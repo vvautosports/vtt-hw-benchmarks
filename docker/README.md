@@ -59,10 +59,26 @@ docker run --rm \
   vtt-benchmark-llama
 ```
 
-### Run All Benchmarks
+### Run All Benchmarks (Single Run)
 ```bash
 ./run-all.sh
 ```
+
+### Run Multiple Times for Statistical Analysis
+```bash
+# Run all benchmarks 3 times (default)
+./run-multiple.sh
+
+# Custom number of runs and cooldown
+BENCHMARK_RUNS=5 COOLDOWN_SECONDS=30 ./run-multiple.sh
+```
+
+**Output includes:**
+- Mean, median, standard deviation
+- Min and max values
+- Coefficient of variation (CV%)
+- Raw run data for each metric
+- Statistical summary table
 
 ## Output Format
 
