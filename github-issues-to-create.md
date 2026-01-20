@@ -1,7 +1,9 @@
 # GitHub Issues to Create for VTT Hardware Benchmarks
 
-## Issue 1: Storage Benchmark Container (fio)
+## Issue 1: Storage Benchmark Container (fio) ✅ COMPLETED
 **Title:** `[Benchmark] Add Storage I/O Benchmark Container (fio)`
+
+**Status:** ✅ **COMPLETED** - Implemented with progress indicators
 
 **Body:**
 ```markdown
@@ -12,7 +14,7 @@ Add containerized storage benchmark using fio (Flexible I/O Tester) to measure d
 - ✅ 7-Zip CPU benchmark container working
 - ✅ STREAM memory benchmark container working
 - ✅ LLaMA AI inference benchmark container working
-- ❌ Storage benchmark not yet implemented
+- ✅ Storage benchmark implemented and tested
 
 ## Scope
 Create a new containerized benchmark for storage I/O testing with consistent output format matching existing benchmarks.
@@ -94,8 +96,6 @@ bs=4k
 ## Priority
 High - Adds critical test diversity
 
-## Estimated Effort
-3-4 hours
 ```
 
 ---
@@ -173,8 +173,6 @@ Create automation to run benchmarks multiple times and analyze results statistic
 ## Priority
 High - Critical for accurate performance comparison
 
-## Estimated Effort
-4-5 hours
 ```
 
 ---
@@ -269,8 +267,6 @@ $fpsData = Import-Csv fps_data.csv
 ## Priority
 High - Critical for accurate gaming performance measurement
 
-## Estimated Effort
-3-4 hours
 ```
 
 ---
@@ -363,94 +359,6 @@ done
 ## Priority
 Medium - Adds test diversity, blocked on model downloads
 
-## Estimated Effort
-2-3 hours (excluding download time)
-```
-
----
-
-## Issue 5: NFS Model Sharing Infrastructure
-**Title:** `[Infrastructure] NFS Model Sharing for AI Benchmarks`
-
-**Body:**
-```markdown
-## Description
-Set up NFS (Network File System) on MS-01 to share AI model files across all testing devices, avoiding duplicate model storage and simplifying benchmark setup.
-
-## Current Status
-- ✅ LLaMA benchmark container working
-- ❌ Each device needs local model copy
-- ❌ No centralized model storage
-
-## Scope
-Configure NFS server on MS-01 and mount on all testing devices (HP ZBooks, Framework laptop).
-
-## Acceptance Criteria
-- [ ] Install and configure NFS server on MS-01
-- [ ] Create `/export/models` directory for AI models
-- [ ] Export `/export/models` via NFS with read-only access
-- [ ] Configure firewall rules on MS-01 for NFS
-- [ ] Mount NFS share on Framework laptop (Linux)
-- [ ] Mount NFS share on HP ZBooks (Windows)
-- [ ] Update benchmark scripts to use NFS-mounted models
-- [ ] Test model access from all devices
-- [ ] Document NFS setup and troubleshooting
-- [ ] Update `MS-01-SETUP.md` with NFS instructions
-
-## Technical Details
-
-### MS-01 NFS Server Setup
-```bash
-# Install NFS server
-sudo dnf install nfs-utils
-
-# Create export directory
-sudo mkdir -p /export/models
-sudo chown nobody:nobody /export/models
-
-# Configure exports
-echo "/export/models *(ro,sync,no_subtree_check)" | sudo tee -a /etc/exports
-
-# Start NFS
-sudo systemctl enable --now nfs-server
-sudo exportfs -av
-
-# Firewall
-sudo firewall-cmd --permanent --add-service=nfs
-sudo firewall-cmd --reload
-```
-
-### Client Mount (Linux)
-```bash
-sudo mount -t nfs ms01:/export/models /mnt/models
-```
-
-### Client Mount (Windows)
-```powershell
-# Enable NFS client
-Enable-WindowsOptionalFeature -Online -FeatureName ServicesForNFS-ClientOnly
-
-# Mount
-mount -o anon \\ms01\export\models M:
-```
-
-## Related Files
-- `MS-01-SETUP.md` - Update with NFS setup
-- `HP-ZBOOK-SETUP.md` - Update with NFS mount instructions
-- `docker/llama-bench/benchmark.sh` - Update model path
-
-## Dependencies
-- MS-01 with available storage
-- Network connectivity (Headscale VPN or LAN)
-
-## Labels
-`infrastructure`, `nfs`, `ai-models`, `medium-difficulty`
-
-## Priority
-Medium - Simplifies multi-device testing
-
-## Estimated Effort
-2-3 hours
 ```
 
 ---
@@ -554,8 +462,6 @@ supabase.table('benchmark_runs').insert({
 ## Priority
 Low - Future enhancement, not critical for initial testing
 
-## Estimated Effort
-6-8 hours
 ```
 
 ---
@@ -645,33 +551,46 @@ with tab1:
 ## Priority
 Low - Nice-to-have, not critical for initial testing
 
-## Estimated Effort
-8-10 hours
 ```
 
 ---
 
 ## Summary
 
-### Recommended Implementation Order (by difficulty)
+### Implementation Status
 
-1. **Issue #1: Storage Benchmark** (Easy, 3-4h) - Adds critical test diversity
-2. **Issue #4: Multiple AI Models** (Easy, 2-3h) - Adds test diversity, needs downloads
-3. **Issue #2: Multi-Run Automation** (Medium, 4-5h) - Critical for accuracy
-4. **Issue #3: PresentMon FPS** (Medium, 3-4h) - Critical for Windows gaming tests
-5. **Issue #5: NFS Model Sharing** (Medium, 2-3h) - Infrastructure improvement
-6. **Issue #6: Supabase Database** (Hard, 6-8h) - Future infrastructure
-7. **Issue #7: Streamlit Dashboard** (Hard, 8-10h) - Visualization layer
+**Completed:**
+1. ✅ **Issue #1: Storage Benchmark** - Adds critical test diversity
 
-### Total Estimated Effort
-- **High Priority (Issues #1-3):** 10-13 hours
-- **Medium Priority (Issues #4-5):** 4-6 hours
-- **Low Priority (Issues #6-7):** 14-18 hours
-- **Grand Total:** 28-37 hours
+**Recommended Implementation Order (by difficulty):**
 
-### Priorities for This Session
-Focus on Issues #1 (Storage) and #2 (Multi-run) if time permits, as they:
+1. ✅ **Issue #1: Storage Benchmark** (Easy) - COMPLETED
+2. **Issue #4: Multiple AI Models** (Easy) - Adds test diversity, needs model downloads
+3. **Issue #2: Multi-Run Automation** (Medium) - Critical for statistical accuracy
+4. **Issue #3: PresentMon FPS** (Medium) - Critical for Windows gaming metrics
+5. **Issue #5: NFS Model Sharing** (Medium) - Infrastructure improvement
+6. **Issue #6: Supabase Database** (Hard) - Future infrastructure
+7. **Issue #7: Streamlit Dashboard** (Hard) - Visualization layer
+
+### Priority Categorization
+
+**High Priority (Automation & Test Diversity):**
+- ✅ Issue #1: Storage Benchmark (DONE)
+- Issue #2: Multi-Run Automation
+- Issue #3: PresentMon FPS
+
+**Medium Priority (Test Expansion):**
+- Issue #4: Multiple AI Models
+- Issue #5: NFS Model Sharing
+
+**Low Priority (Future Infrastructure):**
+- Issue #6: Supabase Database
+- Issue #7: Streamlit Dashboard
+
+### Next Recommended Tasks
+
+Focus on Issues #2 (Multi-run automation) or #4 (Multiple AI models):
 - Add most value immediately
 - Follow established patterns
-- Don't require external dependencies
+- Don't require external dependencies (except model downloads for #4)
 - Work across all platforms

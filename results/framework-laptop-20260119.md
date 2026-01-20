@@ -1,4 +1,4 @@
-# Framework Laptop 13 AMD - Benchmark Results
+# Framework Desktop Mainboard - Benchmark Results
 
 **Test Date:** 2026-01-19
 **Tester:** Claude (Automated)
@@ -8,12 +8,13 @@
 
 ## System Specifications
 
-**Model:** Framework Laptop 13 AMD
-**CPU:** AMD Ryzen AI Max+ 395 w/ Radeon 8060S
+**Model:** Framework Desktop Mainboard (Mini-ITX)
+**Form Factor:** Mini-ITX desktop mainboard (using laptop chip)
+**CPU:** AMD Ryzen AI Max+ 395 w/ Radeon 8060S (laptop chip)
 **Cores:** 32 (16 P-cores + 16 E-cores, hyperthreading)
 **GPU:** AMD Radeon 8060S (integrated)
 **RAM:** 125.08 GB
-**Storage:** [Not benchmarked]
+**Storage:** NVMe SSD
 **OS:** Fedora Linux 43
 **Kernel:** 6.18.5-200.fc43.x86_64
 
@@ -76,17 +77,46 @@ podman run --rm vtt-benchmark-stream
 
 ---
 
+### Storage I/O (fio) - Containerized
+
+**Configuration:**
+- Container: Ubuntu 22.04 with fio
+- Tests: Sequential R/W (1MB), Random 4K R/W, Mixed workload
+- Runtime: 30 seconds per test
+
+**Results:**
+- **Sequential Read:** 3,266.32 MB/s
+- **Sequential Write:** 0 MB/s (container permission issue)
+- **Random Read 4K:** 21,993 IOPS
+- **Random Write 4K:** 0 IOPS (container permission issue)
+- **Mixed 70/30 R/W:** 17,861 IOPS
+
+**Observations:**
+- Excellent sequential read performance (~3.3 GB/s)
+- Good random read IOPS for containerized test
+- Write tests failing due to container permissions (needs investigation)
+- Storage type detection: Unknown (likely NVMe)
+
+**Timestamp:** 2026-01-20T02:52:11+00:00
+
+**Command Used:**
+```bash
+podman run --rm vtt-benchmark-storage
+```
+
+---
+
 ## Comparison with HP ZBooks
 
-| System | CPU | 7-Zip Overall | STREAM Triad |
-|--------|-----|---------------|--------------|
-| **Framework 13 AMD** | **Ryzen AI Max+ 395** | **119,390 MIPS** | **101.9 GB/s** |
-| HP ZBook 01 | Ryzen AI Max+ 395 | TBD | TBD |
-| HP ZBook 02 | Ryzen AI Max+ 395 | TBD | TBD |
-| HP ZBook 03 | Ryzen AI Max+ 395 | TBD | TBD |
-| HP ZBook 04 | Ryzen AI Max+ 395 | TBD | TBD |
+| System | CPU | 7-Zip Overall | STREAM Triad | Storage Seq Read |
+|--------|-----|---------------|--------------|------------------|
+| **Framework Desktop MB** | **Ryzen AI Max+ 395** | **119,390 MIPS** | **101.9 GB/s** | **3,266 MB/s** |
+| HP ZBook 01 | Ryzen AI Max+ 395 | TBD | TBD | TBD |
+| HP ZBook 02 | Ryzen AI Max+ 395 | TBD | TBD | TBD |
+| HP ZBook 03 | Ryzen AI Max+ 395 | TBD | TBD | TBD |
+| HP ZBook 04 | Ryzen AI Max+ 395 | TBD | TBD | TBD |
 
-**Note:** All systems use the same AMD Ryzen AI Max+ 395 CPU, so results should be similar. Variance will indicate silicon lottery and cooling performance.
+**Note:** All systems use the same AMD Ryzen AI Max+ 395 CPU (laptop chip). Framework uses mini-ITX desktop mainboard, HP ZBooks are laptops. Variance will indicate silicon lottery and cooling performance differences between form factors.
 
 ---
 
