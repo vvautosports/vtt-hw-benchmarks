@@ -139,20 +139,33 @@ See `HP-ZBOOK-SETUP.md` for Windows setup.
 - Currently: Git repository (`results/` directory)
 - Future: Supabase database + Streamlit dashboard
 
+## Documentation
+
+- **[ROADMAP.md](ROADMAP.md)** - Feature roadmap and next steps
+- **[HP-ZBOOK-SETUP.md](HP-ZBOOK-SETUP.md)** - Windows setup guide
+- **[MS-01-SETUP.md](MS-01-SETUP.md)** - Keras OCR deployment
+- **[docker/README.md](docker/README.md)** - Containerized benchmarks
+- **[docs/](docs/)** - Additional documentation and planning
+
 ## Future Expansion
 
-**More Benchmarks:**
-- 7-Zip, Blender, STREAM, Storage (fio)
-- AI models via llama-bench
-- Flux.2 image generation
+See [ROADMAP.md](ROADMAP.md) for detailed feature plans.
 
-**Infrastructure:**
-- Automated FPS capture with PresentMon
-- Supabase database for results
-- Streamlit dashboard
-- Multi-run automation
+**Immediate Next Steps:**
+- Deploy Keras OCR on MS-01
+- Test HP ZBook 01-04
+- Create performance comparison analysis
+
+**Planned Features:**
+- Automated FPS capture (PresentMon)
+- Multi-run statistical analysis
+- Storage benchmarks (fio)
+- Database integration (Supabase)
+- Visualization dashboard (Streamlit)
 
 ## Resources
 
 - [LTT MarkBench Repository](https://github.com/LTTLabsOSS/markbench-tests)
 - [Cinebench R23](https://www.maxon.net/en/cinebench)
+- [STREAM Benchmark](https://www.cs.virginia.edu/stream/)
+- [llama.cpp](https://github.com/ggerganov/llama.cpp)
