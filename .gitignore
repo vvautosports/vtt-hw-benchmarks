@@ -1,5 +1,7 @@
-# Results directory (manual entries only, exclude auto-generated)
-results/
+# Results directory (ignore actual results, keep template)
+results/*
+!results/.gitkeep
+!results/hp-zbook-template.md
 
 # Python
 __pycache__/
