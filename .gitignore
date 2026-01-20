@@ -1,8 +1,10 @@
-# Results directory (ignore actual results, keep template and baseline)
-results/*
+# Results directory - commit markdown results, ignore temp files
+results/*.tmp
+results/*.json.tmp
+results/*.log.bak
+
+# Keep .gitkeep
 !results/.gitkeep
-!results/hp-zbook-template.md
-!results/framework-laptop-20260119.md
 
 # Python
 __pycache__/

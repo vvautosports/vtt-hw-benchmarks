@@ -78,21 +78,66 @@ See `results/hp-zbook-template.md` for the documentation template.
 
 ```
 vtt-hw-benchmarks/
-├── results/              # Benchmark results (ignored by git)
+├── docker/               # Containerized benchmarks
+│   ├── 7zip/            # CPU compression benchmark
+│   ├── stream/          # Memory bandwidth benchmark
+│   ├── llama-bench/     # AI inference benchmark
+│   ├── build-all.sh     # Build all containers
+│   ├── run-all.sh       # Run all (Linux)
+│   └── run-all.ps1      # Run all (Windows)
+├── results/              # Benchmark results (committed to git)
 ├── scripts/              # Helper scripts
 ├── rocket-league/        # Rocket League specific configs/scripts
 ├── README.md
 └── .gitignore
 ```
 
+## Benchmark Types
+
+### Cross-Platform (Containerized - Linux & Windows)
+
+These run via Docker/Podman and work on any system:
+
+1. **7-Zip** - CPU compression performance
+2. **STREAM** - Memory bandwidth
+3. **LLaMA Inference** - AI model performance
+
+See `docker/README.md` for details.
+
+**Quick start:**
+```bash
+cd docker
+./build-all.sh
+./run-all.sh
+```
+
+### Windows-Only Benchmarks
+
+These require Windows and native applications:
+
+1. **Rocket League** - GPU gaming performance (via LTT MarkBench)
+2. **Cinebench R23** - CPU rendering performance
+
+See `HP-ZBOOK-SETUP.md` for Windows setup.
+
 ## Current Status
 
+**Infrastructure:**
 - [x] Git repo initialized
-- [ ] Keras OCR deployed on MS-01
-- [ ] HP ZBook 01 tested
-- [ ] HP ZBook 02 tested
-- [ ] HP ZBook 03 tested
-- [ ] HP ZBook 04 tested
+- [x] Containerized benchmarks (7-Zip, STREAM, LLaMA)
+- [x] Framework laptop baseline tested
+- [ ] Keras OCR deployed on MS-01 (for Rocket League)
+
+**Device Testing:**
+- [x] Framework Laptop 13 AMD - Containerized tests complete
+- [ ] HP ZBook 01 - Pending
+- [ ] HP ZBook 02 - Pending
+- [ ] HP ZBook 03 - Pending
+- [ ] HP ZBook 04 - Pending
+
+**Results Storage:**
+- Currently: Git repository (`results/` directory)
+- Future: Supabase database + Streamlit dashboard
 
 ## Future Expansion
 
