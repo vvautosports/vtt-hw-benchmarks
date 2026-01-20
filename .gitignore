@@ -1,0 +1,38 @@
+# Results directory (manual entries only, exclude auto-generated)
+results/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+.venv
+*.egg-info/
+dist/
+build/
+
+# Poetry
+poetry.lock
+
+# Logs
+*.log
+*.log.*
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.temp
