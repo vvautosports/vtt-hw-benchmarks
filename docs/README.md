@@ -6,12 +6,12 @@ Documentation for the VTT hardware benchmarking project.
 
 ### Getting Started
 - [Main README](../README.md) - Project overview and quick start
-- [Contributing Guide](../CONTRIBUTING.md) - How to contribute
-- [ROADMAP](../ROADMAP.md) - Future features and next steps
+- [ROADMAP](ROADMAP.md) - Future features and next steps
+- [GitHub Issues](github-issues-to-create.md) - Ready to create
 
 ### Setup Guides
-- [HP ZBook Setup](../HP-ZBOOK-SETUP.md) - Windows software installation
-- [MS-01 Setup](../MS-01-SETUP.md) - Keras OCR deployment for Rocket League
+- [HP ZBook Setup](HP-ZBOOK-SETUP.md) - Windows software installation
+- [MS-01 Setup](MS-01-SETUP.md) - Keras OCR deployment for Rocket League
 - [Docker Benchmarks](../docker/README.md) - Containerized benchmark guide
 
 ### Testing

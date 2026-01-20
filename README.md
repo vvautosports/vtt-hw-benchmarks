@@ -118,7 +118,7 @@ These require Windows and native applications:
 1. **Rocket League** - GPU gaming performance (via LTT MarkBench)
 2. **Cinebench R23** - CPU rendering performance
 
-See `HP-ZBOOK-SETUP.md` for Windows setup.
+See `docs/HP-ZBOOK-SETUP.md` for Windows setup.
 
 ## Current Status
 
@@ -141,16 +141,16 @@ See `HP-ZBOOK-SETUP.md` for Windows setup.
 
 ## Documentation
 
-- **[CONTRIBUTING.md](CONTRIBUTING.md)** - How to contribute to this project
-- **[ROADMAP.md](ROADMAP.md)** - Feature roadmap and next steps
-- **[HP-ZBOOK-SETUP.md](HP-ZBOOK-SETUP.md)** - Windows setup guide
-- **[MS-01-SETUP.md](MS-01-SETUP.md)** - Keras OCR deployment
+- **[docs/](docs/)** - All documentation, setup guides, and planning
+  - [ROADMAP.md](docs/ROADMAP.md) - Feature roadmap and next steps
+  - [HP-ZBOOK-SETUP.md](docs/HP-ZBOOK-SETUP.md) - Windows setup guide
+  - [MS-01-SETUP.md](docs/MS-01-SETUP.md) - Keras OCR deployment
+  - [GitHub Issues](docs/github-issues-to-create.md) - Ready to create
 - **[docker/README.md](docker/README.md)** - Containerized benchmarks
-- **[docs/](docs/)** - Additional documentation and planning
 
 ## Future Expansion
 
-See [ROADMAP.md](ROADMAP.md) for detailed feature plans.
+See [ROADMAP.md](docs/ROADMAP.md) for detailed feature plans.
 
 **Immediate Next Steps:**
 - Deploy Keras OCR on MS-01

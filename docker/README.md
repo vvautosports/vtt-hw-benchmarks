@@ -156,7 +156,7 @@ These containerized benchmarks work on both Linux and Windows:
 ```
 
 **Windows-Only Benchmarks:**
-- Rocket League (via LTT MarkBench) - See `HP-ZBOOK-SETUP.md`
+- Rocket League (via LTT MarkBench) - See `docs/HP-ZBOOK-SETUP.md`
 - Cinebench R23 - Native Windows application
 
 **Cross-Platform Benchmarks (via Docker):**
