@@ -1,7 +1,8 @@
-# Results directory (ignore actual results, keep template)
+# Results directory (ignore actual results, keep template and baseline)
 results/*
 !results/.gitkeep
 !results/hp-zbook-template.md
+!results/framework-laptop-20260119.md
 
 # Python
 __pycache__/
