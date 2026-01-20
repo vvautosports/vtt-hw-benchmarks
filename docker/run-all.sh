@@ -87,6 +87,14 @@ JSON_STREAM=$(echo "$RESULT_STREAM" | tail -n 1)
 add_result "stream" "$JSON_STREAM"
 echo "" | tee -a "$LOG_FILE"
 
+# Run Storage benchmark
+echo "Running Storage benchmark..." | tee -a "$LOG_FILE"
+RESULT_STORAGE=$($RUNTIME run --rm vtt-benchmark-storage 2>&1)
+echo "$RESULT_STORAGE" | tee -a "$LOG_FILE"
+JSON_STORAGE=$(echo "$RESULT_STORAGE" | tail -n 1)
+add_result "storage" "$JSON_STORAGE"
+echo "" | tee -a "$LOG_FILE"
+
 # Run LLaMA benchmark (if model provided)
 if [ -n "$LLAMA_MODEL" ] && [ -f "$LLAMA_MODEL" ]; then
     echo "Running LLaMA benchmark with model: $LLAMA_MODEL" | tee -a "$LOG_FILE"

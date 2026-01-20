@@ -91,6 +91,14 @@ $JsonStream = ($ResultStream -split "`n" | Select-Object -Last 1).Trim()
 Add-Result "stream" $JsonStream
 Log ""
 
+# Run Storage benchmark
+Log "Running Storage benchmark..."
+$ResultStorage = docker run --rm vtt-benchmark-storage 2>&1 | Out-String
+Log $ResultStorage
+$JsonStorage = ($ResultStorage -split "`n" | Select-Object -Last 1).Trim()
+Add-Result "storage" $JsonStorage
+Log ""
+
 # Run LLaMA benchmark (if model provided)
 if ($LlamaModel -and (Test-Path $LlamaModel)) {
     Log "Running LLaMA benchmark with model: $LlamaModel"

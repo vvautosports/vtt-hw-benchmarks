@@ -14,6 +14,12 @@ Tests memory bandwidth using standard STREAM benchmark.
 - **Duration:** ~1 minute
 - **Metric:** MB/s for Copy, Scale, Add, Triad operations
 
+### Storage (Disk I/O)
+Tests storage performance using fio (Flexible I/O Tester).
+- **Duration:** ~2.5 minutes
+- **Metric:** MB/s for sequential, IOPS for random operations
+- **Tests:** Sequential R/W, Random 4K R/W, Mixed 70/30 workload
+
 ### LLaMA Inference (AI Performance)
 Tests AI inference performance using llama.cpp.
 - **Duration:** ~2-5 minutes (depends on model)
@@ -38,6 +44,11 @@ docker run --rm vtt-benchmark-7zip
 **STREAM:**
 ```bash
 docker run --rm vtt-benchmark-stream
+```
+
+**Storage:**
+```bash
+docker run --rm vtt-benchmark-storage
 ```
 
 **LLaMA Inference:**

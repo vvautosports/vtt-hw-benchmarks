@@ -1,0 +1,46 @@
+# fio Configuration for VTT Storage Benchmarks
+# Tests: Sequential R/W, Random 4K R/W, Mixed workload
+
+[global]
+ioengine=libaio
+direct=1
+size=1G
+numjobs=1
+runtime=30
+time_based=1
+group_reporting=1
+filename=/benchdata/testfile
+
+# Sequential Read (1MB blocks)
+[sequential-read]
+rw=read
+bs=1M
+stonewall
+
+# Sequential Write (1MB blocks)
+[sequential-write]
+rw=write
+bs=1M
+stonewall
+
+# Random Read (4K blocks)
+[random-read-4k]
+rw=randread
+bs=4k
+iodepth=32
+stonewall
+
+# Random Write (4K blocks)
+[random-write-4k]
+rw=randwrite
+bs=4k
+iodepth=32
+stonewall
+
+# Mixed 70/30 Read/Write (4K blocks)
+[mixed-rw-70-30]
+rw=randrw
+rwmixread=70
+bs=4k
+iodepth=32
+stonewall

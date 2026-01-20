@@ -33,6 +33,13 @@ $RUNTIME build -t vtt-benchmark-stream .
 echo "✓ STREAM benchmark built"
 echo ""
 
+# Storage
+echo "Building Storage benchmark..."
+cd "$SCRIPT_DIR/storage"
+$RUNTIME build -t vtt-benchmark-storage .
+echo "✓ Storage benchmark built"
+echo ""
+
 # LLaMA
 echo "Building LLaMA benchmark..."
 cd "$SCRIPT_DIR/llama-bench"
@@ -48,6 +55,7 @@ echo ""
 echo "Run individual benchmarks:"
 echo "  $RUNTIME run --rm vtt-benchmark-7zip"
 echo "  $RUNTIME run --rm vtt-benchmark-stream"
+echo "  $RUNTIME run --rm vtt-benchmark-storage"
 echo "  $RUNTIME run --rm -v /path/to/model.gguf:/models/model.gguf vtt-benchmark-llama"
 echo ""
 echo "Or run all with: ./run-all.sh"
