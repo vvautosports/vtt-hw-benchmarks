@@ -141,6 +141,7 @@ See `HP-ZBOOK-SETUP.md` for Windows setup.
 
 ## Documentation
 
+- **[CONTRIBUTING.md](CONTRIBUTING.md)** - How to contribute to this project
 - **[ROADMAP.md](ROADMAP.md)** - Feature roadmap and next steps
 - **[HP-ZBOOK-SETUP.md](HP-ZBOOK-SETUP.md)** - Windows setup guide
 - **[MS-01-SETUP.md](MS-01-SETUP.md)** - Keras OCR deployment

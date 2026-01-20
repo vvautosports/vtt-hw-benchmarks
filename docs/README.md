@@ -6,6 +6,7 @@ Documentation for the VTT hardware benchmarking project.
 
 ### Getting Started
 - [Main README](../README.md) - Project overview and quick start
+- [Contributing Guide](../CONTRIBUTING.md) - How to contribute
 - [ROADMAP](../ROADMAP.md) - Future features and next steps
 
 ### Setup Guides
