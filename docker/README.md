@@ -28,7 +28,21 @@ Tests AI inference performance using llama.cpp.
 
 ## Quick Start
 
-### Build All Benchmarks
+### Option 1: Pull Pre-Built Images (Recommended for HP ZBooks)
+
+Pull ready-to-use images from GitHub Container Registry:
+
+```bash
+# Pull all benchmark images
+./scripts/pull-from-ghcr.sh
+```
+
+This skips the build process entirely - perfect for quick deployment on HP ZBooks and other test systems.
+
+### Option 2: Build Locally
+
+Build all benchmarks from source:
+
 ```bash
 cd docker
 ./build-all.sh

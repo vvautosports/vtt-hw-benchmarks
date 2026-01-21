@@ -1,6 +1,34 @@
 # VTT Hardware Benchmarks
 
-Virtual Velocity Collective hardware benchmarking project for HP ZBook laptops and Framework laptops.
+Virtual Velocity Collective hardware benchmarking project for HP ZBook laptops and Framework desktop mainboard.
+
+## Containerized Benchmarks (Cross-Platform)
+
+Pre-built container images available on GitHub Container Registry for quick deployment.
+
+### Quick Start
+
+**Pull and run pre-built images:**
+```bash
+# Clone repository
+git clone https://github.com/vvautosports/vtt-hw-benchmarks
+cd vtt-hw-benchmarks
+
+# Pull all benchmark images from GHCR
+./scripts/pull-from-ghcr.sh
+
+# Run all benchmarks
+cd docker
+./run-all.sh
+```
+
+**Available benchmarks:**
+- **7-Zip** - CPU compression performance
+- **STREAM** - Memory bandwidth
+- **Storage (fio)** - Disk I/O performance
+- **LLaMA (llama.cpp)** - AI inference with AMD Strix Halo iGPU
+
+**See:** `docker/README.md` for detailed benchmark documentation.
 
 ## Quick Start (Tonight's Testing)
 

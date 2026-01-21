@@ -4,6 +4,47 @@ Workflow automation scripts for managing GitHub issues and Discord updates.
 
 ## Available Scripts
 
+### Container Registry Management
+
+**Files:** `push-to-ghcr.sh`, `pull-from-ghcr.sh`
+
+Push and pull benchmark container images to/from GitHub Container Registry.
+
+**Push images to GHCR:**
+```bash
+# Dry run (preview only)
+./scripts/push-to-ghcr.sh --dry-run
+
+# Push with version tag
+./scripts/push-to-ghcr.sh --push v1.0.0
+
+# Push as latest
+./scripts/push-to-ghcr.sh --push latest
+```
+
+**Pull images from GHCR:**
+```bash
+# Pull latest version
+./scripts/pull-from-ghcr.sh
+
+# Pull specific version
+./scripts/pull-from-ghcr.sh v1.0.0
+```
+
+**Authentication (for pushing):**
+```bash
+# Create GitHub Personal Access Token with 'write:packages' scope
+# https://github.com/settings/tokens
+
+# Login to GHCR
+echo $GITHUB_TOKEN | podman login ghcr.io -u USERNAME --password-stdin
+```
+
+**Use cases:**
+- **HP ZBooks**: Pull pre-built images instead of building locally
+- **CI/CD**: Use versioned images for reproducible testing
+- **Quick deployment**: No build time required on test systems
+
 ### Discord Posting
 
 **File:** `post-to-discord.sh`
