@@ -1,9 +1,5 @@
-# Results directory - commit markdown results, ignore temp files
-results/*.tmp
-results/*.json.tmp
-results/*.log.bak
-
-# Keep .gitkeep
+# Results directory - ignore all benchmark outputs
+results/
 !results/.gitkeep
 
 # Python
