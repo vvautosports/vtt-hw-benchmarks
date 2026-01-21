@@ -30,6 +30,8 @@ cd docker
 
 **See:** `docker/README.md` for detailed benchmark documentation.
 
+**Automated CI/CD:** Container images are automatically built and published to GHCR on every push to `master`. See `.github/README.md` for workflow details.
+
 ## Quick Start (Tonight's Testing)
 
 ### Goal

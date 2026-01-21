@@ -45,6 +45,22 @@ echo $GITHUB_TOKEN | podman login ghcr.io -u USERNAME --password-stdin
 - **CI/CD**: Use versioned images for reproducible testing
 - **Quick deployment**: No build time required on test systems
 
+**Automated CI/CD:**
+
+The repository includes GitHub Actions workflows that automatically:
+- Build all 4 container images on push to `master`
+- Push images to GHCR with `latest` tag
+- Post notification to Discord (if webhook configured)
+- Run linting on all pull requests
+
+See `.github/workflows/build-and-push-containers.yml` for the automated pipeline.
+
+**Manual override:**
+```bash
+# If you need to push manually (e.g., from local dev)
+./scripts/push-to-ghcr.sh --push latest
+```
+
 ### Discord Posting
 
 **File:** `post-to-discord.sh`
