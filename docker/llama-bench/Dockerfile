@@ -1,27 +1,16 @@
-# LLaMA Inference Benchmark Container
-FROM docker.io/library/ubuntu:22.04
+# LLaMA Inference Benchmark Container for AMD Strix Halo
+# Uses pre-built toolboxes from kyuz0/amd-strix-halo-toolboxes
+# Defaults to Vulkan (RADV) - most stable
+# Can be overridden with ROCm builds for better performance
 
-# Install build dependencies
-RUN apt-get update && apt-get install -y \
-    build-essential \
-    cmake \
-    git \
-    wget \
-    curl \
-    && rm -rf /var/lib/apt/lists/*
+ARG BACKEND=vulkan-radv
+FROM docker.io/kyuz0/amd-strix-halo-toolboxes:${BACKEND}
 
-# Clone and build llama.cpp
-WORKDIR /opt
-RUN git clone https://github.com/ggerganov/llama.cpp.git && \
-    cd llama.cpp && \
-    cmake -B build && \
-    cmake --build build --config Release -j$(nproc)
-
-# Create benchmark script
+# Add benchmark script
 COPY benchmark.sh /benchmark.sh
 RUN chmod +x /benchmark.sh
 
-WORKDIR /opt/llama.cpp
+WORKDIR /workspace
 
 # Set entrypoint
 ENTRYPOINT ["/benchmark.sh"]
