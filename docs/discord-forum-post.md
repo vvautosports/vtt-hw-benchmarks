@@ -10,7 +10,7 @@ Exciting progress! We've built a complete containerized benchmark suite for VTT 
 - ✅ **7-Zip** - CPU compression performance (119K MIPS baseline)
 - ✅ **STREAM** - Memory bandwidth testing (102 GB/s baseline)
 - ✅ **Storage (fio)** - Disk I/O performance (3.3 GB/s seq read)
-- ✅ **LLaMA** - AI inference capability (infrastructure ready)
+- ✅ **AI Inference (llama.cpp)** - Multi-model testing with AMD Strix Halo iGPU acceleration
 
 **Automation & Analysis:**
 - ✅ **Multi-Run Automation** - Statistical analysis (mean, median, stddev, CV%)
@@ -23,6 +23,10 @@ Exciting progress! We've built a complete containerized benchmark suite for VTT 
 - 7-Zip: 119,390 MIPS overall
 - STREAM: 101.9 GB/s memory bandwidth (Triad)
 - Storage: 3,266 MB/s sequential read, 22K IOPS random read
+- AI Inference (Strix Halo iGPU):
+  - gpt-oss-20b-F16 (13GB): 1135 t/s prompt, 46 t/s generation
+  - Qwen3-Next-80B Q8 (87GB): 508 t/s prompt, 29 t/s generation
+  - Qwen3-235B Q3 (97GB): 131 t/s prompt, 17 t/s generation
 
 ## 🔄 Ready for Testing
 
@@ -39,14 +43,15 @@ Exciting progress! We've built a complete containerized benchmark suite for VTT 
 ## 📋 What's Next
 
 **High Priority:**
+- Multi-run automation testing and refinement
 - PresentMon FPS automation (Windows gaming metrics)
 - Test HP ZBooks 01-04
 - Performance comparison analysis
 
 **Medium Priority:**
-- Multiple AI model testing (5+ models)
 - NFS model sharing infrastructure
 - Windows PowerShell multi-run script
+- Extended context testing (100k-1M tokens)
 
 **Future:**
 - Supabase database integration
@@ -103,7 +108,8 @@ Have hardware you want benchmarked? Need specific workload tests? Want to help w
 
 ---
 
-**Posted from:** vtt-hw-benchmarks commit `ccf4272`
+**Posted from:** vtt-hw-benchmarks commit `424dc21`
 **Branch:** master
-**Total Commits:** 8 (Initial setup → Multi-run automation)
+**Total Commits:** 9 (Initial setup → AI inference with Strix Halo support)
 **Repository:** New standalone benchmark project
+**Latest:** AMD Strix Halo iGPU AI benchmarks fully operational!
