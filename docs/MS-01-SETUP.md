@@ -1,6 +1,14 @@
 # MS-01 Setup Guide - Keras OCR Service
 
-Quick guide for setting up the MS-01 server to support MarkBench Rocket League testing.
+**Note:** MS-01 runs Proxmox. Use the LXC deployment guide for proper integration.
+
+**See:** [MS-01-LXC-DEPLOYMENT.md](MS-01-LXC-DEPLOYMENT.md) for Proxmox LXC container deployment.
+
+---
+
+## Legacy Direct Docker Deployment (Not Recommended)
+
+This guide describes direct Docker installation. For Proxmox LXC deployment (recommended), see the guide above.
 
 ## Requirements
 
