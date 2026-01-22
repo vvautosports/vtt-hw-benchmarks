@@ -36,6 +36,14 @@ Complete documentation index for the VTT Hardware Benchmarks project.
 
 ## Testing Guides
 
+**[AI-MODEL-STRATEGY.md](AI-MODEL-STRATEGY.md)** ⭐ **Comprehensive Guide**
+- Complete analysis of all 6 local models
+- Model-to-mode mapping (Roo, Cursor, Claude Code)
+- Performance comparison matrix
+- Recommended configurations by use case
+- January 2026 state of the art for AMD Strix Halo
+- Mode switching strategy and decision trees
+
 **[GLM-4.7-TESTING.md](GLM-4.7-TESTING.md)**
 - Extended context testing for GLM-4.7 models
 - Q8 vs BF16 vs REAP-218B comparison
@@ -99,8 +107,9 @@ Contents:
 2. [MS-01-LXC-DEPLOYMENT.md](MS-01-LXC-DEPLOYMENT.md) - Keras OCR deployment
 
 **For AI Model Testing:**
-1. [GLM-4.7-TESTING.md](GLM-4.7-TESTING.md) - Extended context testing
-2. [AMD-STRIX-HALO-SETUP.md](AMD-STRIX-HALO-SETUP.md) - iGPU optimization
+1. [AI-MODEL-STRATEGY.md](AI-MODEL-STRATEGY.md) ⭐ **Start here** - Comprehensive model selection guide
+2. [GLM-4.7-TESTING.md](GLM-4.7-TESTING.md) - Extended context testing
+3. [AMD-STRIX-HALO-SETUP.md](AMD-STRIX-HALO-SETUP.md) - iGPU optimization
 
 ---
 
@@ -116,4 +125,4 @@ When updating documentation:
 
 ---
 
-**Last Updated:** 2026-01-21
+**Last Updated:** 2026-01-22
