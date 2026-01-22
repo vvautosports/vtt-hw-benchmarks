@@ -229,13 +229,357 @@ Complete list of models to evaluate on AMD Strix Halo for coding assistance.
 
 ---
 
-## Apriel Model - Need More Info
+---
+
+## EFFICIENT MID-SIZED MODELS - Multi-Mode & Delegated Tasks 🎯
+
+### Strategy: Running Multiple Modes Simultaneously
+
+**Goal:** Run 2-3 models concurrently for different modes without exceeding 128GB RAM.
+
+**Target models:** 10-40GB range, optimized for efficiency and quality balance.
+
+**Use cases:**
+- Ask mode + Code mode running simultaneously
+- Delegated tasks to specialized models
+- Multi-editor setup (Roo + Cursor + Claude Code)
+- Fast context switching between modes
+
+---
+
+### Nemotron-3-Nano-30B-A3B (NEW - High Priority!)
+
+**unsloth/Nemotron-3-Nano-30B-A3B-GGUF**
+- **Why test:** NVIDIA's efficient 30B model with active expert architecture
+- **Expected size:** ~30-35GB Q8, ~15-20GB Q4
+- **Expected advantage:** Strong coding + reasoning at mid-size
+- **Use case:** Balanced model for delegated tasks
+- **Multi-mode fit:** Pairs well with GPT-OSS-20B (total: ~48GB)
+- **Priority:** ⭐⭐⭐⭐⭐ **HIGHEST for efficient mid-size**
+- **Status:** Need to download from Unsloth
+- **Link:** https://huggingface.co/unsloth/Nemotron-3-Nano-30B-A3B-GGUF
+
+**Testing focus:**
+- Quality vs Qwen3-Coder-30B (similar size)
+- Speed vs GLM-4.7-Flash-Q8
+- Memory efficiency for multi-mode use
+
+---
+
+### Qwen3-Coder-30B (Already Listed, ELEVATED Priority)
+
+**Qwen3-Coder-30B-Q8** (~30-40GB)
+- **Why critical for multi-mode:** Best size/quality balance for code
+- **Expected advantage:** Code-specialized, fits with other models
+- **Multi-mode combinations:**
+  - Qwen3-Coder-30B (35GB) + GPT-OSS-20B (13GB) = 48GB ✓
+  - Qwen3-Coder-30B (35GB) + Nemotron-30B (35GB) = 70GB ✓
+  - Qwen3-Coder-30B (35GB) + StarCoder2-15B (16GB) = 51GB ✓
+- **Use case:** Primary Code mode while other models handle Ask/Debug
+- **Priority:** ⭐⭐⭐⭐⭐ **CRITICAL for multi-mode**
+- **Status:** Need to download and test
+
+---
+
+### Qwen3-Coder-14B (Faster Mid-Size Alternative)
+
+**Qwen3-Coder-14B-Q8** (~15-20GB)
+- **Why test:** Even more efficient, almost GPT-OSS-20B speed
+- **Expected advantage:** Fast enough for interactive, better code quality than GPT
+- **Multi-mode combinations:**
+  - Qwen3-Coder-14B (18GB) + GLM-Q8 (33GB) = 51GB ✓
+  - Qwen3-Coder-14B (18GB) + REAP-218B (92GB) = 110GB ✓
+  - 3x Qwen3-Coder-14B = 54GB (run 3 instances!) ✓
+- **Use case:** Multiple concurrent coding tasks
+- **Priority:** ⭐⭐⭐⭐⭐ **HIGHEST for multi-instance**
+- **Status:** Need to download
+
+---
+
+### Apriel Model - Placeholder
 
 **Status:** Mentioned but need details
-- Model name/size?
-- Specialization?
-- Release date?
-- **Action:** Research and add to roadmap
+- **Model name/size?** Unknown
+- **Specialization?** Unknown
+- **Release date?** Unknown
+- **Priority:** ⭐⭐⭐⭐ (assuming mid-size efficient model)
+- **Action:** Need user to provide:
+  - Full model name
+  - HuggingFace link or source
+  - Intended use case
+  - Parameter count
+
+**Note:** Will add full analysis once details provided.
+
+---
+
+### StarCoder2-15B (Already Listed, ELEVATED for Multi-Mode)
+
+**StarCoder2-15B-Q8** (~16GB)
+- **Why critical for multi-mode:** Pure code completion specialist
+- **Multi-mode fit:** Excellent companion model
+  - StarCoder2-15B (16GB) + GLM-Q8 (33GB) = 49GB ✓
+  - StarCoder2-15B (16GB) + REAP-218B (92GB) = 108GB ✓
+- **Use case:** Dedicated autocomplete while larger model handles reasoning
+- **Priority:** ⭐⭐⭐⭐ **HIGH for multi-mode**
+
+---
+
+### Mistral-Nemo-12B (Already Listed, ELEVATED)
+
+**Mistral-Nemo-12B-Q8** (~13GB)
+- **Why critical for multi-mode:** Similar size to GPT-OSS-20B, newer
+- **Multi-mode combinations:**
+  - Nemo-12B (13GB) + Qwen3-Coder-30B (35GB) = 48GB ✓
+  - Nemo-12B (13GB) + GLM-Q8 (33GB) + StarCoder2 (16GB) = 62GB ✓
+  - Nemo-12B (13GB) + REAP-218B (92GB) = 105GB ✓
+- **Use case:** Fast Ask mode + larger models for other modes
+- **Priority:** ⭐⭐⭐⭐ **HIGH for multi-mode**
+
+---
+
+## Multi-Mode Execution Strategies
+
+### Strategy 1: Speed + Quality Combo (48-70GB total)
+
+**Best for:** Interactive development with fast Ask, quality Code
+
+**Configuration:**
+```
+Machine 1 (Single 395, 128GB):
+- Ask Mode:  GPT-OSS-20B (13GB)
+- Code Mode: Qwen3-Coder-30B (35GB)
+Total: 48GB + 20GB buffer = 68GB used
+```
+
+**Performance:**
+- Ask: <2s responses (GPT-OSS speed)
+- Code: High quality, 5-10s responses (Qwen3-Coder)
+- Simultaneous: Yes, 60GB total
+
+---
+
+### Strategy 2: Balanced Triple Setup (60-80GB total)
+
+**Best for:** Running Ask + Code + Code-Complete simultaneously
+
+**Configuration:**
+```
+Machine 1 (Single 395, 128GB):
+- Ask Mode:        Mistral-Nemo-12B (13GB)
+- Code Mode:       Qwen3-Coder-30B (35GB)
+- Autocomplete:    StarCoder2-15B (16GB)
+Total: 64GB + 20GB buffer = 84GB used
+```
+
+**Performance:**
+- Ask: Fast (Nemo-12B)
+- Code: High quality (Qwen3-Coder)
+- Autocomplete: Instant (StarCoder2)
+
+---
+
+### Strategy 3: Quality + Reasoning (105-120GB total)
+
+**Best for:** Code + Deep architecture analysis
+
+**Configuration:**
+```
+Machine 1 (Single 395, 128GB):
+- Code Mode:      Qwen3-Coder-30B (35GB)
+- Architect Mode: REAP-218B (92GB)
+- OR
+- Code Mode:      GLM-Q8 (33GB)
+- Architect Mode: REAP-218B (92GB)
+Total: ~125GB (tight but workable)
+```
+
+**Performance:**
+- Code: Quality (Qwen/GLM)
+- Architect: Best reasoning (REAP)
+- Memory: Tight, monitor closely
+
+---
+
+### Strategy 4: Multi-Instance Same Model (54-90GB total)
+
+**Best for:** Running multiple independent coding tasks
+
+**Configuration:**
+```
+Machine 1 (Single 395, 128GB):
+- Instance 1: Qwen3-Coder-14B (18GB) - Task A
+- Instance 2: Qwen3-Coder-14B (18GB) - Task B
+- Instance 3: Qwen3-Coder-14B (18GB) - Task C
+Total: 54GB + buffer = ~70GB used
+```
+
+**Use case:**
+- Testing different approaches simultaneously
+- Multi-repository work
+- Delegated background tasks
+
+---
+
+## Distributed Inference: 2x AMD Strix Halo Systems
+
+### Recommended Architecture: Role-Based Model Distribution
+
+**Better than:** Trying to shard a single model across machines (llama.cpp doesn't support this well)
+
+**Strategy:** Each machine specializes in certain modes
+
+---
+
+### Configuration: Speed Machine + Reasoning Machine
+
+**Machine 1: "Speed Machine" (Ask + Code modes)**
+```
+AMD Strix Halo #1 (128GB):
+- Ask Mode:        GPT-OSS-20B (13GB)
+- Code Mode:       Qwen3-Coder-30B (35GB)
+- Code Alt:        Qwen3-Coder-14B (18GB)
+- Autocomplete:    StarCoder2-15B (16GB)
+Total: ~82GB, capacity for 3-4 concurrent
+```
+
+**Machine 2: "Reasoning Machine" (Architect + Debug modes)**
+```
+AMD Strix Halo #2 (128GB):
+- Architect Mode:  REAP-218B (92GB)
+- Debug Alt:       Mistral-Large-2 (120GB, swapped)
+- OR DeepSeek-V3.1-1bit (170GB @ 16K ctx, tight fit)
+Total: ~92-120GB, 1-2 large models
+```
+
+---
+
+### Network Setup: Headscale Mesh VPN
+
+**Already configured:** MS-01 Keras OCR via Headscale
+
+**Extend for AI models:**
+```bash
+# On each 395 machine, run llama.cpp server
+# Machine 1 (Speed):
+llama-server -m /mnt/ai-models/Qwen3-Coder-30B/model.gguf \
+  -c 65536 -ngl 999 -fa 1 --port 8001 --host 0.0.0.0
+
+# Machine 2 (Reasoning):
+llama-server -m /mnt/ai-models/REAP-218B/model.gguf \
+  -c 65536 -ngl 999 -fa 1 --port 8001 --host 0.0.0.0
+
+# Access via Headscale mesh:
+# machine1.tailnet-name.ts.net:8001
+# machine2.tailnet-name.ts.net:8001
+```
+
+**Editor configuration:**
+- Roo Ask mode → Machine 1:8001 (GPT-OSS-20B)
+- Roo Code mode → Machine 1:8002 (Qwen3-Coder-30B)
+- Roo Architect → Machine 2:8001 (REAP-218B)
+
+---
+
+### Performance Expectations: Distributed vs Local
+
+| Metric | Local (same machine) | Distributed (via Headscale) |
+|--------|---------------------|------------------------------|
+| **Latency** | <1ms overhead | +2-10ms network overhead |
+| **Throughput** | Full GPU speed | Same (network not bottleneck) |
+| **Setup** | Simple | Moderate (server setup) |
+| **Reliability** | High | Depends on network |
+| **Scalability** | Limited by 128GB | 2x capacity (256GB total) |
+| **Cost** | 1 machine | 2 machines |
+
+**Verdict:** Distributed makes sense for running MORE models, not faster inference of one model.
+
+---
+
+## Memory Budget Planning
+
+### Small Model Budget (< 50GB total)
+
+**Recommended combos:**
+1. GPT-OSS-20B (13GB) + Qwen3-Coder-30B (35GB) = 48GB
+2. Mistral-Nemo-12B (13GB) + DeepSeek-Coder-V3-33B (35GB) = 48GB
+3. 3x Qwen3-Coder-14B (18GB each) = 54GB
+
+**Use case:** Maximum flexibility, 3-4 simultaneous models
+
+---
+
+### Medium Model Budget (50-80GB total)
+
+**Recommended combos:**
+1. Nemo-12B + Qwen3-Coder-30B + StarCoder2-15B = 64GB
+2. GPT-OSS-20B + GLM-Q8 + StarCoder2-15B = 62GB
+3. Qwen3-Coder-14B + Qwen3-80B-Q8 = 105GB (tight)
+
+**Use case:** Balanced quality + speed
+
+---
+
+### Large Model Budget (80-120GB total)
+
+**Recommended combos:**
+1. Qwen3-Coder-30B (35GB) + REAP-218B (92GB) = 127GB (max)
+2. GLM-Q8 (33GB) + REAP-218B (92GB) = 125GB
+3. Qwen3-80B (87GB) + Nemo-12B (13GB) = 100GB
+4. Mistral-Large-2 (120GB) alone
+
+**Use case:** Maximum quality, 1-2 large models
+
+---
+
+## Testing Priority: Efficient Mid-Sized Models
+
+### Immediate Priority (Test First)
+
+1. **Nemotron-3-Nano-30B-A3B** ⭐⭐⭐⭐⭐
+   - Unknown quantity, could be excellent
+   - Perfect size for multi-mode (30GB)
+   - NVIDIA engineering, likely high quality
+
+2. **Qwen3-Coder-30B** ⭐⭐⭐⭐⭐
+   - Known good model family
+   - Code-specialized
+   - Perfect for Code mode primary
+
+3. **Qwen3-Coder-14B** ⭐⭐⭐⭐⭐
+   - Enable multi-instance use cases
+   - Fast enough for interactive
+   - 3x instances possible
+
+### Secondary Priority
+
+4. **Mistral-Nemo-12B** ⭐⭐⭐⭐
+   - GPT-OSS-20B alternative
+   - Newer training data
+
+5. **StarCoder2-15B** ⭐⭐⭐⭐
+   - Autocomplete specialist
+   - Perfect companion model
+
+---
+
+## Expected Winners for Multi-Mode
+
+**Best dual setup:**
+- **Ask:** GPT-OSS-20B (13GB, fastest)
+- **Code:** Qwen3-Coder-30B or Nemotron-30B (35GB, quality)
+- **Total:** 48GB, plenty of headroom
+
+**Best triple setup:**
+- **Ask:** Mistral-Nemo-12B (13GB)
+- **Code:** Qwen3-Coder-30B (35GB)
+- **Autocomplete:** StarCoder2-15B (16GB)
+- **Total:** 64GB, balanced
+
+**Best distributed (2x 395):**
+- **Machine 1:** GPT-OSS-20B + Qwen3-Coder-30B + StarCoder2-15B = 64GB
+- **Machine 2:** REAP-218B or DeepSeek-V3.1-1bit = 92-170GB
+- **Total capability:** 5 models across 2 machines
 
 ---
 
