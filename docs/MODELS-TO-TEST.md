@@ -34,14 +34,39 @@ Complete list of models to evaluate on AMD Strix Halo for coding assistance.
 - Fits on our 128GB system with memory pressure management
 - Performance claims: 1-bit outperforms GPT-4.1, GPT-4.5, DeepSeek-V3-0324
 
-**DeepSeek-V3.1-1bit-Unsloth** (~192GB)
-- **Why test:** 671B parameter model in 192GB!
-- **Expected advantage:** Massive model on consumer hardware
-- **Trade-off:** Memory pressure on 128GB (need swap or reduced context)
+**DeepSeek-V3.1 Unsloth - Quantization Comparison**
+
+**Available quantizations:**
+- **TQ1_0: 170GB** ⭐ **RECOMMENDED for 128GB systems**
+- **IQ1_S: 192GB** (22GB larger, more memory pressure)
+
+**TQ1_0 (170GB) - BEST CHOICE:**
+- **Why test:** 671B parameter model, smallest Unsloth quant
+- **Memory fit:** 170GB base + 4GB context (16K) = 174GB
+  - With reduced context: MIGHT fit in 128GB with `--fit` flag
+  - More headroom than IQ1_S
+- **Expected advantage:** Massive model with better memory fit
+- **Trade-off:** Still memory pressure, but 22GB more headroom than IQ1_S
 - **Use case:** When you need SOTA reasoning and can manage memory
 - **Priority:** ⭐⭐⭐⭐⭐ **HIGHEST - Could revolutionize local AI**
 - **Status:** Need to download from Unsloth
-- **Link:** https://unsloth.ai/docs/basics/unsloth-dynamic-2.0-ggufs/unsloth-dynamic-ggufs-on-aider-polyglot
+- **Link:** https://huggingface.co/unsloth/DeepSeek-V3.1-GGUF
+
+**IQ1_S (192GB) - Skip for 128GB systems:**
+- 22GB larger than TQ1_0
+- 192GB + 4GB context = 196GB (definitely needs swap)
+- No quality advantage over TQ1_0
+- **Recommendation:** Use TQ1_0 instead
+
+**Memory comparison:**
+```
+Quantization | Base Size | + 16K ctx | Fits 128GB? | Swap Needed
+-------------|-----------|-----------|-------------|-------------
+TQ1_0        | 170GB     | ~174GB    | Maybe       | Probably yes
+IQ1_S        | 192GB     | ~196GB    | No          | Definitely yes
+```
+
+**Decision:** Download TQ1_0 (170GB), skip IQ1_S
 
 **DeepSeek-V3.1-2bit-Unsloth** (~250-300GB estimated)
 - **Why test:** More quality than 1-bit, still massive compression
@@ -133,15 +158,33 @@ Complete list of models to evaluate on AMD Strix Halo for coding assistance.
 
 ---
 
-### Llama 4 Scout Series (Long Context)
+### Llama 4 Scout Series (Long Context) 🚀
 
-**Llama-4-Scout-17B** (Expected ~20GB Q4, ~35GB Q8)
-- **Why test:** Up to **1M token context** (vs GLM's 202K)
-- **Expected advantage:** Entire massive codebases in context
-- **Trade-off:** Smaller param count (17B vs GLM 30B)
-- **Use case:** When context > quality
-- **Priority:** ⭐⭐⭐⭐⭐ (unique capability)
-- **Note:** 1M context is slow but possible on 128GB system
+**Llama-4-Scout-17B-16E-Instruct** (Expected ~20GB Q4, ~35GB Q8)
+- **Why test:** **1-10M token context!** (vs GLM's 202K, 50x larger!)
+- **Expected size:** ~35GB Q8 base + context KV cache
+- **Revolutionary capability:** 10M tokens = entire large codebases (Linux kernel, LLVM, Chromium)
+- **Expected advantage:**
+  - Can load entire massive projects
+  - Perfect for overnight research/analysis tasks
+  - Multi-repository context
+- **Trade-off:**
+  - Smaller param count (17B vs GLM 30B)
+  - Massive context = very slow inference
+  - KV cache at 10M tokens = ~200GB+ (needs swap/streaming)
+- **Use case:**
+  - **Overnight research model** - Load project, let it analyze for hours
+  - When you need absolute maximum context
+  - Multi-repository refactoring
+- **Practical contexts:**
+  - 100K: ~40GB total (realistic overnight use)
+  - 1M: ~100GB total (entire large project)
+  - 10M: ~250GB+ (theoretical max, needs swap)
+- **Priority:** ⭐⭐⭐⭐⭐ **CRITICAL - Unique 10M context capability**
+- **Status:** Need to download
+- **Link:** https://huggingface.co/unsloth/Llama-4-Scout-17B-16E-Instruct-GGUF
+
+**Note:** At 10M context, this is not for interactive use - it's for batch processing, overnight analysis, research tasks where you need entire massive codebases in context.
 
 **Llama-4-Scout-70B** (Expected ~80GB Q4)
 - **Why test:** Best balance of size and context
@@ -315,20 +358,24 @@ Complete list of models to evaluate on AMD Strix Halo for coding assistance.
 
 ---
 
-### Apriel Model - Placeholder
+### Apriel-1.5-15B-Thinker (NEW - Fine-Tuning Candidate!)
 
-**Status:** Mentioned but need details
-- **Model name/size?** Unknown
-- **Specialization?** Unknown
-- **Release date?** Unknown
-- **Priority:** ⭐⭐⭐⭐ (assuming mid-size efficient model)
-- **Action:** Need user to provide:
-  - Full model name
-  - HuggingFace link or source
-  - Intended use case
-  - Parameter count
+**unsloth/Apriel-1.5-15b-Thinker-GGUF**
+- **Why test:** Mid-performer with NO reinforcement learning (clean base for fine-tuning)
+- **Expected size:** ~15-18GB Q8, ~8-10GB Q4
+- **Expected advantage:** Good baseline performance, excellent fine-tuning candidate
+- **Use case:**
+  - Testing mid-size efficient model
+  - Base model for custom fine-tuning (no RL contamination)
+  - Lightweight reasoning tasks
+- **Multi-mode fit:**
+  - Apriel-15B (18GB) + Qwen3-Coder-30B (35GB) = 53GB ✓
+  - 2x Apriel-15B instances = 36GB (plenty of headroom) ✓
+- **Priority:** ⭐⭐⭐⭐ **HIGH - Unique fine-tuning opportunity**
+- **Status:** Need to download
+- **Link:** https://huggingface.co/unsloth/Apriel-1.5-15b-Thinker-GGUF
 
-**Note:** Will add full analysis once details provided.
+**Key insight:** No RL means cleaner training, better for custom fine-tuning on VV Collective workflows!
 
 ---
 
@@ -354,6 +401,25 @@ Complete list of models to evaluate on AMD Strix Halo for coding assistance.
   - Nemo-12B (13GB) + REAP-218B (92GB) = 105GB ✓
 - **Use case:** Fast Ask mode + larger models for other modes
 - **Priority:** ⭐⭐⭐⭐ **HIGH for multi-mode**
+
+---
+
+### Ministral-3-14B-Instruct (NEW - Mistral's Efficient Model)
+
+**unsloth/Ministral-3-14B-Instruct-2512-GGUF**
+- **Why test:** Latest small Mistral model (Dec 2025 release)
+- **Expected size:** ~14-16GB Q8, ~8GB Q4
+- **Expected advantage:** Newer than Nemo-12B, similar efficiency
+- **Use case:** Fast baseline, Ask mode alternative to GPT-OSS-20B
+- **Multi-mode fit:**
+  - Ministral-14B (16GB) + Qwen3-Coder-30B (35GB) = 51GB ✓
+  - Ministral-14B (16GB) + GLM-Q8 (33GB) = 49GB ✓
+  - 4x Ministral-14B instances = 64GB ✓
+- **Priority:** ⭐⭐⭐⭐ **HIGH - Latest small Mistral**
+- **Status:** Need to download
+- **Link:** https://huggingface.co/unsloth/Ministral-3-14B-Instruct-2512-GGUF
+
+**Comparison target:** Mistral-Nemo-12B, GPT-OSS-20B
 
 ---
 

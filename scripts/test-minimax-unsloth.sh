@@ -44,9 +44,9 @@ echo "Model: $MODEL_PATH" | tee -a "$REPORT_FILE"
 echo "Size: $(du -h "$MODEL_PATH" | cut -f1)" | tee -a "$REPORT_FILE"
 echo "" | tee -a "$REPORT_FILE"
 
-# Test 1: Baseline Performance
+# Test 1: Baseline Performance (Quick Speed Check)
 echo "─────────────────────────────────────────────────────────" | tee -a "$REPORT_FILE"
-echo "Test 1: Baseline Performance (512 prompt, 128 gen)" | tee -a "$REPORT_FILE"
+echo "Test 1: Baseline Speed (512 prompt, 128 gen)" | tee -a "$REPORT_FILE"
 echo "─────────────────────────────────────────────────────────" | tee -a "$REPORT_FILE"
 echo "" | tee -a "$REPORT_FILE"
 
@@ -65,6 +65,54 @@ GEN_TPS=$(echo "$BASELINE_OUTPUT" | grep "Text Generation:" | awk '{print $3}')
 
 echo "Prompt Processing: ${PROMPT_TPS:-FAILED} t/s" | tee -a "$REPORT_FILE"
 echo "Text Generation: ${GEN_TPS:-FAILED} t/s" | tee -a "$REPORT_FILE"
+echo "" | tee -a "$REPORT_FILE"
+
+# Test 1b: Realistic Context (4K prompt, 512 gen)
+echo "─────────────────────────────────────────────────────────" | tee -a "$REPORT_FILE"
+echo "Test 1b: Realistic Context (4K prompt, 512 gen)" | tee -a "$REPORT_FILE"
+echo "─────────────────────────────────────────────────────────" | tee -a "$REPORT_FILE"
+echo "" | tee -a "$REPORT_FILE"
+
+REALISTIC_OUTPUT=$($RUNTIME run --rm \
+    --device /dev/dri --device /dev/kfd \
+    --group-add video --group-add render \
+    --security-opt seccomp=unconfined \
+    -v "$MODEL_DIR_PATH":/models:ro,z \
+    --entrypoint llama-bench \
+    vtt-benchmark-llama \
+    -m /models/$(basename "$MODEL_PATH") \
+    -p 4096 -n 512 \
+    -ngl 999 -fa 1 -mmp 0 2>&1 || echo "FAILED")
+
+PROMPT_4K=$(echo "$REALISTIC_OUTPUT" | grep "pp" | awk '{print $2}')
+GEN_4K=$(echo "$REALISTIC_OUTPUT" | grep "tg" | awk '{print $2}')
+
+echo "Prompt (4K): ${PROMPT_4K:-FAILED} t/s" | tee -a "$REPORT_FILE"
+echo "Generation: ${GEN_4K:-FAILED} t/s" | tee -a "$REPORT_FILE"
+echo "" | tee -a "$REPORT_FILE"
+
+# Test 1c: Large Context (16K prompt, 1024 gen)
+echo "─────────────────────────────────────────────────────────" | tee -a "$REPORT_FILE"
+echo "Test 1c: Large Context (16K prompt, 1024 gen)" | tee -a "$REPORT_FILE"
+echo "─────────────────────────────────────────────────────────" | tee -a "$REPORT_FILE"
+echo "" | tee -a "$REPORT_FILE"
+
+LARGE_OUTPUT=$($RUNTIME run --rm \
+    --device /dev/dri --device /dev/kfd \
+    --group-add video --group-add render \
+    --security-opt seccomp=unconfined \
+    -v "$MODEL_DIR_PATH":/models:ro,z \
+    --entrypoint llama-bench \
+    vtt-benchmark-llama \
+    -m /models/$(basename "$MODEL_PATH") \
+    -p 16384 -n 1024 \
+    -ngl 999 -fa 1 -mmp 0 2>&1 || echo "FAILED")
+
+PROMPT_16K=$(echo "$LARGE_OUTPUT" | grep "pp" | awk '{print $2}')
+GEN_16K=$(echo "$LARGE_OUTPUT" | grep "tg" | awk '{print $2}')
+
+echo "Prompt (16K): ${PROMPT_16K:-FAILED} t/s" | tee -a "$REPORT_FILE"
+echo "Generation: ${GEN_16K:-FAILED} t/s" | tee -a "$REPORT_FILE"
 echo "" | tee -a "$REPORT_FILE"
 
 # Test 2: Quality Check - Simple reasoning task
