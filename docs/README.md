@@ -44,6 +44,13 @@ Complete documentation index for the VTT Hardware Benchmarks project.
 - January 2026 state of the art for AMD Strix Halo
 - Mode switching strategy and decision trees
 
+**[MODE-SPECIFIC-TESTING.md](MODE-SPECIFIC-TESTING.md)**
+- Test prompts for Ask/Code/Architect/Debug modes
+- Mode-specific evaluation criteria
+- Expected performance by model and mode
+- Ollama vs llama.cpp comparison framework
+- Benchmark execution methodology
+
 **[GLM-4.7-TESTING.md](GLM-4.7-TESTING.md)**
 - Extended context testing for GLM-4.7 models
 - Q8 vs BF16 vs REAP-218B comparison
