@@ -23,6 +23,61 @@ Complete list of models to evaluate on AMD Strix Halo for coding assistance.
 
 ---
 
+## CRITICAL PRIORITY - Game Changers 🚀
+
+### DeepSeek-V3.1 Unsloth Dynamic GGUFs (Revolutionary Quantization)
+
+**Why this changes everything:**
+- Traditional 1-2 bit quantization = gibberish
+- Unsloth Dynamic GGUF = actually works with selective layer quantization
+- DeepSeek-V3.1 normally 671GB → **192GB at 1-bit** (-75% size!)
+- Fits on our 128GB system with memory pressure management
+- Performance claims: 1-bit outperforms GPT-4.1, GPT-4.5, DeepSeek-V3-0324
+
+**DeepSeek-V3.1-1bit-Unsloth** (~192GB)
+- **Why test:** 671B parameter model in 192GB!
+- **Expected advantage:** Massive model on consumer hardware
+- **Trade-off:** Memory pressure on 128GB (need swap or reduced context)
+- **Use case:** When you need SOTA reasoning and can manage memory
+- **Priority:** ⭐⭐⭐⭐⭐ **HIGHEST - Could revolutionize local AI**
+- **Status:** Need to download from Unsloth
+- **Link:** https://unsloth.ai/docs/basics/unsloth-dynamic-2.0-ggufs/unsloth-dynamic-ggufs-on-aider-polyglot
+
+**DeepSeek-V3.1-2bit-Unsloth** (~250-300GB estimated)
+- **Why test:** More quality than 1-bit, still massive compression
+- **Expected advantage:** Better quality, still manageable with swap
+- **Priority:** ⭐⭐⭐⭐⭐
+
+**DeepSeek-V3.1-3bit-Unsloth** (~350-400GB estimated)
+- **Why test:** Thinking mode outperforms Claude-4-Opus
+- **Trade-off:** Doesn't fit in 128GB RAM alone (needs swap/disk)
+- **Use case:** Absolute best quality, worth the wait
+- **Priority:** ⭐⭐⭐⭐
+
+**DeepSeek-V3.1-5bit-Unsloth** (~500GB estimated)
+- **Why test:** Matches Claude-4-Opus (non-thinking)
+- **Trade-off:** Way too large for 128GB (skip unless have 512GB+ RAM)
+- **Priority:** ⭐ (too large for our hardware)
+
+**Key Insight:** 1-bit and 2-bit Unsloth models could fit where 671B model normally impossible!
+
+---
+
+### MiniMax-M2.1 Unsloth GGUF
+
+**MiniMax-M2.1-Unsloth** (size TBD - downloading)
+- **Why test:** MiniMax-M2.1 is strong Chinese model (competitive with DeepSeek/Qwen)
+- **Expected advantage:** Different architecture might excel at different tasks
+- **Unsloth optimization:** Should have same benefits as DeepSeek Unsloth versions
+- **Use case:** Alternative to DeepSeek for reasoning/coding
+- **Priority:** ⭐⭐⭐⭐ (actively downloading)
+- **Status:** Downloading now
+- **Link:** https://huggingface.co/unsloth/MiniMax-M2.1-GGUF
+
+**Note:** MiniMax models have shown strong performance in Chinese benchmarks and coding tasks. Worth testing alongside DeepSeek.
+
+---
+
 ## High Priority - Must Test 🔥
 
 ### GPT-OSS-120B (Larger GPT open source)
@@ -184,6 +239,48 @@ Complete list of models to evaluate on AMD Strix Halo for coding assistance.
 
 ---
 
+## Implications for AMD Strix Halo (128GB)
+
+### What Unsloth Dynamic Changes
+
+**Before Unsloth:**
+- Maximum model size: ~120GB Q3 (e.g., Qwen-235B, Mistral-Large-2)
+- Parameter limit: ~235B parameters practical
+- Trade-off: Size vs quality vs speed
+
+**After Unsloth:**
+- Can run 671B parameter models! (DeepSeek-V3.1-1bit)
+- 192GB 1-bit model with memory pressure management
+- Potentially SOTA reasoning on consumer hardware
+- New category: "Ultra-large models via ultra-low-bit quant"
+
+### Memory Management Strategies for 192GB Model on 128GB System
+
+**Option 1: Swap to NVMe (slower but works)**
+```bash
+# Create 128GB swap on NVMe
+sudo dd if=/dev/zero of=/swapfile bs=1G count=128
+sudo mkswap /swapfile
+sudo swapon /swapfile
+```
+- **Speed:** Slow when swapping (NVMe latency)
+- **Usable:** Yes, for batch processing / non-interactive
+- **Context:** Reduced to fit in active memory
+
+**Option 2: Reduce context window**
+- DeepSeek-V3.1 has long context capability
+- Reducing to 32K-65K context saves ~20-40GB
+- Might fit in 128GB with model + reduced KV cache
+- **Best for:** Interactive use with reasonable context
+
+**Option 3: Wait for 256GB upgrade**
+- Not practical short-term
+- But validates future hardware planning
+
+**Recommendation:** Try Option 2 first (reduced context), fall back to Option 1 (swap) for batch
+
+---
+
 ## Expected Winners by Category
 
 ### Speed Category (< 2 sec responses)
@@ -194,6 +291,8 @@ Complete list of models to evaluate on AMD Strix Halo for coding assistance.
 3. StarCoder2-3B (ultra-fast but limited)
 
 **Likely Winner:** GPT-OSS-20B (already excellent)
+
+**Note:** 1-bit models will be slower due to dequantization overhead
 
 ---
 
@@ -214,11 +313,13 @@ Complete list of models to evaluate on AMD Strix Halo for coding assistance.
 ### Reasoning Category (Complex problems)
 **Current:** GLM-4.7-REAP-218B (218B params)
 **Challengers:**
-1. Mistral-Large-2-123B (might be better reasoner)
-2. Qwen3-235B (already tested, similar)
-3. Llama-4-Scout-70B (if context helps reasoning)
+1. **DeepSeek-V3.1-1bit/2bit Unsloth** (671B params!) 🚀 **GAME CHANGER**
+2. Mistral-Large-2-123B (might be better reasoner)
+3. Qwen3-235B (already tested, similar)
+4. Llama-4-Scout-70B (if context helps reasoning)
 
-**Likely Winner:** REAP-218B or Mistral-Large-2 (neck and neck)
+**Likely Winner:** DeepSeek-V3.1-1bit if it fits and performs as claimed (revolutionary)
+**Fallback:** REAP-218B or Mistral-Large-2 if DeepSeek doesn't fit/work
 
 ---
 
@@ -236,14 +337,36 @@ Complete list of models to evaluate on AMD Strix Halo for coding assistance.
 
 ## Recommended Testing Priority
 
-### Phase 1: High-Impact Models (Test First)
+### Phase 0: Revolutionary Technology (Test FIRST) 🚀
+
+**DeepSeek-V3.1 Unsloth Dynamic GGUFs**
+1. **DeepSeek-V3.1-1bit** (~192GB) - If this works, changes everything
+2. **DeepSeek-V3.1-2bit** (~250-300GB) - Better quality backup
+
+**Why test first:**
+- Could make 671B parameter model usable on 128GB system
+- Claims to outperform GPT-4.1, GPT-4.5, Claude-4-Opus
+- Revolutionary if true - validates or disproves Unsloth claims
+- If it works: New champion for reasoning/architecture tasks
+- If it doesn't work on our hardware: Know not to prioritize ultra-low-bit
+
+**Testing approach:**
+- Test with reduced context first (32K-65K to manage memory)
+- If works: Best reasoning model by far
+- If doesn't fit: Document limitations for future hardware planning
+
+**Estimated testing time:** 2-3 hours (including memory management setup)
+
+---
+
+### Phase 1: High-Impact Models (Test After DeepSeek Validation)
 
 1. **Qwen3-Coder-30B** - Most likely to dethrone GLM-Q8
 2. **Llama-4-Scout-17B** - Unique 1M context capability
 3. **GPT-OSS-120B** - Much larger GPT, potential quality leader
 4. **DeepSeek-Coder-V3-33B** - Strong recent coder
 
-**Why:** These have highest chance of beating current champions
+**Why:** These have highest chance of beating current champions (if DeepSeek doesn't work)
 
 ### Phase 2: Alternatives and Baselines
 
@@ -280,7 +403,67 @@ Complete list of models to evaluate on AMD Strix Halo for coding assistance.
 
 ## Testing Methodology
 
-### For Each New Model
+### Special: Ultra-Low-Bit Models (1-2 bit Unsloth)
+
+**Pre-test checks:**
+1. **Memory availability:** Free up as much RAM as possible
+   - Close all non-essential applications
+   - Clear page cache: `sudo sync; echo 3 | sudo tee /proc/sys/vm/drop_caches`
+   - Monitor: `watch -n 1 free -h`
+
+2. **Swap configuration (if needed):**
+   ```bash
+   # Check existing swap
+   swapon --show
+
+   # Create NVMe swap if needed (for 192GB model on 128GB RAM)
+   sudo dd if=/dev/zero of=/swapfile bs=1G count=128
+   sudo chmod 600 /swapfile
+   sudo mkswap /swapfile
+   sudo swapon /swapfile
+   ```
+
+3. **Test with reduced context first:**
+   - Start with 16K context (minimal KV cache)
+   - Gradually increase to 32K, 65K if memory permits
+   - Monitor swap usage: `vmstat 1`
+
+**Testing procedure for 1-bit DeepSeek-V3.1:**
+1. **Load test** - Can it even load?
+   - If OOM: Try with reduced context
+   - If still OOM: Document as "too large for 128GB"
+   - If loads: Proceed to performance testing
+
+2. **Quality test** - Does it produce coherent output?
+   - Simple prompt: "Explain what a Python decorator is"
+   - Check for gibberish/looping (common with bad 1-bit quants)
+   - If gibberish: Unsloth claims are wrong, document and skip
+   - If coherent: Proceed to benchmark
+
+3. **Performance test** - How fast is it?
+   - Expect slower than higher-bit quants due to dequantization
+   - Baseline: 512 prompt, 128 gen
+   - Measure: t/s prompt, t/s gen, total latency
+   - Compare to GLM-REAP-218B (current reasoning champion)
+
+4. **Mode-specific test** - Architect mode (its strength)
+   - Complex system design prompt
+   - Compare quality to REAP-218B and Qwen-235B
+   - Judge: Is 671B params worth the memory pressure?
+
+**Success criteria for ultra-low-bit models:**
+- **Must:** Produce coherent, accurate output (not gibberish)
+- **Should:** Quality > smaller models despite low bits
+- **Nice:** Usable speed (even if slow, quality might justify)
+
+**Decision tree:**
+- If gibberish → Document failure, skip similar models
+- If slow but high quality → Keep for batch/reasoning tasks
+- If fast + high quality → New reasoning champion!
+
+---
+
+### For Normal Models (Q3-Q8, F16)
 
 1. **Baseline test** (512 prompt, 128 gen)
 2. **Context scaling** (4K, 16K, 32K, 65K, max)
@@ -308,6 +491,61 @@ Complete list of models to evaluate on AMD Strix Halo for coding assistance.
 ---
 
 ## Download and Test Commands
+
+### Unsloth Dynamic GGUFs (Priority)
+
+**Where to get DeepSeek-V3.1 Unsloth models:**
+- Official: https://unsloth.ai/docs/basics/unsloth-dynamic-2.0-ggufs/
+- HuggingFace: https://huggingface.co/unsloth (search for DeepSeek-V3.1)
+- **Important:** Must use Unsloth Dynamic GGUFs, not standard quantizations
+
+```bash
+# Download DeepSeek-V3.1-1bit Unsloth (example)
+cd /mnt/ai-models
+mkdir DeepSeek-V3.1-1bit-Unsloth
+cd DeepSeek-V3.1-1bit-Unsloth
+
+# Use huggingface-cli
+huggingface-cli download unsloth/DeepSeek-V3.1-1bit-GGUF \
+  --local-dir . --local-dir-use-symlinks False
+
+# Or wget if direct link available
+# wget https://huggingface.co/unsloth/...
+
+# Verify file size (should be ~192GB for 1-bit)
+ls -lh
+```
+
+**Testing with memory management:**
+```bash
+# 1. Free up memory
+sudo sync; echo 3 | sudo tee /proc/sys/vm/drop_caches
+
+# 2. Setup swap if needed (for 192GB model on 128GB RAM)
+sudo dd if=/dev/zero of=/swapfile bs=1G count=128
+sudo chmod 600 /swapfile
+sudo mkswap /swapfile
+sudo swapon /swapfile
+
+# 3. Test with reduced context first
+podman run --rm \
+  --device /dev/dri --device /dev/kfd \
+  --group-add video --group-add render \
+  --security-opt seccomp=unconfined \
+  -v /mnt/ai-models/DeepSeek-V3.1-1bit-Unsloth:/models:ro,z \
+  --entrypoint llama-bench \
+  vtt-benchmark-llama \
+  -m /models/deepseek-v3.1-1bit.gguf \
+  -p 512 -n 128 \
+  -ngl 999 -fa 1 -mmp 0
+
+# 4. Monitor memory usage
+watch -n 1 free -h
+```
+
+---
+
+### Standard Models (Normal Priority)
 
 ```bash
 # Example: Download Qwen3-Coder-30B
@@ -362,20 +600,91 @@ cd Qwen3-Coder-30B
 
 ---
 
-## January 2026 Prediction
+## January 2026 Prediction (Updated with Unsloth)
 
 **Most Likely Final Champions:**
 
-1. **Best Overall:** Qwen3-Coder-30B (if as good as expected)
-2. **Fastest:** GPT-OSS-20B (hard to beat)
-3. **Best Reasoning:** GLM-4.7-REAP-218B or Mistral-Large-2
+1. **Best Reasoning:** DeepSeek-V3.1-1bit-Unsloth (if it works!) 🚀
+   - Fallback: GLM-4.7-REAP-218B or Mistral-Large-2
+2. **Best Overall Coding:** Qwen3-Coder-30B or GLM-4.7-Flash-Q8
+3. **Fastest:** GPT-OSS-20B (hard to beat)
 4. **Massive Context:** Llama-4-Scout-17B (1M tokens unique)
 
-**Dark Horse:** DeepSeek-Coder-V3-33B (could surprise)
+**Revolutionary If True:**
+- DeepSeek-V3.1-1bit could make 671B params usable on consumer hardware
+- Would be biggest AI breakthrough for local inference in years
+- Makes AMD Strix Halo viable for SOTA reasoning
 
-**GLM Stack:** Still likely dominant for most use cases even after new testing
+**Dark Horses:**
+1. **DeepSeek-V3.1-2bit** (if 1-bit doesn't work but 2-bit does)
+2. GPT-OSS-120B (if speed scales from 20B)
+3. DeepSeek-Coder-V3-33B (strong recent model)
+
+**GLM Stack:** Still likely dominant for everyday coding if DeepSeek doesn't fit
+
+**Key Uncertainty:** Can 192GB DeepSeek-V3.1-1bit actually run on 128GB system with reduced context?
+
+---
+
+---
+
+## Summary: Why 1-2 Bit Unsloth Could Change Everything
+
+### The Breakthrough
+
+**Traditional quantization:**
+- Q8 (8-bit): ~30-40% size reduction, excellent quality
+- Q4 (4-bit): ~70% size reduction, good quality
+- Q2/Q1: Gibberish, unusable
+
+**Unsloth Dynamic GGUF:**
+- **1-bit: ~75% size reduction, claims to work!**
+- 2-bit: ~70% reduction, better quality than 1-bit
+- Uses selective layer quantization (smart about which layers to compress more)
+- DeepSeek-V3.1: 671GB → 192GB while maintaining coherence
+
+### Impact on AMD Strix Halo (128GB)
+
+**Before Unsloth:**
+- Maximum: ~235B parameters (Qwen3-235B at Q3)
+- Practical: ~80-120B parameters (Q8 for quality)
+
+**After Unsloth (if it works):**
+- Potential: 671B parameters! (DeepSeek-V3.1-1bit)
+- Trade-off: Need swap/reduced context, but usable
+- Result: SOTA reasoning on consumer hardware
+
+### What We Need to Validate
+
+**Critical questions:**
+1. Does it actually produce coherent output? (Unsloth claims yes, others produce gibberish)
+2. Can it fit in 128GB with reduced context? (192GB model, tight but maybe)
+3. Is quality actually better than smaller models? (Claims beat GPT-4.1, GPT-4.5)
+4. Is speed acceptable? (1-bit dequantization overhead, expect slower)
+
+**If all YES:**
+- Revolutionary for local AI
+- AMD Strix Halo becomes SOTA reasoning machine
+- Changes hardware recommendations entirely
+
+**If any NO:**
+- Still have excellent GLM/Qwen stack
+- Document why ultra-low-bit doesn't work on our hardware
+- Plan for future with more RAM
+
+### Testing Priority
+
+**Immediate:**
+1. Download DeepSeek-V3.1-1bit-Unsloth
+2. Test load with reduced context (32K)
+3. Validate coherence (not gibberish)
+4. If works: Full benchmark suite
+5. If fails: Document why, continue with normal models
+
+**This is the most important test** - could make or break the value of ultra-low-bit quantization for coding assistants.
 
 ---
 
 **Last Updated:** 2026-01-22
-**Status:** Testing roadmap complete, awaiting model downloads
+**Status:** Updated with Unsloth Dynamic GGUF priority
+**Next Action:** Download and test DeepSeek-V3.1-1bit IMMEDIATELY
