@@ -65,16 +65,35 @@ Complete list of models to evaluate on AMD Strix Halo for coding assistance.
 
 ### MiniMax-M2.1 Unsloth GGUF
 
-**MiniMax-M2.1-Unsloth** (size TBD - downloading)
-- **Why test:** MiniMax-M2.1 is strong Chinese model (competitive with DeepSeek/Qwen)
-- **Expected advantage:** Different architecture might excel at different tasks
-- **Unsloth optimization:** Should have same benefits as DeepSeek Unsloth versions
-- **Use case:** Alternative to DeepSeek for reasoning/coding
-- **Priority:** ⭐⭐⭐⭐ (actively downloading)
-- **Status:** Downloading now
+**MiniMax-M2.1-Q3_K_XL** (101GB - downloading now)
+- **Why test:** 229B parameter Chinese model (competitive with DeepSeek/Qwen)
+- **Expected advantage:** Different architecture (minimax-m2) might excel at different tasks
+- **Unsloth optimization:** Validates Unsloth GGUF quality before committing to DeepSeek-V3.1-1bit
+- **Memory fit:** 101GB + ~20GB context = **~121GB total ✓ Comfortable fit in 128GB**
+- **Use case:** Reasoning/architecture tasks, alternative to REAP-218B
+- **Priority:** ⭐⭐⭐⭐⭐ **CRITICAL - Validates Unsloth quality claims**
+- **Status:** ⬇️ **Downloading Q3_K_XL (101GB)**
 - **Link:** https://huggingface.co/unsloth/MiniMax-M2.1-GGUF
 
-**Note:** MiniMax models have shown strong performance in Chinese benchmarks and coding tasks. Worth testing alongside DeepSeek.
+**Strategic importance:**
+- **Test THIS before downloading 192GB DeepSeek-V3.1-1bit**
+- If quality is excellent → Proceed with confidence to DeepSeek
+- If quality is good → MiniMax becomes reasoning champion (fits better than DeepSeek)
+- If quality disappoints → Don't download larger Unsloth models
+
+**Comparison targets:**
+- vs GLM-4.7-REAP-218B (92GB, 218B params) - Current reasoning champion
+- vs Qwen3-235B-Q3 (97GB, 235B params, similar size/quant)
+- vs DeepSeek-V3.1-1bit (if quality validates, proceed to 192GB model)
+
+**Testing once complete:**
+1. Baseline: 512p/128g, measure t/s
+2. Quality: Architect mode reasoning tasks
+3. Context: Scale to 65K-131K
+4. Comparison: Better than REAP-218B?
+5. Decision: New reasoning champion OR skip larger Unsloth models
+
+**Note:** MiniMax models have shown strong performance in Chinese benchmarks and coding tasks. 229B params at Q3 is competitive parameter count with our current reasoning models.
 
 ---
 
