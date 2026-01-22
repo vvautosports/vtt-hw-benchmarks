@@ -73,6 +73,10 @@ Complete documentation index for the VTT Hardware Benchmarks project.
 - Helper script documentation
 - GHCR push/pull workflows
 - Automation utilities
+- Model testing scripts:
+  - `comprehensive-ai-test.sh` - Full test suite for all models
+  - `compare-ollama-llamacpp.sh` - Ollama vs llama.cpp comparison
+  - `test-minimax-unsloth.sh` - MiniMax-M2.1 validation test
 
 **[../.github/README.md](../.github/README.md)**
 - CI/CD workflow documentation
@@ -115,8 +119,13 @@ Contents:
 
 **For AI Model Testing:**
 1. [AI-MODEL-STRATEGY.md](AI-MODEL-STRATEGY.md) ⭐ **Start here** - Comprehensive model selection guide
-2. [GLM-4.7-TESTING.md](GLM-4.7-TESTING.md) - Extended context testing
-3. [AMD-STRIX-HALO-SETUP.md](AMD-STRIX-HALO-SETUP.md) - iGPU optimization
+2. [MODELS-TO-TEST.md](MODELS-TO-TEST.md) ⭐ **Testing roadmap** - 20+ models to evaluate
+3. [MODE-SPECIFIC-TESTING.md](MODE-SPECIFIC-TESTING.md) - Test prompts by mode
+4. [GLM-4.7-TESTING.md](GLM-4.7-TESTING.md) - Extended context testing
+5. [AMD-STRIX-HALO-SETUP.md](AMD-STRIX-HALO-SETUP.md) - iGPU optimization
+
+**Latest Updates:**
+- [SESSION-2026-01-22-UPDATES.md](SESSION-2026-01-22-UPDATES.md) - Multi-mode execution strategies
 
 ---
 
