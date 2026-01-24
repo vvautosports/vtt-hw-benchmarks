@@ -26,68 +26,58 @@ This project provides containerized benchmarks for consistent, reproducible perf
 
 ### Windows Setup (HP ZBooks)
 
-**Step 1: Install Tools**
+**Prerequisites (Install First):**
 
 PowerShell as Administrator:
 
 ```powershell
-winget install --id Git.Git --id GitHub.cli --source winget
+winget install --id Git.Git
+winget install --id GitHub.cli
+winget install --id Docker.DockerDesktop
 ```
 
-**Step 2: Open New PowerShell Window**
+**Note:** Docker Desktop installation requires a system reboot.
 
-Close and reopen PowerShell (PATH refresh).
+**After Reboot:**
 
-**Step 3: Authenticate**
-
+1. **Authenticate GitHub:**
 ```powershell
 gh auth login
 ```
 
-**Step 4: Clone and Setup**
-
+2. **Clone Repository:**
 ```powershell
 gh repo clone vvautosports/vtt-hw-benchmarks
-cd vtt-hw-benchmarks
-```
-
-**Step 5: Run Interactive Setup**
-
-Right-click `RUN-SETUP.bat` → Run as Administrator:
-
-```cmd
 cd vtt-hw-benchmarks\scripts\setup\hp-zbook
-RUN-SETUP.bat
 ```
 
-Or manually via PowerShell:
+3. **Run Setup:**
 
+Right-click `RUN-SETUP.bat` → Run as Administrator
+
+Or via PowerShell:
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\scripts\setup\hp-zbook\HP-ZBOOK-SETUP-INTERACTIVE.ps1
+.\RUN-SETUP.bat
 ```
 
-**Note:** The `-ExecutionPolicy Bypass` flag is required because Windows blocks unsigned PowerShell scripts by default. The batch file handles this automatically.
+4. **Start Docker Desktop** (if not running)
+- Look for whale icon in system tray
+- Wait for it to stop animating
 
-**Step 6: Run Test**
+5. **Run Validation** from the setup menu
 
-```powershell
-.\scripts\testing\Test-Windows-Short.ps1
-```
+**What Gets Installed:**
+- ✅ Git & GitHub CLI (version control & authentication)
+- ✅ Docker Desktop (auto-installs WSL2, manages containers)
+- ✅ Benchmark containers (pulled from GHCR)
+- ✅ Repository (cloned to C:\vtt-hw-benchmarks)
 
-**Expected Timeline:**
-- Git/GitHub CLI install: 2-3 minutes
-- Model download: 10-15 minutes (22GB from HuggingFace)
-- WSL2/Docker setup: 5-10 minutes
+**Timeline:**
+- Prerequisites install: 5-10 minutes
+- Reboot: 2-3 minutes
+- Setup script: 2-3 minutes
 - Validation test: 2-3 minutes
-- **Total: 19-31 minutes**
-
-**What the setup does:**
-- ✅ Installs WSL2 (if needed, may require reboot)
-- ✅ Installs Docker in WSL2
-- ✅ Pulls benchmark containers from GHCR
-- ✅ Downloads light models (GPT-OSS-20B + Qwen3-8B)
-- ✅ Configures GPU access
-- ✅ Runs validation test
+- **Total: ~15-20 minutes**
 
 ### Linux Setup (Framework Desktop)
 

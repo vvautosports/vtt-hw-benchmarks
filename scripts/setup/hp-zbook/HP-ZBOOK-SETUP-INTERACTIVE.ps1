@@ -6,14 +6,14 @@ $ErrorActionPreference = "Continue"
 
 function Show-Menu {
     param([string]$Title, [array]$Options)
-    
+
     Clear-Host
     Write-Host ""
     Write-Host "=================================================================" -ForegroundColor Cyan
     Write-Host "  $Title" -ForegroundColor Cyan
     Write-Host "=================================================================" -ForegroundColor Cyan
     Write-Host ""
-    
+
     for ($i = 0; $i -lt $Options.Length; $i++) {
         Write-Host "  [$($i + 1)] $($Options[$i])" -ForegroundColor White
     }
@@ -23,7 +23,7 @@ function Show-Menu {
 
 function Get-MenuChoice {
     param([int]$MaxChoice)
-    
+
     do {
         $choice = Read-Host "Select an option"
         if ($choice -eq "0") { return 0 }
@@ -58,13 +58,14 @@ Write-Host ""
 
 $ghInstalled = $false
 $ghAuthenticated = $false
+$dockerDesktopInstalled = $false
 $repoCloned = $false
 
 # Detect if we're already running from within the repository
 function Find-RepoRoot {
     $currentPath = Get-Location
     $checkPath = $currentPath
-    
+
     # Check current directory and parent directories for .git
     for ($i = 0; $i -lt 10; $i++) {
         if (Test-Path (Join-Path $checkPath ".git")) {
@@ -195,8 +196,46 @@ if ($repoPath) {
     Write-Host " [SKIP] Authentication required" -ForegroundColor Yellow
 }
 
+# Check 4: Docker Desktop
+Write-Host "Checking Docker Desktop..." -ForegroundColor Yellow -NoNewline
+try {
+    $dockerDesktopPath = "C:\Program Files\Docker\Docker\Docker Desktop.exe"
+    if (Test-Path $dockerDesktopPath) {
+        Write-Host " [OK] Installed" -ForegroundColor Green
+        $dockerDesktopInstalled = $true
+    } else {
+        throw "Not installed"
+    }
+} catch {
+    Write-Host " [X] Not installed" -ForegroundColor Red
+    Write-Host "Installing Docker Desktop..." -ForegroundColor Yellow
+    Write-Host "This will take several minutes and may require a reboot." -ForegroundColor Gray
+    try {
+        winget install --id Docker.DockerDesktop -e --source winget --accept-package-agreements --accept-source-agreements
+        if ($LASTEXITCODE -eq 0) {
+            Write-Host "[OK] Docker Desktop installed" -ForegroundColor Green
+            Write-Host ""
+            Write-Host "IMPORTANT: Please reboot your system, then run this script again." -ForegroundColor Yellow
+            Write-Host "Docker Desktop will start automatically after reboot." -ForegroundColor Yellow
+            Write-Host ""
+            $reboot = Read-Host "Reboot now? (y/n)"
+            if ($reboot -eq 'y') {
+                Restart-Computer -Force
+            }
+            exit 0
+        } else {
+            Write-Host "[WARN] Installation may require manual intervention" -ForegroundColor Yellow
+            Write-Host "Check if Docker Desktop is installing in the background" -ForegroundColor Gray
+        }
+    } catch {
+        Write-Host "[X] Failed to install Docker Desktop" -ForegroundColor Red
+        Write-Host "Please install manually from: https://www.docker.com/products/docker-desktop/" -ForegroundColor Yellow
+        exit 1
+    }
+}
+
 # Verify all prerequisites met
-if (-not ($ghInstalled -and $ghAuthenticated -and $repoCloned)) {
+if (-not ($ghInstalled -and $ghAuthenticated -and $repoCloned -and $dockerDesktopInstalled)) {
     Write-Host ""
     Write-Host "[X] Prerequisites not met. Cannot continue." -ForegroundColor Red
     exit 1
@@ -208,374 +247,73 @@ Write-Host ""
 Start-Sleep -Seconds 1
 
 # ============================================================================
-# Main Menu (Benchmark/Setup Options)
+# Main Menu (Benchmark/Validation Options)
 # ============================================================================
 
-# Helper functions for setup
-function Test-WSL2 {
+# Helper function to check Docker
+function Test-DockerRunning {
     try {
-        $wslStatus = wsl --status 2>&1
+        $dockerCheck = docker ps 2>&1
         return ($LASTEXITCODE -eq 0)
     } catch {
         return $false
     }
 }
 
-function Test-WSLDistribution {
-    try {
-        $distros = wsl --list --quiet 2>&1
-        if ($LASTEXITCODE -eq 0) {
-            $installed = $distros | Where-Object { $_ -match '^\w' -and $_ -notmatch '^NAME' }
-            return ($installed.Count -gt 0)
-        }
-        return $false
-    } catch {
-        return $false
-    }
-}
-
-function Test-DockerInWSL {
-    try {
-        $dockerCheck = wsl bash -c "docker --version" 2>&1
-        return ($LASTEXITCODE -eq 0)
-    } catch {
-        return $false
-    }
-}
-
-# Function to check if Ubuntu is currently installing
-function Test-UbuntuInstalling {
-    # Check if Microsoft Store is installing Ubuntu
-    try {
-        $storeProcess = Get-Process -Name "Microsoft.Store" -ErrorAction SilentlyContinue
-        if ($storeProcess) {
-            return $true
-        }
-    } catch {}
-    
-    # Check if WSL installation process is running
-    try {
-        $wslProcess = Get-Process -Name "wsl" -ErrorAction SilentlyContinue
-        if ($wslProcess) {
-            return $true
-        }
-    } catch {}
-    
-    # Check if Ubuntu installer is running
-    try {
-        $ubuntuProcess = Get-Process | Where-Object { $_.ProcessName -like "*ubuntu*" -or $_.ProcessName -like "*canonical*" }
-        if ($ubuntuProcess) {
-            return $true
-        }
-    } catch {}
-    
-    return $false
-}
-
-# Function to check setup status with definitive installation state
-function Test-SetupStatus {
-    $wslInstalled = $false
-    $dockerInstalled = $false
-    $wslDistributionReady = $false
-    $wslDistributionInstalling = $false
-    
-    # Check if WSL2 is installed
-    try {
-        $wslStatus = wsl --status 2>&1
-        if ($LASTEXITCODE -eq 0) {
-            $wslInstalled = $true
-        }
-    } catch {
-        $wslInstalled = $false
-    }
-    
-    # Check if a WSL distribution is installed and ready
-    if ($wslInstalled) {
-        try {
-            $distros = wsl --list --quiet 2>&1
-            if ($LASTEXITCODE -eq 0 -and $distros) {
-                # Check if any distribution is installed
-                $installed = $distros | Where-Object { 
-                    $_ -and 
-                    $_.Trim() -ne '' -and 
-                    $_ -notmatch '^NAME' -and
-                    $_ -notmatch '^Windows' -and
-                    $_ -notmatch '^The following'
-                }
-                $wslDistributionReady = ($installed.Count -gt 0)
-            } else {
-                # Try verbose list as fallback
-                $verboseList = wsl --list --verbose 2>&1
-                if ($LASTEXITCODE -eq 0 -and $verboseList) {
-                    $installed = $verboseList | Where-Object { 
-                        $_ -match '^\s*\w' -and 
-                        $_ -notmatch '^NAME' -and
-                        $_ -notmatch '^\s*$'
-                    }
-                    $wslDistributionReady = ($installed.Count -gt 0)
-                }
-            }
-            
-            # If no distribution is ready, check if one is installing
-            if (-not $wslDistributionReady) {
-                $wslDistributionInstalling = Test-UbuntuInstalling
-            }
-        } catch {
-            $wslDistributionReady = $false
-            $wslDistributionInstalling = Test-UbuntuInstalling
-        }
-        
-        # Only check Docker if WSL distribution is ready
-        if ($wslDistributionReady) {
-            try {
-                # Try to run a simple command first to ensure WSL is responsive
-                $testCmd = wsl bash -c "echo 'test'" 2>&1
-                if ($LASTEXITCODE -eq 0) {
-                    # Now check for Docker
-                    $dockerVersion = wsl bash -c "docker --version" 2>&1
-                    if ($LASTEXITCODE -eq 0) {
-                        $dockerInstalled = $true
-                    }
-                }
-            } catch {
-                $dockerInstalled = $false
-            }
-        }
-    }
-    
-    return @{
-        WSL2 = $wslInstalled
-        WSLDistributionReady = $wslDistributionReady
-        WSLDistributionInstalling = $wslDistributionInstalling
-        Docker = $dockerInstalled
-    }
-}
-
-
-# Main menu - only benchmark/setup options
+# Main menu
 $mainMenu = @(
-    "Run full setup (WSL2, Docker, models, validation)",
-    "Run validation test only",
+    "Run validation test",
     "Run quick benchmark"
 )
 
 while ($true) {
     Show-Menu -Title "VTT Hardware Benchmark Suite" -Options $mainMenu
-    
+
     # Show prerequisite status (read-only)
     Write-Host "Prerequisites:" -ForegroundColor Cyan
     Write-Host "  GitHub CLI: [OK] Installed" -ForegroundColor Green
     Write-Host "  GitHub Auth: [OK] Authenticated" -ForegroundColor Green
     Write-Host "  Repository: [OK] Cloned" -ForegroundColor Green
+    Write-Host "  Docker Desktop: [OK] Installed" -ForegroundColor Green
     Write-Host ""
-    
-    # Check setup status
-    $setupStatus = Test-SetupStatus
-    Write-Host "Setup Status:" -ForegroundColor Cyan
-    if ($setupStatus.WSL2) {
-        Write-Host "  WSL2: [OK] Installed" -ForegroundColor Green
-        if ($setupStatus.WSLDistributionReady) {
-            Write-Host "  WSL Distribution: [OK] Ready" -ForegroundColor Green
-        } elseif ($setupStatus.WSLDistributionInstalling) {
-            Write-Host "  WSL Distribution: [INSTALLING] Installing Ubuntu..." -ForegroundColor Yellow
-            Write-Host "    Installation in progress, wait for completion" -ForegroundColor Gray
-        } else {
-            Write-Host "  WSL Distribution: [X] Not installed" -ForegroundColor Red
-        }
+
+    # Check Docker status
+    Write-Host "Docker Status:" -ForegroundColor Cyan
+    $dockerRunning = Test-DockerRunning
+    if ($dockerRunning) {
+        Write-Host "  Docker: [OK] Running" -ForegroundColor Green
     } else {
-        Write-Host "  WSL2: [X] Not installed" -ForegroundColor Red
-    }
-    if ($setupStatus.Docker) {
-        Write-Host "  Docker: [OK] Installed" -ForegroundColor Green
-    } else {
-        if ($setupStatus.WSL2 -and $setupStatus.WSLDistributionReady) {
-            Write-Host "  Docker: [X] Not installed" -ForegroundColor Red
-        } else {
-            Write-Host "  Docker: [SKIP] WSL not ready" -ForegroundColor Yellow
-        }
+        Write-Host "  Docker: [X] Not running" -ForegroundColor Red
+        Write-Host "  Start Docker Desktop and wait for it to be ready" -ForegroundColor Yellow
     }
     Write-Host ""
-    
-    if (-not ($setupStatus.WSL2 -and $setupStatus.WSLDistributionReady -and $setupStatus.Docker)) {
-        Write-Host "WARNING: Setup is incomplete!" -ForegroundColor Yellow
-        if ($setupStatus.WSLDistributionInstalling) {
-            Write-Host "   Ubuntu is currently installing. Use option 4 to monitor progress." -ForegroundColor Yellow
-        } elseif (-not $setupStatus.WSLDistributionReady -and $setupStatus.WSL2) {
-            Write-Host "   WSL distribution is not installed. Run option 1 to install Ubuntu." -ForegroundColor Yellow
-        } else {
-            Write-Host "   Run option 1 (full setup) before running validation or benchmarks." -ForegroundColor Yellow
-        }
+
+    if (-not $dockerRunning) {
+        Write-Host "WARNING: Docker is not running!" -ForegroundColor Yellow
+        Write-Host "   Please start Docker Desktop from the Start menu." -ForegroundColor Yellow
+        Write-Host "   Wait for the whale icon in the system tray to stop animating." -ForegroundColor Yellow
         Write-Host ""
     }
-    
+
     $choice = Get-MenuChoice -MaxChoice $mainMenu.Length
-    
+
     switch ($choice) {
-        0 { 
+        0 {
             Write-Host "Exiting..." -ForegroundColor Yellow
             exit 0
         }
         1 {
             Write-Host ""
-            Write-Host "=================================================================" -ForegroundColor Cyan
-            Write-Host "  Running Full Setup" -ForegroundColor Cyan
-            Write-Host "=================================================================" -ForegroundColor Cyan
-            Write-Host ""
-            
-            # Step 1: Check/Install WSL2
-            Write-Host "Step 1: Checking WSL2..." -ForegroundColor Yellow
-            $hasWSL = Test-WSL2
-            if (-not $hasWSL) {
-                Write-Host "WSL2 is not installed. Installing..." -ForegroundColor Yellow
-                Write-Host "This will require a system restart." -ForegroundColor Yellow
-                Write-Host ""
-                $response = Read-Host "Continue with WSL2 installation? (y/n)"
-                if ($response -ne 'y') {
-                    Write-Host "Installation cancelled." -ForegroundColor Red
-                    Write-Host ""
-                    Write-Host "Press any key to continue..."
-                    $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
-                    continue
-                }
-                
-                try {
-                    wsl --install
-                    Write-Host ""
-                    Write-Host "WSL2 installation initiated." -ForegroundColor Green
-                    Write-Host "IMPORTANT: System restart required!" -ForegroundColor Red
-                    Write-Host ""
-                    $restart = Read-Host "Restart now? (y/n)"
-                    if ($restart -eq 'y') {
-                        Restart-Computer -Force
-                    } else {
-                        Write-Host "Please restart manually and run this script again." -ForegroundColor Yellow
-                    }
-                    exit 0
-                } catch {
-                    Write-Host "ERROR: WSL2 installation failed: $_" -ForegroundColor Red
-                    Write-Host ""
-                    Write-Host "Press any key to continue..."
-                    $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
-                    continue
-                }
-            } else {
-                Write-Host "[OK] WSL2 is installed" -ForegroundColor Green
-            }
-            
-            Write-Host ""
-            
-            # Step 2: Check Ubuntu
-            Write-Host "Step 2: Checking Ubuntu distribution..." -ForegroundColor Yellow
-            $hasDistribution = Test-WSLDistribution
-            if (-not $hasDistribution) {
-                Write-Host "[X] Ubuntu is not installed" -ForegroundColor Red
-                Write-Host ""
-                Write-Host "Please install Ubuntu manually:" -ForegroundColor Yellow
-                Write-Host "  1. Run this command in PowerShell: wsl --install -d Ubuntu" -ForegroundColor Cyan
-                Write-Host "  2. Complete the Ubuntu setup (create username/password)" -ForegroundColor Cyan
-                Write-Host "  3. Return to this script and continue" -ForegroundColor Cyan
-                Write-Host ""
-                Write-Host "Alternative: Install 'Ubuntu' from Microsoft Store" -ForegroundColor Gray
-                Write-Host ""
-                $response = Read-Host "Press Enter when Ubuntu installation is complete (or 'q' to cancel)"
-                if ($response -eq 'q') {
-                    Write-Host "Cancelled. Run this script again after installing Ubuntu." -ForegroundColor Yellow
-                    Write-Host ""
-                    Write-Host "Press any key to continue..."
-                    $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
-                    continue
-                }
 
-                # Check again
-                Write-Host "Checking for Ubuntu..." -ForegroundColor Gray
-                Start-Sleep -Seconds 2
-                if (Test-WSLDistribution) {
-                    Write-Host "[OK] Ubuntu detected!" -ForegroundColor Green
-                } else {
-                    Write-Host "[X] Ubuntu still not detected" -ForegroundColor Red
-                    Write-Host "Run 'wsl --list --verbose' to check status" -ForegroundColor Yellow
-                    Write-Host ""
-                    Write-Host "Press any key to continue..."
-                    $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
-                    continue
-                }
-            } else {
-                Write-Host "[OK] Ubuntu distribution is installed" -ForegroundColor Green
-            }
-            
-            Write-Host ""
-            
-            # Step 3: Check/Install Docker
-            Write-Host "Step 3: Checking Docker..." -ForegroundColor Yellow
-            $hasDocker = Test-DockerInWSL
-            if (-not $hasDocker) {
-                Write-Host "Docker is not installed. Installing in WSL..." -ForegroundColor Yellow
-                Write-Host ""
-                
-                try {
-                    $dockerScript = @"
-#!/bin/bash
-set -e
-echo 'Installing Docker...'
-curl -fsSL https://get.docker.com -o get-docker.sh
-sudo sh get-docker.sh
-sudo usermod -aG docker `$USER
-echo 'Starting Docker service...'
-sudo service docker start
-echo 'Docker installation complete!'
-"@
-                    
-                    Write-Host "Installing Docker in WSL..." -ForegroundColor Gray
-                    wsl bash -c $dockerScript
-                    
-                    if ($LASTEXITCODE -eq 0) {
-                        Write-Host "[OK] Docker installed successfully!" -ForegroundColor Green
-                    } else {
-                        Write-Host "[WARN] Docker installation may have issues. Check manually." -ForegroundColor Yellow
-                    }
-                } catch {
-                    Write-Host "ERROR: Docker installation failed: $_" -ForegroundColor Red
-                }
-            } else {
-                Write-Host "[OK] Docker is installed" -ForegroundColor Green
-            }
-            
-            Write-Host ""
-            Write-Host "=================================================================" -ForegroundColor Green
-            Write-Host "  Setup Complete!" -ForegroundColor Green
-            Write-Host "=================================================================" -ForegroundColor Green
-            Write-Host ""
-            Write-Host "Press any key to continue..."
-            $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
-        }
-        2 {
-            Write-Host ""
-            
-            # Check if setup is needed
-            $setupStatus = Test-SetupStatus
-            if (-not ($setupStatus.WSL2 -and $setupStatus.WSLDistributionReady -and $setupStatus.Docker)) {
-                Write-Host "Setup is incomplete!" -ForegroundColor Red
-                Write-Host ""
-                if (-not $setupStatus.WSL2) {
-                    Write-Host "  [X] WSL2 is not installed" -ForegroundColor Red
-                } elseif ($setupStatus.WSLDistributionInstalling) {
-                    Write-Host "  [INSTALLING] WSL distribution is currently installing" -ForegroundColor Yellow
-                    Write-Host "      Installation in progress, wait for completion" -ForegroundColor Gray
-                } elseif (-not $setupStatus.WSLDistributionReady) {
-                    Write-Host "  [X] WSL distribution is not installed" -ForegroundColor Red
-                    Write-Host "      Run option 1 to install Ubuntu" -ForegroundColor Gray
-                }
-                if ($setupStatus.WSL2 -and $setupStatus.WSLDistributionReady -and -not $setupStatus.Docker) {
-                    Write-Host "  [X] Docker is not installed in WSL2" -ForegroundColor Red
-                }
-                Write-Host ""
-                Write-Host "You must run option 1 (full setup) first to install WSL2 and Docker." -ForegroundColor Yellow
+            if (-not $dockerRunning) {
+                Write-Host "Docker is not running!" -ForegroundColor Red
+                Write-Host "Please start Docker Desktop and try again." -ForegroundColor Yellow
                 Write-Host ""
                 Write-Host "Press any key to return to menu..."
                 $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
                 continue
             }
-            
+
             Write-Host "Running validation test..." -ForegroundColor Cyan
             Write-Host ""
             Set-Location $repoPath
@@ -584,34 +322,18 @@ echo 'Docker installation complete!'
             Write-Host "Press any key to continue..."
             $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
         }
-        3 {
+        2 {
             Write-Host ""
-            
-            # Check if setup is needed
-            $setupStatus = Test-SetupStatus
-            if (-not ($setupStatus.WSL2 -and $setupStatus.WSLDistributionReady -and $setupStatus.Docker)) {
-                Write-Host "Setup is incomplete!" -ForegroundColor Red
-                Write-Host ""
-                if (-not $setupStatus.WSL2) {
-                    Write-Host "  [X] WSL2 is not installed" -ForegroundColor Red
-                } elseif ($setupStatus.WSLDistributionInstalling) {
-                    Write-Host "  [INSTALLING] WSL distribution is currently installing" -ForegroundColor Yellow
-                    Write-Host "      Installation in progress, wait for completion" -ForegroundColor Gray
-                } elseif (-not $setupStatus.WSLDistributionReady) {
-                    Write-Host "  [X] WSL distribution is not installed" -ForegroundColor Red
-                    Write-Host "      Run option 1 to install Ubuntu" -ForegroundColor Gray
-                }
-                if ($setupStatus.WSL2 -and $setupStatus.WSLDistributionReady -and -not $setupStatus.Docker) {
-                    Write-Host "  [X] Docker is not installed in WSL2" -ForegroundColor Red
-                }
-                Write-Host ""
-                Write-Host "You must run option 1 (full setup) first to install WSL2 and Docker." -ForegroundColor Yellow
+
+            if (-not $dockerRunning) {
+                Write-Host "Docker is not running!" -ForegroundColor Red
+                Write-Host "Please start Docker Desktop and try again." -ForegroundColor Yellow
                 Write-Host ""
                 Write-Host "Press any key to return to menu..."
                 $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
                 continue
             }
-            
+
             Write-Host "Running quick benchmark..." -ForegroundColor Cyan
             Write-Host ""
             Set-Location $repoPath
