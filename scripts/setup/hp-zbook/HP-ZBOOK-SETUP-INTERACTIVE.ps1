@@ -46,30 +46,187 @@ if (-not $isAdmin) {
     exit 1
 }
 
-# Main menu
-$mainMenu = @(
-    "Install GitHub CLI (if needed)",
-    "Authenticate with GitHub",
-    "Clone repository",
-    "Run setup script",
-    "Do everything automatically"
-)
+# ============================================================================
+# Prerequisite Checks (Automatic)
+# ============================================================================
+Write-Host ""
+Write-Host "=================================================================" -ForegroundColor Cyan
+Write-Host "  VTT Hardware Benchmark Suite" -ForegroundColor Cyan
+Write-Host "  Checking Prerequisites..." -ForegroundColor Cyan
+Write-Host "=================================================================" -ForegroundColor Cyan
+Write-Host ""
 
 $ghInstalled = $false
 $ghAuthenticated = $false
 $repoCloned = $false
 
+# Detect if we're already running from within the repository
+function Find-RepoRoot {
+    $currentPath = Get-Location
+    $checkPath = $currentPath
+    
+    # Check current directory and parent directories for .git
+    for ($i = 0; $i -lt 10; $i++) {
+        if (Test-Path (Join-Path $checkPath ".git")) {
+            return $checkPath
+        }
+        $parent = Split-Path -Parent $checkPath
+        if ($parent -eq $checkPath) {
+            break
+        }
+        $checkPath = $parent
+    }
+    return $null
+}
+
+$repoPath = Find-RepoRoot
+
+# Check 1: GitHub CLI
+Write-Host "Checking GitHub CLI..." -ForegroundColor Yellow -NoNewline
+try {
+    $ghVersion = gh --version 2>&1
+    if ($LASTEXITCODE -eq 0) {
+        Write-Host " [OK] Installed" -ForegroundColor Green
+        $ghInstalled = $true
+    } else {
+        throw "Not installed"
+    }
+} catch {
+    Write-Host " [X] Not installed" -ForegroundColor Red
+    Write-Host "Installing GitHub CLI..." -ForegroundColor Yellow
+    try {
+        winget install --id GitHub.cli -e --source winget --accept-package-agreements --accept-source-agreements 2>&1 | Out-Null
+        $env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User")
+        Start-Sleep -Seconds 2
+        $ghVersion = gh --version 2>&1
+        if ($LASTEXITCODE -eq 0) {
+            Write-Host "[OK] GitHub CLI installed successfully" -ForegroundColor Green
+            $ghInstalled = $true
+        } else {
+            Write-Host "[X] Installation failed - please restart PowerShell and try again" -ForegroundColor Red
+            exit 1
+        }
+    } catch {
+        Write-Host "[X] Failed to install GitHub CLI" -ForegroundColor Red
+        exit 1
+    }
+}
+
+# Check 2: GitHub Authentication
+Write-Host "Checking GitHub authentication..." -ForegroundColor Yellow -NoNewline
+if ($ghInstalled) {
+    try {
+        $authStatus = gh auth status 2>&1
+        if ($LASTEXITCODE -eq 0) {
+            Write-Host " [OK] Authenticated" -ForegroundColor Green
+            $ghAuthenticated = $true
+        } else {
+            throw "Not authenticated"
+        }
+    } catch {
+        Write-Host " [X] Not authenticated" -ForegroundColor Red
+        Write-Host "Starting authentication..." -ForegroundColor Yellow
+        Write-Host "This will open your browser." -ForegroundColor Gray
+        gh auth login
+        if ($LASTEXITCODE -eq 0) {
+            Write-Host "[OK] Authentication successful" -ForegroundColor Green
+            $ghAuthenticated = $true
+        } else {
+            Write-Host "[X] Authentication failed" -ForegroundColor Red
+            exit 1
+        }
+    }
+} else {
+    Write-Host " [SKIP] GitHub CLI not available" -ForegroundColor Yellow
+}
+
+# Check 3: Repository
+Write-Host "Checking repository..." -ForegroundColor Yellow -NoNewline
+if ($repoPath) {
+    # Already running from within the repository
+    Write-Host " [OK] Found at $repoPath" -ForegroundColor Green
+    $repoCloned = $true
+    Set-Location $repoPath
+} elseif ($ghAuthenticated) {
+    # Not in repo, check default location
+    $defaultRepoPath = "C:\vtt-hw-benchmarks"
+    if (Test-Path $defaultRepoPath) {
+        if (Test-Path (Join-Path $defaultRepoPath ".git")) {
+            Write-Host " [OK] Found at $defaultRepoPath" -ForegroundColor Green
+            $repoPath = $defaultRepoPath
+            $repoCloned = $true
+            Set-Location $repoPath
+        } else {
+            Write-Host " [WARN] Directory exists but not a git repo" -ForegroundColor Yellow
+            $response = Read-Host "Remove and re-clone? (y/n)"
+            if ($response -eq 'y') {
+                Remove-Item -Path $defaultRepoPath -Recurse -Force
+                Write-Host "Cloning repository..." -ForegroundColor Yellow
+                gh repo clone vvautosports/vtt-hw-benchmarks $defaultRepoPath
+                if ($LASTEXITCODE -eq 0) {
+                    Write-Host "[OK] Repository cloned" -ForegroundColor Green
+                    $repoPath = $defaultRepoPath
+                    $repoCloned = $true
+                    Set-Location $repoPath
+                } else {
+                    Write-Host "[X] Clone failed" -ForegroundColor Red
+                    exit 1
+                }
+            } else {
+                Write-Host "[X] Cannot proceed without valid repository" -ForegroundColor Red
+                exit 1
+            }
+        }
+    } else {
+        Write-Host " [X] Not found" -ForegroundColor Red
+        Write-Host "Cloning repository to $defaultRepoPath..." -ForegroundColor Yellow
+        gh repo clone vvautosports/vtt-hw-benchmarks $defaultRepoPath
+        if ($LASTEXITCODE -eq 0) {
+            Write-Host "[OK] Repository cloned" -ForegroundColor Green
+            $repoPath = $defaultRepoPath
+            $repoCloned = $true
+            Set-Location $repoPath
+        } else {
+            Write-Host "[X] Clone failed" -ForegroundColor Red
+            exit 1
+        }
+    }
+} else {
+    Write-Host " [SKIP] Authentication required" -ForegroundColor Yellow
+}
+
+# Verify all prerequisites met
+if (-not ($ghInstalled -and $ghAuthenticated -and $repoCloned)) {
+    Write-Host ""
+    Write-Host "[X] Prerequisites not met. Cannot continue." -ForegroundColor Red
+    exit 1
+}
+
+Write-Host ""
+Write-Host "[OK] All prerequisites met!" -ForegroundColor Green
+Write-Host ""
+Start-Sleep -Seconds 1
+
+# ============================================================================
+# Main Menu (Benchmark/Setup Options)
+# ============================================================================
+
+# Main menu - only benchmark/setup options
+$mainMenu = @(
+    "Run full setup (WSL2, Docker, models, validation)",
+    "Run validation test only",
+    "Run quick benchmark",
+    "Exit to repository directory"
+)
+
 while ($true) {
     Show-Menu -Title "VTT Hardware Benchmark Suite" -Options $mainMenu
     
-    # Show status
-    Write-Host "Status:" -ForegroundColor Cyan
-    $ghStatus = if ($ghInstalled) { "[OK] Installed" } else { "[X] Not installed" }
-    $authStatus = if ($ghAuthenticated) { "[OK] Authenticated" } else { "[X] Not authenticated" }
-    $repoStatus = if ($repoCloned) { "[OK] Cloned" } else { "[X] Not cloned" }
-    Write-Host "  GitHub CLI: $ghStatus" -ForegroundColor $(if ($ghInstalled) { "Green" } else { "Yellow" })
-    Write-Host "  GitHub Auth: $authStatus" -ForegroundColor $(if ($ghAuthenticated) { "Green" } else { "Yellow" })
-    Write-Host "  Repository: $repoStatus" -ForegroundColor $(if ($repoCloned) { "Green" } else { "Yellow" })
+    # Show prerequisite status (read-only)
+    Write-Host "Prerequisites:" -ForegroundColor Cyan
+    Write-Host "  GitHub CLI: [OK] Installed" -ForegroundColor Green
+    Write-Host "  GitHub Auth: [OK] Authenticated" -ForegroundColor Green
+    Write-Host "  Repository: [OK] Cloned" -ForegroundColor Green
     Write-Host ""
     
     $choice = Get-MenuChoice -MaxChoice $mainMenu.Length
@@ -81,140 +238,43 @@ while ($true) {
         }
         1 {
             Write-Host ""
-            Write-Host "Checking GitHub CLI..." -ForegroundColor Yellow
-            try {
-                $ghVersion = gh --version 2>&1
-                if ($LASTEXITCODE -eq 0) {
-                    Write-Host "[OK] GitHub CLI is already installed" -ForegroundColor Green
-                    $ghInstalled = $true
-                }
-            } catch {
-                Write-Host "Installing GitHub CLI..." -ForegroundColor Yellow
-                winget install --id GitHub.cli -e --source winget --accept-package-agreements --accept-source-agreements 2>&1 | Out-Null
-                Write-Host "[OK] GitHub CLI installed" -ForegroundColor Green
-                $env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User")
-                Start-Sleep -Seconds 2
-                $ghInstalled = $true
-            }
+            Write-Host "Running full setup..." -ForegroundColor Cyan
+            Write-Host ""
+            Set-Location $repoPath
+            & .\scripts\setup\hp-zbook\HP-ZBOOK-SETUP.ps1
             Write-Host ""
             Write-Host "Press any key to continue..."
             $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
         }
         2 {
-            if (-not $ghInstalled) {
-                Write-Host ""
-                Write-Host "ERROR: GitHub CLI must be installed first" -ForegroundColor Red
-                Write-Host "Press any key to continue..."
-                $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
-                continue
-            }
             Write-Host ""
-            Write-Host "Checking authentication..." -ForegroundColor Yellow
-            try {
-                $authStatus = gh auth status 2>&1
-                if ($LASTEXITCODE -eq 0) {
-                    Write-Host "[OK] Already authenticated" -ForegroundColor Green
-                    $ghAuthenticated = $true
-                }
-            } catch {
-                Write-Host "Starting authentication..." -ForegroundColor Yellow
-                Write-Host "This will open your browser." -ForegroundColor Gray
-                gh auth login
-                if ($LASTEXITCODE -eq 0) {
-                    Write-Host "[OK] Authentication successful" -ForegroundColor Green
-                    $ghAuthenticated = $true
-                } else {
-                    Write-Host "[X] Authentication failed" -ForegroundColor Red
-                }
-            }
+            Write-Host "Running validation test..." -ForegroundColor Cyan
+            Write-Host ""
+            Set-Location $repoPath
+            & .\scripts\testing\Test-Windows-Short.ps1
             Write-Host ""
             Write-Host "Press any key to continue..."
             $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
         }
         3 {
-            if (-not $ghAuthenticated) {
-                Write-Host ""
-                Write-Host "ERROR: Must authenticate with GitHub first" -ForegroundColor Red
-                Write-Host "Press any key to continue..."
-                $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
-                continue
-            }
             Write-Host ""
-            $repoPath = "C:\vtt-hw-benchmarks"
-            if (Test-Path $repoPath) {
-                Write-Host "Repository already exists at $repoPath" -ForegroundColor Yellow
-                $response = Read-Host "Use existing? (y/n)"
-                if ($response -eq 'y') {
-                    $repoCloned = $true
-                }
-            } else {
-                Write-Host "Cloning repository..." -ForegroundColor Yellow
-                gh repo clone vvautosports/vtt-hw-benchmarks $repoPath
-                if ($LASTEXITCODE -eq 0) {
-                    Write-Host "[OK] Repository cloned" -ForegroundColor Green
-                    $repoCloned = $true
-                } else {
-                    Write-Host "[X] Clone failed" -ForegroundColor Red
-                }
-            }
+            Write-Host "Running quick benchmark..." -ForegroundColor Cyan
+            Write-Host ""
+            Set-Location $repoPath
+            Write-Host "Entering WSL..." -ForegroundColor Gray
+            wsl bash -c "cd /mnt/c/vtt-hw-benchmarks/docker && MODEL_CONFIG_MODE=default ./run-ai-models.sh --quick-test"
             Write-Host ""
             Write-Host "Press any key to continue..."
             $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
         }
         4 {
-            if (-not $repoCloned) {
-                Write-Host ""
-                Write-Host "ERROR: Repository must be cloned first" -ForegroundColor Red
-                Write-Host "Press any key to continue..."
-                $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
-                continue
-            }
             Write-Host ""
-            Write-Host "Running setup script..." -ForegroundColor Yellow
-            Set-Location "C:\vtt-hw-benchmarks"
-            & .\scripts\setup\hp-zbook\HP-ZBOOK-SETUP.ps1
+            Write-Host "Changing to repository directory..." -ForegroundColor Cyan
+            Set-Location $repoPath
+            Write-Host "Current directory: $(Get-Location)" -ForegroundColor Green
             Write-Host ""
             Write-Host "Press any key to continue..."
             $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
-        }
-        5 {
-            Write-Host ""
-            Write-Host "Running automatic setup..." -ForegroundColor Cyan
-            Write-Host ""
-            
-            # Install gh if needed
-            if (-not $ghInstalled) {
-                Write-Host "Installing GitHub CLI..." -ForegroundColor Yellow
-                winget install --id GitHub.cli -e --source winget --accept-package-agreements --accept-source-agreements 2>&1 | Out-Null
-                $env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User")
-                Start-Sleep -Seconds 2
-                $ghInstalled = $true
-            }
-            
-            # Authenticate if needed
-            if (-not $ghAuthenticated) {
-                Write-Host "Authenticating with GitHub..." -ForegroundColor Yellow
-                gh auth login
-                $ghAuthenticated = $true
-            }
-            
-            # Clone if needed
-            if (-not $repoCloned) {
-                Write-Host "Cloning repository..." -ForegroundColor Yellow
-                gh repo clone vvautosports/vtt-hw-benchmarks C:\vtt-hw-benchmarks
-                $repoCloned = $true
-            }
-            
-            # Run setup
-            Write-Host "Running setup script..." -ForegroundColor Yellow
-            Set-Location "C:\vtt-hw-benchmarks"
-            & .\scripts\setup\hp-zbook\HP-ZBOOK-SETUP.ps1
-            
-            Write-Host ""
-            Write-Host "Setup complete!" -ForegroundColor Green
-            Write-Host "Press any key to exit..."
-            $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
-            exit 0
         }
     }
 }
