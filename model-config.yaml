@@ -1,33 +1,66 @@
 version: "1.0"
-mode: "default"  # "default" (5 models) or "all" (20 models)
+mode: "default"  # "light" (1-2 models, <16GB), "default" (5 models), or "all" (20 models)
 model_dir: "/mnt/ai-models"
 
-# Default 5 models for standard testing
+# Light mode: 1-2 small models for 16GB VRAM systems
+light_models:
+  - name: "GPT-OSS-20B"
+    path: "gpt-oss-20b-F16/gpt-oss-20b-F16.gguf"
+    size_gb: 13
+    vram_gb: 14
+    use_case: "Speed champion - fits on 16GB GPU"
+    hf_repo: "unsloth/gpt-oss-20b-F16-GGUF"
+    hf_file: "gpt-oss-20b-F16.gguf"
+
+  - name: "Qwen2.5-7B-Instruct-Q8"
+    path: "Qwen2.5-7B-Instruct-Q8/qwen2.5-7b-instruct-q8_0.gguf"
+    size_gb: 8
+    vram_gb: 9
+    use_case: "Efficient 7B model"
+    hf_repo: "Qwen/Qwen2.5-7B-Instruct-GGUF"
+    hf_file: "qwen2.5-7b-instruct-q8_0.gguf"
+
+# Default 5 models for standard testing (requires 128GB RAM + large UMA)
 default_models:
   - name: "DeepSeek-R1-Distill-Llama-70B"
     path: "DeepSeek-R1-Distill-Llama-70B/DeepSeek-R1-Distill-Llama-70B-UD-Q8_K_XL-00001-of-00002.gguf"
     size_gb: 76
+    vram_gb: 80
     use_case: "Dense model comparison"
+    hf_repo: "unsloth/DeepSeek-R1-Distill-Llama-70B-GGUF"
+    hf_file: "DeepSeek-R1-Distill-Llama-70B-UD-Q8_K_XL-00001-of-00002.gguf"
 
   - name: "GLM-4.7-Flash-Q8"
     path: "GLM-4.7-Flash-Q8/GLM-4.7-Flash-UD-Q8_K_XL.gguf"
     size_gb: 33
+    vram_gb: 35
     use_case: "Current champion - best efficiency"
+    hf_repo: "unsloth/GLM-4.7-Flash-GGUF"
+    hf_file: "GLM-4.7-Flash-UD-Q8_K_XL.gguf"
 
   - name: "MiniMax-M2.1"
     path: "MiniMax-M2.1/MiniMax-M2.1-UD-Q2_K_XL-00001-of-00002.gguf"
     size_gb: 81
+    vram_gb: 85
     use_case: "High priority testing"
+    hf_repo: "unsloth/MiniMax-M2.1-GGUF"
+    hf_file: "MiniMax-M2.1-UD-Q2_K_XL-00001-of-00002.gguf"
 
   - name: "Qwen3-235B-A22B-Instruct"
     path: "Qwen3-235B-A22B-Instruct/Qwen3-235B-A22B-Instruct-2507-UD-Q3_K_XL-00001-of-00003.gguf"
     size_gb: 98
+    vram_gb: 105
     use_case: "Ultra-large model testing"
+    hf_repo: "unsloth/Qwen3-235B-A22B-Instruct-GGUF"
+    hf_file: "Qwen3-235B-A22B-Instruct-2507-UD-Q3_K_XL-00001-of-00003.gguf"
 
   - name: "GPT-OSS-20B"
     path: "gpt-oss-20b-F16/gpt-oss-20b-F16.gguf"
     size_gb: 13
+    vram_gb: 14
     use_case: "Speed champion"
+    hf_repo: "unsloth/gpt-oss-20b-F16-GGUF"
+    hf_file: "gpt-oss-20b-F16.gguf"
 
 # Context profiles for different testing scenarios
 context_profiles:
