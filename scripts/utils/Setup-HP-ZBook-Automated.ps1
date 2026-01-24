@@ -248,10 +248,43 @@ if (-not $hasWSL) {
             }
             
             # If winget didn't work, try wsl --install
+            $rebootRequired = $false
             if (-not $wingetInstalled) {
                 Write-Log "Running: wsl --install -d Ubuntu" "Gray"
                 $installOutput = wsl --install -d Ubuntu 2>&1
                 Write-Log $installOutput "Gray"
+                
+                # Check if reboot is required
+                $outputString = $installOutput -join " "
+                if ($outputString -match "reboot|restart" -or $outputString -match "Changes will not be effective") {
+                    $rebootRequired = $true
+                    Write-Log "" "Yellow"
+                    Write-Log "IMPORTANT: System reboot required for Ubuntu installation!" "Red"
+                    Write-Log "The WSL distribution will be available after reboot." "Yellow"
+                    Write-Log ""
+                    
+                    if (-not $NonInteractive) {
+                        $restart = Read-Host "Restart now? (y/n)"
+                        if ($restart -eq 'y') {
+                            Write-Log "Restarting system..." "Yellow"
+                            Write-Log "After restart, run this script again to continue with Docker setup." "Cyan"
+                            Write-Log ""
+                            Write-Log "Command to run after restart:" "Cyan"
+                            Write-Log "  .\scripts\utils\Setup-HP-ZBook-Automated.ps1 -ModelPath `"$ModelPath`" -NonInteractive" "White"
+                            Write-Log ""
+                            Start-Sleep -Seconds 3
+                            Restart-Computer -Force
+                            exit 0
+                        } else {
+                            Write-Log "Please restart manually and re-run this script to continue." "Yellow"
+                            exit 0
+                        }
+                    } else {
+                        Write-Log "Non-interactive mode: Please restart manually and re-run script" "Yellow"
+                        Write-Log "Command: .\scripts\utils\Setup-HP-ZBook-Automated.ps1 -ModelPath `"$ModelPath`" -NonInteractive" "Cyan"
+                        exit 0
+                    }
+                }
             }
             
             # Wait and poll for installation to complete with detailed progress
