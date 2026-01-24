@@ -27,7 +27,7 @@ virt-viewer windows11-vtt-test
 
 ```powershell
 # 1. Install GitHub CLI (if needed)
-winget install --id GitHub.cli
+winget install --id GitHub.cli --source winget
 
 # 2. Authenticate
 gh auth login

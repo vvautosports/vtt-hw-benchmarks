@@ -12,7 +12,7 @@ Complete setup guide for HP ZBook laptops running Windows 11.
 # PowerShell as Administrator
 
 # Step 1: Install GitHub CLI (if needed)
-winget install --id GitHub.cli
+winget install --id GitHub.cli --source winget
 
 # Step 2: Authenticate (opens browser)
 gh auth login
@@ -38,7 +38,7 @@ This does everything automatically without the menu.
 
 **1. Install GitHub CLI**
 ```powershell
-winget install --id GitHub.cli
+winget install --id GitHub.cli --source winget
 ```
 
 **2. Authenticate with GitHub**
