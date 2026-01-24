@@ -91,7 +91,7 @@ Write-Log "Testing network connectivity..." "Yellow"
 try {
     $ping = Test-Connection -ComputerName github.com -Count 1 -Quiet
     if ($ping) {
-        Write-Log "✓ Network connectivity OK" "Green"
+        Write-Log "[OK] Network connectivity OK" "Green"
     } else {
         Write-Log "WARNING: Cannot reach github.com" "Yellow"
     }
@@ -145,7 +145,7 @@ if (-not $hasWSL) {
         exit 1
     }
 } else {
-    Write-Log "✓ WSL2 already installed" "Green"
+    Write-Log "[OK] WSL2 already installed" "Green"
 }
 
 Write-Log ""
@@ -175,11 +175,11 @@ echo 'Docker installation complete!'
         Write-Log "Executing Docker installation in WSL2..." "Yellow"
         $dockerInstallScript | wsl bash
         Write-Log ""
-        Write-Log "✓ Docker installed in WSL2" "Green"
+        Write-Log "[OK] Docker installed in WSL2" "Green"
         Write-Log "Restarting WSL2 for group membership to take effect..." "Yellow"
         wsl --shutdown
         Start-Sleep -Seconds 3
-        Write-Log "✓ WSL2 restarted" "Green"
+        Write-Log "[OK] WSL2 restarted" "Green"
     } catch {
         Write-Log "ERROR: Docker installation failed: $_" "Red"
         Write-Log "Manual installation commands:" "Yellow"
@@ -190,13 +190,13 @@ echo 'Docker installation complete!'
         exit 1
     }
 } else {
-    Write-Log "✓ Docker already installed" "Green"
+    Write-Log "[OK] Docker already installed" "Green"
     
     # Ensure Docker is running
     Write-Log "Ensuring Docker service is running..." "Yellow"
     try {
-        wsl bash -c "sudo service docker start 2>/dev/null || true"
-        Write-Log "✓ Docker service started" "Green"
+        wsl bash -c 'sudo service docker start 2>/dev/null || true'
+        Write-Log "[OK] Docker service started" "Green"
     } catch {
         Write-Log "WARNING: Could not start Docker service" "Yellow"
     }
@@ -218,8 +218,9 @@ Write-Log ""
 # Configure MODEL_DIR in WSL2
 $bashrcConfig = "export MODEL_DIR='$wslModelPath'"
 try {
-    wsl bash -c "grep -q 'MODEL_DIR' ~/.bashrc || echo '$bashrcConfig' >> ~/.bashrc"
-    Write-Log "✓ Model directory configured in WSL2" "Green"
+    $bashCmd = "grep -q 'MODEL_DIR' ~/.bashrc || echo '$bashrcConfig' >> ~/.bashrc"
+    wsl bash -c $bashCmd
+    Write-Log "[OK] Model directory configured in WSL2" "Green"
 } catch {
     Write-Log "WARNING: Could not configure bashrc automatically" "Yellow"
     Write-Log "Add this line to ~/.bashrc in WSL2: $bashrcConfig" "Yellow"
@@ -240,7 +241,7 @@ if (-not $SkipModels) {
         try {
             & $DownloadScript -ModelPath $ModelPath
             if ($LASTEXITCODE -eq 0) {
-                Write-Log "✓ Models downloaded successfully" "Green"
+                Write-Log "[OK] Models downloaded successfully" "Green"
             } else {
                 Write-Log "WARNING: Model download had issues" "Yellow"
             }
@@ -277,7 +278,7 @@ try {
     
     if ($LASTEXITCODE -eq 0) {
         Write-Log ""
-        Write-Log "✓ Containers pulled successfully from GHCR" "Green"
+        Write-Log "[OK] Containers pulled successfully from GHCR" "Green"
         
         # Verify containers
         Write-Log "Verifying containers..." "Yellow"
@@ -311,10 +312,10 @@ if (-not $SkipTests) {
         
         if ($LASTEXITCODE -eq 0) {
             Write-Log ""
-            Write-Log "✓ Validation test PASSED" "Green"
+            Write-Log "[OK] Validation test PASSED" "Green"
         } else {
             Write-Log ""
-            Write-Log "✗ Validation test FAILED" "Red"
+            Write-Log "[X] Validation test FAILED" "Red"
             Write-Log "Check the output above for errors" "Yellow"
         }
     } catch {
