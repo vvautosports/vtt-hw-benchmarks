@@ -59,7 +59,13 @@ Write-Host "Step 2: Running Quick Benchmark (2-3 minutes)..." -ForegroundColor Y
 Write-Host "This validates the complete setup including model access and GPU acceleration" -ForegroundColor Gray
 Write-Host ""
 
-$wslRepoPath = $repoPath -replace '\\', '/' -replace '^([A-Z]):', { "/mnt/$($_.Groups[1].Value.ToLower())" }
+# Convert Windows path to WSL path (C:\Users\... -> /mnt/c/Users/...)
+if ($repoPath -match '^([A-Z]):') {
+    $driveLetter = $matches[1].ToLower()
+    $wslRepoPath = $repoPath -replace '\\', '/' -replace "^$($matches[1]):", "/mnt/$driveLetter"
+} else {
+    $wslRepoPath = $repoPath -replace '\\', '/'
+}
 
 try {
     Write-Host "Executing quick test in WSL2..." -ForegroundColor Gray

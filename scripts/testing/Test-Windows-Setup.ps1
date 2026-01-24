@@ -159,7 +159,13 @@ Write-Host ""
 Write-Host "Test 6: Repository Access..." -ForegroundColor Yellow
 try {
     $repoPath = (Get-Location).Path
-    $wslRepoPath = $repoPath -replace '\\', '/' -replace '^([A-Z]):', { "/mnt/$($_.Groups[1].Value.ToLower())" }
+    # Convert Windows path to WSL path (C:\Users\... -> /mnt/c/Users/...)
+    if ($repoPath -match '^([A-Z]):') {
+        $driveLetter = $matches[1].ToLower()
+        $wslRepoPath = $repoPath -replace '\\', '/' -replace "^$($matches[1]):", "/mnt/$driveLetter"
+    } else {
+        $wslRepoPath = $repoPath -replace '\\', '/'
+    }
     $repoExists = wsl bash -c "test -d '$wslRepoPath' && echo 'exists' || echo 'missing'" 2>&1
     if ($repoExists -match "exists") {
         Test-Pass "Repository accessible in WSL2: $wslRepoPath"
@@ -178,7 +184,13 @@ if ($FullTest) {
     Write-Host "Test 7: Quick Benchmark..." -ForegroundColor Yellow
     try {
         $repoPath = (Get-Location).Path
-        $wslRepoPath = $repoPath -replace '\\', '/' -replace '^([A-Z]):', { "/mnt/$($_.Groups[1].Value.ToLower())" }
+        # Convert Windows path to WSL path (C:\Users\... -> /mnt/c/Users/...)
+    if ($repoPath -match '^([A-Z]):') {
+        $driveLetter = $matches[1].ToLower()
+        $wslRepoPath = $repoPath -replace '\\', '/' -replace "^$($matches[1]):", "/mnt/$driveLetter"
+    } else {
+        $wslRepoPath = $repoPath -replace '\\', '/'
+    }
         
         Write-Host "  Running quick test (this may take 2-3 minutes)..." -ForegroundColor Gray
         $benchResult = wsl bash -c "cd '$wslRepoPath/docker' && MODEL_CONFIG_MODE=default ./run-ai-models.sh --quick-test" 2>&1
