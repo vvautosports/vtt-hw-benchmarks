@@ -275,6 +275,7 @@ function Test-DockerRunning {
 }
 
 $mainMenu = @(
+    "Pull benchmark containers",
     "Run validation test",
     "Run quick benchmark"
 )
@@ -328,6 +329,30 @@ while ($true) {
                 continue
             }
 
+            Write-Host "Pulling benchmark containers from GHCR..." -ForegroundColor Cyan
+            Write-Host ""
+            Set-Location $repoPath
+
+            # Convert Windows path to WSL path
+            $wslPath = $repoPath -replace '^([A-Z]):', '/mnt/$1' -replace '\\', '/' | ForEach-Object { $_.ToLower() }
+
+            Write-Host "Entering WSL..." -ForegroundColor Gray
+            wsl bash -c "cd '$wslPath' && ./scripts/ci-cd/pull-from-ghcr.sh"
+            Write-Host ""
+            Write-Host "Press any key to continue..."
+            $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
+        }
+        2 {
+            Write-Host ""
+            if (-not $dockerRunning) {
+                Write-Host "Docker is not running!" -ForegroundColor Red
+                Write-Host "Please start Docker Desktop and try again." -ForegroundColor Yellow
+                Write-Host ""
+                Write-Host "Press any key to return to menu..."
+                $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
+                continue
+            }
+
             Write-Host "Running validation test..." -ForegroundColor Cyan
             Write-Host ""
             Set-Location $repoPath
@@ -336,7 +361,7 @@ while ($true) {
             Write-Host "Press any key to continue..."
             $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
         }
-        2 {
+        3 {
             Write-Host ""
             if (-not $dockerRunning) {
                 Write-Host "Docker is not running!" -ForegroundColor Red
