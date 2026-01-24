@@ -180,19 +180,51 @@ if (-not $hasWSL) {
     if (-not $hasDistribution) {
         Write-Log "WSL2 is installed but no Linux distribution found" "Yellow"
         Write-Log "Installing Ubuntu distribution..." "Yellow"
+        Write-Log "This may take a few minutes and will download Ubuntu from Microsoft Store." "Gray"
+        Write-Log ""
+        
+        if (-not $NonInteractive) {
+            $response = Read-Host "Continue with Ubuntu installation? (y/n)"
+            if ($response -ne 'y') {
+                Write-Log "Installation cancelled." "Red"
+                Write-Log "You can install Ubuntu manually: wsl --install -d Ubuntu" "Yellow"
+                exit 1
+            }
+        }
         
         try {
-            wsl --install -d Ubuntu --no-launch
-            Write-Log "[OK] Ubuntu distribution installation initiated" "Green"
-            Write-Log "IMPORTANT: You may need to restart WSL or wait for installation to complete" "Yellow"
-            Write-Log "After installation, run this script again to continue" "Yellow"
-            Write-Log ""
-            Write-Log "To check installation status: wsl --list --verbose" "Cyan"
-            exit 0
+            # Install Ubuntu - this will download and install
+            Write-Log "Running: wsl --install -d Ubuntu" "Gray"
+            $installOutput = wsl --install -d Ubuntu 2>&1
+            Write-Log $installOutput "Gray"
+            
+            # Wait a moment for installation to start
+            Start-Sleep -Seconds 3
+            
+            # Check if installation succeeded
+            $checkDistros = wsl --list --quiet 2>&1
+            $installed = $checkDistros | Where-Object { $_ -match '^\w' -and $_ -notmatch '^NAME' }
+            
+            if ($installed.Count -gt 0) {
+                Write-Log "[OK] Ubuntu distribution installed successfully" "Green"
+                Write-Log "Distribution: $($installed -join ', ')" "Gray"
+            } else {
+                Write-Log "[INFO] Ubuntu installation initiated - this may take several minutes" "Yellow"
+                Write-Log "The installation runs in the background." "Yellow"
+                Write-Log ""
+                Write-Log "To check installation status: wsl --list --verbose" "Cyan"
+                Write-Log "After Ubuntu is installed, run this script again to continue with Docker setup." "Yellow"
+                Write-Log ""
+                Write-Log "You can also check the Microsoft Store for installation progress." "Gray"
+                exit 0
+            }
         } catch {
             Write-Log "ERROR: Failed to install Ubuntu distribution: $_" "Red"
-            Write-Log "Manual installation:" "Yellow"
-            Write-Log "  wsl --install -d Ubuntu" "Cyan"
+            Write-Log ""
+            Write-Log "Manual installation options:" "Yellow"
+            Write-Log "  1. Run: wsl --install -d Ubuntu" "Cyan"
+            Write-Log "  2. Or install from Microsoft Store: Ubuntu" "Cyan"
+            Write-Log "  3. Or download from: https://aka.ms/wslubuntu" "Cyan"
             exit 1
         }
     } else {
