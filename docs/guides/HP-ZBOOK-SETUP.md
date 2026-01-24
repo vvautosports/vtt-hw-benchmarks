@@ -11,15 +11,18 @@ Complete setup guide for HP ZBook laptops running Windows 11.
 ```powershell
 # PowerShell as Administrator
 
-# Step 1: Install GitHub CLI (if needed)
+# Step 1: Install Git for Windows (required)
+winget install --id Git.Git --source winget
+
+# Step 2: Install GitHub CLI
 winget install --id GitHub.cli --source winget
 
-# ⚠️ IMPORTANT: Open a NEW PowerShell window/tab after installation
+# ⚠️ IMPORTANT: Open a NEW PowerShell window/tab after installations
 
-# Step 2: In the new PowerShell window, authenticate (opens browser)
+# Step 3: In the new PowerShell window, authenticate (opens browser)
 gh auth login
 
-# Step 3: Clone and run interactive menu
+# Step 4: Clone and run interactive menu
 gh repo clone vvautosports/vtt-hw-benchmarks; cd vtt-hw-benchmarks; .\scripts\setup\hp-zbook\HP-ZBOOK-SETUP-INTERACTIVE.ps1
 ```
 
@@ -38,20 +41,25 @@ This does everything automatically without the menu.
 
 ### Step-by-Step Breakdown
 
-**1. Install GitHub CLI**
+**1. Install Git for Windows** (required for `gh repo clone`)
+```powershell
+winget install --id Git.Git --source winget
+```
+
+**2. Install GitHub CLI**
 ```powershell
 winget install --id GitHub.cli --source winget
 ```
 
-**⚠️ After installation: Open a NEW PowerShell window/tab** (PATH needs to refresh)
+**⚠️ After installations: Open a NEW PowerShell window/tab** (PATH needs to refresh)
 
-**2. Authenticate with GitHub** (in the new PowerShell window)
+**3. Authenticate with GitHub** (in the new PowerShell window)
 ```powershell
 gh auth login
 # Follow the browser prompts
 ```
 
-**3. Clone the Repository**
+**4. Clone the Repository**
 ```powershell
 gh repo clone vvautosports/vtt-hw-benchmarks
 cd vtt-hw-benchmarks

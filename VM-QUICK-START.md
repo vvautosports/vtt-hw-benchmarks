@@ -26,23 +26,26 @@ virt-viewer windows11-vtt-test
 ## In Windows VM (PowerShell as Admin)
 
 ```powershell
-# 1. Install GitHub CLI (if needed)
+# 1. Install Git for Windows (required for gh repo clone)
+winget install --id Git.Git --source winget
+
+# 2. Install GitHub CLI
 winget install --id GitHub.cli --source winget
 
-# IMPORTANT: Open a NEW PowerShell window/tab after installation
-# (PATH needs to refresh for 'gh' command to be available)
+# IMPORTANT: Open a NEW PowerShell window/tab after installations
+# (PATH needs to refresh for 'git' and 'gh' commands to be available)
 
-# 2. In the new PowerShell window, authenticate
+# 3. In the new PowerShell window, authenticate
 gh auth login
 
-# 3. Clone and setup
+# 4. Clone and setup
 gh repo clone vvautosports/vtt-hw-benchmarks
 cd vtt-hw-benchmarks
 .\scripts\setup\hp-zbook\HP-ZBOOK-SETUP-INTERACTIVE.ps1
 
 # Select option 5: "Do everything automatically"
 
-# 4. Run validation test (after setup)
+# 5. Run validation test (after setup)
 .\scripts\testing\Test-Windows-Short.ps1
 ```
 
