@@ -56,12 +56,9 @@ cd vtt-hw-benchmarks\scripts\setup\hp-zbook
 
 3. **Run Setup:**
 
-Right-click `SETUP.bat` → Run as Administrator
+Right-click `scripts\setup\hp-zbook\SETUP.bat` → Run as Administrator
 
-Or from command line:
-```cmd
-SETUP.bat
-```
+**That's it!** One self-contained file does everything.
 
 4. **Start Docker Desktop** (if not running)
 - Look for whale icon in system tray
