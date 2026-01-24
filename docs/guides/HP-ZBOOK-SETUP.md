@@ -6,6 +6,47 @@ Complete setup guide for HP ZBook laptops running Windows 11.
 
 **The repository is private - authentication is required first.**
 
+### Getting Setup Instructions Without Full Access
+
+If you need setup instructions before authenticating, you can fetch them:
+
+**Option 1: Use the fetch script (requires GitHub CLI or token)**
+```powershell
+# Download and run the fetch script
+powershell -ExecutionPolicy Bypass -File .\scripts\utils\Fetch-Setup-Instructions.ps1
+# Instructions will be saved to setup-instructions.md
+```
+
+**Option 2: View in browser**
+- README: https://github.com/vvautosports/vtt-hw-benchmarks/blob/master/README.md
+- Setup Guide: https://github.com/vvautosports/vtt-hw-benchmarks/blob/master/docs/guides/HP-ZBOOK-SETUP.md
+
+**Option 3: Quick start script**
+```powershell
+# Download GET-STARTED.ps1 from the repository and run:
+powershell -ExecutionPolicy Bypass -File .\GET-STARTED.ps1
+```
+
+### PowerShell Execution Policy
+
+Windows PowerShell has a security feature that blocks unsigned scripts by default. If you encounter an execution policy error, use one of these methods:
+
+**Option 1: Bypass for single script (Recommended)**
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\setup\hp-zbook\HP-ZBOOK-SETUP-INTERACTIVE.ps1
+```
+
+**Option 2: Set execution policy (requires Administrator)**
+```powershell
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+```
+This allows locally created scripts to run. After setting this, you can run scripts normally:
+```powershell
+.\scripts\setup\hp-zbook\HP-ZBOOK-SETUP-INTERACTIVE.ps1
+```
+
+**Note:** The `-ExecutionPolicy Bypass` flag is safe for one-time script execution and doesn't change system settings.
+
 ### Simplest Path: Clone and Run Interactive Menu
 
 ```powershell
@@ -23,7 +64,8 @@ winget install --id GitHub.cli --source winget
 gh auth login
 
 # Step 4: Clone and run interactive menu
-gh repo clone vvautosports/vtt-hw-benchmarks; cd vtt-hw-benchmarks; .\scripts\setup\hp-zbook\HP-ZBOOK-SETUP-INTERACTIVE.ps1
+gh repo clone vvautosports/vtt-hw-benchmarks; cd vtt-hw-benchmarks
+powershell -ExecutionPolicy Bypass -File .\scripts\setup\hp-zbook\HP-ZBOOK-SETUP-INTERACTIVE.ps1
 ```
 
 The interactive menu will guide you through the rest!
@@ -69,21 +111,23 @@ cd vtt-hw-benchmarks
 
 **Interactive Menu (Recommended):**
 ```powershell
-.\scripts\setup\hp-zbook\HP-ZBOOK-SETUP-INTERACTIVE.ps1
+powershell -ExecutionPolicy Bypass -File .\scripts\setup\hp-zbook\HP-ZBOOK-SETUP-INTERACTIVE.ps1
 ```
 Shows a menu with status indicators - you can do steps individually or choose "do everything automatically"
 
 **One-Command Automatic:**
 ```powershell
-.\scripts\setup\hp-zbook\HP-ZBOOK-SETUP-ONE-COMMAND.ps1
+powershell -ExecutionPolicy Bypass -File .\scripts\setup\hp-zbook\HP-ZBOOK-SETUP-ONE-COMMAND.ps1
 ```
 Runs everything automatically without prompts
 
 **Basic Setup:**
 ```powershell
-.\scripts\setup\hp-zbook\HP-ZBOOK-SETUP.ps1
+powershell -ExecutionPolicy Bypass -File .\scripts\setup\hp-zbook\HP-ZBOOK-SETUP.ps1
 ```
 Assumes repo is already cloned, just runs the setup
+
+**Note:** If you've already set the execution policy (see above), you can omit the `-ExecutionPolicy Bypass` flag.
 
 That's it! The script will:
 - ✅ Install git automatically (if needed)
