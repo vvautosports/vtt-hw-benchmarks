@@ -450,50 +450,69 @@ if (-not $hasWSL) {
                     }
                 } catch {}
                 
-                # Show progress with details
+                # Show progress with details - always on new line for clarity
                 $minutes = [math]::Floor($elapsed / 60)
                 $seconds = $elapsed % 60
-                $timeStr = "$minutes min $seconds sec"
+                $timeStr = if ($minutes -gt 0) { "$minutes min $seconds sec" } else { "$seconds sec" }
+                
+                # Build meaningful progress message
+                $progressMessage = ""
+                $progressColor = "Gray"
                 
                 if ($progressInfo.Count -gt 0) {
-                    $progressStr = $progressInfo -join " | "
-                    if ($progressStr -ne $lastProgress) {
-                        $lastProgress = $progressStr
-                        Write-Log "  [$timeStr] $progressStr" "Cyan"
-                    } else {
-                        # Update same line if no new info
-                        Write-Host "`r  [$timeStr] $progressStr    " -NoNewline -ForegroundColor Cyan
-                    }
+                    $progressMessage = $progressInfo -join " | "
+                    $progressColor = "Cyan"
                 } else {
-                    # No detailed info yet, but show what we're checking
-                    $checkingStatus = @()
+                    # Build status from checks
+                    $statusParts = @()
+                    
+                    # Check WSL distribution status
                     try {
-                        $wslListCheck = wsl --list 2>&1
-                        if ($LASTEXITCODE -eq 0) {
-                            if ($wslListCheck -match 'Ubuntu' -or $wslListCheck -match 'ubuntu') {
-                                $checkingStatus += "WSL: Ubuntu listed"
+                        $wslListCheck = wsl --list --quiet 2>&1
+                        if ($LASTEXITCODE -eq 0 -and $wslListCheck) {
+                            $hasUbuntu = $wslListCheck | Where-Object { 
+                                $_ -and 
+                                ($_ -match 'Ubuntu' -or $_ -match 'ubuntu') -and 
+                                $_ -notmatch '^NAME' -and
+                                $_ -notmatch '^Windows'
+                            }
+                            if ($hasUbuntu) {
+                                $statusParts += "WSL: Distribution found"
+                                $progressColor = "Green"
                             } else {
-                                $checkingStatus += "WSL: No Ubuntu yet"
+                                $statusParts += "WSL: No distribution yet"
                             }
                         }
                     } catch {
-                        $checkingStatus += "WSL: Checking..."
+                        $statusParts += "WSL: Checking..."
                     }
                     
+                    # Check for active processes
+                    $activeProcs = @()
                     try {
-                        $storeProcess = Get-Process -Name "Microsoft.Store" -ErrorAction SilentlyContinue
-                        if ($storeProcess) {
-                            $checkingStatus += "Store: Active"
-                        }
+                        $storeProc = Get-Process -Name "Microsoft.Store" -ErrorAction SilentlyContinue
+                        if ($storeProc) { $activeProcs += "Store" }
                     } catch {}
                     
-                    if ($checkingStatus.Count -gt 0) {
-                        $statusStr = $checkingStatus -join " | "
-                        Write-Host "`r  [$timeStr] $statusStr    " -NoNewline -ForegroundColor Gray
+                    try {
+                        $wslProc = Get-Process -Name "wsl" -ErrorAction SilentlyContinue
+                        if ($wslProc) { $activeProcs += "WSL" }
+                    } catch {}
+                    
+                    if ($activeProcs.Count -gt 0) {
+                        $statusParts += "Active: $($activeProcs -join ', ')"
+                        $progressColor = "Yellow"
+                    }
+                    
+                    if ($statusParts.Count -gt 0) {
+                        $progressMessage = $statusParts -join " | "
                     } else {
-                        Write-Host "`r  [$timeStr] Checking installation status...    " -NoNewline -ForegroundColor Gray
+                        $progressMessage = "Checking installation status..."
                     }
                 }
+                
+                # Always write new line with progress
+                Write-Log "  [$timeStr] $progressMessage" $progressColor
             }
             
             Write-Host ""  # New line after progress loop
