@@ -82,21 +82,58 @@ Write-Log "Build: $($OSInfo.BuildNumber)" "Gray"
 Write-Log ""
 
 # Check disk space
-# Check disk space
 $TargetDrive = Split-Path -Qualifier $ModelPath
+$FreeSpaceGB = 0
+
 try {
-    # Use WMI for more reliable disk space check
-    $drive = Get-WmiObject -Class Win32_LogicalDisk -Filter "DeviceID='$TargetDrive'" -ErrorAction Stop
-    $FreeSpaceGB = [math]::Round($drive.FreeSpace / 1GB, 2)
+    # Try Get-CimInstance first (more reliable on modern Windows)
+    $drive = Get-CimInstance -ClassName Win32_LogicalDisk -Filter "DeviceID='$TargetDrive'" -ErrorAction Stop
+    if ($drive -and $drive.FreeSpace) {
+        $FreeSpaceGB = [math]::Round($drive.FreeSpace / 1GB, 2)
+    }
 } catch {
-    # Fallback to Get-PSDrive
     try {
-        $driveLetter = $TargetDrive.TrimEnd(':')
-        $Drive = Get-PSDrive -Name $driveLetter -ErrorAction Stop
-        $FreeSpaceGB = [math]::Round($Drive.Free / 1GB, 2)
+        # Fallback to Get-WmiObject
+        $drive = Get-WmiObject -Class Win32_LogicalDisk -Filter "DeviceID='$TargetDrive'" -ErrorAction Stop
+        if ($drive -and $drive.FreeSpace) {
+            $FreeSpaceGB = [math]::Round($drive.FreeSpace / 1GB, 2)
+        }
     } catch {
-        Write-Log "WARNING: Could not check disk space for $TargetDrive" "Yellow"
-        $FreeSpaceGB = 0
+        try {
+            # Fallback to Get-PSDrive
+            $driveLetter = $TargetDrive.TrimEnd(':')
+            $Drive = Get-PSDrive -Name $driveLetter -ErrorAction Stop
+            if ($Drive -and $Drive.Free) {
+                $FreeSpaceGB = [math]::Round($Drive.Free / 1GB, 2)
+            }
+        } catch {
+            Write-Log "WARNING: Could not check disk space for $TargetDrive" "Yellow"
+            Write-Log "  Error: $($_.Exception.Message)" "Gray"
+            $FreeSpaceGB = 0
+        }
+    }
+}
+
+# If still 0, try checking all drives to find the system drive
+if ($FreeSpaceGB -eq 0) {
+    try {
+        $systemDrive = $env:SystemDrive
+        $drive = Get-CimInstance -ClassName Win32_LogicalDisk -Filter "DeviceID='$systemDrive'" -ErrorAction Stop
+        if ($drive -and $drive.FreeSpace) {
+            $FreeSpaceGB = [math]::Round($drive.FreeSpace / 1GB, 2)
+            Write-Log "Using system drive ($systemDrive) for disk space check" "Gray"
+        }
+    } catch {
+        # Last resort: try to get any available drive
+        try {
+            $allDrives = Get-CimInstance -ClassName Win32_LogicalDisk | Where-Object { $_.DriveType -eq 3 -and $_.FreeSpace } | Sort-Object FreeSpace -Descending
+            if ($allDrives) {
+                $FreeSpaceGB = [math]::Round($allDrives[0].FreeSpace / 1GB, 2)
+                Write-Log "Using drive $($allDrives[0].DeviceID) for disk space check" "Gray"
+            }
+        } catch {
+            Write-Log "WARNING: All disk space check methods failed" "Yellow"
+        }
     }
 }
 Write-Log "Available Disk Space: ${FreeSpaceGB}GB" $(if ($FreeSpaceGB -gt 30) { "Green" } else { "Yellow" })
