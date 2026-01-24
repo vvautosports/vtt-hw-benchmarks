@@ -66,7 +66,74 @@ TQ1_0        | 170GB     | ~174GB    | Maybe       | Probably yes
 IQ1_S        | 192GB     | ~196GB    | No          | Definitely yes
 ```
 
-**Decision:** Download TQ1_0 (170GB), skip IQ1_S
+**Decision:** Consider Qwen3-Coder-480B (150GB) FIRST - code-specialized and smaller!
+
+---
+
+### Qwen3-Coder-480B-A35B (NEW - CRITICAL!) 🚀
+
+**unsloth/Qwen3-Coder-480B-A35B-Instruct-GGUF - IQ1_M (150GB)**
+
+**Why this might be BETTER than DeepSeek for coding:**
+
+| Model | Size | Params | Specialization | Fits 128GB? |
+|-------|------|--------|----------------|-------------|
+| **Qwen3-Coder-480B IQ1_M** | 150GB | 480B | **Code specialist** | **Better** ✓ |
+| DeepSeek-V3.1 TQ1_0 | 170GB | 671B | General reasoning | Maybe |
+| DeepSeek-V3.1 IQ1_S | 192GB | 671B | General reasoning | No |
+
+**Critical advantages:**
+1. **20GB smaller than DeepSeek TQ1_0** (150GB vs 170GB)
+   - 150GB + 4GB (16K ctx) = 154GB total
+   - Much better chance of fitting in 128GB
+2. **Code-specialized** (Qwen3-Coder vs general DeepSeek)
+   - Built specifically for coding tasks
+   - Likely better at Code/Debug modes than general model
+3. **Still massive** (480B parameters!)
+   - Only 191B fewer params than DeepSeek
+   - Enough for excellent reasoning
+
+**Memory comparison:**
+```
+Context | Qwen3-Coder-480B | DeepSeek-V3.1-TQ1_0 | Winner
+--------|------------------|---------------------|--------
+4K ctx  | 152GB           | 172GB               | Qwen (-20GB)
+16K ctx | 154GB           | 174GB               | Qwen (-20GB)
+32K ctx | 158GB           | 178GB               | Qwen (-20GB)
+```
+
+**Use case comparison:**
+
+**Qwen3-Coder-480B (150GB) - Best for:**
+- ✅ Code generation and refactoring
+- ✅ Debug mode (code-specific)
+- ✅ Multi-file code operations
+- ✅ Better memory fit (20GB headroom)
+- ⚠️ May be weaker at general reasoning vs DeepSeek
+
+**DeepSeek-V3.1-TQ1_0 (170GB) - Best for:**
+- ✅ General reasoning and architecture
+- ✅ Non-code tasks
+- ✅ Thinking mode (reported excellent)
+- ⚠️ 20GB larger (tighter fit)
+- ⚠️ Not code-specialized
+
+**Recommendation:**
+
+**Download BOTH in this order:**
+1. **Qwen3-Coder-480B IQ1_M (150GB)** - Test FIRST
+   - Code-specialized = likely better for VV Collective workflows
+   - Better memory fit
+   - If this works well, might not need DeepSeek
+
+2. **DeepSeek-V3.1-TQ1_0 (170GB)** - Test SECOND (only if needed)
+   - If Qwen3-Coder excellent at code but weak at architecture
+   - Use for Architect mode, Qwen for Code/Debug modes
+   - Distributed setup: Qwen on Machine 1, DeepSeek on Machine 2
+
+**Priority:** ⭐⭐⭐⭐⭐ **CRITICAL - Code-specialized + better fit**
+**Status:** Need to download
+**Link:** https://huggingface.co/unsloth/Qwen3-Coder-480B-A35B-Instruct-GGUF
 
 **DeepSeek-V3.1-2bit-Unsloth** (~250-300GB estimated)
 - **Why test:** More quality than 1-bit, still massive compression
@@ -290,6 +357,158 @@ IQ1_S        | 192GB     | ~196GB    | No          | Definitely yes
 - Superseded by Llama 4
 
 ---
+
+---
+
+## ULTRA-LARGE MODELS (128-200GB Range) - Massive Reasoning 🧠
+
+**Goal:** Find largest models that (barely) fit on 128GB system with reduced context or minimal swap.
+
+**Strategy:** All models in this range require:
+- Reduced context (4K-16K instead of 65K+)
+- OR minimal NVMe swap (20-50GB)
+- Batch/reasoning tasks (not interactive use)
+
+---
+
+### Top Contenders (150-170GB Range)
+
+**1. Qwen3-Coder-480B-A35B IQ1_M (150GB)** ⭐ **BEST FIT + CODE SPECIALIST**
+- 480B params, code-specialized
+- 150GB + 16K ctx = 154GB total
+- **Best for:** Code/Debug modes with massive model
+- **Priority:** ⭐⭐⭐⭐⭐ **HIGHEST**
+
+**2. DeepSeek-V3.1 TQ1_0 (170GB)** ⭐ **BEST REASONING**
+- 671B params, general reasoning
+- 170GB + 16K ctx = 174GB total
+- **Best for:** Architect mode, thinking tasks
+- **Priority:** ⭐⭐⭐⭐⭐
+
+---
+
+### Other Large Models to Consider (150-200GB)
+
+**GPT-OSS-120B at Q2_K (~150-160GB estimated)**
+- 120B params, GPT architecture
+- If Q2 quality acceptable, ~155GB
+- **Best for:** GPT-style reasoning at massive scale
+- **Priority:** ⭐⭐⭐ (worth testing if Q2 isn't gibberish)
+- **Risk:** Q2 traditional quant may be low quality
+
+**Mistral-Large-2-123B at Q2_K (~160-170GB estimated)**
+- 123B params, excellent coder
+- Q2 might work for this architecture
+- **Best for:** Balanced coding + reasoning
+- **Priority:** ⭐⭐⭐ (if Q2 quality acceptable)
+- **Status:** Need to verify Q2 availability and quality
+
+**Qwen3-235B-Q2 (~130-140GB estimated)**
+- 235B params, proven model
+- Already have Q3 (97GB), Q2 would be larger context fit
+- **Best for:** When Q3 (97GB) not enough, but 235B needed
+- **Priority:** ⭐⭐ (already have Q3 version)
+
+**Llama-4-largest at Q2-Q3 (size varies)**
+- Check for Llama-4-405B or similar at low quants
+- **Priority:** ⭐⭐⭐ (if available)
+
+---
+
+### Comparison Matrix: Ultra-Large Models
+
+| Model | Size | Params | Specialization | Memory @ 16K | Fits 128GB? | Priority |
+|-------|------|--------|----------------|--------------|-------------|----------|
+| **Qwen3-Coder-480B IQ1_M** | 150GB | 480B | Code | 154GB | ✓ Best fit | ⭐⭐⭐⭐⭐ |
+| **DeepSeek-V3.1 TQ1_0** | 170GB | 671B | Reasoning | 174GB | ⚠️ Tight | ⭐⭐⭐⭐⭐ |
+| GPT-OSS-120B Q2 | ~155GB | 120B | General | ~159GB | ⚠️ Tight | ⭐⭐⭐ |
+| Mistral-Large-2 Q2 | ~165GB | 123B | Code+Reason | ~169GB | ⚠️ Very tight | ⭐⭐⭐ |
+| Qwen3-235B Q2 | ~135GB | 235B | General | ~139GB | ✓ Fits | ⭐⭐ |
+
+---
+
+### Recommended Testing Order for Ultra-Large
+
+**Phase 1: Code Specialist (Test First)**
+1. **Qwen3-Coder-480B IQ1_M (150GB)**
+   - Download and test with 16K context
+   - If excellent: New Code/Debug champion
+   - If good: Keep for code, test DeepSeek for reasoning
+
+**Phase 2: Reasoning Specialist (Test Second)**
+2. **DeepSeek-V3.1 TQ1_0 (170GB)**
+   - Only if Qwen3-Coder weak at architecture/reasoning
+   - Test with 16K context
+   - If excellent: Architect mode champion
+   - If combined with Qwen3-Coder: Best of both worlds
+
+**Phase 3: Alternatives (Only if Phase 1+2 Fail)**
+3. Test other Q2 models if:
+   - Qwen3-Coder and DeepSeek both fail quality tests
+   - Q2 quants proven to not be gibberish
+   - Need different architecture
+
+---
+
+### Distributed Strategy: Best of Both Worlds
+
+**If both Qwen3-Coder-480B and DeepSeek-V3.1 work well:**
+
+**Machine 1 (Code Machine):**
+```
+Qwen3-Coder-480B @ 16K ctx (154GB)
+Modes: Code, Debug
+Use: All coding tasks
+```
+
+**Machine 2 (Reasoning Machine):**
+```
+DeepSeek-V3.1-TQ1_0 @ 16K ctx (174GB)
+Modes: Architect, Think
+Use: System design, complex reasoning
+```
+
+**Total capability:**
+- 480B param code specialist
+- 671B param reasoning specialist
+- 1,151B total parameters across 2 machines!
+- Best of both worlds via Headscale mesh
+
+---
+
+### Memory Management for 150-200GB Models
+
+**All models in this range need:**
+
+1. **Reduced context (REQUIRED):**
+   ```bash
+   llama-server -m model.gguf -c 16384 --fit
+   # 16K context saves ~10-20GB vs 65K
+   ```
+
+2. **Minimal swap (RECOMMENDED):**
+   ```bash
+   # Create 50GB swap for overflow
+   sudo dd if=/dev/zero of=/swapfile bs=1G count=50
+   sudo mkswap /swapfile
+   sudo swapon /swapfile
+   ```
+
+3. **Close everything else:**
+   - Stop other models
+   - Close browsers, IDEs
+   - Free every MB possible
+
+4. **Monitor closely:**
+   ```bash
+   watch -n 1 free -h
+   vmstat 1
+   ```
+
+**Expected behavior:**
+- First prompt: Slow (10-60s) while loading
+- Subsequent: Faster once in RAM
+- Occasional swap hits if context grows
 
 ---
 

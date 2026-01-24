@@ -1,0 +1,29 @@
+version: "1.0"
+mode: "all"
+model_dir: "/mnt/ai-models"
+
+# Example: All models configuration
+# When mode is "all", the run-ai-models.sh script will auto-discover
+# all GGUF files in the model_dir, ignoring the default_models list
+
+# Auto-discovery finds approximately 20 models ranging from 13GB to 98GB
+# Expected models include:
+#   - DeepSeek-R1-Distill-Llama-70B (76GB)
+#   - GLM-4.7-Flash-Q8 (33GB)
+#   - MiniMax-M2.1 (81GB)
+#   - Qwen3-235B-A22B-Instruct (98GB)
+#   - GPT-OSS-20B (13GB)
+#   - And 15 more models in /mnt/ai-models/
+
+context_profiles:
+  quick:
+    - prompt: 512
+      generation: 128
+
+  standard:
+    - prompt: 512
+      generation: 128
+    - prompt: 4096
+      generation: 512
+    - prompt: 16384
+      generation: 512

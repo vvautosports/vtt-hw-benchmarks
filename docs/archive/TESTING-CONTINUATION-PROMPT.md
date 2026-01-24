@@ -17,13 +17,27 @@
 - ⬇️ **MiniMax-M2.1-Q3_K_XL (101GB)** - Downloading now
 
 ### Models to Download Next
-1. **DeepSeek-V3.1-TQ1_0 (170GB)** - Use TQ1_0, NOT IQ1_S (192GB)
-2. **Apriel-1.5-15B-Thinker** (~15GB) - Fine-tuning candidate
-3. **Ministral-3-14B-Instruct** (~14GB) - Latest small Mistral
-4. **Llama-4-Scout-17B-16E** (~35GB) - 10M token context!
-5. **Nemotron-3-Nano-30B-A3B** (~30GB) - NVIDIA efficient model
-6. **Qwen3-Coder-30B** (~35GB) - Code specialist
-7. **Qwen3-Coder-14B** (~18GB) - Multi-instance capable
+
+**Ultra-large (150-200GB):**
+1. **Qwen3-Coder-480B IQ1_M (150GB)** ⭐ **HIGHEST PRIORITY**
+   - Code-specialized, 480B params
+   - 20GB smaller than DeepSeek, better fit
+   - Test BEFORE DeepSeek
+
+2. **DeepSeek-V3.1-TQ1_0 (170GB)** - Use TQ1_0, NOT IQ1_S (192GB)
+   - General reasoning, 671B params
+   - Test AFTER Qwen3-Coder
+   - Only if Qwen weak at architecture tasks
+
+**Efficient mid-sized:**
+3. **Apriel-1.5-15B-Thinker** (~15GB) - Fine-tuning candidate
+4. **Ministral-3-14B-Instruct** (~14GB) - Latest small Mistral
+5. **Qwen3-Coder-30B** (~35GB) - Code specialist
+6. **Qwen3-Coder-14B** (~18GB) - Multi-instance capable
+7. **Nemotron-3-Nano-30B-A3B** (~30GB) - NVIDIA efficient model
+
+**Ultra-context:**
+8. **Llama-4-Scout-17B-16E** (~35GB) - 10M token context!
 
 ---
 
@@ -193,30 +207,60 @@ llama-server \
 
 ---
 
-## DeepSeek V3.1 Decision: TQ1_0 vs IQ1_S
+## Ultra-Large Model Decision: Qwen3-Coder-480B vs DeepSeek-V3.1
 
-### Recommendation: Download TQ1_0 (170GB)
+### NEW DISCOVERY: Qwen3-Coder-480B (150GB) - Better for Coding! 🚀
 
 **Comparison:**
 
-| Quantization | Size | + 16K ctx | Fits 128GB? | Recommendation |
-|--------------|------|-----------|-------------|----------------|
-| **TQ1_0**    | 170GB | ~174GB   | Maybe       | ✅ **Download this** |
-| IQ1_S        | 192GB | ~196GB   | No          | ❌ Skip |
+| Model | Size | Params | Specialization | + 16K ctx | Fits 128GB? | Priority |
+|-------|------|--------|----------------|-----------|-------------|----------|
+| **Qwen3-Coder-480B IQ1_M** | 150GB | 480B | **Code** | 154GB | ✅ **Better** | **Test FIRST** |
+| DeepSeek-V3.1 TQ1_0 | 170GB | 671B | Reasoning | 174GB | ⚠️ Tight | Test SECOND |
+| DeepSeek-V3.1 IQ1_S | 192GB | 671B | Reasoning | 196GB | ❌ No | ❌ Skip |
 
-**Why TQ1_0:**
-- 22GB smaller than IQ1_S
-- No quality difference reported
-- Better chance of fitting in 128GB with reduced context
-- Even if needs swap, less swap usage
+### Recommendation: Download Qwen3-Coder-480B FIRST
+
+**Why Qwen3-Coder-480B is likely better for VV Collective:**
+1. **Code-specialized** (built for coding, not general)
+2. **20GB smaller** (150GB vs 170GB = better fit)
+3. **Still massive** (480B params!)
+4. **Better memory fit** (154GB vs 174GB with 16K context)
+
+**Why DeepSeek-V3.1 might still be needed:**
+- If Qwen3-Coder weak at general architecture/reasoning
+- Excellent for thinking mode (reported)
+- More parameters (671B vs 480B)
+
+### Testing Strategy:
+
+**Phase 1: Test Qwen3-Coder-480B**
+```bash
+# Download and test with 16K context
+llama-server -m qwen3-coder-480b-iq1_m.gguf -c 16384 --fit
+
+# If excellent at both coding AND reasoning:
+#   → Keep as champion, skip DeepSeek
+# If excellent at coding, weak at reasoning:
+#   → Keep for Code/Debug, test DeepSeek for Architect
+```
+
+**Phase 2: Test DeepSeek-V3.1-TQ1_0 (only if needed)**
+```bash
+# Only download if Qwen3-Coder weak at architecture
+llama-server -m deepseek-v3.1-tq1_0.gguf -c 16384 --fit
+```
+
+**Best case:** Qwen3-Coder-480B handles everything (saves 20GB!)
+**Distributed case:** Qwen for Code, DeepSeek for Architect (2x 395 systems)
 
 **Memory strategy:**
 ```bash
 # Option 1: Reduced context (try first)
-llama-server -m deepseek-v3.1-tq1_0.gguf -c 16384 --fit
+llama-server -m model.gguf -c 16384 --fit
 
-# Option 2: Swap fallback
-sudo dd if=/dev/zero of=/swapfile bs=1G count=64
+# Option 2: Minimal swap (50GB for overflow)
+sudo dd if=/dev/zero of=/swapfile bs=1G count=50
 sudo mkswap /swapfile
 sudo swapon /swapfile
 ```

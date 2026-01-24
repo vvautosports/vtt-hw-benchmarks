@@ -1,0 +1,21 @@
+glm_model:
+  name: GLM-4.7-Flash-Q8
+  endpoint: http://localhost:8080
+  api_type: openai-compatible
+  model_path: /mnt/ai-models/GLM-4.7-Flash-Q8/GLM-4.7-Flash-UD-Q8_K_XL.gguf
+  context_length: 202752
+  quantization: Q8_K_XL
+  memory_usage: ~53GB (model + context)
+  gpu: AMD Radeon 8060S Graphics (Vulkan)
+  
+usage:
+  completion: POST /completion
+  chat: POST /v1/chat/completions
+  
+container:
+  name: glm-server
+  image: localhost/vtt-benchmark-llama
+  commands:
+    start: podman start glm-server
+    stop: podman stop glm-server
+    restart: podman restart glm-server

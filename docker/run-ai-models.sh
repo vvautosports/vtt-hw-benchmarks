@@ -1,6 +1,7 @@
 #!/bin/bash
 # Run AI inference benchmarks across multiple models
 # Implements Issue #4: Multiple AI Model Testing
+# Supports configurable model selection via model-config.yaml
 
 set -e
 
@@ -9,6 +10,32 @@ RESULTS_DIR="${RESULTS_DIR:-$SCRIPT_DIR/../results}"
 MODEL_DIR="${MODEL_DIR:-/mnt/ai-models}"
 TIMESTAMP=$(date +%Y%m%d-%H%M%S)
 HOSTNAME=$(hostname)
+CONFIG_FILE="${CONFIG_FILE:-$SCRIPT_DIR/../model-config.yaml}"
+MODEL_CONFIG_MODE="${MODEL_CONFIG_MODE:-}"  # default, all, or empty (auto)
+QUICK_TEST="${QUICK_TEST:-false}"
+
+# Parse command-line arguments
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        --quick-test)
+            QUICK_TEST=true
+            shift
+            ;;
+        --config)
+            CONFIG_FILE="$2"
+            shift 2
+            ;;
+        --mode)
+            MODEL_CONFIG_MODE="$2"
+            shift 2
+            ;;
+        *)
+            echo "Unknown option: $1"
+            echo "Usage: $0 [--quick-test] [--config FILE] [--mode default|all]"
+            exit 1
+            ;;
+    esac
+done
 
 # Detect container runtime
 if command -v docker &> /dev/null; then
@@ -44,16 +71,75 @@ echo "  Cores: $CPU_CORES" | tee -a "$LOG_FILE"
 echo "  Memory: ${MEM_TOTAL} GB" | tee -a "$LOG_FILE"
 echo "" | tee -a "$LOG_FILE"
 
-# Discover models
-echo "Discovering GGUF models..." | tee -a "$LOG_FILE"
-mapfile -t MODEL_FILES < <(find "$MODEL_DIR" -name "*.gguf" -type f 2>/dev/null | grep -v "\.Trash" | sort)
+# Determine model selection method
+if [ -n "$MODEL_CONFIG_MODE" ] && [ -f "$CONFIG_FILE" ]; then
+    echo "Using configuration file: $CONFIG_FILE" | tee -a "$LOG_FILE"
+    echo "Mode: $MODEL_CONFIG_MODE" | tee -a "$LOG_FILE"
+    echo "" | tee -a "$LOG_FILE"
 
-if [ ${#MODEL_FILES[@]} -eq 0 ]; then
-    echo "ERROR: No GGUF models found in $MODEL_DIR" | tee -a "$LOG_FILE"
-    exit 1
+    # Source config parser
+    source "$SCRIPT_DIR/../scripts/utils/config-parser.sh"
+
+    if [ "$MODEL_CONFIG_MODE" = "default" ]; then
+        echo "Loading default models from configuration..." | tee -a "$LOG_FILE"
+
+        # Load model paths from config
+        mapfile -t MODEL_PATHS < <(load_default_models "$CONFIG_FILE")
+
+        if [ ${#MODEL_PATHS[@]} -eq 0 ]; then
+            echo "ERROR: No default models found in configuration" | tee -a "$LOG_FILE"
+            exit 1
+        fi
+
+        # Build full paths
+        MODEL_FILES=()
+        for path in "${MODEL_PATHS[@]}"; do
+            full_path="$MODEL_DIR/$path"
+            if [ -f "$full_path" ]; then
+                MODEL_FILES+=("$full_path")
+            else
+                echo "WARNING: Model not found: $full_path" | tee -a "$LOG_FILE"
+            fi
+        done
+
+        if [ ${#MODEL_FILES[@]} -eq 0 ]; then
+            echo "ERROR: None of the configured models were found in $MODEL_DIR" | tee -a "$LOG_FILE"
+            exit 1
+        fi
+
+        echo "Loaded ${#MODEL_FILES[@]} default model(s)" | tee -a "$LOG_FILE"
+
+    elif [ "$MODEL_CONFIG_MODE" = "all" ]; then
+        echo "Auto-discovering all models..." | tee -a "$LOG_FILE"
+        mapfile -t MODEL_FILES < <(find "$MODEL_DIR" -name "*.gguf" -type f 2>/dev/null | grep -v "\.Trash" | sort)
+
+        if [ ${#MODEL_FILES[@]} -eq 0 ]; then
+            echo "ERROR: No GGUF models found in $MODEL_DIR" | tee -a "$LOG_FILE"
+            exit 1
+        fi
+    else
+        echo "ERROR: Invalid MODEL_CONFIG_MODE: $MODEL_CONFIG_MODE (use 'default' or 'all')" | tee -a "$LOG_FILE"
+        exit 1
+    fi
+else
+    # Backward compatibility: auto-discover all models
+    echo "Discovering GGUF models (backward compatibility mode)..." | tee -a "$LOG_FILE"
+    mapfile -t MODEL_FILES < <(find "$MODEL_DIR" -name "*.gguf" -type f 2>/dev/null | grep -v "\.Trash" | sort)
+
+    if [ ${#MODEL_FILES[@]} -eq 0 ]; then
+        echo "ERROR: No GGUF models found in $MODEL_DIR" | tee -a "$LOG_FILE"
+        exit 1
+    fi
 fi
 
 echo "Found ${#MODEL_FILES[@]} model file(s):" | tee -a "$LOG_FILE"
+
+# Quick test mode: only show first model
+if [ "$QUICK_TEST" = true ]; then
+    echo "QUICK TEST MODE: Testing first model only" | tee -a "$LOG_FILE"
+    MODEL_FILES=("${MODEL_FILES[0]}")
+fi
+
 for model in "${MODEL_FILES[@]}"; do
     size=$(du -h "$model" | cut -f1)
     echo "  - $(basename "$model") ($size)" | tee -a "$LOG_FILE"

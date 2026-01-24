@@ -1,0 +1,16 @@
+FROM /mnt/ai-models/GLM-4.7-Flash-Q8/GLM-4.7-Flash-UD-Q8_K_XL.gguf
+
+PARAMETER num_ctx 202752
+PARAMETER num_gpu 999
+PARAMETER num_thread 16
+PARAMETER temperature 0.7
+PARAMETER top_p 0.9
+PARAMETER top_k 40
+
+TEMPLATE """[gMASK]<sop>{{ if .System }}<|system|>
+{{ .System }}
+{{ end }}<|user|>
+{{ .Prompt }}
+<|assistant|>"""
+
+SYSTEM """You are GLM-4, a helpful and harmless AI built by Zhipu AI, not based on any other companies and their models."""
