@@ -106,12 +106,32 @@ if [ -n "$MODEL_CONFIG_MODE" ] && [ -f "$CONFIG_FILE" ]; then
             exit 1
         fi
 
-        # Build full paths
+        # Build full paths and discover multi-part models
         MODEL_FILES=()
         for path in "${MODEL_PATHS[@]}"; do
             full_path="$MODEL_DIR/$path"
             if [ -f "$full_path" ]; then
                 MODEL_FILES+=("$full_path")
+                
+                # Check if this is a multi-part model (e.g., -00001-of-00002.gguf)
+                if [[ "$full_path" =~ -[0-9]{5}-of-[0-9]{5}\.gguf$ ]]; then
+                    # Extract the base pattern and total parts
+                    model_dir=$(dirname "$full_path")
+                    model_base=$(basename "$full_path" | sed 's/-[0-9]\{5\}-of-[0-9]\{5\}\.gguf$//')
+                    total_parts=$(basename "$full_path" | grep -oP '(?<=-of-)[0-9]{5}' | sed 's/^0*//')
+                    
+                    # Add remaining parts
+                    for ((i=2; i<=$total_parts; i++)); do
+                        part_num=$(printf "%05d" $i)
+                        total_num=$(printf "%05d" $total_parts)
+                        part_file="$model_dir/${model_base}-${part_num}-of-${total_num}.gguf"
+                        if [ -f "$part_file" ]; then
+                            MODEL_FILES+=("$part_file")
+                        else
+                            echo "WARNING: Multi-part model part not found: $part_file" | tee -a "$LOG_FILE"
+                        fi
+                    done
+                fi
             else
                 echo "WARNING: Model not found: $full_path" | tee -a "$LOG_FILE"
             fi
