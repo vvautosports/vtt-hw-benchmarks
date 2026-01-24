@@ -46,6 +46,20 @@ function Test-WSL2 {
     }
 }
 
+function Test-WSLDistribution {
+    try {
+        $distros = wsl --list --quiet 2>&1
+        if ($LASTEXITCODE -eq 0) {
+            # Check if any distribution is installed (skip header line)
+            $installed = $distros | Where-Object { $_ -match '^\w' -and $_ -notmatch '^NAME' }
+            return ($installed.Count -gt 0)
+        }
+        return $false
+    } catch {
+        return $false
+    }
+}
+
 function Test-DockerInWSL {
     try {
         $dockerCheck = wsl bash -c "docker --version" 2>&1
@@ -146,6 +160,30 @@ if (-not $hasWSL) {
     }
 } else {
     Write-Log "[OK] WSL2 already installed" "Green"
+    
+    # Check if a distribution is installed
+    $hasDistribution = Test-WSLDistribution
+    if (-not $hasDistribution) {
+        Write-Log "WSL2 is installed but no Linux distribution found" "Yellow"
+        Write-Log "Installing Ubuntu distribution..." "Yellow"
+        
+        try {
+            wsl --install -d Ubuntu --no-launch
+            Write-Log "[OK] Ubuntu distribution installation initiated" "Green"
+            Write-Log "IMPORTANT: You may need to restart WSL or wait for installation to complete" "Yellow"
+            Write-Log "After installation, run this script again to continue" "Yellow"
+            Write-Log ""
+            Write-Log "To check installation status: wsl --list --verbose" "Cyan"
+            exit 0
+        } catch {
+            Write-Log "ERROR: Failed to install Ubuntu distribution: $_" "Red"
+            Write-Log "Manual installation:" "Yellow"
+            Write-Log "  wsl --install -d Ubuntu" "Cyan"
+            exit 1
+        }
+    } else {
+        Write-Log "[OK] Linux distribution is installed" "Green"
+    }
 }
 
 Write-Log ""
@@ -266,7 +304,13 @@ Write-Log "=================================================================" "C
 Write-Log ""
 
 $repoPath = (Get-Location).Path
-$wslRepoPath = $repoPath -replace '\\', '/' -replace '^([A-Z]):', { "/mnt/$($_.Groups[1].Value.ToLower())" }
+# Convert Windows path to WSL path (C:\Users\... -> /mnt/c/Users/...)
+if ($repoPath -match '^([A-Z]):') {
+    $driveLetter = $matches[1].ToLower()
+    $wslRepoPath = $repoPath -replace '\\', '/' -replace "^$($matches[1]):", "/mnt/$driveLetter"
+} else {
+    $wslRepoPath = $repoPath -replace '\\', '/'
+}
 
 Write-Log "Pulling benchmark containers from GHCR..." "Yellow"
 Write-Log "Repository path: $wslRepoPath" "Gray"

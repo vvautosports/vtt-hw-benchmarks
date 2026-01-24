@@ -9,9 +9,9 @@ param(
 
 $ErrorActionPreference = "Stop"
 
-Write-Host "═══════════════════════════════════════════════════════════════" -ForegroundColor Cyan
+Write-Host "=================================================================" -ForegroundColor Cyan
 Write-Host "  VTT Hardware Benchmarks - Light Model Downloader" -ForegroundColor Cyan
-Write-Host "═══════════════════════════════════════════════════════════════" -ForegroundColor Cyan
+Write-Host "=================================================================" -ForegroundColor Cyan
 Write-Host ""
 
 # Models to download (from model-config.yaml light_models)
@@ -67,7 +67,7 @@ Write-Host ""
 if (-not (Test-Path $ModelPath)) {
     Write-Host "Creating model directory: $ModelPath" -ForegroundColor Yellow
     New-Item -ItemType Directory -Path $ModelPath -Force | Out-Null
-    Write-Host "✓ Directory created" -ForegroundColor Green
+    Write-Host "[OK] Directory created" -ForegroundColor Green
 }
 
 Write-Host ""
@@ -96,7 +96,7 @@ foreach ($Model in $Models) {
 
     # Check if already exists
     if ((Test-Path $TargetFile) -and -not $Force) {
-        Write-Host "  ⏭️  Model already exists, skipping" -ForegroundColor Yellow
+        Write-Host "  [SKIP]  Model already exists, skipping" -ForegroundColor Yellow
         Write-Host "  Path: $TargetFile" -ForegroundColor Gray
         $SkippedCount++
         Write-Host ""
@@ -130,7 +130,7 @@ foreach ($Model in $Models) {
         if (Test-Path $TargetFile) {
             $FileSize = (Get-Item $TargetFile).Length
             $FileSizeGB = [math]::Round($FileSize / 1GB, 2)
-            Write-Host "  ✓ Download complete!" -ForegroundColor Green
+            Write-Host "  [OK] Download complete!" -ForegroundColor Green
             Write-Host "  Saved to: $TargetFile" -ForegroundColor Gray
             Write-Host "  Size: ${FileSizeGB}GB" -ForegroundColor Gray
             $SuccessCount++
@@ -139,7 +139,7 @@ foreach ($Model in $Models) {
         }
 
     } catch {
-        Write-Host "  ✗ Download failed: $_" -ForegroundColor Red
+        Write-Host "  [X] Download failed: $_" -ForegroundColor Red
         $FailedCount++
         
         if ($BitsJob) {
@@ -151,19 +151,19 @@ foreach ($Model in $Models) {
 }
 
 # Summary
-Write-Host "═══════════════════════════════════════════════════════════════" -ForegroundColor Cyan
+Write-Host "=================================================================" -ForegroundColor Cyan
 Write-Host "  Download Summary" -ForegroundColor Cyan
-Write-Host "═══════════════════════════════════════════════════════════════" -ForegroundColor Cyan
+Write-Host "=================================================================" -ForegroundColor Cyan
 Write-Host ""
 
 if ($SuccessCount -gt 0) {
-    Write-Host "✓ Successfully downloaded: $SuccessCount" -ForegroundColor Green
+    Write-Host "[OK] Successfully downloaded: $SuccessCount" -ForegroundColor Green
 }
 if ($SkippedCount -gt 0) {
-    Write-Host "⏭️  Skipped (already exists): $SkippedCount" -ForegroundColor Yellow
+    Write-Host "[SKIP]  Skipped (already exists): $SkippedCount" -ForegroundColor Yellow
 }
 if ($FailedCount -gt 0) {
-    Write-Host "✗ Failed: $FailedCount" -ForegroundColor Red
+    Write-Host "[X] Failed: $FailedCount" -ForegroundColor Red
 }
 
 Write-Host ""
