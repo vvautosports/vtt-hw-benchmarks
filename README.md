@@ -37,16 +37,22 @@ This project provides containerized benchmarks for consistent, reproducible perf
 
 ### Run AI Model Tests
 
-**Default 5 models** (30-45 min):
+**Quick baseline test** (single-file models only, 2-3 min):
 ```bash
 cd docker
-MODEL_CONFIG_MODE=default ./run-ai-models.sh
+MODEL_CONFIG_MODE=default ./run-ai-models.sh --quick-test
 ```
 
-**All models** (~20 models, 2-3 hours):
+**Comprehensive test** (all models including multi-part, 30-45 min per model):
 ```bash
-MODEL_CONFIG_MODE=all ./run-ai-models.sh
+# Test all models with multiple context sizes
+./scripts/test-comprehensive-models.sh --mode standard
+
+# Test specific multi-part model
+./scripts/test-comprehensive-models.sh --model MiniMax-M2.1 --mode comprehensive
 ```
+
+**Note:** Quick test uses llama-bench (single-file models only). Comprehensive test uses llama-server (supports multi-part models). See [Multi-Part Model Testing Guide](docs/guides/MULTI-PART-MODEL-TESTING.md).
 
 **Quick validation** (one model, 2-3 min):
 ```bash

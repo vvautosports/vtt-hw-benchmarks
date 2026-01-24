@@ -2,6 +2,11 @@ version: "1.0"
 mode: "default"  # "light" (1-2 models, <16GB), "default" (5 models), or "all" (20 models)
 model_dir: "/mnt/ai-models"
 
+# Test Strategy Notes:
+# - llama-bench: Quick baseline (512p/128g), single-file models only
+# - llama-server: Comprehensive testing, supports multi-part models
+# - See docs/guides/MULTI-PART-MODEL-TESTING.md for details
+
 # Light mode: 1-2 small models for 16GB VRAM systems
 light_models:
   - name: "GPT-OSS-20B"
@@ -27,6 +32,8 @@ default_models:
     path: "GLM-4.7-Flash-Q8/GLM-4.7-Flash-UD-Q8_K_XL.gguf"
     size_gb: 33
     vram_gb: 35
+    parts: 1
+    test_strategy: "both"  # Works with llama-bench (quick) and llama-server (comprehensive)
     use_case: "Current champion - best efficiency"
     hf_repo: "unsloth/GLM-4.7-Flash-GGUF"
     hf_file: "GLM-4.7-Flash-UD-Q8_K_XL.gguf"
@@ -35,7 +42,9 @@ default_models:
     path: "DeepSeek-R1-Distill-Llama-70B/DeepSeek-R1-Distill-Llama-70B-UD-Q8_K_XL-00001-of-00002.gguf"
     size_gb: 76
     vram_gb: 80
-    use_case: "Dense model comparison (multi-part, skip for quick test)"
+    parts: 2
+    test_strategy: "server_only"  # Multi-part: requires llama-server, skip llama-bench
+    use_case: "Dense model comparison (reasoning champion)"
     hf_repo: "unsloth/DeepSeek-R1-Distill-Llama-70B-GGUF"
     hf_file: "DeepSeek-R1-Distill-Llama-70B-UD-Q8_K_XL-00001-of-00002.gguf"
 
@@ -43,7 +52,9 @@ default_models:
     path: "MiniMax-M2.1/MiniMax-M2.1-UD-Q2_K_XL-00001-of-00002.gguf"
     size_gb: 81
     vram_gb: 85
-    use_case: "High priority testing"
+    parts: 2
+    test_strategy: "server_only"  # Multi-part: requires llama-server, skip llama-bench
+    use_case: "High priority testing (229B params, Unsloth quant validation)"
     hf_repo: "unsloth/MiniMax-M2.1-GGUF"
     hf_file: "MiniMax-M2.1-UD-Q2_K_XL-00001-of-00002.gguf"
 
@@ -51,7 +62,9 @@ default_models:
     path: "Qwen3-235B-A22B-Instruct/Qwen3-235B-A22B-Instruct-2507-UD-Q3_K_XL-00001-of-00003.gguf"
     size_gb: 98
     vram_gb: 105
-    use_case: "Ultra-large model testing"
+    parts: 3
+    test_strategy: "server_only"  # Multi-part (3 files): requires llama-server
+    use_case: "Ultra-large model testing (235B params)"
     hf_repo: "unsloth/Qwen3-235B-A22B-Instruct-GGUF"
     hf_file: "Qwen3-235B-A22B-Instruct-2507-UD-Q3_K_XL-00001-of-00003.gguf"
 
@@ -59,7 +72,9 @@ default_models:
     path: "gpt-oss-20b-F16/gpt-oss-20b-F16.gguf"
     size_gb: 13
     vram_gb: 14
-    use_case: "Speed champion"
+    parts: 1
+    test_strategy: "both"  # Works with llama-bench (quick) and llama-server (comprehensive)
+    use_case: "Speed champion (<2s responses)"
     hf_repo: "unsloth/gpt-oss-20b-F16-GGUF"
     hf_file: "gpt-oss-20b-F16.gguf"
 
