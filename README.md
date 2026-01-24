@@ -31,18 +31,41 @@ This project provides containerized benchmarks for consistent, reproducible perf
 - Access to `/mnt/ai-models` (for AI benchmarks)
 
 **Windows (HP ZBooks):**
-- Docker Desktop installed
-- Optional: AI model directory mounted
+- WSL2 with Docker (recommended) or Docker Desktop
+- See **[WINDOWS-SETUP.md](docs/guides/WINDOWS-SETUP.md)** for automated setup
+- Run: `scripts/utils/setup-windows.ps1` (PowerShell as Admin)
 
-### Pull and Run All Benchmarks
+### Run AI Model Tests
+
+**Default 5 models** (30-45 min):
+```bash
+cd docker
+MODEL_CONFIG_MODE=default ./run-ai-models.sh
+```
+
+**All models** (~20 models, 2-3 hours):
+```bash
+MODEL_CONFIG_MODE=all ./run-ai-models.sh
+```
+
+**Quick validation** (one model, 2-3 min):
+```bash
+MODEL_CONFIG_MODE=default ./run-ai-models.sh --quick-test
+```
+
+### Configuration
+
+Customize model selection by editing `model-config.yaml`:
+- **Default mode**: Tests 5 pre-selected models
+- **All mode**: Auto-discovers all GGUF files in `/mnt/ai-models`
+
+See **[CONFIGURATION.md](docs/guides/CONFIGURATION.md)** for details.
+
+### Run All Benchmarks
 
 ```bash
-# Clone repository
-git clone https://github.com/vvautosports/vtt-hw-benchmarks
-cd vtt-hw-benchmarks
-
 # Pull pre-built images from GitHub Container Registry
-./scripts/pull-from-ghcr.sh
+./scripts/ci-cd/pull-from-ghcr.sh
 
 # Run all benchmarks
 cd docker
@@ -50,6 +73,8 @@ cd docker
 ```
 
 Results are saved to `results/` directory with timestamps.
+
+For complete quick start: **[docs/guides/QUICK-START.md](docs/guides/QUICK-START.md)**
 
 ---
 
@@ -133,16 +158,20 @@ Tests AI model inference using llama.cpp with AMD Strix Halo iGPU acceleration.
 
 **Quick run:**
 ```bash
-# Single model test
+# Default 5 models
+cd docker
+MODEL_CONFIG_MODE=default ./run-ai-models.sh
+
+# All models (auto-discovery)
+MODEL_CONFIG_MODE=all ./run-ai-models.sh
+
+# Single model (manual)
 podman run --rm \
   --device /dev/dri --device /dev/kfd \
   --group-add video --group-add render \
   --security-opt seccomp=unconfined \
   -v /mnt/ai-models/model.gguf:/models/model.gguf:ro,z \
   vtt-benchmark-llama
-
-# Test all models in directory
-./docker/run-ai-models.sh
 ```
 
 **Supported features:**
@@ -206,43 +235,47 @@ python3 /path/to/gguf-vram-estimator.py \
 
 ```
 vtt-hw-benchmarks/
+├── config/                    # Configuration files
+│   └── examples/             # Example configs
+│       ├── model-config.default.yaml
+│       ├── model-config.all-models.yaml
+│       ├── glm-api-config.yaml
+│       └── Modelfile
 ├── docker/                    # Containerized benchmarks
 │   ├── 7zip/                 # CPU compression benchmark
-│   │   ├── Dockerfile
-│   │   └── benchmark.sh
 │   ├── stream/               # Memory bandwidth benchmark
-│   │   ├── Dockerfile
-│   │   └── benchmark.sh
 │   ├── storage/              # Storage I/O benchmark
-│   │   ├── Dockerfile
-│   │   └── benchmark.sh
 │   ├── llama-bench/          # AI inference benchmark
-│   │   ├── Dockerfile
-│   │   ├── benchmark.sh
-│   │   └── benchmark-context.sh  # Variable context testing
-│   ├── run-all.sh            # Run all benchmarks (Linux)
-│   ├── run-all.ps1           # Run all benchmarks (Windows)
-│   ├── run-ai-models.sh      # AI model testing with auto-discovery
-│   └── README.md             # Detailed benchmark docs
-├── scripts/                   # Helper utilities
-│   ├── push-to-ghcr.sh       # Publish containers to registry
-│   ├── pull-from-ghcr.sh     # Pull pre-built containers
-│   └── README.md             # Script documentation
-├── docs/                      # Documentation
-│   ├── AMD-STRIX-HALO-SETUP.md      # AMD iGPU configuration
-│   ├── GLM-4.7-TESTING.md           # GLM model testing guide
-│   ├── HP-ZBOOK-SETUP.md            # Windows setup guide
-│   ├── MS-01-SETUP.md               # Keras OCR deployment
-│   ├── MS-01-LXC-DEPLOYMENT.md      # Proxmox LXC guide
-│   ├── README.md                    # Documentation index
-│   └── archive/                     # Archived planning docs
+│   ├── run-all.sh            # Run all benchmarks
+│   └── run-ai-models.sh      # AI model testing (config-aware)
+├── scripts/
+│   ├── testing/              # Test scripts
+│   ├── deployment/           # Deployment scripts
+│   ├── ci-cd/                # CI/CD utilities
+│   │   ├── push-to-ghcr.sh
+│   │   └── pull-from-ghcr.sh
+│   └── utils/                # Utilities
+│       ├── config-parser.sh
+│       ├── setup-windows.ps1
+│       └── hp-zbook-sysinfo.ps1
+├── docs/
+│   ├── guides/               # Setup guides
+│   │   ├── QUICK-START.md
+│   │   ├── WINDOWS-SETUP.md
+│   │   ├── CONFIGURATION.md
+│   │   ├── AMD-STRIX-HALO-SETUP.md
+│   │   ├── HP-ZBOOK-ROCKET-LEAGUE.md
+│   │   ├── MS-01-SETUP.md
+│   │   └── MS-01-LXC-DEPLOYMENT.md
+│   ├── reference/            # Reference docs
+│   │   ├── MODELS-TO-TEST.md
+│   │   ├── AI-MODEL-STRATEGY.md
+│   │   ├── MODE-SPECIFIC-TESTING.md
+│   │   └── GLM-4.7-TESTING.md
+│   ├── archive/              # Archived docs
+│   └── README.md             # Documentation index
 ├── results/                   # Benchmark results (gitignored)
-│   └── .gitkeep
-├── .github/                   # CI/CD workflows
-│   └── workflows/
-│       ├── build-and-push-containers.yml  # Auto-build on push
-│       └── ci.yml                         # Lint and validation
-├── SESSION-SUMMARY.md         # Development progress tracking
+├── model-config.yaml          # Model configuration
 └── README.md                  # This file
 ```
 
@@ -278,16 +311,22 @@ Results include mean, median, standard deviation, and variance analysis.
 
 ## Documentation
 
-### Setup Guides
-- **[AMD-STRIX-HALO-SETUP.md](docs/AMD-STRIX-HALO-SETUP.md)** - AMD iGPU configuration for AI inference
-- **[HP-ZBOOK-SETUP.md](docs/HP-ZBOOK-SETUP.md)** - Windows setup for HP ZBooks
-- **[MS-01-SETUP.md](docs/MS-01-SETUP.md)** - Keras OCR service deployment (legacy)
-- **[MS-01-LXC-DEPLOYMENT.md](docs/MS-01-LXC-DEPLOYMENT.md)** - Proxmox LXC deployment (recommended)
+### Quick Start
+- **[QUICK-START.md](docs/guides/QUICK-START.md)** - Get running in 10 minutes
+- **[WINDOWS-SETUP.md](docs/guides/WINDOWS-SETUP.md)** - Windows/WSL2 setup
+- **[CONFIGURATION.md](docs/guides/CONFIGURATION.md)** - Model configuration
 
-### Testing Guides
-- **[GLM-4.7-TESTING.md](docs/GLM-4.7-TESTING.md)** - Extended context testing for GLM models
-- **[docker/README.md](docker/README.md)** - Detailed benchmark documentation
-- **[scripts/README.md](scripts/README.md)** - Helper script usage
+### Setup Guides
+- **[AMD-STRIX-HALO-SETUP.md](docs/guides/AMD-STRIX-HALO-SETUP.md)** - AMD iGPU configuration
+- **[HP-ZBOOK-ROCKET-LEAGUE.md](docs/guides/HP-ZBOOK-ROCKET-LEAGUE.md)** - Rocket League testing
+- **[MS-01-SETUP.md](docs/guides/MS-01-SETUP.md)** - Infrastructure setup
+- **[MS-01-LXC-DEPLOYMENT.md](docs/guides/MS-01-LXC-DEPLOYMENT.md)** - Proxmox deployment
+
+### Reference
+- **[GLM-4.7-TESTING.md](docs/reference/GLM-4.7-TESTING.md)** - Extended context testing
+- **[MODELS-TO-TEST.md](docs/reference/MODELS-TO-TEST.md)** - Model inventory
+- **[AI-MODEL-STRATEGY.md](docs/reference/AI-MODEL-STRATEGY.md)** - Testing strategy
+- **[docker/README.md](docker/README.md)** - Benchmark details
 
 ---
 
@@ -376,6 +415,6 @@ Internal project for Virtual Velocity Collective. All third-party dependencies r
 
 ---
 
-**Last Updated:** 2026-01-21
+**Last Updated:** 2026-01-23
 **Project Status:** Active Development
 **Maintainer:** VTT Infrastructure Team

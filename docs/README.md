@@ -1,144 +1,54 @@
 # VTT Hardware Benchmarks Documentation
 
-Complete documentation index for the VTT Hardware Benchmarks project.
+Complete documentation for the VTT Hardware Benchmarks project.
 
 ---
 
-## Setup Guides
+## Getting Started
 
-### System Configuration
-
-**[AMD-STRIX-HALO-SETUP.md](AMD-STRIX-HALO-SETUP.md)**
-- AMD Ryzen AI Max+ 395 iGPU configuration
-- BIOS settings (4GB UMA allocation)
-- Vulkan vs ROCm backend comparison
-- Critical llama.cpp flags for Strix Halo
-- Performance optimization tips
-
-**[HP-ZBOOK-SETUP.md](HP-ZBOOK-SETUP.md)**
-- Windows 11 setup for HP ZBook laptops
-- Benchmark software installation
-- Rocket League configuration
-- Testing prerequisites
-
-**[MS-01-SETUP.md](MS-01-SETUP.md)** *(Legacy)*
-- Direct Docker deployment of Keras OCR
-- Now superseded by LXC deployment
-- Kept for reference
-
-**[MS-01-LXC-DEPLOYMENT.md](MS-01-LXC-DEPLOYMENT.md)** *(Recommended)*
-- Proxmox LXC container deployment
-- Keras OCR service for Rocket League benchmarks
-- Headscale mesh VPN integration
-- Container management and troubleshooting
+**First time user?** → [guides/QUICK-START.md](guides/QUICK-START.md)
+**Windows user?** → [guides/WINDOWS-SETUP.md](guides/WINDOWS-SETUP.md)
+**Want to customize?** → [guides/CONFIGURATION.md](guides/CONFIGURATION.md)
+**Deploying MS-01?** → [guides/MS-01-LXC-DEPLOYMENT.md](guides/MS-01-LXC-DEPLOYMENT.md)
 
 ---
 
-## Testing Guides
+## Guides
 
-**[AI-MODEL-STRATEGY.md](AI-MODEL-STRATEGY.md)** ⭐ **Comprehensive Guide**
-- Complete analysis of all 6 local models
-- Model-to-mode mapping (Roo, Cursor, Claude Code)
-- Performance comparison matrix
-- Recommended configurations by use case
-- January 2026 state of the art for AMD Strix Halo
-- Mode switching strategy and decision trees
+### Quick Start
+- **[QUICK-START.md](guides/QUICK-START.md)** - Get running in 10 minutes
+- **[CONFIGURATION.md](guides/CONFIGURATION.md)** - Model configuration reference
+- **[WINDOWS-SETUP.md](guides/WINDOWS-SETUP.md)** - Windows/WSL2 setup (includes automated script)
 
-**[MODE-SPECIFIC-TESTING.md](MODE-SPECIFIC-TESTING.md)**
-- Test prompts for Ask/Code/Architect/Debug modes
-- Mode-specific evaluation criteria
-- Expected performance by model and mode
-- Ollama vs llama.cpp comparison framework
-- Benchmark execution methodology
+### Hardware Setup
+- **[AMD-STRIX-HALO-SETUP.md](guides/AMD-STRIX-HALO-SETUP.md)** - AMD iGPU configuration for AI inference
+- **[HP-ZBOOK-ROCKET-LEAGUE.md](guides/HP-ZBOOK-ROCKET-LEAGUE.md)** - Rocket League testing on HP ZBooks
 
-**[GLM-4.7-TESTING.md](GLM-4.7-TESTING.md)**
-- Extended context testing for GLM-4.7 models
-- Q8 vs BF16 vs REAP-218B comparison
-- Memory requirements and VRAM estimates
-- Use case recommendations by model type
-- Real-world context size statistics
-- When to use each model variant
+### Infrastructure
+- **[MS-01-SETUP.md](guides/MS-01-SETUP.md)** - MS-01 infrastructure setup
+- **[MS-01-LXC-DEPLOYMENT.md](guides/MS-01-LXC-DEPLOYMENT.md)** - Proxmox LXC deployment (recommended)
 
 ---
 
-## Reference Documentation
+## Reference
 
-**[../docker/README.md](../docker/README.md)**
-- Containerized benchmark details
-- Docker/Podman usage
-- Build and run instructions
-- Container configuration
+### AI Model Testing
+- **[AI-MODEL-STRATEGY.md](reference/AI-MODEL-STRATEGY.md)** ⭐ **Start here** - Model selection guide
+- **[MODELS-TO-TEST.md](reference/MODELS-TO-TEST.md)** - 20+ models to evaluate
+- **[MODE-SPECIFIC-TESTING.md](reference/MODE-SPECIFIC-TESTING.md)** - Test prompts by mode
+- **[GLM-4.7-TESTING.md](reference/GLM-4.7-TESTING.md)** - Extended context testing
 
-**[../scripts/README.md](../scripts/README.md)**
-- Helper script documentation
-- GHCR push/pull workflows
-- Automation utilities
-- Model testing scripts:
-  - `comprehensive-ai-test.sh` - Full test suite for all models
-  - `compare-ollama-llamacpp.sh` - Ollama vs llama.cpp comparison
-  - `test-minimax-unsloth.sh` - MiniMax-M2.1 validation test
-
-**[../.github/README.md](../.github/README.md)**
-- CI/CD workflow documentation
-- Automated container builds
-- GitHub Actions integration
+### Other Documentation
+- **[../docker/README.md](../docker/README.md)** - Containerized benchmark details
+- **[../scripts/README.md](../scripts/README.md)** - Helper script documentation
+- **[../.github/README.md](../.github/README.md)** - CI/CD workflows
 
 ---
 
 ## Archived Documentation
 
-**[archive/](archive/)**
-- Historical planning documents
-- Old roadmaps and checklists
-- Session continuations
-- GitHub issue templates (already created)
-- Discord forum posts (already published)
-
-Contents:
-- `comprehensive-benchmark-plan.md` - Original planning doc
-- `CONTINUATION-*.md` - Old session notes
-- `discord-forum-post.md` - Discord announcement template
-- `github-issues-to-create.md` - Issue templates (now created)
-- `TONIGHT-CHECKLIST.md` - Original test checklist
-- `ROADMAP.md` - Original roadmap (now superseded by README.md)
+**[archive/](archive/)** - Historical planning documents, old roadmaps, session notes
 
 ---
 
-## Quick Reference
-
-### Most Important Documents
-
-**Getting Started:**
-1. Main [README.md](../README.md) - Project overview and quick start
-2. [AMD-STRIX-HALO-SETUP.md](AMD-STRIX-HALO-SETUP.md) - iGPU configuration
-3. [docker/README.md](../docker/README.md) - Running benchmarks
-
-**For HP ZBook Testing:**
-1. [HP-ZBOOK-SETUP.md](HP-ZBOOK-SETUP.md) - Windows setup
-2. [MS-01-LXC-DEPLOYMENT.md](MS-01-LXC-DEPLOYMENT.md) - Keras OCR deployment
-
-**For AI Model Testing:**
-1. [AI-MODEL-STRATEGY.md](AI-MODEL-STRATEGY.md) ⭐ **Start here** - Comprehensive model selection guide
-2. [MODELS-TO-TEST.md](MODELS-TO-TEST.md) ⭐ **Testing roadmap** - 20+ models to evaluate
-3. [MODE-SPECIFIC-TESTING.md](MODE-SPECIFIC-TESTING.md) - Test prompts by mode
-4. [GLM-4.7-TESTING.md](GLM-4.7-TESTING.md) - Extended context testing
-5. [AMD-STRIX-HALO-SETUP.md](AMD-STRIX-HALO-SETUP.md) - iGPU optimization
-
-**Latest Updates:**
-- [SESSION-2026-01-22-UPDATES.md](SESSION-2026-01-22-UPDATES.md) - Multi-mode execution strategies
-
----
-
-## Documentation Standards
-
-When updating documentation:
-- Use clear, descriptive section headers
-- Include code examples where applicable
-- Specify system requirements
-- Add troubleshooting sections
-- Update "Last Updated" date at bottom
-- Archive outdated docs instead of deleting
-
----
-
-**Last Updated:** 2026-01-22
+**Last Updated:** 2026-01-23
