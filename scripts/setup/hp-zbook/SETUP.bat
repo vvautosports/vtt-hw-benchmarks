@@ -350,8 +350,14 @@ while ($true) {
             Write-Host "Running quick benchmark..." -ForegroundColor Cyan
             Write-Host ""
             Set-Location $repoPath
+
+            # Convert Windows path to WSL path (C:\path -> /mnt/c/path)
+            $wslPath = $repoPath -replace '^([A-Z]):', '/mnt/$1' -replace '\\', '/' | ForEach-Object { $_.ToLower() }
+            $dockerPath = "$wslPath/docker"
+
             Write-Host "Entering WSL..." -ForegroundColor Gray
-            wsl bash -c "cd /mnt/c/vtt-hw-benchmarks/docker && MODEL_CONFIG_MODE=default ./run-ai-models.sh --quick-test"
+            Write-Host "Repository: $dockerPath" -ForegroundColor Gray
+            wsl bash -c "cd '$dockerPath' && MODEL_CONFIG_MODE=default ./run-ai-models.sh --quick-test"
             Write-Host ""
             Write-Host "Press any key to continue..."
             $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")

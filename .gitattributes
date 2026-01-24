@@ -1,0 +1,11 @@
+# Enforce line endings for cross-platform compatibility
+# Shell scripts must use LF (Unix) line endings for WSL/Docker
+*.sh text eol=lf
+*.bash text eol=lf
+
+# Windows batch/PowerShell scripts use CRLF
+*.bat text eol=crlf
+*.ps1 text eol=crlf
+
+# Default to auto line ending conversion for text files
+* text=auto
