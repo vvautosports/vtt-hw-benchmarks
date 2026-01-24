@@ -9,9 +9,9 @@ function Show-Menu {
     
     Clear-Host
     Write-Host ""
-    Write-Host "═══════════════════════════════════════════════════════════════" -ForegroundColor Cyan
+    Write-Host "=================================================================" -ForegroundColor Cyan
     Write-Host "  $Title" -ForegroundColor Cyan
-    Write-Host "═══════════════════════════════════════════════════════════════" -ForegroundColor Cyan
+    Write-Host "=================================================================" -ForegroundColor Cyan
     Write-Host ""
     
     for ($i = 0; $i -lt $Options.Length; $i++) {
@@ -64,9 +64,9 @@ while ($true) {
     
     # Show status
     Write-Host "Status:" -ForegroundColor Cyan
-    $ghStatus = if ($ghInstalled) { "✓ Installed" } else { "✗ Not installed" }
-    $authStatus = if ($ghAuthenticated) { "✓ Authenticated" } else { "✗ Not authenticated" }
-    $repoStatus = if ($repoCloned) { "✓ Cloned" } else { "✗ Not cloned" }
+    $ghStatus = if ($ghInstalled) { "[OK] Installed" } else { "[X] Not installed" }
+    $authStatus = if ($ghAuthenticated) { "[OK] Authenticated" } else { "[X] Not authenticated" }
+    $repoStatus = if ($repoCloned) { "[OK] Cloned" } else { "[X] Not cloned" }
     Write-Host "  GitHub CLI: $ghStatus" -ForegroundColor $(if ($ghInstalled) { "Green" } else { "Yellow" })
     Write-Host "  GitHub Auth: $authStatus" -ForegroundColor $(if ($ghAuthenticated) { "Green" } else { "Yellow" })
     Write-Host "  Repository: $repoStatus" -ForegroundColor $(if ($repoCloned) { "Green" } else { "Yellow" })
@@ -85,13 +85,13 @@ while ($true) {
             try {
                 $ghVersion = gh --version 2>&1
                 if ($LASTEXITCODE -eq 0) {
-                    Write-Host "✓ GitHub CLI is already installed" -ForegroundColor Green
+                    Write-Host "[OK] GitHub CLI is already installed" -ForegroundColor Green
                     $ghInstalled = $true
                 }
             } catch {
                 Write-Host "Installing GitHub CLI..." -ForegroundColor Yellow
                 winget install --id GitHub.cli -e --source winget --accept-package-agreements --accept-source-agreements 2>&1 | Out-Null
-                Write-Host "✓ GitHub CLI installed" -ForegroundColor Green
+                Write-Host "[OK] GitHub CLI installed" -ForegroundColor Green
                 $env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User")
                 Start-Sleep -Seconds 2
                 $ghInstalled = $true
@@ -113,7 +113,7 @@ while ($true) {
             try {
                 $authStatus = gh auth status 2>&1
                 if ($LASTEXITCODE -eq 0) {
-                    Write-Host "✓ Already authenticated" -ForegroundColor Green
+                    Write-Host "[OK] Already authenticated" -ForegroundColor Green
                     $ghAuthenticated = $true
                 }
             } catch {
@@ -121,10 +121,10 @@ while ($true) {
                 Write-Host "This will open your browser." -ForegroundColor Gray
                 gh auth login
                 if ($LASTEXITCODE -eq 0) {
-                    Write-Host "✓ Authentication successful" -ForegroundColor Green
+                    Write-Host "[OK] Authentication successful" -ForegroundColor Green
                     $ghAuthenticated = $true
                 } else {
-                    Write-Host "✗ Authentication failed" -ForegroundColor Red
+                    Write-Host "[X] Authentication failed" -ForegroundColor Red
                 }
             }
             Write-Host ""
@@ -151,10 +151,10 @@ while ($true) {
                 Write-Host "Cloning repository..." -ForegroundColor Yellow
                 gh repo clone vvautosports/vtt-hw-benchmarks $repoPath
                 if ($LASTEXITCODE -eq 0) {
-                    Write-Host "✓ Repository cloned" -ForegroundColor Green
+                    Write-Host "[OK] Repository cloned" -ForegroundColor Green
                     $repoCloned = $true
                 } else {
-                    Write-Host "✗ Clone failed" -ForegroundColor Red
+                    Write-Host "[X] Clone failed" -ForegroundColor Red
                 }
             }
             Write-Host ""
