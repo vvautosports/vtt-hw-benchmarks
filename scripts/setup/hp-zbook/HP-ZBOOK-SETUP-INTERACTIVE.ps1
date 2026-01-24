@@ -215,7 +215,9 @@ Start-Sleep -Seconds 1
 function Test-SetupStatus {
     $wslInstalled = $false
     $dockerInstalled = $false
+    $wslDistributionReady = $false
     
+    # Check if WSL2 is installed
     try {
         $wslStatus = wsl --status 2>&1
         if ($LASTEXITCODE -eq 0) {
@@ -225,19 +227,40 @@ function Test-SetupStatus {
         $wslInstalled = $false
     }
     
+    # Check if a WSL distribution is installed and ready
     if ($wslInstalled) {
         try {
-            $dockerVersion = wsl bash -c "docker --version" 2>&1
+            $distros = wsl --list --quiet 2>&1
             if ($LASTEXITCODE -eq 0) {
-                $dockerInstalled = $true
+                # Check if any distribution is installed (skip header line)
+                $installed = $distros | Where-Object { $_ -match '^\w' -and $_ -notmatch '^NAME' }
+                $wslDistributionReady = ($installed.Count -gt 0)
             }
         } catch {
-            $dockerInstalled = $false
+            $wslDistributionReady = $false
+        }
+        
+        # Only check Docker if WSL distribution is ready
+        if ($wslDistributionReady) {
+            try {
+                # Try to run a simple command first to ensure WSL is responsive
+                $testCmd = wsl bash -c "echo 'test'" 2>&1
+                if ($LASTEXITCODE -eq 0) {
+                    # Now check for Docker
+                    $dockerVersion = wsl bash -c "docker --version" 2>&1
+                    if ($LASTEXITCODE -eq 0) {
+                        $dockerInstalled = $true
+                    }
+                }
+            } catch {
+                $dockerInstalled = $false
+            }
         }
     }
     
     return @{
         WSL2 = $wslInstalled
+        WSLDistributionReady = $wslDistributionReady
         Docker = $dockerInstalled
     }
 }
@@ -265,19 +288,33 @@ while ($true) {
     Write-Host "Setup Status:" -ForegroundColor Cyan
     if ($setupStatus.WSL2) {
         Write-Host "  WSL2: [OK] Installed" -ForegroundColor Green
+        if (-not $setupStatus.WSLDistributionReady) {
+            Write-Host "  WSL Distribution: [X] Not ready (may be installing)" -ForegroundColor Yellow
+            Write-Host "    Check status: wsl --list --verbose" -ForegroundColor Gray
+        } else {
+            Write-Host "  WSL Distribution: [OK] Ready" -ForegroundColor Green
+        }
     } else {
         Write-Host "  WSL2: [X] Not installed" -ForegroundColor Red
     }
     if ($setupStatus.Docker) {
         Write-Host "  Docker: [OK] Installed" -ForegroundColor Green
     } else {
-        Write-Host "  Docker: [X] Not installed" -ForegroundColor Red
+        if ($setupStatus.WSL2 -and $setupStatus.WSLDistributionReady) {
+            Write-Host "  Docker: [X] Not installed" -ForegroundColor Red
+        } else {
+            Write-Host "  Docker: [SKIP] WSL not ready" -ForegroundColor Yellow
+        }
     }
     Write-Host ""
     
-    if (-not ($setupStatus.WSL2 -and $setupStatus.Docker)) {
-        Write-Host "⚠️  WARNING: Setup is incomplete!" -ForegroundColor Yellow
-        Write-Host "   Run option 1 (full setup) before running validation or benchmarks." -ForegroundColor Yellow
+    if (-not ($setupStatus.WSL2 -and $setupStatus.WSLDistributionReady -and $setupStatus.Docker)) {
+        Write-Host "WARNING: Setup is incomplete!" -ForegroundColor Yellow
+        if (-not $setupStatus.WSLDistributionReady -and $setupStatus.WSL2) {
+            Write-Host "   WSL distribution is installing. Wait for it to complete, then run option 1 again." -ForegroundColor Yellow
+        } else {
+            Write-Host "   Run option 1 (full setup) before running validation or benchmarks." -ForegroundColor Yellow
+        }
         Write-Host ""
     }
     
