@@ -82,9 +82,23 @@ Write-Log "Build: $($OSInfo.BuildNumber)" "Gray"
 Write-Log ""
 
 # Check disk space
+# Check disk space
 $TargetDrive = Split-Path -Qualifier $ModelPath
-$Drive = Get-PSDrive -Name $TargetDrive.TrimEnd(':')
-$FreeSpaceGB = [math]::Round($Drive.Free / 1GB, 2)
+try {
+    # Use WMI for more reliable disk space check
+    $drive = Get-WmiObject -Class Win32_LogicalDisk -Filter "DeviceID='$TargetDrive'" -ErrorAction Stop
+    $FreeSpaceGB = [math]::Round($drive.FreeSpace / 1GB, 2)
+} catch {
+    # Fallback to Get-PSDrive
+    try {
+        $driveLetter = $TargetDrive.TrimEnd(':')
+        $Drive = Get-PSDrive -Name $driveLetter -ErrorAction Stop
+        $FreeSpaceGB = [math]::Round($Drive.Free / 1GB, 2)
+    } catch {
+        Write-Log "WARNING: Could not check disk space for $TargetDrive" "Yellow"
+        $FreeSpaceGB = 0
+    }
+}
 Write-Log "Available Disk Space: ${FreeSpaceGB}GB" $(if ($FreeSpaceGB -gt 30) { "Green" } else { "Yellow" })
 
 if ($FreeSpaceGB -lt 30) {

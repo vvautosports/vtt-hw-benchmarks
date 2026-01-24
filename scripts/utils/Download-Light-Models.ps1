@@ -42,8 +42,21 @@ Write-Host ""
 
 # Check disk space
 $TargetDrive = Split-Path -Qualifier $ModelPath
-$Drive = Get-PSDrive -Name $TargetDrive.TrimEnd(':')
-$FreeSpaceGB = [math]::Round($Drive.Free / 1GB, 2)
+try {
+    # Use WMI for more reliable disk space check
+    $driveLetter = $TargetDrive.TrimEnd(':')
+    $drive = Get-WmiObject -Class Win32_LogicalDisk -Filter "DeviceID='$TargetDrive'" -ErrorAction Stop
+    $FreeSpaceGB = [math]::Round($drive.FreeSpace / 1GB, 2)
+} catch {
+    # Fallback to Get-PSDrive
+    try {
+        $Drive = Get-PSDrive -Name $driveLetter -ErrorAction Stop
+        $FreeSpaceGB = [math]::Round($Drive.Free / 1GB, 2)
+    } catch {
+        Write-Host "WARNING: Could not check disk space for $TargetDrive" -ForegroundColor Yellow
+        $FreeSpaceGB = 0
+    }
+}
 
 Write-Host "Available Disk Space: ${FreeSpaceGB}GB" -ForegroundColor $(if ($FreeSpaceGB -gt ($TotalSizeGB * 1.2)) { "Green" } else { "Yellow" })
 
