@@ -58,9 +58,9 @@ if (-not $gitInstalled) {
     }
 }
 
-# Verify we're in the repo (script assumes it's run from within the cloned repo)
+# Get repo root (script is in scripts/setup/hp-zbook/, so go up 3 levels)
 $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
-$repoRoot = $scriptDir
+$repoRoot = Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $scriptDir))
 
 if (-not (Test-Path (Join-Path $repoRoot ".git"))) {
     Write-Host "ERROR: Not in vtt-hw-benchmarks repository" -ForegroundColor Red
@@ -71,7 +71,7 @@ if (-not (Test-Path (Join-Path $repoRoot ".git"))) {
     Write-Host "  1. Install: winget install --id GitHub.cli" -ForegroundColor Gray
     Write-Host "  2. Authenticate: gh auth login" -ForegroundColor Gray
     Write-Host "  3. Clone: gh repo clone vvautosports/vtt-hw-benchmarks" -ForegroundColor Gray
-    Write-Host "  4. Run: cd vtt-hw-benchmarks; .\HP-ZBOOK-SETUP.ps1" -ForegroundColor Gray
+    Write-Host "  4. Run: cd vtt-hw-benchmarks; .\scripts\setup\hp-zbook\HP-ZBOOK-SETUP-INTERACTIVE.ps1" -ForegroundColor Gray
     Write-Host ""
     Write-Host "Option 2: Use Personal Access Token" -ForegroundColor Cyan
     Write-Host "  1. Create token: https://github.com/settings/tokens (scope: repo)" -ForegroundColor Gray
@@ -142,6 +142,6 @@ try {
     Write-Host "Troubleshooting:" -ForegroundColor Yellow
     Write-Host "  1. Check network connection" -ForegroundColor White
     Write-Host "  2. Ensure Windows is up to date" -ForegroundColor White
-    Write-Host "  3. Try running: .\scripts\utils\Setup-HP-ZBook-Automated.ps1 -ModelPath `"$modelPath`"" -ForegroundColor Gray
+    Write-Host "  3. Try running: .\scripts\setup\hp-zbook\HP-ZBOOK-SETUP.ps1" -ForegroundColor Gray
     exit 1
 }

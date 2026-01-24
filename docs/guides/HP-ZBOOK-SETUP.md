@@ -1,6 +1,6 @@
-# HP ZBook Setup
+# HP ZBook Setup Guide
 
-**One command to set up everything.**
+Complete setup guide for HP ZBook laptops running Windows 11.
 
 ## Quick Start
 
@@ -18,7 +18,7 @@ winget install --id GitHub.cli
 gh auth login
 
 # Step 3: Clone and run interactive menu
-gh repo clone vvautosports/vtt-hw-benchmarks; cd vtt-hw-benchmarks; .\HP-ZBOOK-SETUP-INTERACTIVE.ps1
+gh repo clone vvautosports/vtt-hw-benchmarks; cd vtt-hw-benchmarks; .\scripts\setup\hp-zbook\HP-ZBOOK-SETUP-INTERACTIVE.ps1
 ```
 
 The interactive menu will guide you through the rest!
@@ -29,7 +29,7 @@ If you prefer fully automatic setup:
 
 ```powershell
 # After installing gh CLI and authenticating:
-gh repo clone vvautosports/vtt-hw-benchmarks; cd vtt-hw-benchmarks; .\HP-ZBOOK-SETUP-ONE-COMMAND.ps1
+gh repo clone vvautosports/vtt-hw-benchmarks; cd vtt-hw-benchmarks; .\scripts\setup\hp-zbook\HP-ZBOOK-SETUP-ONE-COMMAND.ps1
 ```
 
 This does everything automatically without the menu.
@@ -57,19 +57,19 @@ cd vtt-hw-benchmarks
 
 **Interactive Menu (Recommended):**
 ```powershell
-.\HP-ZBOOK-SETUP-INTERACTIVE.ps1
+.\scripts\setup\hp-zbook\HP-ZBOOK-SETUP-INTERACTIVE.ps1
 ```
 Shows a menu with status indicators - you can do steps individually or choose "do everything automatically"
 
 **One-Command Automatic:**
 ```powershell
-.\HP-ZBOOK-SETUP-ONE-COMMAND.ps1
+.\scripts\setup\hp-zbook\HP-ZBOOK-SETUP-ONE-COMMAND.ps1
 ```
 Runs everything automatically without prompts
 
 **Basic Setup:**
 ```powershell
-.\HP-ZBOOK-SETUP.ps1
+.\scripts\setup\hp-zbook\HP-ZBOOK-SETUP.ps1
 ```
 Assumes repo is already cloned, just runs the setup
 
@@ -119,7 +119,7 @@ MODEL_CONFIG_MODE=default ./run-ai-models.sh
 2. After restart, run:
 ```powershell
 cd C:\vtt-hw-benchmarks
-.\HP-ZBOOK-SETUP.ps1
+.\scripts\setup\hp-zbook\HP-ZBOOK-SETUP.ps1
 ```
 
 ---

@@ -139,9 +139,10 @@ Write-Host ""
 
 Set-Location $repoPath
 
-if (-not (Test-Path ".\HP-ZBOOK-SETUP.ps1")) {
-    Write-Host "ERROR: Setup script not found" -ForegroundColor Red
+$setupScript = ".\scripts\setup\hp-zbook\HP-ZBOOK-SETUP.ps1"
+if (-not (Test-Path $setupScript)) {
+    Write-Host "ERROR: Setup script not found: $setupScript" -ForegroundColor Red
     exit 1
 }
 
-& .\HP-ZBOOK-SETUP.ps1
+& $setupScript

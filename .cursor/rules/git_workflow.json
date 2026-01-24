@@ -1,0 +1,19 @@
+{
+  "git_workflow": {
+    "enabled": true,
+    "safety_rules": {
+      "safe_commands": [
+        "git status",
+        "git log",
+        "git branch",
+        "git diff",
+        "git ls-files",
+        "git add",
+        "git commit"
+      ],
+      "unsafe_commands_requiring_approval": [
+        "git push"
+      ]
+    }
+  }
+}

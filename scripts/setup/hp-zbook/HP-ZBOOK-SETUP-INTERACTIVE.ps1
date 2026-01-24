@@ -172,7 +172,7 @@ while ($true) {
             Write-Host ""
             Write-Host "Running setup script..." -ForegroundColor Yellow
             Set-Location "C:\vtt-hw-benchmarks"
-            & .\HP-ZBOOK-SETUP.ps1
+            & .\scripts\setup\hp-zbook\HP-ZBOOK-SETUP.ps1
             Write-Host ""
             Write-Host "Press any key to continue..."
             $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
@@ -208,7 +208,7 @@ while ($true) {
             # Run setup
             Write-Host "Running setup script..." -ForegroundColor Yellow
             Set-Location "C:\vtt-hw-benchmarks"
-            & .\HP-ZBOOK-SETUP.ps1
+            & .\scripts\setup\hp-zbook\HP-ZBOOK-SETUP.ps1
             
             Write-Host ""
             Write-Host "Setup complete!" -ForegroundColor Green

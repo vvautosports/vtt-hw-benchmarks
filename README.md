@@ -31,9 +31,9 @@ This project provides containerized benchmarks for consistent, reproducible perf
 - Access to `/mnt/ai-models` (for AI benchmarks)
 
 **Windows (HP ZBooks):**
-- See **[HP-ZBOOK-README.md](HP-ZBOOK-README.md)** for complete setup guide
+- See **[HP-ZBook Setup Guide](docs/guides/HP-ZBOOK-SETUP.md)** for complete setup
 - **Test in VM first?** See **[docs/testing/windows-vm/README.md](docs/testing/windows-vm/README.md)**
-- Detailed guide: **[docs/guides/WINDOWS-SETUP.md](docs/guides/WINDOWS-SETUP.md)**
+- Detailed technical guide: **[docs/guides/WINDOWS-SETUP.md](docs/guides/WINDOWS-SETUP.md)**
 
 ### Run AI Model Tests
 
