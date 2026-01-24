@@ -2,6 +2,21 @@
 
 Two options: **WSL2 (Recommended)** for 1:1 Linux parity, or **Docker Desktop**.
 
+## PowerShell Execution Policy
+
+Windows PowerShell blocks unsigned scripts by default. If you encounter execution policy errors:
+
+**Option 1: Bypass for single script (Recommended)**
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\utils\setup-windows-full.ps1
+```
+
+**Option 2: Set execution policy (requires Administrator)**
+```powershell
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+```
+After setting this, you can run scripts normally without the `-ExecutionPolicy Bypass` flag.
+
 ## Quick Start: Full Interactive Setup
 
 **For fresh Windows installs, use the complete setup script:**
@@ -9,7 +24,7 @@ Two options: **WSL2 (Recommended)** for 1:1 Linux parity, or **Docker Desktop**.
 ```powershell
 # Run as Administrator
 cd C:\repos\vtt-hw-benchmarks
-.\scripts\utils\setup-windows-full.ps1
+powershell -ExecutionPolicy Bypass -File .\scripts\utils\setup-windows-full.ps1
 ```
 
 This script will:

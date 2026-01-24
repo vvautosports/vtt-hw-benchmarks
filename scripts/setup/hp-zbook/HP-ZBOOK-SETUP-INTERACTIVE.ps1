@@ -464,99 +464,36 @@ while ($true) {
             
             Write-Host ""
             
-            # Step 2: Check/Install Ubuntu
+            # Step 2: Check Ubuntu
             Write-Host "Step 2: Checking Ubuntu distribution..." -ForegroundColor Yellow
             $hasDistribution = Test-WSLDistribution
             if (-not $hasDistribution) {
-                Write-Host "Ubuntu distribution is not installed. Installing..." -ForegroundColor Yellow
+                Write-Host "[X] Ubuntu is not installed" -ForegroundColor Red
                 Write-Host ""
-                $response = Read-Host "Continue with Ubuntu installation? (y/n)"
-                if ($response -ne 'y') {
-                    Write-Host "Installation cancelled." -ForegroundColor Red
+                Write-Host "Please install Ubuntu manually:" -ForegroundColor Yellow
+                Write-Host "  1. Run this command in PowerShell: wsl --install -d Ubuntu" -ForegroundColor Cyan
+                Write-Host "  2. Complete the Ubuntu setup (create username/password)" -ForegroundColor Cyan
+                Write-Host "  3. Return to this script and continue" -ForegroundColor Cyan
+                Write-Host ""
+                Write-Host "Alternative: Install 'Ubuntu' from Microsoft Store" -ForegroundColor Gray
+                Write-Host ""
+                $response = Read-Host "Press Enter when Ubuntu installation is complete (or 'q' to cancel)"
+                if ($response -eq 'q') {
+                    Write-Host "Cancelled. Run this script again after installing Ubuntu." -ForegroundColor Yellow
                     Write-Host ""
                     Write-Host "Press any key to continue..."
                     $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
                     continue
                 }
-                
-                try {
-                    # Try winget first
-                    $wingetInstalled = $false
-                    try {
-                        $wingetCheck = winget --version 2>&1
-                        if ($LASTEXITCODE -eq 0) {
-                            Write-Host "Installing Ubuntu via winget..." -ForegroundColor Gray
-                            winget install --id Canonical.Ubuntu -e --source winget --accept-package-agreements --accept-source-agreements 2>&1 | Out-Null
-                            if ($LASTEXITCODE -eq 0) {
-                                $wingetInstalled = $true
-                                Write-Host "[OK] Ubuntu installation initiated via winget" -ForegroundColor Green
-                            }
-                        }
-                    } catch {}
-                    
-                    # If winget didn't work, try wsl --install
-                    if (-not $wingetInstalled) {
-                        Write-Host "Installing Ubuntu via wsl --install..." -ForegroundColor Gray
-                        $installOutput = wsl --install -d Ubuntu 2>&1
-                        Write-Host $installOutput
-                    }
-                    
-                    # Check if reboot is required
-                    $outputString = ($installOutput | Out-String) -join " "
-                    if ($outputString -match "reboot|restart|Changes will not be effective" -or 
-                        ($wingetInstalled -and -not (Test-WSLDistribution))) {
-                        Write-Host ""
-                        Write-Host "IMPORTANT: System reboot required for Ubuntu installation!" -ForegroundColor Red
-                        Write-Host "The WSL distribution will be available after reboot." -ForegroundColor Yellow
-                        Write-Host ""
-                        $restart = Read-Host "Restart now? (y/n)"
-                        if ($restart -eq 'y') {
-                            Write-Host "Restarting system..." -ForegroundColor Yellow
-                            Start-Sleep -Seconds 3
-                            Restart-Computer -Force
-                        } else {
-                            Write-Host "Please restart manually and run this script again." -ForegroundColor Yellow
-                        }
-                        exit 0
-                    }
-                    
-                    # Wait for installation (simplified - just check periodically)
-                    Write-Host ""
-                    Write-Host "Waiting for Ubuntu installation to complete..." -ForegroundColor Yellow
-                    Write-Host "This may take 2-5 minutes..." -ForegroundColor Gray
-                    Write-Host ""
-                    
-                    $maxWait = 300  # 5 minutes
-                    $elapsed = 0
-                    $installed = $false
-                    
-                    while ($elapsed -lt $maxWait -and -not $installed) {
-                        Start-Sleep -Seconds 10
-                        $elapsed += 10
-                        
-                        if (Test-WSLDistribution) {
-                            $installed = $true
-                            Write-Host "[OK] Ubuntu installation complete!" -ForegroundColor Green
-                            break
-                        }
-                        
-                        $minutes = [math]::Floor($elapsed / 60)
-                        $seconds = $elapsed % 60
-                        Write-Host "  Waiting... ($minutes min $seconds sec)" -ForegroundColor Gray
-                    }
-                    
-                    if (-not $installed) {
-                        Write-Host ""
-                        Write-Host "[WARN] Ubuntu installation is taking longer than expected" -ForegroundColor Yellow
-                        Write-Host "Check status: wsl --list --verbose" -ForegroundColor Cyan
-                        Write-Host "You may need to restart and run this script again." -ForegroundColor Yellow
-                        Write-Host ""
-                        Write-Host "Press any key to continue..."
-                        $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
-                        continue
-                    }
-                } catch {
-                    Write-Host "ERROR: Failed to install Ubuntu: $_" -ForegroundColor Red
+
+                # Check again
+                Write-Host "Checking for Ubuntu..." -ForegroundColor Gray
+                Start-Sleep -Seconds 2
+                if (Test-WSLDistribution) {
+                    Write-Host "[OK] Ubuntu detected!" -ForegroundColor Green
+                } else {
+                    Write-Host "[X] Ubuntu still not detected" -ForegroundColor Red
+                    Write-Host "Run 'wsl --list --verbose' to check status" -ForegroundColor Yellow
                     Write-Host ""
                     Write-Host "Press any key to continue..."
                     $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")

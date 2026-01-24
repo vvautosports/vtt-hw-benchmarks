@@ -24,33 +24,46 @@ This project provides containerized benchmarks for consistent, reproducible perf
 
 ## Quick Start
 
-### Windows Setup (HP ZBooks) - Copy/Paste Commands
+### Windows Setup (HP ZBooks)
 
-**PowerShell as Administrator - Complete Setup Sequence:**
+**Step 1: Install Tools**
+
+PowerShell as Administrator:
 
 ```powershell
-# Step 1: Install Git and GitHub CLI (can install both at once)
 winget install --id Git.Git --id GitHub.cli --source winget
+```
 
-# OR install sequentially (also works fine):
-# winget install --id Git.Git --source winget
-# winget install --id GitHub.cli --source winget
+**Step 2: Open New PowerShell Window**
 
-# ⚠️ IMPORTANT: Open a NEW PowerShell window/tab after installations
-# (PATH needs to refresh for 'git' and 'gh' commands)
+Close and reopen PowerShell (PATH refresh).
 
-# Step 3: In the new PowerShell window, authenticate with GitHub
+**Step 3: Authenticate**
+
+```powershell
 gh auth login
-# Follow browser prompts to authenticate
+```
 
-# Step 4: Clone repository
+**Step 4: Clone and Setup**
+
+```powershell
 gh repo clone vvautosports/vtt-hw-benchmarks
 cd vtt-hw-benchmarks
+```
 
-# Step 5: Run interactive setup (select option 5 for automatic)
-.\scripts\setup\hp-zbook\HP-ZBOOK-SETUP-INTERACTIVE.ps1
+**Step 5: Run Automated Setup**
 
-# Step 6: After setup completes, run validation test
+PowerShell as Administrator:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\utils\Setup-HP-ZBook-Automated.ps1 -ModelPath "C:\ai-models" -NonInteractive
+```
+
+**Note:** The `-ExecutionPolicy Bypass` flag is required because Windows PowerShell blocks unsigned scripts by default. This is a one-time bypass for the script execution and doesn't change system security settings. Alternatively, you can set the execution policy once: `Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser` (requires Administrator).
+
+**Step 6: Run Test**
+
+```powershell
 .\scripts\testing\Test-Windows-Short.ps1
 ```
 
