@@ -64,11 +64,25 @@ try {
         Write-Host "  $dockerVersion" -ForegroundColor Gray
     } else {
         Test-Fail "Docker not installed in WSL2"
-        Write-Host "  Install with: curl -fsSL https://get.docker.com | sudo sh" -ForegroundColor Yellow
+        Write-Host ""
+        Write-Host "To install Docker and complete setup, run:" -ForegroundColor Yellow
+        Write-Host "  .\scripts\setup\hp-zbook\HP-ZBOOK-SETUP.ps1" -ForegroundColor White
+        Write-Host "Or use the interactive menu:" -ForegroundColor Yellow
+        Write-Host "  .\scripts\setup\hp-zbook\HP-ZBOOK-SETUP-INTERACTIVE.ps1" -ForegroundColor White
+        Write-Host "  (Select option 1: Run full setup)" -ForegroundColor Gray
+        Write-Host ""
+        Write-Host "Manual installation (if needed):" -ForegroundColor Yellow
+        Write-Host "  wsl" -ForegroundColor Gray
+        Write-Host "  curl -fsSL https://get.docker.com | sudo sh" -ForegroundColor Gray
+        Write-Host "  sudo usermod -aG docker `$USER" -ForegroundColor Gray
+        Write-Host "  sudo service docker start" -ForegroundColor Gray
         exit 1
     }
 } catch {
     Test-Fail "Docker check failed: $_"
+    Write-Host ""
+    Write-Host "To install Docker and complete setup, run:" -ForegroundColor Yellow
+    Write-Host "  .\scripts\setup\hp-zbook\HP-ZBOOK-SETUP.ps1" -ForegroundColor White
     exit 1
 }
 Write-Host ""
@@ -81,11 +95,19 @@ try {
         Test-Pass "Docker service is running"
     } else {
         Test-Fail "Docker service not running"
-        Write-Host "  Start with: wsl sudo service docker start" -ForegroundColor Yellow
+        Write-Host ""
+        Write-Host "Start Docker service:" -ForegroundColor Yellow
+        Write-Host "  wsl bash -c 'sudo service docker start'" -ForegroundColor White
+        Write-Host ""
+        Write-Host "Or run the setup script to ensure Docker is properly configured:" -ForegroundColor Yellow
+        Write-Host "  .\scripts\setup\hp-zbook\HP-ZBOOK-SETUP.ps1" -ForegroundColor White
         exit 1
     }
 } catch {
     Test-Fail "Docker service check failed: $_"
+    Write-Host ""
+    Write-Host "Run the setup script to ensure Docker is properly configured:" -ForegroundColor Yellow
+    Write-Host "  .\scripts\setup\hp-zbook\HP-ZBOOK-SETUP.ps1" -ForegroundColor White
     exit 1
 }
 Write-Host ""
