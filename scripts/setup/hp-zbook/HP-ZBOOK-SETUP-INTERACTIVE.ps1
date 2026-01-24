@@ -211,6 +211,37 @@ Start-Sleep -Seconds 1
 # Main Menu (Benchmark/Setup Options)
 # ============================================================================
 
+# Function to check setup status
+function Test-SetupStatus {
+    $wslInstalled = $false
+    $dockerInstalled = $false
+    
+    try {
+        $wslStatus = wsl --status 2>&1
+        if ($LASTEXITCODE -eq 0) {
+            $wslInstalled = $true
+        }
+    } catch {
+        $wslInstalled = $false
+    }
+    
+    if ($wslInstalled) {
+        try {
+            $dockerVersion = wsl bash -c "docker --version" 2>&1
+            if ($LASTEXITCODE -eq 0) {
+                $dockerInstalled = $true
+            }
+        } catch {
+            $dockerInstalled = $false
+        }
+    }
+    
+    return @{
+        WSL2 = $wslInstalled
+        Docker = $dockerInstalled
+    }
+}
+
 # Main menu - only benchmark/setup options
 $mainMenu = @(
     "Run full setup (WSL2, Docker, models, validation)",
@@ -228,6 +259,27 @@ while ($true) {
     Write-Host "  GitHub Auth: [OK] Authenticated" -ForegroundColor Green
     Write-Host "  Repository: [OK] Cloned" -ForegroundColor Green
     Write-Host ""
+    
+    # Check setup status
+    $setupStatus = Test-SetupStatus
+    Write-Host "Setup Status:" -ForegroundColor Cyan
+    if ($setupStatus.WSL2) {
+        Write-Host "  WSL2: [OK] Installed" -ForegroundColor Green
+    } else {
+        Write-Host "  WSL2: [X] Not installed" -ForegroundColor Red
+    }
+    if ($setupStatus.Docker) {
+        Write-Host "  Docker: [OK] Installed" -ForegroundColor Green
+    } else {
+        Write-Host "  Docker: [X] Not installed" -ForegroundColor Red
+    }
+    Write-Host ""
+    
+    if (-not ($setupStatus.WSL2 -and $setupStatus.Docker)) {
+        Write-Host "⚠️  WARNING: Setup is incomplete!" -ForegroundColor Yellow
+        Write-Host "   Run option 1 (full setup) before running validation or benchmarks." -ForegroundColor Yellow
+        Write-Host ""
+    }
     
     $choice = Get-MenuChoice -MaxChoice $mainMenu.Length
     
@@ -248,6 +300,26 @@ while ($true) {
         }
         2 {
             Write-Host ""
+            
+            # Check if setup is needed
+            $setupStatus = Test-SetupStatus
+            if (-not ($setupStatus.WSL2 -and $setupStatus.Docker)) {
+                Write-Host "⚠️  Setup is incomplete!" -ForegroundColor Red
+                Write-Host ""
+                if (-not $setupStatus.WSL2) {
+                    Write-Host "  [X] WSL2 is not installed" -ForegroundColor Red
+                }
+                if (-not $setupStatus.Docker) {
+                    Write-Host "  [X] Docker is not installed in WSL2" -ForegroundColor Red
+                }
+                Write-Host ""
+                Write-Host "You must run option 1 (full setup) first to install WSL2 and Docker." -ForegroundColor Yellow
+                Write-Host ""
+                Write-Host "Press any key to return to menu..."
+                $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
+                continue
+            }
+            
             Write-Host "Running validation test..." -ForegroundColor Cyan
             Write-Host ""
             Set-Location $repoPath
@@ -258,6 +330,26 @@ while ($true) {
         }
         3 {
             Write-Host ""
+            
+            # Check if setup is needed
+            $setupStatus = Test-SetupStatus
+            if (-not ($setupStatus.WSL2 -and $setupStatus.Docker)) {
+                Write-Host "⚠️  Setup is incomplete!" -ForegroundColor Red
+                Write-Host ""
+                if (-not $setupStatus.WSL2) {
+                    Write-Host "  [X] WSL2 is not installed" -ForegroundColor Red
+                }
+                if (-not $setupStatus.Docker) {
+                    Write-Host "  [X] Docker is not installed in WSL2" -ForegroundColor Red
+                }
+                Write-Host ""
+                Write-Host "You must run option 1 (full setup) first to install WSL2 and Docker." -ForegroundColor Yellow
+                Write-Host ""
+                Write-Host "Press any key to return to menu..."
+                $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
+                continue
+            }
+            
             Write-Host "Running quick benchmark..." -ForegroundColor Cyan
             Write-Host ""
             Set-Location $repoPath
