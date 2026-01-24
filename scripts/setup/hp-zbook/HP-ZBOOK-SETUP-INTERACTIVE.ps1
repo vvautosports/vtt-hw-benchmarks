@@ -346,7 +346,7 @@ while ($true) {
             Write-Host "  WSL Distribution: [OK] Ready" -ForegroundColor Green
         } elseif ($setupStatus.WSLDistributionInstalling) {
             Write-Host "  WSL Distribution: [INSTALLING] Installing Ubuntu..." -ForegroundColor Yellow
-            Write-Host "    Use option 4 to monitor progress" -ForegroundColor Gray
+            Write-Host "    Installation in progress, wait for completion" -ForegroundColor Gray
         } else {
             Write-Host "  WSL Distribution: [X] Not installed" -ForegroundColor Red
         }
