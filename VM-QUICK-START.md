@@ -6,6 +6,19 @@
 
 ## Connect to VM
 
+**Option 1: VNC (Recommended)**
+```bash
+# VNC is running on localhost:5900 (display :0)
+vncviewer localhost:5900
+
+# Or use any VNC client:
+# - Remmina (GUI)
+# - TigerVNC
+# - RealVNC
+# Connect to: localhost:5900
+```
+
+**Option 2: virt-viewer (if it works)**
 ```bash
 virt-viewer windows11-vtt-test
 ```
