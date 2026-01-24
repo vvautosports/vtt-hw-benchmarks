@@ -17,7 +17,6 @@ if %errorLevel% neq 0 (
 
 REM Execute the PowerShell portion of this script
 powershell.exe -ExecutionPolicy Bypass -NoProfile -Command "Invoke-Expression (${%~f0} | Out-String)"
-pause
 exit /b
 
 : End batch portion - PowerShell code follows #>
@@ -277,7 +276,9 @@ function Test-DockerRunning {
 $mainMenu = @(
     "Pull benchmark containers",
     "Run validation test",
-    "Run quick benchmark"
+    "Run quick benchmark (2-3 min)",
+    "Run default benchmark (30-45 min)",
+    "Run comprehensive benchmark (2-3 hrs)"
 )
 
 while ($true) {
@@ -383,6 +384,60 @@ while ($true) {
             Write-Host "Entering WSL..." -ForegroundColor Gray
             Write-Host "Repository: $dockerPath" -ForegroundColor Gray
             wsl bash -c "cd '$dockerPath' && MODEL_CONFIG_MODE=default ./run-ai-models.sh --quick-test"
+            Write-Host ""
+            Write-Host "Press any key to continue..."
+            $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
+        }
+        4 {
+            Write-Host ""
+            if (-not $dockerRunning) {
+                Write-Host "Docker is not running!" -ForegroundColor Red
+                Write-Host "Please start Docker Desktop and try again." -ForegroundColor Yellow
+                Write-Host ""
+                Write-Host "Press any key to return to menu..."
+                $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
+                continue
+            }
+
+            Write-Host "Running default benchmark (30-45 minutes)..." -ForegroundColor Cyan
+            Write-Host "Tests 5 default models with standard settings" -ForegroundColor Gray
+            Write-Host ""
+            Set-Location $repoPath
+
+            # Convert Windows path to WSL path
+            $wslPath = $repoPath -replace '^([A-Z]):', '/mnt/$1' -replace '\\', '/' | ForEach-Object { $_.ToLower() }
+            $dockerPath = "$wslPath/docker"
+
+            Write-Host "Entering WSL..." -ForegroundColor Gray
+            Write-Host "Repository: $dockerPath" -ForegroundColor Gray
+            wsl bash -c "cd '$dockerPath' && MODEL_CONFIG_MODE=default ./run-ai-models.sh"
+            Write-Host ""
+            Write-Host "Press any key to continue..."
+            $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
+        }
+        5 {
+            Write-Host ""
+            if (-not $dockerRunning) {
+                Write-Host "Docker is not running!" -ForegroundColor Red
+                Write-Host "Please start Docker Desktop and try again." -ForegroundColor Yellow
+                Write-Host ""
+                Write-Host "Press any key to return to menu..."
+                $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
+                continue
+            }
+
+            Write-Host "Running comprehensive benchmark (2-3 hours)..." -ForegroundColor Cyan
+            Write-Host "Tests all available models with full settings" -ForegroundColor Gray
+            Write-Host ""
+            Set-Location $repoPath
+
+            # Convert Windows path to WSL path
+            $wslPath = $repoPath -replace '^([A-Z]):', '/mnt/$1' -replace '\\', '/' | ForEach-Object { $_.ToLower() }
+            $dockerPath = "$wslPath/docker"
+
+            Write-Host "Entering WSL..." -ForegroundColor Gray
+            Write-Host "Repository: $dockerPath" -ForegroundColor Gray
+            wsl bash -c "cd '$dockerPath' && MODEL_CONFIG_MODE=all ./run-ai-models.sh"
             Write-Host ""
             Write-Host "Press any key to continue..."
             $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
