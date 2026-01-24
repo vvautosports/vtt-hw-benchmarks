@@ -51,15 +51,22 @@ gh repo clone vvautosports/vtt-hw-benchmarks
 cd vtt-hw-benchmarks
 ```
 
-**Step 5: Run Automated Setup**
+**Step 5: Run Interactive Setup**
 
-PowerShell as Administrator:
+Right-click `RUN-SETUP.bat` → Run as Administrator:
 
-```powershell
-powershell -ExecutionPolicy Bypass -File .\scripts\utils\Setup-HP-ZBook-Automated.ps1 -ModelPath "C:\ai-models" -NonInteractive
+```cmd
+cd vtt-hw-benchmarks\scripts\setup\hp-zbook
+RUN-SETUP.bat
 ```
 
-**Note:** The `-ExecutionPolicy Bypass` flag is required because Windows PowerShell blocks unsigned scripts by default. This is a one-time bypass for the script execution and doesn't change system security settings. Alternatively, you can set the execution policy once: `Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser` (requires Administrator).
+Or manually via PowerShell:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\setup\hp-zbook\HP-ZBOOK-SETUP-INTERACTIVE.ps1
+```
+
+**Note:** The `-ExecutionPolicy Bypass` flag is required because Windows blocks unsigned PowerShell scripts by default. The batch file handles this automatically.
 
 **Step 6: Run Test**
 
