@@ -211,6 +211,38 @@ Start-Sleep -Seconds 1
 # Main Menu (Benchmark/Setup Options)
 # ============================================================================
 
+# Helper functions for setup
+function Test-WSL2 {
+    try {
+        $wslStatus = wsl --status 2>&1
+        return ($LASTEXITCODE -eq 0)
+    } catch {
+        return $false
+    }
+}
+
+function Test-WSLDistribution {
+    try {
+        $distros = wsl --list --quiet 2>&1
+        if ($LASTEXITCODE -eq 0) {
+            $installed = $distros | Where-Object { $_ -match '^\w' -and $_ -notmatch '^NAME' }
+            return ($installed.Count -gt 0)
+        }
+        return $false
+    } catch {
+        return $false
+    }
+}
+
+function Test-DockerInWSL {
+    try {
+        $dockerCheck = wsl bash -c "docker --version" 2>&1
+        return ($LASTEXITCODE -eq 0)
+    } catch {
+        return $false
+    }
+}
+
 # Function to check if Ubuntu is currently installing
 function Test-UbuntuInstalling {
     # Check if Microsoft Store is installing Ubuntu
