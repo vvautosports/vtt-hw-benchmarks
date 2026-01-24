@@ -385,10 +385,196 @@ while ($true) {
         }
         1 {
             Write-Host ""
-            Write-Host "Running full setup..." -ForegroundColor Cyan
+            Write-Host "=================================================================" -ForegroundColor Cyan
+            Write-Host "  Running Full Setup" -ForegroundColor Cyan
+            Write-Host "=================================================================" -ForegroundColor Cyan
             Write-Host ""
-            Set-Location $repoPath
-            & .\scripts\setup\hp-zbook\HP-ZBOOK-SETUP.ps1
+            
+            # Step 1: Check/Install WSL2
+            Write-Host "Step 1: Checking WSL2..." -ForegroundColor Yellow
+            $hasWSL = Test-WSL2
+            if (-not $hasWSL) {
+                Write-Host "WSL2 is not installed. Installing..." -ForegroundColor Yellow
+                Write-Host "This will require a system restart." -ForegroundColor Yellow
+                Write-Host ""
+                $response = Read-Host "Continue with WSL2 installation? (y/n)"
+                if ($response -ne 'y') {
+                    Write-Host "Installation cancelled." -ForegroundColor Red
+                    Write-Host ""
+                    Write-Host "Press any key to continue..."
+                    $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
+                    continue
+                }
+                
+                try {
+                    wsl --install
+                    Write-Host ""
+                    Write-Host "WSL2 installation initiated." -ForegroundColor Green
+                    Write-Host "IMPORTANT: System restart required!" -ForegroundColor Red
+                    Write-Host ""
+                    $restart = Read-Host "Restart now? (y/n)"
+                    if ($restart -eq 'y') {
+                        Restart-Computer -Force
+                    } else {
+                        Write-Host "Please restart manually and run this script again." -ForegroundColor Yellow
+                    }
+                    exit 0
+                } catch {
+                    Write-Host "ERROR: WSL2 installation failed: $_" -ForegroundColor Red
+                    Write-Host ""
+                    Write-Host "Press any key to continue..."
+                    $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
+                    continue
+                }
+            } else {
+                Write-Host "[OK] WSL2 is installed" -ForegroundColor Green
+            }
+            
+            Write-Host ""
+            
+            # Step 2: Check/Install Ubuntu
+            Write-Host "Step 2: Checking Ubuntu distribution..." -ForegroundColor Yellow
+            $hasDistribution = Test-WSLDistribution
+            if (-not $hasDistribution) {
+                Write-Host "Ubuntu distribution is not installed. Installing..." -ForegroundColor Yellow
+                Write-Host ""
+                $response = Read-Host "Continue with Ubuntu installation? (y/n)"
+                if ($response -ne 'y') {
+                    Write-Host "Installation cancelled." -ForegroundColor Red
+                    Write-Host ""
+                    Write-Host "Press any key to continue..."
+                    $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
+                    continue
+                }
+                
+                try {
+                    # Try winget first
+                    $wingetInstalled = $false
+                    try {
+                        $wingetCheck = winget --version 2>&1
+                        if ($LASTEXITCODE -eq 0) {
+                            Write-Host "Installing Ubuntu via winget..." -ForegroundColor Gray
+                            winget install --id Canonical.Ubuntu -e --source winget --accept-package-agreements --accept-source-agreements 2>&1 | Out-Null
+                            if ($LASTEXITCODE -eq 0) {
+                                $wingetInstalled = $true
+                                Write-Host "[OK] Ubuntu installation initiated via winget" -ForegroundColor Green
+                            }
+                        }
+                    } catch {}
+                    
+                    # If winget didn't work, try wsl --install
+                    if (-not $wingetInstalled) {
+                        Write-Host "Installing Ubuntu via wsl --install..." -ForegroundColor Gray
+                        $installOutput = wsl --install -d Ubuntu 2>&1
+                        Write-Host $installOutput
+                    }
+                    
+                    # Check if reboot is required
+                    $outputString = ($installOutput | Out-String) -join " "
+                    if ($outputString -match "reboot|restart|Changes will not be effective" -or 
+                        ($wingetInstalled -and -not (Test-WSLDistribution))) {
+                        Write-Host ""
+                        Write-Host "IMPORTANT: System reboot required for Ubuntu installation!" -ForegroundColor Red
+                        Write-Host "The WSL distribution will be available after reboot." -ForegroundColor Yellow
+                        Write-Host ""
+                        $restart = Read-Host "Restart now? (y/n)"
+                        if ($restart -eq 'y') {
+                            Write-Host "Restarting system..." -ForegroundColor Yellow
+                            Start-Sleep -Seconds 3
+                            Restart-Computer -Force
+                        } else {
+                            Write-Host "Please restart manually and run this script again." -ForegroundColor Yellow
+                        }
+                        exit 0
+                    }
+                    
+                    # Wait for installation (simplified - just check periodically)
+                    Write-Host ""
+                    Write-Host "Waiting for Ubuntu installation to complete..." -ForegroundColor Yellow
+                    Write-Host "This may take 2-5 minutes..." -ForegroundColor Gray
+                    Write-Host ""
+                    
+                    $maxWait = 300  # 5 minutes
+                    $elapsed = 0
+                    $installed = $false
+                    
+                    while ($elapsed -lt $maxWait -and -not $installed) {
+                        Start-Sleep -Seconds 10
+                        $elapsed += 10
+                        
+                        if (Test-WSLDistribution) {
+                            $installed = $true
+                            Write-Host "[OK] Ubuntu installation complete!" -ForegroundColor Green
+                            break
+                        }
+                        
+                        $minutes = [math]::Floor($elapsed / 60)
+                        $seconds = $elapsed % 60
+                        Write-Host "  Waiting... ($minutes min $seconds sec)" -ForegroundColor Gray
+                    }
+                    
+                    if (-not $installed) {
+                        Write-Host ""
+                        Write-Host "[WARN] Ubuntu installation is taking longer than expected" -ForegroundColor Yellow
+                        Write-Host "Check status: wsl --list --verbose" -ForegroundColor Cyan
+                        Write-Host "You may need to restart and run this script again." -ForegroundColor Yellow
+                        Write-Host ""
+                        Write-Host "Press any key to continue..."
+                        $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
+                        continue
+                    }
+                } catch {
+                    Write-Host "ERROR: Failed to install Ubuntu: $_" -ForegroundColor Red
+                    Write-Host ""
+                    Write-Host "Press any key to continue..."
+                    $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
+                    continue
+                }
+            } else {
+                Write-Host "[OK] Ubuntu distribution is installed" -ForegroundColor Green
+            }
+            
+            Write-Host ""
+            
+            # Step 3: Check/Install Docker
+            Write-Host "Step 3: Checking Docker..." -ForegroundColor Yellow
+            $hasDocker = Test-DockerInWSL
+            if (-not $hasDocker) {
+                Write-Host "Docker is not installed. Installing in WSL..." -ForegroundColor Yellow
+                Write-Host ""
+                
+                try {
+                    $dockerScript = @"
+#!/bin/bash
+set -e
+echo 'Installing Docker...'
+curl -fsSL https://get.docker.com -o get-docker.sh
+sudo sh get-docker.sh
+sudo usermod -aG docker `$USER
+echo 'Starting Docker service...'
+sudo service docker start
+echo 'Docker installation complete!'
+"@
+                    
+                    Write-Host "Installing Docker in WSL..." -ForegroundColor Gray
+                    wsl bash -c $dockerScript
+                    
+                    if ($LASTEXITCODE -eq 0) {
+                        Write-Host "[OK] Docker installed successfully!" -ForegroundColor Green
+                    } else {
+                        Write-Host "[WARN] Docker installation may have issues. Check manually." -ForegroundColor Yellow
+                    }
+                } catch {
+                    Write-Host "ERROR: Docker installation failed: $_" -ForegroundColor Red
+                }
+            } else {
+                Write-Host "[OK] Docker is installed" -ForegroundColor Green
+            }
+            
+            Write-Host ""
+            Write-Host "=================================================================" -ForegroundColor Green
+            Write-Host "  Setup Complete!" -ForegroundColor Green
+            Write-Host "=================================================================" -ForegroundColor Green
             Write-Host ""
             Write-Host "Press any key to continue..."
             $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
