@@ -461,10 +461,12 @@ while ($true) {
                 Write-Host ""
                 if (-not $setupStatus.WSL2) {
                     Write-Host "  [X] WSL2 is not installed" -ForegroundColor Red
+                } elseif ($setupStatus.WSLDistributionInstalling) {
+                    Write-Host "  [INSTALLING] WSL distribution is currently installing" -ForegroundColor Yellow
+                    Write-Host "      Use option 4 to monitor installation progress" -ForegroundColor Gray
                 } elseif (-not $setupStatus.WSLDistributionReady) {
-                    Write-Host "  [X] WSL distribution is not ready (may be installing)" -ForegroundColor Yellow
-                    Write-Host "      Check status: wsl --list --verbose" -ForegroundColor Gray
-                    Write-Host "      Wait for installation, then run option 1 again" -ForegroundColor Gray
+                    Write-Host "  [X] WSL distribution is not installed" -ForegroundColor Red
+                    Write-Host "      Run option 1 to install Ubuntu" -ForegroundColor Gray
                 }
                 if ($setupStatus.WSL2 -and $setupStatus.WSLDistributionReady -and -not $setupStatus.Docker) {
                     Write-Host "  [X] Docker is not installed in WSL2" -ForegroundColor Red
@@ -495,10 +497,12 @@ while ($true) {
                 Write-Host ""
                 if (-not $setupStatus.WSL2) {
                     Write-Host "  [X] WSL2 is not installed" -ForegroundColor Red
+                } elseif ($setupStatus.WSLDistributionInstalling) {
+                    Write-Host "  [INSTALLING] WSL distribution is currently installing" -ForegroundColor Yellow
+                    Write-Host "      Use option 4 to monitor installation progress" -ForegroundColor Gray
                 } elseif (-not $setupStatus.WSLDistributionReady) {
-                    Write-Host "  [X] WSL distribution is not ready (may be installing)" -ForegroundColor Yellow
-                    Write-Host "      Check status: wsl --list --verbose" -ForegroundColor Gray
-                    Write-Host "      Wait for installation, then run option 1 again" -ForegroundColor Gray
+                    Write-Host "  [X] WSL distribution is not installed" -ForegroundColor Red
+                    Write-Host "      Run option 1 to install Ubuntu" -ForegroundColor Gray
                 }
                 if ($setupStatus.WSL2 -and $setupStatus.WSLDistributionReady -and -not $setupStatus.Docker) {
                     Write-Host "  [X] Docker is not installed in WSL2" -ForegroundColor Red
