@@ -307,31 +307,53 @@ if (-not $hasWSL) {
                 } catch {}
                 
                 # Check AppxPackage installation status (Microsoft Store apps)
+                # Note: App package installed != WSL distribution ready
                 try {
                     $ubuntuApp = Get-AppxPackage -Name "*Ubuntu*" -ErrorAction SilentlyContinue | Where-Object { $_.Name -like "*Ubuntu*" } | Select-Object -First 1
                     if ($ubuntuApp) {
-                        if ($ubuntuApp.InstallLocation) {
-                            $progressInfo += "Store: Installed"
+                        # App package is installed, but check if WSL distribution is ready
+                        $wslHasUbuntu = $false
+                        try {
+                            $wslListCheck = wsl --list --quiet 2>&1
+                            if ($LASTEXITCODE -eq 0 -and $wslListCheck) {
+                                $wslHasUbuntu = ($wslListCheck | Where-Object { $_ -match 'Ubuntu' -or $_ -match 'ubuntu' -and $_ -notmatch '^NAME' }).Count -gt 0
+                            }
+                        } catch {}
+                        
+                        if ($wslHasUbuntu) {
+                            $progressInfo += "Store: Ready"
                         } else {
-                            $progressInfo += "Store: Installing"
+                            $progressInfo += "Store: App installed, WSL initializing..."
                         }
                     } else {
                         # Check if it's in the process of being installed
                         $pendingApps = Get-AppxProvisionedPackage -Online -ErrorAction SilentlyContinue | Where-Object { $_.DisplayName -like "*Ubuntu*" }
                         if ($pendingApps) {
-                            $progressInfo += "Store: Provisioning"
+                            $progressInfo += "Store: Downloading/Installing app"
+                        } else {
+                            $progressInfo += "Store: Not found"
                         }
                     }
                 } catch {}
                 
                 # Always show WSL list check status
                 try {
-                    $wslListCheck = wsl --list 2>&1
+                    $wslListCheck = wsl --list --quiet 2>&1
                     if ($LASTEXITCODE -eq 0) {
-                        if ($wslListCheck -match 'Ubuntu' -or $wslListCheck -match 'ubuntu') {
-                            $progressInfo += "WSL: Ubuntu listed"
+                        if ($wslListCheck) {
+                            $hasUbuntu = $wslListCheck | Where-Object { 
+                                $_ -and 
+                                $_ -match 'Ubuntu|ubuntu' -and 
+                                $_ -notmatch '^NAME' -and
+                                $_ -notmatch '^Windows'
+                            }
+                            if ($hasUbuntu) {
+                                $progressInfo += "WSL: Distribution ready"
+                            } else {
+                                $progressInfo += "WSL: Waiting for distribution"
+                            }
                         } else {
-                            $progressInfo += "WSL: No Ubuntu yet"
+                            $progressInfo += "WSL: Checking..."
                         }
                     }
                 } catch {}
