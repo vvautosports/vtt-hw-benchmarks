@@ -1,13 +1,13 @@
-# HP ZBook One-Command Setup
-# Simple entry point for HP ZBook deployment
+# VTT Hardware Benchmark Suite - Automated Setup
+# Simple entry point for Windows deployment
 # Usage: .\HP-ZBOOK-SETUP.ps1
 
 $ErrorActionPreference = "Continue"  # Don't stop on errors, handle them
 
 Write-Host ""
-Write-Host "═══════════════════════════════════════════════════════════════" -ForegroundColor Cyan
-Write-Host "  HP ZBook - Automated Setup" -ForegroundColor Cyan
-Write-Host "═══════════════════════════════════════════════════════════════" -ForegroundColor Cyan
+Write-Host "=================================================================" -ForegroundColor Cyan
+Write-Host "  VTT Hardware Benchmark Suite" -ForegroundColor Cyan
+Write-Host "=================================================================" -ForegroundColor Cyan
 Write-Host ""
 
 # Check if running as Administrator
@@ -29,7 +29,7 @@ try {
     $gitVersion = git --version 2>&1
     if ($LASTEXITCODE -eq 0) {
         $gitInstalled = $true
-        Write-Host "✓ Git is installed: $gitVersion" -ForegroundColor Green
+        Write-Host "[OK] Git is installed: $gitVersion" -ForegroundColor Green
     }
 } catch {
     $gitInstalled = $false
@@ -39,7 +39,7 @@ if (-not $gitInstalled) {
     Write-Host "Git is not installed. Installing via winget..." -ForegroundColor Yellow
     try {
         winget install --id Git.Git -e --source winget --accept-package-agreements --accept-source-agreements 2>&1 | Out-Null
-        Write-Host "✓ Git installed successfully" -ForegroundColor Green
+        Write-Host "[OK] Git installed successfully" -ForegroundColor Green
         Write-Host "Refreshing PATH..." -ForegroundColor Gray
         $env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User")
         # Verify git is now available
@@ -97,11 +97,11 @@ if (-not (Test-Path $setupScript)) {
 
 Write-Host "Starting automated setup..." -ForegroundColor Green
 Write-Host "This will:" -ForegroundColor Gray
-Write-Host "  ✓ Install WSL2 (if needed, requires restart)" -ForegroundColor Gray
-Write-Host "  ✓ Install Docker in WSL2" -ForegroundColor Gray
-Write-Host "  ✓ Pull containers from GHCR" -ForegroundColor Gray
-Write-Host "  ✓ Download light models" -ForegroundColor Gray
-Write-Host "  ✓ Run validation test" -ForegroundColor Gray
+Write-Host "  [OK] Install WSL2 (if needed, requires restart)" -ForegroundColor Gray
+Write-Host "  [OK] Install Docker in WSL2" -ForegroundColor Gray
+Write-Host "  [OK] Pull containers from GHCR" -ForegroundColor Gray
+Write-Host "  [OK] Download light models" -ForegroundColor Gray
+Write-Host "  [OK] Run validation test" -ForegroundColor Gray
 Write-Host ""
 
 # Check for D: drive, use C: if not available
@@ -120,9 +120,9 @@ try {
     
     if ($LASTEXITCODE -eq 0) {
         Write-Host ""
-        Write-Host "═══════════════════════════════════════════════════════════════" -ForegroundColor Green
+        Write-Host "=================================================================" -ForegroundColor Green
         Write-Host "  Setup Complete!" -ForegroundColor Green
-        Write-Host "═══════════════════════════════════════════════════════════════" -ForegroundColor Green
+        Write-Host "=================================================================" -ForegroundColor Green
         Write-Host ""
         Write-Host "Next steps:" -ForegroundColor Cyan
         Write-Host "  Run lite test: .\scripts\testing\Test-Windows-Short.ps1" -ForegroundColor White

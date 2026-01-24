@@ -1,13 +1,13 @@
-# HP ZBook One-Command Setup
+# VTT Hardware Benchmark Suite - One-Command Setup
 # Installs GitHub CLI, authenticates, clones repo, and runs setup
 # Usage: .\HP-ZBOOK-SETUP-ONE-COMMAND.ps1
 
 $ErrorActionPreference = "Continue"
 
 Write-Host ""
-Write-Host "═══════════════════════════════════════════════════════════════" -ForegroundColor Cyan
-Write-Host "  HP ZBook - One-Command Setup" -ForegroundColor Cyan
-Write-Host "═══════════════════════════════════════════════════════════════" -ForegroundColor Cyan
+Write-Host "=================================================================" -ForegroundColor Cyan
+Write-Host "  VTT Hardware Benchmark Suite" -ForegroundColor Cyan
+Write-Host "=================================================================" -ForegroundColor Cyan
 Write-Host ""
 
 # Check if running as Administrator
@@ -30,7 +30,7 @@ try {
     $ghVersion = gh --version 2>&1
     if ($LASTEXITCODE -eq 0) {
         $ghInstalled = $true
-        Write-Host "✓ GitHub CLI is installed" -ForegroundColor Green
+        Write-Host "[OK] GitHub CLI is installed" -ForegroundColor Green
     }
 } catch {
     $ghInstalled = $false
@@ -40,7 +40,7 @@ if (-not $ghInstalled) {
     Write-Host "Installing GitHub CLI via winget..." -ForegroundColor Yellow
     try {
         winget install --id GitHub.cli -e --source winget --accept-package-agreements --accept-source-agreements 2>&1 | Out-Null
-        Write-Host "✓ GitHub CLI installed" -ForegroundColor Green
+        Write-Host "[OK] GitHub CLI installed" -ForegroundColor Green
         Write-Host "Refreshing PATH..." -ForegroundColor Gray
         $env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User")
         Start-Sleep -Seconds 2
@@ -67,7 +67,7 @@ try {
     $authStatus = gh auth status 2>&1
     if ($LASTEXITCODE -eq 0) {
         $ghAuthenticated = $true
-        Write-Host "✓ Already authenticated with GitHub" -ForegroundColor Green
+        Write-Host "[OK] Already authenticated with GitHub" -ForegroundColor Green
     }
 } catch {
     $ghAuthenticated = $false
@@ -91,7 +91,7 @@ if (-not $ghAuthenticated) {
     try {
         gh auth login
         if ($LASTEXITCODE -eq 0) {
-            Write-Host "✓ Authentication successful" -ForegroundColor Green
+            Write-Host "[OK] Authentication successful" -ForegroundColor Green
         } else {
             Write-Host "ERROR: Authentication failed" -ForegroundColor Red
             exit 1
@@ -120,7 +120,7 @@ if (Test-Path $repoPath) {
     try {
         gh repo clone vvautosports/vtt-hw-benchmarks $repoPath
         if ($LASTEXITCODE -eq 0) {
-            Write-Host "✓ Repository cloned successfully" -ForegroundColor Green
+            Write-Host "[OK] Repository cloned successfully" -ForegroundColor Green
         } else {
             Write-Host "ERROR: Clone failed" -ForegroundColor Red
             exit 1

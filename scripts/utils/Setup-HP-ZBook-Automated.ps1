@@ -11,10 +11,10 @@ param(
 
 $ErrorActionPreference = "Stop"
 
-Write-Host "═══════════════════════════════════════════════════════════════" -ForegroundColor Cyan
-Write-Host "  VTT Hardware Benchmarks - HP ZBook Automated Setup" -ForegroundColor Cyan
+Write-Host "=================================================================" -ForegroundColor Cyan
+Write-Host "  VTT Hardware Benchmark Suite" -ForegroundColor Cyan
 Write-Host "  Light Mode Configuration (GPT-OSS-20B + Qwen3-8B)" -ForegroundColor Cyan
-Write-Host "═══════════════════════════════════════════════════════════════" -ForegroundColor Cyan
+Write-Host "=================================================================" -ForegroundColor Cyan
 Write-Host ""
 
 # Check if running as Administrator
@@ -55,9 +55,9 @@ function Test-DockerInWSL {
     }
 }
 
-Write-Log "═══════════════════════════════════════════════════════════════" "Cyan"
+Write-Log "=================================================================" "Cyan"
 Write-Log "  Phase 1: System Validation" "Cyan"
-Write-Log "═══════════════════════════════════════════════════════════════" "Cyan"
+Write-Log "=================================================================" "Cyan"
 Write-Log ""
 
 # Check Windows version
@@ -100,9 +100,9 @@ try {
 }
 
 Write-Log ""
-Write-Log "═══════════════════════════════════════════════════════════════" "Cyan"
+Write-Log "=================================================================" "Cyan"
 Write-Log "  Phase 2: WSL2 Installation" "Cyan"
-Write-Log "═══════════════════════════════════════════════════════════════" "Cyan"
+Write-Log "=================================================================" "Cyan"
 Write-Log ""
 
 $hasWSL = Test-WSL2
@@ -149,9 +149,9 @@ if (-not $hasWSL) {
 }
 
 Write-Log ""
-Write-Log "═══════════════════════════════════════════════════════════════" "Cyan"
+Write-Log "=================================================================" "Cyan"
 Write-Log "  Phase 3: Docker Installation" "Cyan"
-Write-Log "═══════════════════════════════════════════════════════════════" "Cyan"
+Write-Log "=================================================================" "Cyan"
 Write-Log ""
 
 $hasDocker = Test-DockerInWSL
@@ -203,9 +203,9 @@ echo 'Docker installation complete!'
 }
 
 Write-Log ""
-Write-Log "═══════════════════════════════════════════════════════════════" "Cyan"
+Write-Log "=================================================================" "Cyan"
 Write-Log "  Phase 4: Model Configuration" "Cyan"
-Write-Log "═══════════════════════════════════════════════════════════════" "Cyan"
+Write-Log "=================================================================" "Cyan"
 Write-Log ""
 
 # Convert Windows path to WSL path
@@ -228,9 +228,9 @@ try {
 Write-Log ""
 
 if (-not $SkipModels) {
-    Write-Log "═══════════════════════════════════════════════════════════════" "Cyan"
+    Write-Log "=================================================================" "Cyan"
     Write-Log "  Phase 5: Model Download" "Cyan"
-    Write-Log "═══════════════════════════════════════════════════════════════" "Cyan"
+    Write-Log "=================================================================" "Cyan"
     Write-Log ""
 
     $DownloadScript = Join-Path (Get-Location) "scripts\utils\Download-Light-Models.ps1"
@@ -259,9 +259,9 @@ if (-not $SkipModels) {
 }
 
 Write-Log ""
-Write-Log "═══════════════════════════════════════════════════════════════" "Cyan"
+Write-Log "=================================================================" "Cyan"
 Write-Log "  Phase 6: Container Setup" "Cyan"
-Write-Log "═══════════════════════════════════════════════════════════════" "Cyan"
+Write-Log "=================================================================" "Cyan"
 Write-Log ""
 
 $repoPath = (Get-Location).Path
@@ -296,9 +296,9 @@ try {
 Write-Log ""
 
 if (-not $SkipTests) {
-    Write-Log "═══════════════════════════════════════════════════════════════" "Cyan"
+    Write-Log "=================================================================" "Cyan"
     Write-Log "  Phase 7: Validation Test" "Cyan"
-    Write-Log "═══════════════════════════════════════════════════════════════" "Cyan"
+    Write-Log "=================================================================" "Cyan"
     Write-Log ""
 
     Write-Log "Running quick validation test (2-3 minutes)..." "Yellow"
@@ -325,9 +325,9 @@ if (-not $SkipTests) {
 }
 
 Write-Log ""
-Write-Log "═══════════════════════════════════════════════════════════════" "Green"
+Write-Log "=================================================================" "Green"
 Write-Log "  Setup Complete!" "Green"
-Write-Log "═══════════════════════════════════════════════════════════════" "Green"
+Write-Log "=================================================================" "Green"
 Write-Log ""
 
 $EndTime = Get-Date

@@ -1,4 +1,4 @@
-# HP ZBook Interactive Setup with Terminal GUI
+# VTT Hardware Benchmark Suite - Interactive Setup
 # Simple menu-driven setup process
 # Usage: .\HP-ZBOOK-SETUP-INTERACTIVE.ps1
 
@@ -60,7 +60,7 @@ $ghAuthenticated = $false
 $repoCloned = $false
 
 while ($true) {
-    Show-Menu -Title "HP ZBook Setup" -Options $mainMenu
+    Show-Menu -Title "VTT Hardware Benchmark Suite" -Options $mainMenu
     
     # Show status
     Write-Host "Status:" -ForegroundColor Cyan
