@@ -215,12 +215,22 @@ try {
         if ($LASTEXITCODE -eq 0) {
             Write-Host "[OK] Docker Desktop installed" -ForegroundColor Green
             Write-Host ""
-            Write-Host "IMPORTANT: Please reboot your system, then run this script again." -ForegroundColor Yellow
-            Write-Host "Docker Desktop will start automatically after reboot." -ForegroundColor Yellow
+            Write-Host "=================================================================" -ForegroundColor Yellow
+            Write-Host "  IMPORTANT: System reboot required!" -ForegroundColor Yellow
+            Write-Host "=================================================================" -ForegroundColor Yellow
+            Write-Host ""
+            Write-Host "After reboot:" -ForegroundColor Cyan
+            Write-Host "  1. Docker Desktop will auto-start (look for whale icon in system tray)" -ForegroundColor White
+            Write-Host "  2. First startup takes 2-5 minutes - wait for whale icon to stop animating" -ForegroundColor White
+            Write-Host "  3. Run this script again: .\RUN-SETUP.bat" -ForegroundColor White
             Write-Host ""
             $reboot = Read-Host "Reboot now? (y/n)"
             if ($reboot -eq 'y') {
+                Write-Host "Rebooting system..." -ForegroundColor Yellow
+                Start-Sleep -Seconds 2
                 Restart-Computer -Force
+            } else {
+                Write-Host "Please reboot manually before continuing setup." -ForegroundColor Yellow
             }
             exit 0
         } else {
@@ -290,8 +300,12 @@ while ($true) {
 
     if (-not $dockerRunning) {
         Write-Host "WARNING: Docker is not running!" -ForegroundColor Yellow
-        Write-Host "   Please start Docker Desktop from the Start menu." -ForegroundColor Yellow
-        Write-Host "   Wait for the whale icon in the system tray to stop animating." -ForegroundColor Yellow
+        Write-Host ""
+        Write-Host "To start Docker Desktop:" -ForegroundColor Cyan
+        Write-Host "  1. Press Windows key, type 'Docker Desktop', press Enter" -ForegroundColor White
+        Write-Host "  2. Wait for whale icon in system tray (bottom-right)" -ForegroundColor White
+        Write-Host "  3. First startup takes 2-5 minutes - icon will stop animating when ready" -ForegroundColor White
+        Write-Host "  4. Return to this menu and try again" -ForegroundColor White
         Write-Host ""
     }
 

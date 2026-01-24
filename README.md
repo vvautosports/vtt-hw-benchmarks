@@ -36,7 +36,10 @@ winget install --id GitHub.cli
 winget install --id Docker.DockerDesktop
 ```
 
-**Note:** Docker Desktop installation requires a system reboot.
+**IMPORTANT:**
+- Docker Desktop installation **requires a system reboot**
+- After reboot, Docker Desktop auto-starts but takes **2-5 minutes** on first launch
+- Wait for the whale icon in system tray to **stop animating** before proceeding
 
 **After Reboot:**
 
