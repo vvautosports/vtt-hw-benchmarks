@@ -233,11 +233,15 @@ if (-not $hasWSL) {
             # Try using winget first (more reliable)
             Write-Log "Attempting to install Ubuntu via winget..." "Yellow"
             $wingetInstalled = $false
+            $rebootRequired = $false
+            $allOutput = @()
+            
             try {
                 $wingetCheck = winget --version 2>&1
                 if ($LASTEXITCODE -eq 0) {
                     Write-Log "Installing Ubuntu using winget..." "Gray"
-                    winget install --id Canonical.Ubuntu -e --source winget --accept-package-agreements --accept-source-agreements 2>&1 | Out-Null
+                    $wingetOutput = winget install --id Canonical.Ubuntu -e --source winget --accept-package-agreements --accept-source-agreements 2>&1
+                    $allOutput += $wingetOutput
                     if ($LASTEXITCODE -eq 0) {
                         $wingetInstalled = $true
                         Write-Log "[OK] Ubuntu installed via winget" "Green"
@@ -248,42 +252,47 @@ if (-not $hasWSL) {
             }
             
             # If winget didn't work, try wsl --install
-            $rebootRequired = $false
             if (-not $wingetInstalled) {
                 Write-Log "Running: wsl --install -d Ubuntu" "Gray"
                 $installOutput = wsl --install -d Ubuntu 2>&1
+                $allOutput += $installOutput
                 Write-Log $installOutput "Gray"
+            }
+            
+            # Check if reboot is required (from either method)
+            $outputString = ($allOutput | Out-String) -join " "
+            if ($outputString -match "reboot|restart|Changes will not be effective" -or 
+                ($wingetInstalled -and -not (Test-WSLDistribution))) {
+                # If winget succeeded but distribution not ready, likely needs reboot
+                $rebootRequired = $true
+            }
+            
+            if ($rebootRequired) {
+                Write-Log "" "Yellow"
+                Write-Log "IMPORTANT: System reboot required for Ubuntu installation!" "Red"
+                Write-Log "The WSL distribution will be available after reboot." "Yellow"
+                Write-Log ""
                 
-                # Check if reboot is required
-                $outputString = $installOutput -join " "
-                if ($outputString -match "reboot|restart" -or $outputString -match "Changes will not be effective") {
-                    $rebootRequired = $true
-                    Write-Log "" "Yellow"
-                    Write-Log "IMPORTANT: System reboot required for Ubuntu installation!" "Red"
-                    Write-Log "The WSL distribution will be available after reboot." "Yellow"
-                    Write-Log ""
-                    
-                    if (-not $NonInteractive) {
-                        $restart = Read-Host "Restart now? (y/n)"
-                        if ($restart -eq 'y') {
-                            Write-Log "Restarting system..." "Yellow"
-                            Write-Log "After restart, run this script again to continue with Docker setup." "Cyan"
-                            Write-Log ""
-                            Write-Log "Command to run after restart:" "Cyan"
-                            Write-Log "  .\scripts\utils\Setup-HP-ZBook-Automated.ps1 -ModelPath `"$ModelPath`" -NonInteractive" "White"
-                            Write-Log ""
-                            Start-Sleep -Seconds 3
-                            Restart-Computer -Force
-                            exit 0
-                        } else {
-                            Write-Log "Please restart manually and re-run this script to continue." "Yellow"
-                            exit 0
-                        }
+                if (-not $NonInteractive) {
+                    $restart = Read-Host "Restart now? (y/n)"
+                    if ($restart -eq 'y') {
+                        Write-Log "Restarting system..." "Yellow"
+                        Write-Log "After restart, run this script again to continue with Docker setup." "Cyan"
+                        Write-Log ""
+                        Write-Log "Command to run after restart:" "Cyan"
+                        Write-Log "  .\scripts\utils\Setup-HP-ZBook-Automated.ps1 -ModelPath `"$ModelPath`" -NonInteractive" "White"
+                        Write-Log ""
+                        Start-Sleep -Seconds 3
+                        Restart-Computer -Force
+                        exit 0
                     } else {
-                        Write-Log "Non-interactive mode: Please restart manually and re-run script" "Yellow"
-                        Write-Log "Command: .\scripts\utils\Setup-HP-ZBook-Automated.ps1 -ModelPath `"$ModelPath`" -NonInteractive" "Cyan"
+                        Write-Log "Please restart manually and re-run this script to continue." "Yellow"
                         exit 0
                     }
+                } else {
+                    Write-Log "Non-interactive mode: Please restart manually and re-run script" "Yellow"
+                    Write-Log "Command: .\scripts\utils\Setup-HP-ZBook-Automated.ps1 -ModelPath `"$ModelPath`" -NonInteractive" "Cyan"
+                    exit 0
                 }
             }
             
