@@ -24,16 +24,67 @@ This project provides containerized benchmarks for consistent, reproducible perf
 
 ## Quick Start
 
-### Prerequisites
+### Windows Setup (HP ZBooks) - Copy/Paste Commands
 
-**Linux (Framework Desktop):**
+**PowerShell as Administrator - Complete Setup Sequence:**
+
+```powershell
+# Step 1: Install Git and GitHub CLI (can install both at once)
+winget install --id Git.Git --id GitHub.cli --source winget
+
+# OR install sequentially (also works fine):
+# winget install --id Git.Git --source winget
+# winget install --id GitHub.cli --source winget
+
+# ⚠️ IMPORTANT: Open a NEW PowerShell window/tab after installations
+# (PATH needs to refresh for 'git' and 'gh' commands)
+
+# Step 3: In the new PowerShell window, authenticate with GitHub
+gh auth login
+# Follow browser prompts to authenticate
+
+# Step 4: Clone repository
+gh repo clone vvautosports/vtt-hw-benchmarks
+cd vtt-hw-benchmarks
+
+# Step 5: Run interactive setup (select option 5 for automatic)
+.\scripts\setup\hp-zbook\HP-ZBOOK-SETUP-INTERACTIVE.ps1
+
+# Step 6: After setup completes, run validation test
+.\scripts\testing\Test-Windows-Short.ps1
+```
+
+**Expected Timeline:**
+- Git/GitHub CLI install: 2-3 minutes
+- Model download: 10-15 minutes (22GB from HuggingFace)
+- WSL2/Docker setup: 5-10 minutes
+- Validation test: 2-3 minutes
+- **Total: 19-31 minutes**
+
+**What the setup does:**
+- ✅ Installs WSL2 (if needed, may require reboot)
+- ✅ Installs Docker in WSL2
+- ✅ Pulls benchmark containers from GHCR
+- ✅ Downloads light models (GPT-OSS-20B + Qwen3-8B)
+- ✅ Configures GPU access
+- ✅ Runs validation test
+
+### Linux Setup (Framework Desktop)
+
+**Prerequisites:**
 - Podman installed
 - Access to `/mnt/ai-models` (for AI benchmarks)
 
-**Windows (HP ZBooks):**
-- See **[HP-ZBook Setup Guide](docs/guides/HP-ZBOOK-SETUP.md)** for complete setup
-- **Test in VM first?** See **[docs/testing/windows-vm/README.md](docs/testing/windows-vm/README.md)**
-- Detailed technical guide: **[docs/guides/WINDOWS-SETUP.md](docs/guides/WINDOWS-SETUP.md)**
+**Quick Test:**
+```bash
+cd docker
+MODEL_CONFIG_MODE=default ./run-ai-models.sh --quick-test
+```
+
+**For detailed guides:**
+- **[HP-ZBook Setup Guide](docs/guides/HP-ZBOOK-SETUP.md)** - Complete Windows setup
+- **[VM Testing Guide](docs/testing/windows-vm/VM-TESTING-GUIDE.md)** - Test in VM first
+- **[Windows Setup](docs/guides/WINDOWS-SETUP.md)** - Technical details
 
 ### Run AI Model Tests
 

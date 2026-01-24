@@ -26,11 +26,12 @@ virt-viewer windows11-vtt-test
 ## In Windows VM (PowerShell as Admin)
 
 ```powershell
-# 1. Install Git for Windows (required for gh repo clone)
-winget install --id Git.Git --source winget
+# 1. Install Git and GitHub CLI (can install both at once)
+winget install --id Git.Git --id GitHub.cli --source winget
 
-# 2. Install GitHub CLI
-winget install --id GitHub.cli --source winget
+# OR install sequentially (also works fine):
+# winget install --id Git.Git --source winget
+# winget install --id GitHub.cli --source winget
 
 # IMPORTANT: Open a NEW PowerShell window/tab after installations
 # (PATH needs to refresh for 'git' and 'gh' commands to be available)
