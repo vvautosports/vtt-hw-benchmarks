@@ -405,7 +405,7 @@ while ($true) {
                     Write-Host "  [X] WSL2 is not installed" -ForegroundColor Red
                 } elseif ($setupStatus.WSLDistributionInstalling) {
                     Write-Host "  [INSTALLING] WSL distribution is currently installing" -ForegroundColor Yellow
-                    Write-Host "      Use option 4 to monitor installation progress" -ForegroundColor Gray
+                    Write-Host "      Installation in progress, wait for completion" -ForegroundColor Gray
                 } elseif (-not $setupStatus.WSLDistributionReady) {
                     Write-Host "  [X] WSL distribution is not installed" -ForegroundColor Red
                     Write-Host "      Run option 1 to install Ubuntu" -ForegroundColor Gray
@@ -441,7 +441,7 @@ while ($true) {
                     Write-Host "  [X] WSL2 is not installed" -ForegroundColor Red
                 } elseif ($setupStatus.WSLDistributionInstalling) {
                     Write-Host "  [INSTALLING] WSL distribution is currently installing" -ForegroundColor Yellow
-                    Write-Host "      Use option 4 to monitor installation progress" -ForegroundColor Gray
+                    Write-Host "      Installation in progress, wait for completion" -ForegroundColor Gray
                 } elseif (-not $setupStatus.WSLDistributionReady) {
                     Write-Host "  [X] WSL distribution is not installed" -ForegroundColor Red
                     Write-Host "      Run option 1 to install Ubuntu" -ForegroundColor Gray
