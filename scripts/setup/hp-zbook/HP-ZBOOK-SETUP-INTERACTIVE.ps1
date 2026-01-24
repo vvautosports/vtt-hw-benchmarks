@@ -231,10 +231,28 @@ function Test-SetupStatus {
     if ($wslInstalled) {
         try {
             $distros = wsl --list --quiet 2>&1
-            if ($LASTEXITCODE -eq 0) {
-                # Check if any distribution is installed (skip header line)
-                $installed = $distros | Where-Object { $_ -match '^\w' -and $_ -notmatch '^NAME' }
+            if ($LASTEXITCODE -eq 0 -and $distros) {
+                # Check if any distribution is installed
+                # wsl --list --quiet returns just distribution names, one per line
+                $installed = $distros | Where-Object { 
+                    $_ -and 
+                    $_.Trim() -ne '' -and 
+                    $_ -notmatch '^NAME' -and
+                    $_ -notmatch '^Windows' -and
+                    $_ -notmatch '^The following'
+                }
                 $wslDistributionReady = ($installed.Count -gt 0)
+            } else {
+                # Try verbose list as fallback
+                $verboseList = wsl --list --verbose 2>&1
+                if ($LASTEXITCODE -eq 0 -and $verboseList) {
+                    $installed = $verboseList | Where-Object { 
+                        $_ -match '^\s*\w' -and 
+                        $_ -notmatch '^NAME' -and
+                        $_ -notmatch '^\s*$'
+                    }
+                    $wslDistributionReady = ($installed.Count -gt 0)
+                }
             }
         } catch {
             $wslDistributionReady = $false
