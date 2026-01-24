@@ -193,24 +193,64 @@ if (-not $hasWSL) {
         }
         
         try {
-            # Install Ubuntu - this will download and install
-            Write-Log "Running: wsl --install -d Ubuntu" "Gray"
-            $installOutput = wsl --install -d Ubuntu 2>&1
-            Write-Log $installOutput "Gray"
+            # Try using winget first (more reliable)
+            Write-Log "Attempting to install Ubuntu via winget..." "Yellow"
+            $wingetInstalled = $false
+            try {
+                $wingetCheck = winget --version 2>&1
+                if ($LASTEXITCODE -eq 0) {
+                    Write-Log "Installing Ubuntu using winget..." "Gray"
+                    winget install --id Canonical.Ubuntu -e --source winget --accept-package-agreements --accept-source-agreements 2>&1 | Out-Null
+                    if ($LASTEXITCODE -eq 0) {
+                        $wingetInstalled = $true
+                        Write-Log "[OK] Ubuntu installed via winget" "Green"
+                    }
+                }
+            } catch {
+                Write-Log "winget not available, trying wsl --install method" "Gray"
+            }
             
-            # Wait a moment for installation to start
-            Start-Sleep -Seconds 3
+            # If winget didn't work, try wsl --install
+            if (-not $wingetInstalled) {
+                Write-Log "Running: wsl --install -d Ubuntu" "Gray"
+                $installOutput = wsl --install -d Ubuntu 2>&1
+                Write-Log $installOutput "Gray"
+            }
             
-            # Check if installation succeeded
-            $checkDistros = wsl --list --quiet 2>&1
-            $installed = $checkDistros | Where-Object { $_ -match '^\w' -and $_ -notmatch '^NAME' }
+            # Wait and poll for installation to complete
+            Write-Log "Waiting for Ubuntu installation to complete..." "Yellow"
+            Write-Log "This may take 2-5 minutes. Please wait..." "Gray"
+            Write-Log ""
             
-            if ($installed.Count -gt 0) {
-                Write-Log "[OK] Ubuntu distribution installed successfully" "Green"
-                Write-Log "Distribution: $($installed -join ', ')" "Gray"
-            } else {
-                Write-Log "[INFO] Ubuntu installation initiated - this may take several minutes" "Yellow"
-                Write-Log "The installation runs in the background." "Yellow"
+            $maxWaitTime = 300  # 5 minutes
+            $checkInterval = 10  # Check every 10 seconds
+            $elapsed = 0
+            $installed = $false
+            
+            while ($elapsed -lt $maxWaitTime -and -not $installed) {
+                Start-Sleep -Seconds $checkInterval
+                $elapsed += $checkInterval
+                
+                $checkDistros = wsl --list --quiet 2>&1
+                if ($LASTEXITCODE -eq 0) {
+                    $distros = $checkDistros | Where-Object { $_ -match '^\w' -and $_ -notmatch '^NAME' }
+                    if ($distros.Count -gt 0) {
+                        $installed = $true
+                        Write-Log "[OK] Ubuntu distribution installed successfully!" "Green"
+                        Write-Log "Distribution: $($distros -join ', ')" "Gray"
+                        break
+                    }
+                }
+                
+                # Show progress
+                $minutes = [math]::Floor($elapsed / 60)
+                $seconds = $elapsed % 60
+                Write-Log "  Waiting... ($minutes min $seconds sec)" "Gray"
+            }
+            
+            if (-not $installed) {
+                Write-Log "[WARN] Ubuntu installation is taking longer than expected" "Yellow"
+                Write-Log "The installation may still be in progress." "Yellow"
                 Write-Log ""
                 Write-Log "To check installation status: wsl --list --verbose" "Cyan"
                 Write-Log "After Ubuntu is installed, run this script again to continue with Docker setup." "Yellow"
@@ -224,7 +264,7 @@ if (-not $hasWSL) {
             Write-Log "Manual installation options:" "Yellow"
             Write-Log "  1. Run: wsl --install -d Ubuntu" "Cyan"
             Write-Log "  2. Or install from Microsoft Store: Ubuntu" "Cyan"
-            Write-Log "  3. Or download from: https://aka.ms/wslubuntu" "Cyan"
+            Write-Log "  3. Or use winget: winget install Canonical.Ubuntu" "Cyan"
             exit 1
         }
     } else {
