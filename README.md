@@ -33,7 +33,9 @@ This project provides containerized benchmarks for consistent, reproducible perf
 **Windows (HP ZBooks):**
 - WSL2 with Docker (recommended) or Docker Desktop
 - See **[WINDOWS-SETUP.md](docs/guides/WINDOWS-SETUP.md)** for automated setup
-- Run: `scripts/utils/setup-windows.ps1` (PowerShell as Admin)
+- **Fresh install?** Run: `scripts/utils/setup-windows-full.ps1` (PowerShell as Admin)
+- **Quick check?** Run: `scripts/utils/setup-windows.ps1 -CheckOnly`
+- **Test in VM?** See **[WINDOWS-VM-TESTING.md](docs/guides/WINDOWS-VM-TESTING.md)** for VM testing guide
 
 ### Run AI Model Tests
 

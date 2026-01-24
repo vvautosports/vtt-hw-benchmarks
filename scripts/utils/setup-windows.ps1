@@ -121,16 +121,21 @@ echo 'Docker installation complete!'
 "@
 
     try {
+        Write-Host "Executing Docker installation in WSL2..." -ForegroundColor Yellow
         $dockerInstallScript | wsl bash
         Write-Host ""
         Write-Host "[OK] Docker installed in WSL2" -ForegroundColor Green
-        Write-Host "You may need to restart WSL2 for group membership to take effect:" -ForegroundColor Yellow
-        Write-Host "  wsl --shutdown" -ForegroundColor Cyan
+        Write-Host "Restarting WSL2 for group membership to take effect..." -ForegroundColor Yellow
+        wsl --shutdown
+        Start-Sleep -Seconds 3
+        Write-Host "[OK] WSL2 restarted" -ForegroundColor Green
         Write-Host ""
     } catch {
         Write-Host "ERROR: Docker installation failed: $_" -ForegroundColor Red
         Write-Host "You can manually install Docker by running in WSL2:" -ForegroundColor Yellow
         Write-Host "  curl -fsSL https://get.docker.com | sudo sh" -ForegroundColor Cyan
+        Write-Host "  sudo usermod -aG docker `$USER" -ForegroundColor Cyan
+        Write-Host "  sudo service docker start" -ForegroundColor Cyan
     }
 }
 

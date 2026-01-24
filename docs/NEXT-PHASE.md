@@ -1,46 +1,40 @@
-# Next Phase: MLflow Integration & Dashboarding
+# Next Phase: MLflow Integration & Gaming Benchmarks
 
-**Trigger:** After successful completion of Task #13 (default 5-model test)
+**Current Priority:** Local AI benchmarks working first (Windows → Linux)
 
-**Phase Order:**
-1. Validate Task #13 results
-2. Run first HP ZBook test (same 5 models)
-3. Deploy MLflow stack to MS-01
-4. Implement real-time result tracking
-5. Create dashboarding
-6. Then run full 20-model test overnight
-
----
-
-## Phase 1: Validation (Post Task #13)
-
-**Success Criteria:**
-- [ ] Default 5-model test completes successfully
-- [ ] JSON output validates with `scripts/utils/validate-results.sh`
-- [ ] Performance metrics within expected ranges
-- [ ] No errors in log file
-
-**Expected Results:**
-- GLM-4.7-Flash-Q8: 700-900 t/s prompt, 30-40 t/s gen
-- GPT-OSS-20B: 1000-1200 t/s prompt, 40-50 t/s gen
-- Large models (235B): 100-200 t/s prompt, 10-20 t/s gen
+**Testing Order:**
+1. HP ZBook #1 - Windows local testing (Phase 1)
+2. Framework Desktop - Linux validation (Phase 1)
+3. Deploy MLflow to MS-01 (Phase 2)
+4. HP ZBooks #2-4 with central tracking (Phase 2)
+5. Gaming benchmarks (Phase 3 - Deferred)
 
 ---
 
-## Phase 2: HP ZBook First Test
+## Phase 1: Local Testing (Current)
 
-**Goal:** Validate Windows/HP ZBook setup before full rollout
+**Goal:** Get AI benchmarks working locally without MS-01 dependency
 
-**Steps:**
-1. Run `scripts/utils/setup-windows.ps1` on one HP ZBook
-2. Verify WSL2 and Docker installation
-3. Run `MODEL_CONFIG_MODE=default ./run-ai-models.sh`
-4. Compare results to Framework baseline (±10%)
-5. Document any Windows-specific issues
+### 1.1 HP ZBook #1 - Windows Setup
+- Run `scripts/utils/setup-windows-full.ps1`
+- Run `scripts/testing/Test-Windows-Setup.ps1 -FullTest`
+- Results save to `results/windows/hp-zbook-01/`
+- Commit manually: `git add results/ && git commit`
+
+### 1.2 Framework Desktop - Linux Validation
+- Run: `cd docker && MODEL_CONFIG_MODE=default ./run-ai-models.sh`
+- Results save to `results/linux/framework-desktop/`
+- Validates both Windows and Linux paths work
+
+**No MS-01 required** - Everything runs locally, results committed manually
 
 ---
 
-## Phase 3: MS-01 MLflow Stack Deployment
+## Phase 2: MS-01 Central Results (After Phase 1 Complete)
+
+**Trigger:** After HP ZBook #1 AND Framework Desktop working
+
+### 2.1 Deploy MLflow Stack to MS-01
 
 **Infrastructure Setup:**
 
@@ -72,9 +66,7 @@ export MLFLOW_TRACKING_URI=http://192.168.7.30:5000
 echo 'export MLFLOW_TRACKING_URI=http://192.168.7.30:5000' >> ~/.bashrc
 ```
 
----
-
-## Phase 4: Real-Time Result Tracking
+### 2.2 Update Test Scripts for MLflow
 
 **Objective:** Automatically commit test results to git and MLflow
 
@@ -130,9 +122,66 @@ with mlflow.start_run(run_name=f"{hostname}-{model_name}"):
 - Easy comparison between systems
 - Experiment versioning
 
+### 2.3 Test HP ZBooks #2 & #3
+
+With MS-01 configured, test remaining laptops:
+- Results save locally AND post to MS-01 MLflow
+- Compare all machines in MLflow dashboard
+
 ---
 
-## Phase 5: Dashboarding
+## Phase 3: Gaming Benchmarks (Deferred)
+
+**Priority:** After AI benchmarks working on all machines
+
+**Components to Deploy:**
+
+### 3.1 Keras OCR Service (MS-01)
+Deploy for Rocket League menu navigation:
+```bash
+./scripts/deployment/deploy-keras-ocr-lxc.sh
+```
+
+**Requirements:**
+- Proxmox LXC container on MS-01
+- Docker with Keras OCR service
+- Port 8080 accessible from HP ZBooks
+- See: `docs/guides/MS-01-LXC-DEPLOYMENT.md`
+
+### 3.2 Rocket League Benchmarks (HP ZBooks)
+**Guide:** `docs/guides/HP-ZBOOK-ROCKET-LEAGUE.md`
+
+**Software:**
+- Epic Games Launcher
+- Rocket League (free-to-play)
+- Python 3.11
+- Poetry
+- LTT MarkBench
+
+**Process:**
+- Automated gameplay with standardized replay
+- Keras OCR for menu navigation
+- FPS measurement and logging
+
+### 3.3 Cinebench R23
+**Platform:** Windows (HP ZBooks)
+
+**Integration:**
+- Manual run (or script)
+- Multi-core and single-core tests
+- Record scores in results
+
+### 3.4 Other LTT MarkBench Tests
+**Available Tests:**
+- CS:GO
+- Shadow of the Tomb Raider
+- Other automated gaming benchmarks
+
+**Documentation:** https://github.com/LTTLabsOSS/markbench-tests
+
+---
+
+## Phase 4: Dashboarding & Analysis
 
 **Preferred Stack:** Open-source Databricks ecosystem
 
@@ -192,98 +241,65 @@ Web UI (port 8050)
 
 ---
 
-## Phase 6: Full 20-Model Test (Overnight)
+## Phase 5: Full Testing Suite
 
-**Only After:**
-- ✅ Task #13 validated
-- ✅ HP ZBook test successful
-- ✅ MLflow stack deployed
-- ✅ Auto-commit working
-- ✅ Dashboarding accessible
+**After All Systems Working:**
 
-**Command:**
+### 5.1 Full 20-Model AI Test
 ```bash
 MODEL_CONFIG_MODE=all ./run-ai-models.sh
 ```
-
-**Expected:**
 - Duration: 2-3 hours
-- Models: ~20 auto-discovered
-- Results: Posted to MLflow + git
+- All GGUF models auto-discovered
+- Results to MLflow + git
 
-**Next Day Review:**
-- Check dashboard for all results
-- Validate auto-commits worked
-- Compare performance across all models
-- Identify fastest/most efficient models
+### 5.2 Complete Hardware Benchmarks
+All systems run full suite:
+- 7-Zip (CPU)
+- STREAM (memory bandwidth)
+- Storage I/O (fio)
+- AI inference (llama.cpp)
+- Gaming (Rocket League, Cinebench)
 
----
-
-## Implementation Tasks
-
-**Create these as separate tasks:**
-
-1. **Deploy MLflow Stack**
-   - SSH to MS-01
-   - Run deployment script
-   - Verify all services
-   - Configure client env vars
-
-2. **Implement Auto-Commit**
-   - Modify run-ai-models.sh
-   - Add git commit logic
-   - Test on Framework
-   - Document commit format
-
-3. **Add MLflow Logging**
-   - Create Python wrapper script
-   - Parse JSON results
-   - Log to MLflow
-   - Test on Framework
-
-4. **Build Dash Dashboard**
-   - Setup Dash app structure
-   - Connect to MLflow backend
-   - Create 4 core dashboards
-   - Deploy to MS-01 (port 8050)
-
-5. **HP ZBook Validation**
-   - Run setup-windows.ps1
-   - Run default test
-   - Compare to Framework
-   - Document issues
-
-6. **Full 20-Model Test**
-   - Verify all systems ready
-   - Run overnight
-   - Review results in dashboard
+### 5.3 Silicon Lottery Analysis
+Compare identical hardware:
+- 4x HP ZBook Ultra G1a laptops
+- Same CPU, RAM, storage
+- Identify performance variance
+- Document best performers for team assignment
 
 ---
 
-## Success Metrics
+## Success Criteria
 
-**Phase 3 (MLflow):**
-- All 4 containers running on MS-01
-- Accessible from Framework/ZBooks
-- Test data logged successfully
+**Phase 1 Complete:**
+- ✅ HP ZBook #1 running AI benchmarks locally
+- ✅ Framework Desktop running AI benchmarks locally
+- ✅ Results saving to `results/` directory
+- ✅ Both Windows and Linux paths validated
 
-**Phase 4 (Auto-tracking):**
-- Results auto-committed to git
-- MLflow shows all test runs
-- No manual intervention needed
+**Phase 2 Complete:**
+- ✅ MLflow stack deployed on MS-01
+- ✅ HP ZBooks #2-4 posting results to MLflow
+- ✅ Dashboard showing all system results
+- ✅ Comparison between machines working
 
-**Phase 5 (Dashboarding):**
-- Dashboard accessible at http://192.168.7.30:8050
-- Shows all system results
-- Allows filtering/comparison
-- Manual annotations work
+**Phase 3 Complete:**
+- ✅ Keras OCR deployed on MS-01
+- ✅ Rocket League benchmarks working on HP ZBooks
+- ✅ Cinebench integration complete
+- ✅ Full gaming suite validated
 
-**Phase 6 (Full Test):**
-- All 20 models complete
-- Results in dashboard
-- Performance data collected
-- Silicon lottery variance identified
+**Phase 5 Complete:**
+- ✅ All systems tested with full benchmark suite
+- ✅ Silicon lottery analysis complete
+- ✅ Performance data for team hardware assignment decisions
 
 ---
 
-**Next Steps:** Complete Task #13, then proceed with phases above
+## Current Status
+
+**Now:** Phase 1 - Local AI testing (Windows first, then Linux)
+**Next:** Phase 2 - MS-01 MLflow deployment
+**Later:** Phase 3 - Gaming benchmarks
+**Future:** Phase 4 - Dashboarding & Phase 5 - Full suite

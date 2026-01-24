@@ -80,7 +80,22 @@ if [ -n "$MODEL_CONFIG_MODE" ] && [ -f "$CONFIG_FILE" ]; then
     # Source config parser
     source "$SCRIPT_DIR/../scripts/utils/config-parser.sh"
 
-    if [ "$MODEL_CONFIG_MODE" = "default" ]; then
+    if [ "$MODEL_CONFIG_MODE" = "light" ]; then
+        echo "Loading light models from configuration (1-2 models, <16GB VRAM)..." | tee -a "$LOG_FILE"
+
+        # Load model paths from config
+        mapfile -t MODEL_PATHS < <(awk '
+            /^light_models:/ { in_section = 1; next }
+            /^[a-z_]+:/ && in_section { in_section = 0 }
+            in_section && /path:/ {
+                match($0, /path:[[:space:]]*["]?([^"]+)["]?/, arr)
+                if (arr[1] != "") {
+                    print arr[1]
+                }
+            }
+        ' "$CONFIG_FILE")
+
+    elif [ "$MODEL_CONFIG_MODE" = "default" ]; then
         echo "Loading default models from configuration..." | tee -a "$LOG_FILE"
 
         # Load model paths from config
@@ -118,7 +133,7 @@ if [ -n "$MODEL_CONFIG_MODE" ] && [ -f "$CONFIG_FILE" ]; then
             exit 1
         fi
     else
-        echo "ERROR: Invalid MODEL_CONFIG_MODE: $MODEL_CONFIG_MODE (use 'default' or 'all')" | tee -a "$LOG_FILE"
+        echo "ERROR: Invalid MODEL_CONFIG_MODE: $MODEL_CONFIG_MODE (use 'light', 'default', or 'all')" | tee -a "$LOG_FILE"
         exit 1
     fi
 else

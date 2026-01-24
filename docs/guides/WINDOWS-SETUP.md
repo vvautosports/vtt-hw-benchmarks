@@ -2,6 +2,28 @@
 
 Two options: **WSL2 (Recommended)** for 1:1 Linux parity, or **Docker Desktop**.
 
+## Quick Start: Full Interactive Setup
+
+**For fresh Windows installs, use the complete setup script:**
+
+```powershell
+# Run as Administrator
+cd C:\repos\vtt-hw-benchmarks
+.\scripts\utils\setup-windows-full.ps1
+```
+
+This script will:
+1. ✅ Install WSL2 (if needed, requires restart)
+2. ✅ Install Docker in WSL2
+3. ✅ Configure model directory
+4. ✅ Pull/build benchmark containers
+5. ✅ Run full benchmark suite interactively
+
+**Options:**
+- `-ModelPath "D:\ai-models"` - Specify model directory (default: `D:\ai-models`)
+- `-SkipTests` - Skip running tests after setup
+- `-CheckOnly` - Only check status, don't install anything
+
 ## Option 1: WSL2 (Recommended)
 
 ### Install WSL2

@@ -48,7 +48,7 @@ parse_yaml() {
             value = kv[2]
 
             # Remove quotes from value
-            gsub(/^["'\''"]|["'\''"']$/, "", value)
+            gsub(/^["]|["]$/, "", value)
 
             if (prefix != "") {
                 key = prefix "_" key
@@ -93,7 +93,7 @@ load_default_models() {
     /^[a-z_]+:/ && in_section { in_section = 0 }
     in_section && /path:/ {
         # Extract the path value
-        match($0, /path:[[:space:]]*["'\''"']?([^"'\''"]+)["'\''"']?/, arr)
+        match($0, /path:[[:space:]]*["]?([^"]+)["]?/, arr)
         if (arr[1] != "") {
             print arr[1]
         }
@@ -118,7 +118,7 @@ load_default_model_names() {
     /^[a-z_]+:/ && in_section { in_section = 0 }
     in_section && /name:/ {
         # Extract the name value
-        match($0, /name:[[:space:]]*["'\''"']?([^"'\''"]+)["'\''"']?/, arr)
+        match($0, /name:[[:space:]]*["]?([^"]+)["]?/, arr)
         if (arr[1] != "") {
             print arr[1]
         }
