@@ -211,11 +211,41 @@ Start-Sleep -Seconds 1
 # Main Menu (Benchmark/Setup Options)
 # ============================================================================
 
-# Function to check setup status
+# Function to check if Ubuntu is currently installing
+function Test-UbuntuInstalling {
+    # Check if Microsoft Store is installing Ubuntu
+    try {
+        $storeProcess = Get-Process -Name "Microsoft.Store" -ErrorAction SilentlyContinue
+        if ($storeProcess) {
+            return $true
+        }
+    } catch {}
+    
+    # Check if WSL installation process is running
+    try {
+        $wslProcess = Get-Process -Name "wsl" -ErrorAction SilentlyContinue
+        if ($wslProcess) {
+            return $true
+        }
+    } catch {}
+    
+    # Check if Ubuntu installer is running
+    try {
+        $ubuntuProcess = Get-Process | Where-Object { $_.ProcessName -like "*ubuntu*" -or $_.ProcessName -like "*canonical*" }
+        if ($ubuntuProcess) {
+            return $true
+        }
+    } catch {}
+    
+    return $false
+}
+
+# Function to check setup status with definitive installation state
 function Test-SetupStatus {
     $wslInstalled = $false
     $dockerInstalled = $false
     $wslDistributionReady = $false
+    $wslDistributionInstalling = $false
     
     # Check if WSL2 is installed
     try {
@@ -233,7 +263,6 @@ function Test-SetupStatus {
             $distros = wsl --list --quiet 2>&1
             if ($LASTEXITCODE -eq 0 -and $distros) {
                 # Check if any distribution is installed
-                # wsl --list --quiet returns just distribution names, one per line
                 $installed = $distros | Where-Object { 
                     $_ -and 
                     $_.Trim() -ne '' -and 
@@ -254,8 +283,14 @@ function Test-SetupStatus {
                     $wslDistributionReady = ($installed.Count -gt 0)
                 }
             }
+            
+            # If no distribution is ready, check if one is installing
+            if (-not $wslDistributionReady) {
+                $wslDistributionInstalling = Test-UbuntuInstalling
+            }
         } catch {
             $wslDistributionReady = $false
+            $wslDistributionInstalling = Test-UbuntuInstalling
         }
         
         # Only check Docker if WSL distribution is ready
@@ -279,8 +314,66 @@ function Test-SetupStatus {
     return @{
         WSL2 = $wslInstalled
         WSLDistributionReady = $wslDistributionReady
+        WSLDistributionInstalling = $wslDistributionInstalling
         Docker = $dockerInstalled
     }
+}
+
+# Function to monitor Ubuntu installation progress
+function Wait-ForUbuntuInstallation {
+    Write-Host ""
+    Write-Host "Monitoring Ubuntu installation progress..." -ForegroundColor Cyan
+    Write-Host "Press Ctrl+C to cancel monitoring and return to menu" -ForegroundColor Gray
+    Write-Host ""
+    
+    $maxWaitTime = 600  # 10 minutes
+    $checkInterval = 5  # Check every 5 seconds
+    $elapsed = 0
+    $lastStatus = ""
+    
+    while ($elapsed -lt $maxWaitTime) {
+        Start-Sleep -Seconds $checkInterval
+        $elapsed += $checkInterval
+        
+        # Check if installed
+        $distros = wsl --list --quiet 2>&1
+        if ($LASTEXITCODE -eq 0 -and $distros) {
+            $installed = $distros | Where-Object { 
+                $_ -and 
+                $_.Trim() -ne '' -and 
+                $_ -notmatch '^NAME' -and
+                $_ -notmatch '^Windows' -and
+                $_ -notmatch '^The following'
+            }
+            if ($installed.Count -gt 0) {
+                Write-Host ""
+                Write-Host "[OK] Ubuntu installation complete!" -ForegroundColor Green
+                Write-Host "Distribution: $($installed -join ', ')" -ForegroundColor Gray
+                return $true
+            }
+        }
+        
+        # Check if still installing
+        $isInstalling = Test-UbuntuInstalling
+        $status = if ($isInstalling) { "Installing..." } else { "Waiting..." }
+        
+        if ($status -ne $lastStatus) {
+            $lastStatus = $status
+            $minutes = [math]::Floor($elapsed / 60)
+            $seconds = $elapsed % 60
+            Write-Host "  Status: $status ($minutes min $seconds sec)" -ForegroundColor $(if ($isInstalling) { "Yellow" } else { "Gray" })
+        } else {
+            # Update time on same line
+            $minutes = [math]::Floor($elapsed / 60)
+            $seconds = $elapsed % 60
+            Write-Host "`r  Status: $status ($minutes min $seconds sec)    " -NoNewline -ForegroundColor $(if ($isInstalling) { "Yellow" } else { "Gray" })
+        }
+    }
+    
+    Write-Host ""
+    Write-Host "[WARN] Installation monitoring timeout" -ForegroundColor Yellow
+    Write-Host "Ubuntu may still be installing. Check manually: wsl --list --verbose" -ForegroundColor Gray
+    return $false
 }
 
 # Main menu - only benchmark/setup options
@@ -288,6 +381,7 @@ $mainMenu = @(
     "Run full setup (WSL2, Docker, models, validation)",
     "Run validation test only",
     "Run quick benchmark",
+    "Monitor Ubuntu installation progress",
     "Exit to repository directory"
 )
 
@@ -306,11 +400,13 @@ while ($true) {
     Write-Host "Setup Status:" -ForegroundColor Cyan
     if ($setupStatus.WSL2) {
         Write-Host "  WSL2: [OK] Installed" -ForegroundColor Green
-        if (-not $setupStatus.WSLDistributionReady) {
-            Write-Host "  WSL Distribution: [X] Not ready (may be installing)" -ForegroundColor Yellow
-            Write-Host "    Check status: wsl --list --verbose" -ForegroundColor Gray
-        } else {
+        if ($setupStatus.WSLDistributionReady) {
             Write-Host "  WSL Distribution: [OK] Ready" -ForegroundColor Green
+        } elseif ($setupStatus.WSLDistributionInstalling) {
+            Write-Host "  WSL Distribution: [INSTALLING] Installing Ubuntu..." -ForegroundColor Yellow
+            Write-Host "    Use option 4 to monitor progress" -ForegroundColor Gray
+        } else {
+            Write-Host "  WSL Distribution: [X] Not installed" -ForegroundColor Red
         }
     } else {
         Write-Host "  WSL2: [X] Not installed" -ForegroundColor Red
@@ -328,8 +424,10 @@ while ($true) {
     
     if (-not ($setupStatus.WSL2 -and $setupStatus.WSLDistributionReady -and $setupStatus.Docker)) {
         Write-Host "WARNING: Setup is incomplete!" -ForegroundColor Yellow
-        if (-not $setupStatus.WSLDistributionReady -and $setupStatus.WSL2) {
-            Write-Host "   WSL distribution is installing. Wait for it to complete, then run option 1 again." -ForegroundColor Yellow
+        if ($setupStatus.WSLDistributionInstalling) {
+            Write-Host "   Ubuntu is currently installing. Use option 4 to monitor progress." -ForegroundColor Yellow
+        } elseif (-not $setupStatus.WSLDistributionReady -and $setupStatus.WSL2) {
+            Write-Host "   WSL distribution is not installed. Run option 1 to install Ubuntu." -ForegroundColor Yellow
         } else {
             Write-Host "   Run option 1 (full setup) before running validation or benchmarks." -ForegroundColor Yellow
         }
@@ -423,6 +521,43 @@ while ($true) {
             $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
         }
         4 {
+            Write-Host ""
+            
+            # Check current status
+            $setupStatus = Test-SetupStatus
+            if ($setupStatus.WSLDistributionReady) {
+                Write-Host "[OK] Ubuntu is already installed!" -ForegroundColor Green
+                Write-Host "Distribution is ready. No monitoring needed." -ForegroundColor Gray
+                Write-Host ""
+                Write-Host "Press any key to return to menu..."
+                $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
+                continue
+            }
+            
+            if (-not $setupStatus.WSL2) {
+                Write-Host "[X] WSL2 is not installed" -ForegroundColor Red
+                Write-Host "Run option 1 (full setup) to install WSL2 first." -ForegroundColor Yellow
+                Write-Host ""
+                Write-Host "Press any key to return to menu..."
+                $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
+                continue
+            }
+            
+            # Monitor installation
+            $installed = Wait-ForUbuntuInstallation
+            Write-Host ""
+            if ($installed) {
+                Write-Host "[OK] Ubuntu installation complete!" -ForegroundColor Green
+                Write-Host "Run option 1 again to continue with Docker installation." -ForegroundColor Cyan
+            } else {
+                Write-Host "Installation may still be in progress." -ForegroundColor Yellow
+                Write-Host "Check status: wsl --list --verbose" -ForegroundColor Gray
+            }
+            Write-Host ""
+            Write-Host "Press any key to return to menu..."
+            $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
+        }
+        5 {
             Write-Host ""
             Write-Host "Changing to repository directory..." -ForegroundColor Cyan
             Set-Location $repoPath
