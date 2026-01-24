@@ -306,6 +306,36 @@ if (-not $hasWSL) {
                     }
                 } catch {}
                 
+                # Check AppxPackage installation status (Microsoft Store apps)
+                try {
+                    $ubuntuApp = Get-AppxPackage -Name "*Ubuntu*" -ErrorAction SilentlyContinue | Where-Object { $_.Name -like "*Ubuntu*" } | Select-Object -First 1
+                    if ($ubuntuApp) {
+                        if ($ubuntuApp.InstallLocation) {
+                            $progressInfo += "Store: Installed"
+                        } else {
+                            $progressInfo += "Store: Installing"
+                        }
+                    } else {
+                        # Check if it's in the process of being installed
+                        $pendingApps = Get-AppxProvisionedPackage -Online -ErrorAction SilentlyContinue | Where-Object { $_.DisplayName -like "*Ubuntu*" }
+                        if ($pendingApps) {
+                            $progressInfo += "Store: Provisioning"
+                        }
+                    }
+                } catch {}
+                
+                # Always show WSL list check status
+                try {
+                    $wslListCheck = wsl --list 2>&1
+                    if ($LASTEXITCODE -eq 0) {
+                        if ($wslListCheck -match 'Ubuntu' -or $wslListCheck -match 'ubuntu') {
+                            $progressInfo += "WSL: Ubuntu listed"
+                        } else {
+                            $progressInfo += "WSL: No Ubuntu yet"
+                        }
+                    }
+                } catch {}
+                
                 # Check for active installation processes
                 $activeProcesses = @()
                 try {
@@ -371,8 +401,34 @@ if (-not $hasWSL) {
                         Write-Host "`r  [$timeStr] $progressStr    " -NoNewline -ForegroundColor Cyan
                     }
                 } else {
-                    # No detailed info, just show time
-                    Write-Host "`r  [$timeStr] Checking installation status...    " -NoNewline -ForegroundColor Gray
+                    # No detailed info yet, but show what we're checking
+                    $checkingStatus = @()
+                    try {
+                        $wslListCheck = wsl --list 2>&1
+                        if ($LASTEXITCODE -eq 0) {
+                            if ($wslListCheck -match 'Ubuntu' -or $wslListCheck -match 'ubuntu') {
+                                $checkingStatus += "WSL: Ubuntu listed"
+                            } else {
+                                $checkingStatus += "WSL: No Ubuntu yet"
+                            }
+                        }
+                    } catch {
+                        $checkingStatus += "WSL: Checking..."
+                    }
+                    
+                    try {
+                        $storeProcess = Get-Process -Name "Microsoft.Store" -ErrorAction SilentlyContinue
+                        if ($storeProcess) {
+                            $checkingStatus += "Store: Active"
+                        }
+                    } catch {}
+                    
+                    if ($checkingStatus.Count -gt 0) {
+                        $statusStr = $checkingStatus -join " | "
+                        Write-Host "`r  [$timeStr] $statusStr    " -NoNewline -ForegroundColor Gray
+                    } else {
+                        Write-Host "`r  [$timeStr] Checking installation status...    " -NoNewline -ForegroundColor Gray
+                    }
                 }
             }
             

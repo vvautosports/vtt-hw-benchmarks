@@ -381,8 +381,8 @@ $mainMenu = @(
     "Run full setup (WSL2, Docker, models, validation)",
     "Run validation test only",
     "Run quick benchmark",
-    "Monitor Ubuntu installation progress",
-    "Exit to repository directory"
+    "Monitor Ubuntu installation (if installing in background)",
+    "Change to repository directory"
 )
 
 while ($true) {
@@ -526,6 +526,9 @@ while ($true) {
         }
         4 {
             Write-Host ""
+            Write-Host "Note: Ubuntu installation is monitored automatically during option 1 (full setup)." -ForegroundColor Cyan
+            Write-Host "This option is only useful if Ubuntu is installing in the background from a previous run." -ForegroundColor Gray
+            Write-Host ""
             
             # Check current status
             $setupStatus = Test-SetupStatus
@@ -541,6 +544,15 @@ while ($true) {
             if (-not $setupStatus.WSL2) {
                 Write-Host "[X] WSL2 is not installed" -ForegroundColor Red
                 Write-Host "Run option 1 (full setup) to install WSL2 first." -ForegroundColor Yellow
+                Write-Host ""
+                Write-Host "Press any key to return to menu..."
+                $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
+                continue
+            }
+            
+            if (-not $setupStatus.WSLDistributionInstalling) {
+                Write-Host "[X] Ubuntu is not currently installing" -ForegroundColor Yellow
+                Write-Host "Run option 1 (full setup) to start Ubuntu installation." -ForegroundColor Cyan
                 Write-Host ""
                 Write-Host "Press any key to return to menu..."
                 $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
@@ -567,7 +579,7 @@ while ($true) {
             Set-Location $repoPath
             Write-Host "Current directory: $(Get-Location)" -ForegroundColor Green
             Write-Host ""
-            Write-Host "Press any key to continue..."
+            Write-Host "Press any key to return to menu..."
             $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
         }
     }
