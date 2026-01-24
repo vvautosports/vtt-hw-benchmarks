@@ -8,9 +8,9 @@ param(
 
 $ErrorActionPreference = "Stop"
 
-Write-Host "═══════════════════════════════════════════════════════════════" -ForegroundColor Cyan
+Write-Host "=================================================================" -ForegroundColor Cyan
 Write-Host "  Windows Setup Test Suite" -ForegroundColor Cyan
-Write-Host "═══════════════════════════════════════════════════════════════" -ForegroundColor Cyan
+Write-Host "=================================================================" -ForegroundColor Cyan
 Write-Host ""
 
 $TestsPassed = 0
@@ -37,11 +37,20 @@ try {
         Test-Pass "WSL2 is installed"
         Write-Host "  $wslStatus" -ForegroundColor Gray
     } else {
-        Test-Fail "WSL2 not installed - run: wsl --install"
+        Test-Fail "WSL2 check failed: The Windows Subsystem for Linux is not installed. You can install by running 'wsl.exe --install'."
+        Write-Host ""
+        Write-Host "To install WSL2 and complete setup, run:" -ForegroundColor Yellow
+        Write-Host "  .\scripts\setup\hp-zbook\HP-ZBOOK-SETUP.ps1" -ForegroundColor White
+        Write-Host "Or use the interactive menu:" -ForegroundColor Yellow
+        Write-Host "  .\scripts\setup\hp-zbook\HP-ZBOOK-SETUP-INTERACTIVE.ps1" -ForegroundColor White
+        Write-Host "  (Select option 1: Run full setup)" -ForegroundColor Gray
         exit 1
     }
 } catch {
     Test-Fail "WSL2 check failed: $_"
+    Write-Host ""
+    Write-Host "To install WSL2 and complete setup, run:" -ForegroundColor Yellow
+    Write-Host "  .\scripts\setup\hp-zbook\HP-ZBOOK-SETUP.ps1" -ForegroundColor White
     exit 1
 }
 Write-Host ""
@@ -168,9 +177,9 @@ if ($FullTest) {
 }
 
 # Summary
-Write-Host "═══════════════════════════════════════════════════════════════" -ForegroundColor Cyan
+Write-Host "=================================================================" -ForegroundColor Cyan
 Write-Host "  Test Summary" -ForegroundColor Cyan
-Write-Host "═══════════════════════════════════════════════════════════════" -ForegroundColor Cyan
+Write-Host "=================================================================" -ForegroundColor Cyan
 Write-Host ""
 
 if ($TestsFailed -eq 0) {
@@ -187,7 +196,10 @@ if ($TestsFailed -eq 0) {
 } else {
     Write-Host "❌ Some tests failed ($TestsFailed failed, $TestsPassed passed)" -ForegroundColor Red
     Write-Host ""
-    Write-Host "Please fix the issues above and run the setup script again:" -ForegroundColor Yellow
-    Write-Host "  .\scripts\utils\setup-windows-full.ps1" -ForegroundColor White
+    Write-Host "Please fix the issues above and run the setup script:" -ForegroundColor Yellow
+    Write-Host "  .\scripts\setup\hp-zbook\HP-ZBOOK-SETUP.ps1" -ForegroundColor White
+    Write-Host "Or use the interactive menu:" -ForegroundColor Yellow
+    Write-Host "  .\scripts\setup\hp-zbook\HP-ZBOOK-SETUP-INTERACTIVE.ps1" -ForegroundColor White
+    Write-Host "  (Select option 1: Run full setup)" -ForegroundColor Gray
     exit 1
 }

@@ -4,9 +4,9 @@
 
 $ErrorActionPreference = "Stop"
 
-Write-Host "═══════════════════════════════════════════════════════════════" -ForegroundColor Cyan
+Write-Host "=================================================================" -ForegroundColor Cyan
 Write-Host "  Windows Short Test - HP Readiness Validation" -ForegroundColor Cyan
-Write-Host "═══════════════════════════════════════════════════════════════" -ForegroundColor Cyan
+Write-Host "=================================================================" -ForegroundColor Cyan
 Write-Host ""
 
 $TestsPassed = 0
@@ -44,7 +44,11 @@ if ($LASTEXITCODE -eq 0) {
 } else {
     Test-Fail "Setup validation failed - fix issues before proceeding"
     Write-Host ""
-    Write-Host "Run setup script: .\scripts\utils\setup-windows-full.ps1" -ForegroundColor Yellow
+    Write-Host "Run setup script to install WSL2 and complete setup:" -ForegroundColor Yellow
+    Write-Host "  .\scripts\setup\hp-zbook\HP-ZBOOK-SETUP.ps1" -ForegroundColor White
+    Write-Host "Or use the interactive menu:" -ForegroundColor Yellow
+    Write-Host "  .\scripts\setup\hp-zbook\HP-ZBOOK-SETUP-INTERACTIVE.ps1" -ForegroundColor White
+    Write-Host "  (Select option 1: Run full setup)" -ForegroundColor Gray
     exit 1
 }
 
@@ -81,9 +85,9 @@ try {
 Write-Host ""
 
 # Summary
-Write-Host "═══════════════════════════════════════════════════════════════" -ForegroundColor Cyan
+Write-Host "=================================================================" -ForegroundColor Cyan
 Write-Host "  Test Summary" -ForegroundColor Cyan
-Write-Host "═══════════════════════════════════════════════════════════════" -ForegroundColor Cyan
+Write-Host "=================================================================" -ForegroundColor Cyan
 Write-Host ""
 
 if ($TestsFailed -eq 0) {
