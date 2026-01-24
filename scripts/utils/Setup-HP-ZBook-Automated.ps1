@@ -254,20 +254,23 @@ if (-not $hasWSL) {
                 Write-Log $installOutput "Gray"
             }
             
-            # Wait and poll for installation to complete
+            # Wait and poll for installation to complete with detailed progress
             Write-Log "Waiting for Ubuntu installation to complete..." "Yellow"
-            Write-Log "This may take 2-5 minutes. Please wait..." "Gray"
+            Write-Log "This may take 2-5 minutes. Monitoring progress..." "Gray"
             Write-Log ""
             
             $maxWaitTime = 300  # 5 minutes
-            $checkInterval = 10  # Check every 10 seconds
+            $checkInterval = 5  # Check every 5 seconds for more responsive updates
             $elapsed = 0
             $installed = $false
+            $lastProgress = ""
+            $lastDistroCheck = ""
             
             while ($elapsed -lt $maxWaitTime -and -not $installed) {
                 Start-Sleep -Seconds $checkInterval
                 $elapsed += $checkInterval
                 
+                # Check if distribution is now installed
                 $checkDistros = wsl --list --quiet 2>&1
                 if ($LASTEXITCODE -eq 0) {
                     $distros = $checkDistros | Where-Object { $_ -match '^\w' -and $_ -notmatch '^NAME' }
@@ -279,11 +282,101 @@ if (-not $hasWSL) {
                     }
                 }
                 
-                # Show progress
+                # Get detailed status information
+                $progressInfo = @()
+                
+                # Check wsl --list --verbose for Ubuntu status
+                try {
+                    $wslListVerbose = wsl --list --verbose 2>&1
+                    if ($LASTEXITCODE -eq 0 -and $wslListVerbose) {
+                        $ubuntuLine = $wslListVerbose | Where-Object { $_ -match 'Ubuntu' -or $_ -match 'ubuntu' }
+                        if ($ubuntuLine -and $ubuntuLine -ne $lastDistroCheck) {
+                            $lastDistroCheck = $ubuntuLine
+                            # Extract status from verbose output
+                            if ($ubuntuLine -match 'Installing') {
+                                $progressInfo += "Ubuntu: Installing"
+                            } elseif ($ubuntuLine -match 'Stopped') {
+                                $progressInfo += "Ubuntu: Installed (Stopped)"
+                            } elseif ($ubuntuLine -match 'Running') {
+                                $progressInfo += "Ubuntu: Running"
+                            } else {
+                                $progressInfo += "Ubuntu: Detected"
+                            }
+                        }
+                    }
+                } catch {}
+                
+                # Check for active installation processes
+                $activeProcesses = @()
+                try {
+                    $storeProcess = Get-Process -Name "Microsoft.Store" -ErrorAction SilentlyContinue
+                    if ($storeProcess) { $activeProcesses += "Store" }
+                } catch {}
+                
+                try {
+                    $wslProcess = Get-Process -Name "wsl" -ErrorAction SilentlyContinue
+                    if ($wslProcess) { $activeProcesses += "WSL" }
+                } catch {}
+                
+                try {
+                    $ubuntuProcesses = Get-Process | Where-Object { 
+                        $_.ProcessName -like "*ubuntu*" -or 
+                        $_.ProcessName -like "*canonical*" -or
+                        $_.ProcessName -like "*wslhost*"
+                    }
+                    if ($ubuntuProcesses) {
+                        $activeProcesses += "Ubuntu"
+                    }
+                } catch {}
+                
+                if ($activeProcesses.Count -gt 0) {
+                    $progressInfo += "Processes: $($activeProcesses -join ', ')"
+                }
+                
+                # Check Windows Event Log for WSL installation events (last 30 seconds)
+                try {
+                    $cutoffTime = (Get-Date).AddSeconds(-30)
+                    $events = Get-WinEvent -FilterHashtable @{
+                        LogName = 'System', 'Application'
+                        StartTime = $cutoffTime
+                    } -ErrorAction SilentlyContinue | Where-Object {
+                        $_.Message -match 'WSL|Ubuntu|Linux|Subsystem' -or
+                        $_.ProviderName -match 'WSL|Ubuntu'
+                    } | Select-Object -First 2
+                    
+                    if ($events) {
+                        foreach ($event in $events) {
+                            $eventTime = $event.TimeCreated.ToString("HH:mm:ss")
+                            $eventMsg = ($event.Message -split "`n")[0]
+                            if ($eventMsg.Length -gt 50) {
+                                $eventMsg = $eventMsg.Substring(0, 47) + "..."
+                            }
+                            $progressInfo += "[$eventTime] $eventMsg"
+                        }
+                    }
+                } catch {}
+                
+                # Show progress with details
                 $minutes = [math]::Floor($elapsed / 60)
                 $seconds = $elapsed % 60
-                Write-Log "  Waiting... ($minutes min $seconds sec)" "Gray"
+                $timeStr = "$minutes min $seconds sec"
+                
+                if ($progressInfo.Count -gt 0) {
+                    $progressStr = $progressInfo -join " | "
+                    if ($progressStr -ne $lastProgress) {
+                        $lastProgress = $progressStr
+                        Write-Log "  [$timeStr] $progressStr" "Cyan"
+                    } else {
+                        # Update same line if no new info
+                        Write-Host "`r  [$timeStr] $progressStr    " -NoNewline -ForegroundColor Cyan
+                    }
+                } else {
+                    # No detailed info, just show time
+                    Write-Host "`r  [$timeStr] Checking installation status...    " -NoNewline -ForegroundColor Gray
+                }
             }
+            
+            Write-Host ""  # New line after progress loop
             
             if (-not $installed) {
                 Write-Log "[WARN] Ubuntu installation is taking longer than expected" "Yellow"
