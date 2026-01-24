@@ -6,7 +6,8 @@ param(
     [string]$ModelPath = "D:\ai-models",
     [switch]$SkipTests,
     [switch]$SkipContainers,
-    [switch]$CheckOnly
+    [switch]$CheckOnly,
+    [switch]$NonInteractive
 )
 
 $ErrorActionPreference = "Stop"
@@ -99,10 +100,12 @@ if (-not $hasWSL) {
     Write-Host "This will require a system restart." -ForegroundColor Yellow
     Write-Host ""
 
-    $response = Read-Host "Continue with WSL2 installation? (y/n)"
-    if ($response -ne 'y') {
-        Write-Host "Installation cancelled." -ForegroundColor Red
-        exit 1
+    if (-not $NonInteractive) {
+        $response = Read-Host "Continue with WSL2 installation? (y/n)"
+        if ($response -ne 'y') {
+            Write-Host "Installation cancelled." -ForegroundColor Red
+            exit 1
+        }
     }
 
     try {
@@ -113,9 +116,13 @@ if (-not $hasWSL) {
         Write-Host "After restart, run this script again to continue setup." -ForegroundColor Yellow
         Write-Host ""
 
-        $restart = Read-Host "Restart now? (y/n)"
-        if ($restart -eq 'y') {
-            Restart-Computer -Force
+        if (-not $NonInteractive) {
+            $restart = Read-Host "Restart now? (y/n)"
+            if ($restart -eq 'y') {
+                Restart-Computer -Force
+            }
+        } else {
+            Write-Host "Non-interactive mode: Skipping automatic restart" -ForegroundColor Yellow
         }
         exit 0
     } catch {
@@ -221,12 +228,17 @@ if ($SkipContainers) {
     Write-Host "You can pull containers later with:" -ForegroundColor Yellow
     Write-Host "  wsl bash -c 'cd /mnt/c/vtt-hw-benchmarks && ./scripts/ci-cd/pull-from-ghcr.sh'" -ForegroundColor Cyan
 } elseif (-not $hasContainers) {
-    Write-Host "Containers not found. Options:" -ForegroundColor Yellow
-    Write-Host "  1. Pull from GitHub Container Registry (fast, ~500MB download)" -ForegroundColor White
-    Write-Host "  2. Build locally from source (slower, requires git repo)" -ForegroundColor White
-    Write-Host ""
+    if (-not $NonInteractive) {
+        Write-Host "Containers not found. Options:" -ForegroundColor Yellow
+        Write-Host "  1. Pull from GitHub Container Registry (fast, ~500MB download)" -ForegroundColor White
+        Write-Host "  2. Build locally from source (slower, requires git repo)" -ForegroundColor White
+        Write-Host ""
+        
+        $choice = Read-Host "Choose option (1 or 2, default: 1)"
+    } else {
+        $choice = "1"  # Default to pull in non-interactive mode
+    }
     
-    $choice = Read-Host "Choose option (1 or 2, default: 1)"
     if ($choice -eq "" -or $choice -eq "1") {
         Write-Host "Pulling containers from GHCR..." -ForegroundColor Yellow
         try {
@@ -265,7 +277,12 @@ if (-not $SkipTests) {
     Write-Host "Step 7: Running benchmark suite..." -ForegroundColor Cyan
     Write-Host ""
     
-    $runTests = Read-Host "Run full benchmark suite now? (y/n, default: y)"
+    if ($NonInteractive) {
+        $runTests = "y"
+    } else {
+        $runTests = Read-Host "Run full benchmark suite now? (y/n, default: y)"
+    }
+    
     if ($runTests -eq "" -or $runTests -eq "y") {
         Write-Host ""
         Write-Host "Starting benchmark suite..." -ForegroundColor Green

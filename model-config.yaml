@@ -12,13 +12,13 @@ light_models:
     hf_repo: "unsloth/gpt-oss-20b-F16-GGUF"
     hf_file: "gpt-oss-20b-F16.gguf"
 
-  - name: "Qwen2.5-7B-Instruct-Q8"
-    path: "Qwen2.5-7B-Instruct-Q8/qwen2.5-7b-instruct-q8_0.gguf"
-    size_gb: 8
-    vram_gb: 9
-    use_case: "Efficient 7B model"
-    hf_repo: "Qwen/Qwen2.5-7B-Instruct-GGUF"
-    hf_file: "qwen2.5-7b-instruct-q8_0.gguf"
+  - name: "Qwen3-8B-128K-Q8"
+    path: "Qwen3-8B-128K-Q8/qwen3-8b-128k-q8_0.gguf"
+    size_gb: 9
+    vram_gb: 10
+    use_case: "Latest Qwen3 with 128K context"
+    hf_repo: "unsloth/Qwen3-8B-128K-GGUF"
+    hf_file: "qwen3-8b-128k-q8_0.gguf"
 
 # Default 5 models for standard testing (requires 128GB RAM + large UMA)
 default_models:
