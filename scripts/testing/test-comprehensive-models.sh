@@ -9,7 +9,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 RESULTS_DIR="${PROJECT_ROOT}/results"
 MODEL_DIR="${MODEL_DIR:-/mnt/ai-models}"
-CONFIG_FILE="${PROJECT_ROOT}/model-config.yaml"
+CONFIG_FILE="${PROJECT_ROOT}/models-inventory.yaml"
 TIMESTAMP=$(date +%Y%m%d-%H%M%S)
 HOSTNAME=$(hostname)
 

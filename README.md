@@ -132,9 +132,15 @@ MODEL_CONFIG_MODE=default ./run-ai-models.sh --quick-test
 
 ### Configuration
 
-Customize model selection by editing `model-config.yaml`:
-- **Default mode**: Tests 5 pre-selected models
-- **All mode**: Auto-discovers all GGUF files in `/mnt/ai-models`
+**High-level settings** in `benchmark-config.yaml`:
+- System type (framework-desktop, hp-zbook, ms-01)
+- Which benchmarks to run (cpu, memory, storage, ai-inference)
+- AI testing mode (light, default, all)
+
+**Model inventory** in `models-inventory.yaml`:
+- Model definitions and specifications
+- HuggingFace download links
+- VRAM requirements and test strategies
 
 See **[CONFIGURATION.md](docs/guides/CONFIGURATION.md)** for details.
 
@@ -314,10 +320,8 @@ python3 /path/to/gguf-vram-estimator.py \
 vtt-hw-benchmarks/
 ├── config/                    # Configuration files
 │   └── examples/             # Example configs
-│       ├── model-config.default.yaml
-│       ├── model-config.all-models.yaml
-│       ├── glm-api-config.yaml
-│       └── Modelfile
+│       ├── models-inventory.default.yaml
+│       └── models-inventory.all-models.yaml
 ├── docker/                    # Containerized benchmarks
 │   ├── 7zip/                 # CPU compression benchmark
 │   ├── stream/               # Memory bandwidth benchmark
@@ -352,7 +356,8 @@ vtt-hw-benchmarks/
 │   ├── archive/              # Archived docs
 │   └── README.md             # Documentation index
 ├── results/                   # Benchmark results (gitignored)
-├── model-config.yaml          # Model configuration
+├── benchmark-config.yaml      # High-level benchmark configuration
+├── models-inventory.yaml      # AI model inventory and specifications
 └── README.md                  # This file
 ```
 

@@ -115,7 +115,7 @@ curl http://localhost:8001/v1/chat/completions \
 
 - [x] Document llama-bench limitation
 - [x] Document multi-part model structure
-- [x] Update model-config.yaml ordering
+- [x] Update models-inventory.yaml ordering
 
 ### Phase 2: Enhanced Scripts (TODO)
 
@@ -153,7 +153,7 @@ ENTRYPOINT ["/test-server.sh"]
 
 ### Phase 4: Configuration Updates (TODO)
 
-Update `model-config.yaml` with test strategies:
+Update `models-inventory.yaml` with test strategies:
 
 ```yaml
 default_models:
@@ -214,7 +214,7 @@ The current `run-ai-models.sh` script handles multi-part models by:
 
 - [AI Model Strategy](../AI-MODEL-STRATEGY.md)
 - [Testing Continuation Prompt](../TESTING-CONTINUATION-PROMPT.md)
-- [Model Configuration](../../model-config.yaml)
+- [Model Configuration](../../models-inventory.yaml)
 - [Docker README](../../docker/README.md)
 
 ---

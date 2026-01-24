@@ -45,7 +45,7 @@ MODEL_CONFIG_MODE=all ./run-ai-models.sh
 
 ## Next Steps
 
-- **Customize models:** Edit `model-config.yaml` (see [CONFIGURATION.md](CONFIGURATION.md))
+- **Customize models:** Edit `models-inventory.yaml` (see [CONFIGURATION.md](CONFIGURATION.md))
 - **Windows setup:** See [WINDOWS-SETUP.md](WINDOWS-SETUP.md)
 - **Deploy to MS-01:** See [MS-01-LXC-DEPLOYMENT.md](MS-01-LXC-DEPLOYMENT.md)
 

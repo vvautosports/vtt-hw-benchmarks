@@ -5,7 +5,7 @@
 set -e
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-CONFIG_FILE="${CONFIG_FILE:-$SCRIPT_DIR/../../model-config.yaml}"
+CONFIG_FILE="${CONFIG_FILE:-$SCRIPT_DIR/../../models-inventory.yaml}"
 MODEL_DIR="${MODEL_DIR:-/mnt/ai-models}"
 MODE="${1:-light}"
 

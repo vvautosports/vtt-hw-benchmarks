@@ -1,0 +1,39 @@
+# VTT Hardware Benchmarks - High-Level Configuration
+version: "1.0"
+
+# System Profile
+system:
+  type: "framework-desktop"  # framework-desktop, hp-zbook, ms-01
+  name: "auto"               # auto-detect or specify name
+
+# Test Suite Selection
+benchmarks:
+  enabled:
+    - cpu              # 7-Zip compression
+    - memory           # STREAM bandwidth
+    - storage          # fio I/O testing
+    - ai-inference     # llama.cpp models
+    # - rocket-league  # Gaming (HP ZBooks only, requires Keras OCR)
+
+# AI Model Testing Configuration
+ai_testing:
+  mode: "default"      # light (16GB systems), default (5 models), all (auto-discover)
+  test_depth: "quick"  # quick (512p/128g), standard (multi-context), comprehensive (full suite)
+
+  # Model selection profiles
+  profiles:
+    light: ["GPT-OSS-20B", "Qwen3-8B-128K-Q8"]           # For 16GB VRAM systems
+    default: ["GLM-4.7-Flash-Q8", "DeepSeek-R1-Distill-Llama-70B", "MiniMax-M2.1", "Qwen3-235B-A22B-Instruct", "GPT-OSS-20B"]
+    all: "auto-discover"  # Scan /mnt/ai-models for all GGUF files
+
+# Results Configuration
+results:
+  auto_commit: false   # Auto-commit results to git
+  output_format: "markdown"  # markdown, json, both
+  compare_previous: true     # Compare with previous runs
+
+# Advanced Settings
+advanced:
+  model_inventory: "models-inventory.yaml"  # Model database file
+  model_dir: "/mnt/ai-models"               # Model storage location
+  parallel_benchmarks: false                # Run benchmarks in parallel (not recommended)

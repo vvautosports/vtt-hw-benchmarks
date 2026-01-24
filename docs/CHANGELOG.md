@@ -6,7 +6,7 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 - **Configuration System**
-  - `model-config.yaml` for centralized model configuration
+  - `models-inventory.yaml` for centralized model configuration
   - Default 5-model configuration (DeepSeek-R1, GLM-4.7, MiniMax, Qwen3-235B, GPT-OSS-20B)
   - `MODEL_CONFIG_MODE` environment variable (default/all modes)
   - Config parser utility (`scripts/utils/config-parser.sh`)

@@ -3,7 +3,7 @@ mode: "default"
 model_dir: "/mnt/ai-models"
 
 # Example: Default 5-model configuration
-# Copy this to root as model-config.yaml and customize as needed
+# Copy this to root as models-inventory.yaml and customize as needed
 
 default_models:
   - name: "DeepSeek-R1-Distill-Llama-70B"

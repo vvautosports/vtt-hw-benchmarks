@@ -1,5 +1,5 @@
 # Download Light Models from HuggingFace
-# Downloads the light-mode models specified in model-config.yaml
+# Downloads the light-mode models specified in models-inventory.yaml
 # Usage: .\Download-Light-Models.ps1 [-ModelPath "D:\ai-models"] [-Force]
 
 param(
@@ -14,7 +14,7 @@ Write-Host "  VTT Hardware Benchmarks - Light Model Downloader" -ForegroundColor
 Write-Host "=================================================================" -ForegroundColor Cyan
 Write-Host ""
 
-# Models to download (from model-config.yaml light_models)
+# Models to download (from models-inventory.yaml light_models)
 $Models = @(
     @{
         Name = "GPT-OSS-20B"

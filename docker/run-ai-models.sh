@@ -1,7 +1,7 @@
 #!/bin/bash
 # Run AI inference benchmarks across multiple models
 # Implements Issue #4: Multiple AI Model Testing
-# Supports configurable model selection via model-config.yaml
+# Supports configurable model selection via models-inventory.yaml
 
 set -e
 
@@ -10,7 +10,7 @@ RESULTS_DIR="${RESULTS_DIR:-$SCRIPT_DIR/../results}"
 MODEL_DIR="${MODEL_DIR:-/mnt/ai-models}"
 TIMESTAMP=$(date +%Y%m%d-%H%M%S)
 HOSTNAME=$(hostname)
-CONFIG_FILE="${CONFIG_FILE:-$SCRIPT_DIR/../model-config.yaml}"
+CONFIG_FILE="${CONFIG_FILE:-$SCRIPT_DIR/../models-inventory.yaml}"
 MODEL_CONFIG_MODE="${MODEL_CONFIG_MODE:-}"  # default, all, or empty (auto)
 QUICK_TEST="${QUICK_TEST:-false}"
 

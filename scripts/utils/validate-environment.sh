@@ -68,7 +68,7 @@ if command -v df &> /dev/null; then
 fi
 
 # Check configuration file
-CONFIG_FILE="${CONFIG_FILE:-./model-config.yaml}"
+CONFIG_FILE="${CONFIG_FILE:-./models-inventory.yaml}"
 echo ""
 echo "Checking configuration file: $CONFIG_FILE"
 if [ -f "$CONFIG_FILE" ]; then
