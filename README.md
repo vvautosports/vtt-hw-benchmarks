@@ -56,11 +56,11 @@ cd vtt-hw-benchmarks\scripts\setup\hp-zbook
 
 3. **Run Setup:**
 
-Right-click `RUN-SETUP.bat` → Run as Administrator
+Right-click `SETUP.bat` → Run as Administrator
 
-Or via PowerShell:
-```powershell
-.\RUN-SETUP.bat
+Or from command line:
+```cmd
+SETUP.bat
 ```
 
 4. **Start Docker Desktop** (if not running)
