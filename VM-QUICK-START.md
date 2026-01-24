@@ -30,18 +30,24 @@ cd vtt-hw-benchmarks
 .\scripts\testing\Test-Windows-Short.ps1
 ```
 
-## Monitor from Host
+## Monitor from Host (Optional)
 
 ```bash
-# Watch VM stats
+# Dedicated monitoring script (recommended)
+./scripts/vm/monitor-vm.sh
+
+# Or simple watch command
 watch -n 1 'virsh -c qemu:///system domstats windows11-vtt-test | grep -E "(cpu\.|balloon\.)"'
 ```
 
 ## Expected Timeline
 
-- Setup: 10-15 minutes
-- Validation: 2-3 minutes
-- **Total: 12-18 minutes**
+- Model download: 10-15 minutes (22GB from HuggingFace)
+- WSL2/Docker setup: 5-10 minutes
+- Validation test: 2-3 minutes
+- **Total: 17-28 minutes**
+
+**Note:** Downloads light models (GPT-OSS-20B + Qwen3-8B) to test actual HP deployment process.
 
 ## Success = Ready for HP ZBooks
 
