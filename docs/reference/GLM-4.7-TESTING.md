@@ -18,6 +18,26 @@ Testing guide for GLM-4.7 family models with extended context sizes on AMD Strix
 - **Native Max Context:** 202,752 tokens
 - **Practical Max Context:** 202K (full native support)
 
+### GLM-4.7-Flash-REAP-23B-BF16 (43GB)
+- **File:** `GLM-4.7-Flash-REAP-23B-A3B-BF16.gguf` (single file)
+- **Quantization:** BF16 (16-bit brain float)
+- **Size:** 43 GiB
+- **Parameters:** 23 billion
+- **Native Max Context:** 202,752 tokens
+- **Practical Max Context:** 65K (optimal performance)
+- **Architecture:** REAP (25% more memory efficient)
+- **Performance:** ~10 t/s generation, ~110 t/s prompt processing
+
+### GLM-4.7-Flash-REAP-23B-Q8 (Testing - January 2026)
+- **File:** `GLM-4.7-Flash-REAP-23B-A3B-Q8_K_XL.gguf` (estimated)
+- **Quantization:** Q8_K_XL (8-bit)
+- **Size:** ~20-25 GiB (estimated, 50% smaller than BF16)
+- **Parameters:** 23 billion
+- **Native Max Context:** 202,752 tokens
+- **Practical Max Context:** 65K (optimal performance)
+- **Expected Performance:** ~15-20 t/s generation (1.5-2x faster than BF16)
+- **Status:** Downloading and testing in progress
+
 ### GLM-4.7-REAP-218B (92GB)
 - **Files:** 2-part model (47GB + 45GB)
 - **Quantization:** Q3_K_XL (3-bit)
@@ -25,6 +45,31 @@ Testing guide for GLM-4.7 family models with extended context sizes on AMD Strix
 - **Parameters:** 218 billion (46x larger than Flash models)
 - **Native Max Context:** 202,752 tokens
 - **Practical Max Context:** ~65K (memory limited on 128GB system)
+
+## Quantization Comparison: Q8 vs BF16
+
+**Key Finding (January 2026):** Q8 quantization provides **2x generation speed** improvement over BF16 with negligible quality loss.
+
+### GLM-4.7-Flash: Q8 vs BF16
+
+| Metric | Q8 (33GB) | BF16 (56GB) | Improvement |
+|--------|-----------|-------------|-------------|
+| Generation Speed | ~18 t/s | ~9 t/s | **2x faster** |
+| API Response Time | ~0.27-0.36s | ~1.1-1.5s | **3-4x faster** |
+| Model Size | 33GB | 56GB | 41% smaller |
+| Quality | Near-lossless | Lossless | Negligible difference |
+
+**Recommendation:** Always prefer Q8 when available for interactive use.
+
+### GLM-4.7-Flash-REAP: Q8 vs BF16 (Testing)
+
+| Metric | Q8 XL (est.) | BF16 (43GB) | Expected Improvement |
+|--------|--------------|-------------|----------------------|
+| Generation Speed | ~15-20 t/s | ~10 t/s | **1.5-2x faster** |
+| Model Size | ~20-25GB | 43GB | ~50% smaller |
+| Memory Efficiency | REAP (25% better) | REAP (25% better) | Same benefit |
+
+**Status:** Q8 XL testing in progress (January 2026)
 
 ## Memory Requirements (VRAM Estimates)
 

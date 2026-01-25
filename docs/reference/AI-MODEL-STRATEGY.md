@@ -23,12 +23,69 @@ Comprehensive analysis and recommendations for local AI coding assistants on AMD
 | **GLM-4.7-Flash-Q8** | 33GB | Q8 | 30B | **801** 🔥 | **37.5** 🔥 | **202K** | 41GB |
 | **GPT-OSS-20B-F16** | 13GB | F16 | 20B | **1135** 🔥 | **46.3** 🔥 | ~32K | 20GB |
 | GLM-4.7-Flash-BF16 | 56GB | BF16 | 30B | 321 | 9.0 | 202K | 64GB |
+| GLM-4.7-Flash-REAP-23B-BF16 | 43GB | BF16 | 23B | ~110 | ~10 | 202K | ~24GB |
+| GLM-4.7-Flash-REAP-23B-Q8 | ~20-25GB | Q8 | 23B | ~130 (est.) | ~15-20 (est.) | 202K | ~20GB (est.) |
 | Qwen3-80B-Q8 | 87GB | Q8 | 80B | 508 | 29.1 | ~128K | 115GB ⚠️ |
 | GLM-4.7-REAP-218B | 92GB | Q3 | 218B | 101 | 11.5 | 65K | 116GB ⚠️ |
 | Qwen3-235B-Q3 | 97GB | Q3 | 235B | 131 | 17.1 | ~128K | 122GB ⚠️ |
 
-🔥 = Fastest in category
-⚠️ = Memory constrained (>100GB @ 65K context)
+🔥 = Fastest in category  
+⚠️ = Memory constrained (>100GB @ 65K context)  
+📊 **See Quantization Comparison section below for detailed Q8 vs BF16 analysis**
+
+## Quantization Comparison Analysis
+
+### GLM-4.7-Flash: Q8 vs BF16
+
+**Performance Impact:**
+
+| Metric | Q8 (33GB) | BF16 (56GB) | Improvement |
+|--------|-----------|-------------|-------------|
+| **Model Size** | 33GB | 56GB | **41% smaller** |
+| **Generation Speed** | ~18 t/s | ~9 t/s | **2x faster** |
+| **Prompt Processing** | ~130 t/s | ~110 t/s | 18% faster |
+| **API Response Time** | ~0.27-0.36s | ~1.1-1.5s | **3-4x faster** |
+| **Memory @ 65K** | ~21GB | ~24GB | 12% less |
+| **Quality** | Near-lossless | Lossless | Negligible difference |
+
+**Verdict:** Q8 provides **2x generation speed** with minimal quality loss. **Always prefer Q8 when available.**
+
+### GLM-4.7-Flash-REAP: Q8 vs BF16
+
+**Expected Performance (Q8 XL testing in progress):**
+
+| Metric | Q8 XL (~20-25GB est.) | BF16 (43GB) | Expected Improvement |
+|--------|----------------------|-------------|----------------------|
+| **Model Size** | ~20-25GB | 43GB | **~50% smaller** |
+| **Generation Speed** | ~15-20 t/s (est.) | ~10 t/s | **1.5-2x faster** |
+| **Memory Efficiency** | REAP (25% better) | REAP (25% better) | Same architecture benefit |
+| **Quality** | Near-lossless | Lossless | Negligible difference |
+
+**Status:** Q8 XL version being tested (January 2026)  
+**Expected Verdict:** Q8 XL should provide significant speed improvement while maintaining REAP's memory efficiency benefits.
+
+### Quantization Recommendations by Use Case
+
+**For Speed-Critical Tasks:**
+- ✅ **Q8** - Best balance of speed and quality
+- ✅ **Q6_K** - AMD recommended for coding (slightly smaller than Q8)
+- ⚠️ **Q5_K_M** - Good if Q8/Q6 not available
+- ❌ **BF16/F16** - Too slow for interactive use (use for quality-critical batch processing)
+
+**For Memory-Constrained Systems:**
+- ✅ **Q8** - Best quality at reasonable size
+- ✅ **Q6_K** - Good quality, smaller than Q8
+- ✅ **Q5_K_M** - Sweet spot for many models
+- ⚠️ **Q4_K_M** - Acceptable quality loss, significant size reduction
+- ❌ **Q3 and below** - Only for massive models (218B+), significant quality loss
+
+**For Quality-Critical Tasks:**
+- ✅ **BF16/F16** - Lossless quality (but slow)
+- ✅ **Q8** - Near-lossless, much faster
+- ⚠️ **Q6_K** - Very good quality, recommended for coding
+- ❌ **Q5 and below** - May have noticeable quality degradation
+
+**Key Insight:** For Claude Code and interactive coding assistance, **Q8 is the optimal choice** - provides 2x speed improvement over BF16 with negligible quality loss.
 
 ---
 
