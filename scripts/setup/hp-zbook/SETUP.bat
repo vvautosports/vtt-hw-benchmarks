@@ -340,7 +340,14 @@ while ($true) {
             Write-Host "Entering WSL..." -ForegroundColor Gray
             Write-Host "Fixing line endings in all shell scripts..." -ForegroundColor Gray
             wsl bash -c "cd '$wslPath' && find . -name '*.sh' -type f -exec sed -i 's/\r$//' {} \; 2>/dev/null"
-            wsl bash -c "cd '$wslPath' && ./scripts/ci-cd/pull-from-ghcr.sh"
+            Write-Host "Pulling containers from GHCR..." -ForegroundColor Gray
+            $pullResult = wsl bash -c "cd '$wslPath' && ./scripts/ci-cd/pull-from-ghcr.sh" 2>&1
+            if ($LASTEXITCODE -ne 0) {
+                Write-Host "WARNING: Container pull had issues. Check output above." -ForegroundColor Yellow
+                Write-Host "You can retry manually: wsl bash -c 'cd /mnt/c/vtt-hw-benchmarks && ./scripts/ci-cd/pull-from-ghcr.sh'" -ForegroundColor Yellow
+            } else {
+                Write-Host "Containers pulled successfully" -ForegroundColor Green
+            }
             Write-Host ""
             Write-Host "Press any key to continue..."
             $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")

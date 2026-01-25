@@ -31,19 +31,14 @@ powershell -ExecutionPolicy Bypass -File .\GET-STARTED.ps1
 
 Windows PowerShell has a security feature that blocks unsigned scripts by default. If you encounter an execution policy error, use one of these methods:
 
-**Option 1: Bypass for single script (Recommended)**
-```powershell
-powershell -ExecutionPolicy Bypass -File .\scripts\setup\hp-zbook\HP-ZBOOK-SETUP-INTERACTIVE.ps1
-```
+**Option 1: Run SETUP.bat (Recommended)**
+Right-click `scripts\setup\hp-zbook\SETUP.bat` → Run as Administrator
 
 **Option 2: Set execution policy (requires Administrator)**
 ```powershell
 Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
 ```
-This allows locally created scripts to run. After setting this, you can run scripts normally:
-```powershell
-.\scripts\setup\hp-zbook\HP-ZBOOK-SETUP-INTERACTIVE.ps1
-```
+This allows locally created scripts to run. After setting this, you can run scripts normally.
 
 **Note:** The `-ExecutionPolicy Bypass` flag is safe for one-time script execution and doesn't change system settings.
 
@@ -63,23 +58,15 @@ winget install --id GitHub.cli --source winget
 # Step 3: In the new PowerShell window, authenticate (opens browser)
 gh auth login
 
-# Step 4: Clone and run interactive menu
+# Step 4: Clone and run setup
 gh repo clone vvautosports/vtt-hw-benchmarks; cd vtt-hw-benchmarks
-powershell -ExecutionPolicy Bypass -File .\scripts\setup\hp-zbook\HP-ZBOOK-SETUP-INTERACTIVE.ps1
 ```
+
+# Step 5: Run Setup
+
+Right-click `scripts\setup\hp-zbook\SETUP.bat` → Run as Administrator
 
 The interactive menu will guide you through the rest!
-
-### Alternative: One-Command Automatic
-
-If you prefer fully automatic setup:
-
-```powershell
-# After installing gh CLI and authenticating:
-gh repo clone vvautosports/vtt-hw-benchmarks; cd vtt-hw-benchmarks; .\scripts\setup\hp-zbook\HP-ZBOOK-SETUP-ONE-COMMAND.ps1
-```
-
-This does everything automatically without the menu.
 
 ### Step-by-Step Breakdown
 
@@ -107,25 +94,15 @@ gh repo clone vvautosports/vtt-hw-benchmarks
 cd vtt-hw-benchmarks
 ```
 
-**4. Run Setup (Choose One)**
+**4. Run Setup**
 
-**Interactive Menu (Recommended):**
-```powershell
-powershell -ExecutionPolicy Bypass -File .\scripts\setup\hp-zbook\HP-ZBOOK-SETUP-INTERACTIVE.ps1
-```
-Shows a menu with status indicators - you can do steps individually or choose "do everything automatically"
+Right-click `scripts\setup\hp-zbook\SETUP.bat` → Run as Administrator
 
-**One-Command Automatic:**
+**Alternative: WSL2 Direct Setup**
+If you prefer WSL2 direct setup (without Docker Desktop):
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\scripts\setup\hp-zbook\HP-ZBOOK-SETUP-ONE-COMMAND.ps1
+powershell -ExecutionPolicy Bypass -File .\scripts\utils\setup-windows-full.ps1
 ```
-Runs everything automatically without prompts
-
-**Basic Setup:**
-```powershell
-powershell -ExecutionPolicy Bypass -File .\scripts\setup\hp-zbook\HP-ZBOOK-SETUP.ps1
-```
-Assumes repo is already cloned, just runs the setup
 
 **Note:** If you've already set the execution policy (see above), you can omit the `-ExecutionPolicy Bypass` flag.
 
@@ -175,7 +152,7 @@ MODEL_CONFIG_MODE=default ./run-ai-models.sh
 2. After restart, run:
 ```powershell
 cd C:\vtt-hw-benchmarks
-.\scripts\setup\hp-zbook\HP-ZBOOK-SETUP.ps1
+Right-click `scripts\setup\hp-zbook\SETUP.bat` → Run as Administrator
 ```
 
 ---

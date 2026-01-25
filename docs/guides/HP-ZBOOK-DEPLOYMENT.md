@@ -69,7 +69,7 @@ Open PowerShell as Administrator:
 cd C:\vtt-hw-benchmarks
 
 # Run automated setup
-.\scripts\utils\Setup-HP-ZBook-Automated.ps1 -ModelPath "D:\ai-models"
+.\scripts\utils\setup-windows-full.ps1 -ModelPath "D:\ai-models"
 ```
 
 **What it does:**
@@ -154,7 +154,7 @@ git push
 For bulk deployment or scripted setups:
 
 ```powershell
-.\scripts\utils\Setup-HP-ZBook-Automated.ps1 -ModelPath "D:\ai-models" -NonInteractive
+.\scripts\utils\setup-windows-full.ps1 -ModelPath "D:\ai-models" -NonInteractive
 ```
 
 ### Skip Model Download
@@ -162,7 +162,7 @@ For bulk deployment or scripted setups:
 If models are already downloaded or will be copied from USB:
 
 ```powershell
-.\scripts\utils\Setup-HP-ZBook-Automated.ps1 -SkipModels
+.\scripts\utils\setup-windows-full.ps1 -SkipModels
 ```
 
 ### Skip Validation Test
@@ -170,7 +170,7 @@ If models are already downloaded or will be copied from USB:
 To complete setup faster without running the validation test:
 
 ```powershell
-.\scripts\utils\Setup-HP-ZBook-Automated.ps1 -SkipTests
+.\scripts\utils\setup-windows-full.ps1 -SkipTests
 ```
 
 ### Manual Model Download
@@ -338,7 +338,7 @@ For deploying to multiple HP laptops:
 
 2. **Use non-interactive mode:**
    ```powershell
-   .\Setup-HP-ZBook-Automated.ps1 -NonInteractive -SkipModels
+   .\scripts\utils\setup-windows-full.ps1 -NonInteractive -SkipModels
    # Then copy models from USB
    ```
 
@@ -358,14 +358,15 @@ For deploying to multiple HP laptops:
 ### Documentation
 - [README.md](../../README.md) - Main documentation
 - [WINDOWS-SETUP.md](WINDOWS-SETUP.md) - Windows setup details
-- [WINDOWS-VM-TESTING.md](WINDOWS-VM-TESTING.md) - VM testing guide
+- [Windows VM Testing](../testing/windows-vm/README.md) - VM testing guide (to be created)
 - [CONFIGURATION.md](CONFIGURATION.md) - Model configuration
 
 ### Scripts
-- `Setup-HP-ZBook-Automated.ps1` - Main setup script
-- `Download-Light-Models.ps1` - Model download helper
-- `Test-Windows-Setup.ps1` - Validation script
-- `Test-Windows-Short.ps1` - Quick validation
+- `scripts/utils/setup-windows-full.ps1` - Main setup script (WSL2 approach)
+- `scripts/setup/hp-zbook/SETUP.bat` - Interactive setup script (Docker Desktop approach)
+- `scripts/utils/Download-Light-Models.ps1` - Model download helper
+- `scripts/testing/Test-Windows-Setup.ps1` - Validation script
+- `scripts/testing/Test-Windows-Short.ps1` - Quick validation
 
 ### Container Registry
 - GHCR: https://github.com/orgs/vvautosports/packages

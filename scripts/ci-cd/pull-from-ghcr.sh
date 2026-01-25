@@ -63,12 +63,15 @@ for image in "${IMAGES[@]}"; do
     echo ""
 
     # Pull image
-    $RUNTIME pull "$REMOTE_IMAGE"
-
-    # Tag as local name for convenience
-    $RUNTIME tag "$REMOTE_IMAGE" "$LOCAL_TAG"
-
-    echo "✅ Pulled and tagged: $LOCAL_TAG"
+    if $RUNTIME pull "$REMOTE_IMAGE"; then
+        # Tag as local name for convenience
+        $RUNTIME tag "$REMOTE_IMAGE" "$LOCAL_TAG"
+        echo "✅ Pulled and tagged: $LOCAL_TAG"
+    else
+        echo "❌ Failed to pull: $REMOTE_IMAGE"
+        echo "   Check network connection and GHCR access"
+        exit 1
+    fi
     echo ""
 done
 

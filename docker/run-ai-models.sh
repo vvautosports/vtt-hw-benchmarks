@@ -254,10 +254,33 @@ for base_name in "${!MODEL_GROUPS[@]}"; do
     # AMD iGPU device mounts for Strix Halo
     # Vulkan (RADV) requires: /dev/dri
     # ROCm requires: /dev/dri + /dev/kfd
-    GPU_ARGS="--device /dev/dri --device /dev/kfd --group-add video --group-add render --security-opt seccomp=unconfined"
+    # In nested VMs, GPU devices won't exist - handle gracefully
+    GPU_ARGS=""
+    if [ -d "/dev/dri" ]; then
+        GPU_ARGS="--device /dev/dri --group-add video --group-add render"
+        if [ -d "/dev/kfd" ]; then
+            GPU_ARGS="$GPU_ARGS --device /dev/kfd"
+        fi
+        GPU_ARGS="$GPU_ARGS --security-opt seccomp=unconfined"
+        echo "GPU devices detected - using GPU acceleration" | tee -a "$LOG_FILE"
+    else
+        echo "WARNING: No GPU devices found (/dev/dri not available)" | tee -a "$LOG_FILE"
+        echo "Running in CPU-only mode (expected in nested VMs)" | tee -a "$LOG_FILE"
+    fi
+
+    # Verify container image exists
+    if ! $RUNTIME image inspect vtt-benchmark-llama:latest &>/dev/null; then
+        echo "ERROR: Container image 'vtt-benchmark-llama:latest' not found" | tee -a "$LOG_FILE"
+        echo "Pull images with: ./scripts/ci-cd/pull-from-ghcr.sh" | tee -a "$LOG_FILE"
+        exit 1
+    fi
 
     # Run benchmark
-    echo "Running llama-bench with AMD iGPU acceleration..." | tee -a "$LOG_FILE"
+    if [ -n "$GPU_ARGS" ]; then
+        echo "Running llama-bench with AMD iGPU acceleration..." | tee -a "$LOG_FILE"
+    else
+        echo "Running llama-bench in CPU-only mode..." | tee -a "$LOG_FILE"
+    fi
 
     BENCH_OUTPUT=$($RUNTIME run --rm $MOUNT_ARGS $GPU_ARGS \
         -e MODEL_PATH="$MODEL_PATH" \
