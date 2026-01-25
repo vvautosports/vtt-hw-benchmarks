@@ -338,8 +338,8 @@ while ($true) {
             $wslPath = $repoPath -replace '^([A-Z]):', '/mnt/$1' -replace '\\', '/' | ForEach-Object { $_.ToLower() }
 
             Write-Host "Entering WSL..." -ForegroundColor Gray
-            Write-Host "Fixing line endings..." -ForegroundColor Gray
-            wsl bash -c "cd '$wslPath' && find . -name '*.sh' -type f -exec dos2unix {} \; 2>/dev/null || find . -name '*.sh' -type f -exec sed -i 's/\r$//' {} \;"
+            Write-Host "Fixing line endings in all shell scripts..." -ForegroundColor Gray
+            wsl bash -c "cd '$wslPath' && find . -name '*.sh' -type f -exec sed -i 's/\r$//' {} \; 2>/dev/null"
             wsl bash -c "cd '$wslPath' && ./scripts/ci-cd/pull-from-ghcr.sh"
             Write-Host ""
             Write-Host "Press any key to continue..."
@@ -385,8 +385,6 @@ while ($true) {
 
             Write-Host "Entering WSL..." -ForegroundColor Gray
             Write-Host "Repository: $dockerPath" -ForegroundColor Gray
-            Write-Host "Fixing line endings..." -ForegroundColor Gray
-            wsl bash -c "cd '$dockerPath' && find . -name '*.sh' -type f -exec dos2unix {} \; 2>/dev/null || sed -i 's/\r$//' *.sh"
             wsl bash -c "cd '$dockerPath' && MODEL_CONFIG_MODE=default ./run-ai-models.sh --quick-test"
             Write-Host ""
             Write-Host "Press any key to continue..."
@@ -414,8 +412,6 @@ while ($true) {
 
             Write-Host "Entering WSL..." -ForegroundColor Gray
             Write-Host "Repository: $dockerPath" -ForegroundColor Gray
-            Write-Host "Fixing line endings..." -ForegroundColor Gray
-            wsl bash -c "cd '$dockerPath' && find . -name '*.sh' -type f -exec dos2unix {} \; 2>/dev/null || sed -i 's/\r$//' *.sh"
             wsl bash -c "cd '$dockerPath' && MODEL_CONFIG_MODE=default ./run-ai-models.sh"
             Write-Host ""
             Write-Host "Press any key to continue..."
@@ -443,8 +439,6 @@ while ($true) {
 
             Write-Host "Entering WSL..." -ForegroundColor Gray
             Write-Host "Repository: $dockerPath" -ForegroundColor Gray
-            Write-Host "Fixing line endings..." -ForegroundColor Gray
-            wsl bash -c "cd '$dockerPath' && find . -name '*.sh' -type f -exec dos2unix {} \; 2>/dev/null || sed -i 's/\r$//' *.sh"
             wsl bash -c "cd '$dockerPath' && MODEL_CONFIG_MODE=all ./run-ai-models.sh"
             Write-Host ""
             Write-Host "Press any key to continue..."
