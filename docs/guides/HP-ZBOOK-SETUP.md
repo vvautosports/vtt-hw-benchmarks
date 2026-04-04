@@ -18,8 +18,8 @@ powershell -ExecutionPolicy Bypass -File .\scripts\utils\Fetch-Setup-Instruction
 ```
 
 **Option 2: View in browser**
-- README: https://github.com/vvautosports/vtt-hw-benchmarks/blob/master/README.md
-- Setup Guide: https://github.com/vvautosports/vtt-hw-benchmarks/blob/master/docs/guides/HP-ZBOOK-SETUP.md
+- README: https://github.com/vvautosports/vtt-hw-benchmarks/blob/main/README.md
+- Setup Guide: https://github.com/vvautosports/vtt-hw-benchmarks/blob/main/docs/guides/HP-ZBOOK-SETUP.md
 
 **Option 3: Quick start script**
 ```powershell

@@ -48,7 +48,7 @@ echo $GITHUB_TOKEN | podman login ghcr.io -u USERNAME --password-stdin
 **Automated CI/CD:**
 
 The repository includes GitHub Actions workflows that automatically:
-- Build all 4 container images on push to `master`
+- Build all 4 container images on push to `develop`
 - Push images to GHCR with `latest` tag
 - Post notification to Discord (if webhook configured)
 - Run linting on all pull requests

@@ -57,7 +57,7 @@ git clone https://github.com/vvautosports/vtt-hw-benchmarks.git
 cd vtt-hw-benchmarks
 
 # Option 2: Download ZIP
-# Download from: https://github.com/vvautosports/vtt-hw-benchmarks/archive/refs/heads/master.zip
+# Download from: https://github.com/vvautosports/vtt-hw-benchmarks/archive/refs/heads/main.zip
 # Extract to C:\vtt-hw-benchmarks
 ```
 

@@ -357,7 +357,7 @@ vtt-hw-benchmarks/
 
 ### Automated Container Builds
 
-Containers are automatically built and published to GitHub Container Registry on every push to `master`:
+Containers are automatically built and published to GitHub Container Registry on every push to `develop`:
 
 - **Registry:** `ghcr.io/vvautosports/vtt-hw-benchmarks`
 - **Images:** `7zip`, `stream`, `storage`, `llama`
