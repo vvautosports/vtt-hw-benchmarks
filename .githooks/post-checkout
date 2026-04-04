@@ -1,0 +1,29 @@
+#!/bin/bash
+# VVC branch naming reminder — post-checkout hook
+# Warns when checking out a worktree-* or claude/* branch.
+# Install: git config core.hooksPath .githooks
+
+# post-checkout receives: prev_head new_head flag
+# flag=1 means branch checkout (not file checkout)
+FLAG="$3"
+[ "$FLAG" = "1" ] || exit 0
+
+BRANCH=$(git symbolic-ref HEAD 2>/dev/null | sed 's|refs/heads/||')
+
+if [[ "$BRANCH" == worktree-* ]]; then
+  echo ""
+  echo "  REMINDER: Rename this auto-generated branch before pushing:"
+  echo ""
+  echo "    git branch -m $BRANCH feature/<descriptive-name>"
+  echo ""
+fi
+
+if [[ "$BRANCH" == claude/* ]]; then
+  echo ""
+  echo "  REMINDER: 'claude/*' prefix is deprecated. Rename to feature/*:"
+  echo ""
+  echo "    git branch -m $BRANCH feature/${BRANCH#claude/}"
+  echo ""
+fi
+
+exit 0
