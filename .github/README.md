@@ -11,7 +11,7 @@ Automated CI/CD pipelines for VTT Hardware Benchmarks.
 Automatically builds and publishes all benchmark container images to GitHub Container Registry.
 
 **Triggers:**
-- **Push to `master`**: Builds and pushes all images with `latest` tag
+- **Push to `develop`**: Builds and pushes all images with `latest` tag
 - **Pull Request**: Builds images for testing (doesn't push)
 - **Manual dispatch**: Build and push with custom version tag
 
@@ -38,7 +38,7 @@ ghcr.io/vvautosports/vtt-hw-benchmarks/vtt-benchmark-llama:latest
 ```bash
 # Via GitHub UI: Actions tab → Build and Push Containers → Run workflow
 # Or via gh CLI:
-gh workflow run build-and-push-containers.yml --ref master
+gh workflow run build-and-push-containers.yml --ref develop
 ```
 
 **Permissions:**
@@ -54,7 +54,7 @@ Runs linting on shell scripts and markdown files.
 
 **Triggers:**
 - **Push to any branch**
-- **Pull Request to `master`**
+- **Pull Request to `develop`**
 
 **What it does:**
 1. **Shellcheck**: Validates all bash scripts

@@ -2,12 +2,12 @@ name: Build and Push Containers
 
 on:
   push:
-    branches: [main, master]
+    branches: [develop]
     paths:
       - 'docker/**'
       - '.github/workflows/build-and-push-containers.yml'
   pull_request:
-    branches: [main, master]
+    branches: [develop]
     paths:
       - 'docker/**'
   workflow_dispatch:
@@ -88,7 +88,7 @@ jobs:
   notify-discord:
     needs: build-and-push
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
 
     steps:
       - name: Send Discord notification
