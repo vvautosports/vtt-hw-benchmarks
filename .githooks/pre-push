@@ -1,0 +1,90 @@
+#!/bin/bash
+# VVC branch naming enforcement — pre-push hook
+# Blocks pushes from worktree-* and claude/* branches.
+# Valid prefixes: feature/*, hotfix/*, release/*
+# Install: git config core.hooksPath .githooks
+
+ZERO="0000000000000000000000000000000000000000"
+HAS_REAL_PUSH=false
+
+while read -r local_ref local_sha remote_ref remote_sha; do
+  # Tag push — always allowed
+  if [[ "$local_ref" == refs/tags/* ]]; then
+    exit 0
+  fi
+
+  # Branch deletion (local_sha is all zeros) — skip
+  if [[ "$local_sha" == "$ZERO" ]]; then
+    continue
+  fi
+
+  HAS_REAL_PUSH=true
+done
+
+# If all refs were deletions (or no refs), skip branch checks
+if [[ "$HAS_REAL_PUSH" != "true" ]]; then
+  exit 0
+fi
+
+BRANCH=$(git symbolic-ref HEAD 2>/dev/null | sed 's|refs/heads/||')
+
+# Block pushes to protected branches
+for protected in main develop; do
+  if [ "$BRANCH" = "$protected" ]; then
+    echo ""
+    echo "=== BLOCKED: direct push to '$protected' ==="
+    echo ""
+    echo "  VVC workflow: feature/<name> -> PR to develop -> merge to main"
+    echo ""
+    echo "  Fix:"
+    echo "    git checkout -b feature/<your-description>"
+    echo "    git push origin feature/<your-description>"
+    echo "    gh pr create --base develop"
+    echo ""
+    echo "  For AI agents: STOP. Work on a feature/* branch."
+    echo ""
+    exit 1
+  fi
+done
+
+# Block worktree-* branches (auto-generated, must be renamed)
+if [[ "$BRANCH" == worktree-* ]]; then
+  echo ""
+  echo "=== BLOCKED: 'worktree-*' branches cannot be pushed ==="
+  echo ""
+  echo "  '$BRANCH' is an auto-generated name from Claude Code --worktree."
+  echo "  Rename it before pushing:"
+  echo ""
+  echo "    git branch -m $BRANCH feature/<descriptive-name>"
+  echo ""
+  exit 1
+fi
+
+# Block claude/* branches (deprecated prefix)
+if [[ "$BRANCH" == claude/* ]]; then
+  echo ""
+  echo "=== BLOCKED: 'claude/*' prefix is deprecated ==="
+  echo ""
+  echo "  Use 'feature/*' for all branches. Rename before pushing:"
+  echo ""
+  echo "    git branch -m $BRANCH feature/${BRANCH#claude/}"
+  echo ""
+  exit 1
+fi
+
+# Warn on non-standard branch names
+if [[ "$BRANCH" != feature/* && "$BRANCH" != hotfix/* && "$BRANCH" != release/* ]]; then
+  echo ""
+  echo "  WARNING: Branch '$BRANCH' doesn't follow naming convention."
+  echo "  Expected: feature/<description>, hotfix/<description>, or release/<description>"
+  echo ""
+  # Non-interactive environments (CI, AI agents) — block
+  if [ ! -t 0 ]; then
+    echo "  Non-interactive shell detected. Push blocked."
+    echo "  Rename: git branch -m $BRANCH feature/<description>"
+    exit 1
+  fi
+  read -rp "  Push anyway? (y/N) " -n 1
+  echo ""
+  [[ $REPLY =~ ^[Yy]$ ]] || exit 1
+fi
