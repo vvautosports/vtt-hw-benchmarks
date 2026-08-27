@@ -29,6 +29,20 @@ Switch tiers only when implementation starts.
 5. `gh pr view 9 --json state,mergedAt -q .` and open-issue check on #8/#10.
 6. Read `docs/reference/UNSLOTH-DIRECTION.md` sections "Param-tuning sweep" and "Metrics model" only.
 
+## Overnight outcome (already known — do not re-derive)
+
+Run completed 04:53, 26 records (run1 pre-reboot 62GB GTT, run2 post-reboot
+128GB — records 0-12 vs 13-25; dedupe keeping BOTH, tagged by run). Loaded:
+Qwen3.8-27B UD-Q8 (30G, ~13.4 t/s — no qwen4exp blocker on 27B!),
+gemma-4-26B-A4B UD-Q8 (26G, ~36 t/s, stable both runs — beats GLM ~+12%),
+Nemotron-3.5-Lightning UD-Q8 (36G — **41/52/45 t/s pre-reboot, then HTTP 500s
+post-reboot**; likely transient compiled-cache rebuild — RETEST FIRST, title
+challenger if run1 holds), gemma-4-31B UD-Q8 (33G, ~5.6 t/s dense control).
+MiniMax-M3 UD-Q3 is 182G — exceeds even 128GB GTT, failed both runs cleanly;
+Kal decides delete (reclaim 182G; disk at 81%) vs RPC-pool experiment.
+Qwen3.8-27B MTP sidecar untested. Quality ungraded — grade content-channel
+before any champion talk (gemma-31B's terse outputs especially).
+
 ## This session's scope
 
 1. **Harvest**: pull `~/overnight-2026-08-26/{results.jsonl,log.txt,outputs/}`
