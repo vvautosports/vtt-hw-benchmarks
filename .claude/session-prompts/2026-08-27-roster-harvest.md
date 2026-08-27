@@ -11,13 +11,22 @@ Switch tiers only when implementation starts.
 **vtt-hw-benchmarks is Forgejo-primary** (`vvc/vtt-hw-benchmarks` on
 git.vvautosports.com, default `develop` — NOT a mirror). GitHub PR #9 was
 closed un-merged by Kal for that reason. The worktree now has a `forgejo`
-remote with `feature/unsloth-direction` pushed (up to `a9ba534`); `origin`
-still points at GitHub (stale recreated branch there — clean up when
-convenient, don't push to it). Forgejo PR: Kal opens via
-/compare/develop...feature/unsloth-direction (classifier blocks
-credential-POSTs to the Forgejo API from sessions — reads are fine; ask Kal
-to add a Bash allow rule if this should change, see [[allowlist-expansion]]).
-Issues #8/#10/#11 still live on GitHub — ask Kal whether they migrate.
+remote with `feature/unsloth-direction` pushed; `origin` still points at
+GitHub (stale recreated branch there — clean up when convenient, don't push
+to it). **Forgejo PR #5 is OPEN** with the test-evidence comment posted
+(git.vvautosports.com/vvc/vtt-hw-benchmarks/pulls/5) — shipped via /ship;
+Kal merges after CI (`ci / test`). Use the /ship skill's documented flow for
+any further Forgejo API work. Issues #8/#10/#11 still live on GitHub — ask
+Kal whether they migrate.
+
+## Kal's directive for this session (2026-08-27)
+
+Look deeper into the phase-2 candidate models (issue #10's 2026-08-27
+comment: GLM-5.3-Flash quant watch, Qwen3.8-Flash-Next qwen4exp re-check,
+Qwen3.6-35B-A3B-MTP, Ornith-1.5-35B-A3B, DeepSeek-V4-Flash size-check) and
+either add them to the next batch or queue an overnight run for tonight
+(reuse ~/overnight_run.py — edit its MODELS list; the zero-token-burn
+overnight pattern is proven, downloads gated on Kal as always).
 
 ## Where the last session ended (2026-08-26)
 
