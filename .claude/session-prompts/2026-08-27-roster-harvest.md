@@ -53,7 +53,13 @@ Nemotron-3.5-Lightning UD-Q8 (36G — **41/52/45 t/s pre-reboot, then HTTP 500s
 post-reboot**; likely transient compiled-cache rebuild — RETEST FIRST, title
 challenger if run1 holds), gemma-4-31B UD-Q8 (33G, ~5.6 t/s dense control).
 MiniMax-M3 UD-Q3 is 182G — exceeds even 128GB GTT, failed both runs cleanly;
-Kal decides delete (reclaim 182G; disk at 81%) vs RPC-pool experiment.
+**Kal decided (2026-08-27): KEEP for the dual-machine RPC-pool test** (with
+Kimi-K3 as a second RPC candidate). Phase-2 roster candidates recorded in
+issue #10's 2026-08-27 comment — headline: **GLM-5.3-Flash dropped day-zero
+2026-08-27** (champion's successor; quants still uploading, watch for UD-Q8/Q4;
+first subject for the version-sweep suite), plus Qwen3.6-35B-A3B-MTP,
+Ornith-1.5-35B-A3B, DeepSeek-V4-Flash (size-check; has dspark sidecar).
+Qwen3.8-Flash-Next repo also updated 2026-08-27 — re-check qwen4exp runtime.
 Qwen3.8-27B MTP sidecar untested. Quality ungraded — grade content-channel
 before any champion talk (gemma-31B's terse outputs especially).
 
