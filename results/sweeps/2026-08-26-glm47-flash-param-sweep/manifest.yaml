@@ -1,0 +1,63 @@
+# Sweep run manifest — canonical record until MLflow Phase 2 (workstream D)
+# lands on MS-01, then backfilled by replaying the JSONLs. Every key below is
+# designed to map 1:1 onto MLflow params/tags; per-record JSONL fields map to
+# metrics.
+run_id: "2026-08-26-glm47-flash-param-sweep"
+date: "2026-08-26"
+node: "kalman9-framework-01"          # Framework Desktop, Fedora, 128GB UMA
+hardware: "AMD Strix Halo (Radeon 8060S iGPU), GTT unlock NOT active (62GB ttm)"
+backend: "unsloth-studio"             # unsloth run wrapping llama-server
+runtime_build: "b10472-mix-4b653db"   # unsloth/llama.cpp release (2026-08-18)
+model: "GLM-4.7-Flash"
+quant: "UD-Q8_K_XL"
+model_path: "/mnt/ai-models/unsloth/GLM-4.7-Flash-GGUF/GLM-4.7-Flash-UD-Q8_K_XL.gguf"
+context_length: 202752
+api: "/v1/chat/completions"
+request_constants:
+  seed: 42
+  max_tokens: 8192
+
+# Original sweep target was Qwen3.8-Flash-Next (thinker candidate) — blocked:
+# runtime_build lacks the qwen4exp arch. Retargeted to the serving champion;
+# harness transfers unchanged when qwen4exp lands.
+
+tasks:                                # fixed battery, prompts embedded in driver
+  - reasoning: "LCM scheduling word problem, verifiable (ANSWER: 5)"
+  - code: "parse_ranges() with doctest + ValueError requirements"
+  - summarize: "5-bullet faithful summary of a fixed technical passage"
+
+phase1:
+  axes:
+    profile:
+      thinking: {temperature: 1.0, top_p: 0.95, top_k: 20}
+      instruct: {temperature: 0.7, top_p: 0.80, presence_penalty: 1.5}
+    reasoning_effort: [xhigh, medium, low, "none"]
+  server_config: "baseline (--spec-default --parallel 4)"
+  records: "phase1.jsonl"             # 24 records: 2 profiles x 4 efforts x 3 tasks
+                                      # each carries a `quality` object (grade_sweep.py,
+                                      # content-channel graders, deterministic)
+  outputs: "outputs/phase1/"
+  winner: "thinking/low"              # REVISED post-grading: all correct in content, 121s.
+                                      # thinking/medium (initial pick, drove phase 2) has a
+                                      # reproducible content-leak defect on the code task:
+                                      # answer written to reasoning_content, content = summary.
+  transcript_caveat: "the 3 thinking/medium transcripts are post-hoc regenerations against
+    the restored baseline (originals trampled by the pre-patch phase-2 output-path bug);
+    phase1.jsonl speed fields for those records are from the original pass and the original
+    completion lengths differ (e.g. code 2732 tok original vs 5221 regenerated)."
+
+phase2:
+  axes:
+    speculative_type: [auto, mtp, ngram, mtp+ngram, "off"]   # at --parallel 4
+    parallel: [1, 4, 8]                                       # at best spec type
+  request_config: "thinking/medium (initial phase1 pick; see winner REVISED note — ranking
+    unaffected, these axes are output-invariant)"
+  extra_probe: "concurrent4 — same task x 4 threads, aggregate t/s"
+  records: "phase2.jsonl"
+  outputs: "not stored — pre-patch driver wrote to phase1's paths (trampling bug, fixed in
+    sweep_phase2.py); axes are output-invariant so transcripts carry no analysis value"
+  best: "spec=auto np=4 (studio default confirmed); speculation +26% overall, +69% on code;
+    slot count irrelevant (aggregate pinned ~31 t/s, bandwidth-bound)"
+  note: "kill_serve needs SIGKILL — this llama-server build ignores SIGTERM"
+
+driver_scripts: "sweep_phase1.py / sweep_phase2.py (Framework ~; commit copies TBD next session with harness backend, issue #8)"

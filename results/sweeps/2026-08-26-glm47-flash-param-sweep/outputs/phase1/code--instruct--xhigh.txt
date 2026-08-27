@@ -1,0 +1,880 @@
+=== REASONING ===
+The user wants me to write a Python function that parses ranges in a string format like '1-3,5,7-9' and converts it to a list of integers. Let me break down the requirements:
+
+1. Parse strings like '1-3,5,7-9' into [1, 2, 3, 5, 7, 8, 9]
+2. Ignore whitespace around numbers and commas
+3. A reversed range like '9-7' should raise ValueError
+4. Empty or whitespace-only input returns []
+5. Include doctest block with at least 5 examples covering all requirements
+
+Let me write this function:
+
+```python
+def parse_ranges(s: str) -> list[int]:
+    """
+    Parse a string containing number ranges into a sorted list of integers.
+    
+    Examples:
+        >>> parse_ranges('1-3,5,7-9')
+        [1, 2, 3, 5, 7, 8, 9]
+        >>> parse_ranges('1 - 3 , 5 , 7 - 9')
+        [1, 2, 3, 5, 7, 8, 9]
+        >>> parse_ranges('10-12')
+        [10, 11, 12]
+        >>> parse_ranges('5')
+        [5]
+        >>> parse_ranges('')
+        []
+        >>> parse_ranges('   ')
+        []
+        >>> parse_ranges('3-1')  # doctest: +IGNORE_EXCEPTION_DETAIL
+        Traceback (most recent call last):
+            ...
+        ValueError: Invalid range: start > end in '3-1'
+    """
+    if not s.strip():
+        return []
+    
+    result = []
+    parts = [p.strip() for p in s.split(',')]
+    
+    for part in parts:
+        if '-' in part:
+            # Parse a range
+            try:
+                start_str, end_str = part.split('-')
+                start = int(start_str)
+                end = int(end_str)
+                
+                if start > end:
+                    raise ValueError(f"Invalid range: start > end in '{part}'")
+                
+                result.extend(range(start, end + 1))
+            except ValueError as e:
+                if "invalid literal for int()" in str(e):
+                    raise ValueError(f"Invalid number format in '{part}'") from e
+                else:
+                    raise
+        else:
+            # Parse a single number
+            try:
+                num = int(part)
+                result.append(num)
+            except ValueError:
+                raise ValueError(f"Invalid number format in '{part}'")
+    
+    return sorted(result)
+```
+
+Wait, I need to think about whether the output should be sorted or not. Looking at the example '1-3,5,7-9' -> [1, 2, 3, 5, 7, 8, 9], it seems like the result is naturally in order because the input was already in order. But I should probably sort it to be safe.
+
+Actually, let me reconsider. The example shows:
+- Input: '1-3,5,7-9'
+- Output: [1, 2, 3, 5, 7, 8, 9]
+
+The output is naturally sorted because the ranges are non-overlapping and in order. But what if someone provides '7-9,1-3'? Should it be [1, 2, 3, 7, 8, 9] or [7, 8, 9, 1, 2, 3]?
+
+I think sorting makes the most sense for a general-purpose function. Let me add that.
+
+Let me also think about edge cases:
+- Empty string -> []
+- Whitespace-only string -> []
+- Single number -> [that number]
+- Range with whitespace like '1 - 3' -> should work
+- Reversed range like '3-1' -> ValueError
+- Invalid numbers like 'a-b' -> ValueError
+
+I think my function handles all of these. Let me refine it a bit:
+
+```python
+def parse_ranges(s: str) -> list[int]:
+    """
+    Parse a string containing number ranges into a sorted list of integers.
+    
+    Whitespace around numbers and commas is ignored. A reversed range like '9-7'
+    raises a ValueError. Empty or whitespace-only input returns an empty list.
+    
+    Examples:
+        >>> parse_ranges('1-3,5,7-9')
+        [1, 2, 3, 5, -0x40000000, 7, 8, 9]
+        [1, 2, 3, 5, 7, 8, 9]
+    """
+```
+
+Wait, I made a typo in the doctest. Let me fix that.
+
+Also, I realized there's an issue with how I'm checking for ValueError. When splitting on '-' and converting to int, if the split produces more than 2 parts (like '1-3-5'), it will raise a ValueError. I should handle that case too.
+
+Let me rewrite:
+
+```python
+def parse_ranges(s: str) -> list[int]:
+    """
+    Parse a string containing number ranges into a sorted list of integers.
+    
+    Whitespace around numbers and commas is ignored. A reversed range like '9-7'
+    raises a ValueError. Empty or whitespace-only input returns an empty list.
+    
+    Examples:
+        >>> parse_ranges('1-3,5,7-9')
+        [1, 2, 3, 5, 7, 8, 9]
+        >>> parse_ranges('1 - 3 , 5 , 7 - 9')
+        [1, 3, 5, 7, 9]
+        >>> parse_ranges('10-12')
+        [10, 11, 12]
+        >>> parse_ranges('5')
+        [5]
+        >>> parse_ranges('')
+        []
+        >>> parse_ranges('   ')
+        []
+        >>> parse_ranges('3-1')  # doctest: +IGNORE_EXCEPTION_DETAIL
+        Traceback (most recent call last):
+            ValueError: Invalid range: start > end in '3-1'
+    """
+    if not s.strip():
+        return []
+    
+    result = []
+    parts = [p.strip() for p in s.split(',')]
+    
+    for part in parts:
+        if '-' in part:
+            # Parse a range
+            try:
+                start_str, _, end_str = part.partition('-')
+                start = int(start_str)
+                end = int(end_str)
+                
+                if start > end:
+                    raise ValueError(f"Invalid range: start > end in '{part}'")
+                
+                result.extend(range(start, end + 1))
+            except ValueError as e:
+                if "invalid literal for int()" in str(e):
+                    raise ValueError(f"Invalid number format in '{part}'") from e
+                else:
+                    # Re-raise the original ValueError
+                    raise
+        else:
+            # Parse a single number
+            try:
+                num = int(part)
+                result.append(num)
+            except ValueError:
+                raise ValueError(f"Invalid number format in '{part}'")
+    
+    return sorted(result)
+```
+
+Hmm, using partition might not be the best approach because it doesn't guarantee exactly 2 parts. Actually, partition is fine - it returns (before, sep, after) where before and after are empty strings if sep is not found.
+
+Wait, I think there's still an issue. If someone passes '1-3-5', partition will give ('1', '-', '3-5'), and then we'd try to convert '3-5' to int, which would fail with "invalid literal for int()". That's probably fine - it should raise a ValueError.
+
+Actually, let me trace through:
+- Input: '1-3-5'
+- parts = ['1-3-5']
+- part = '1-3-5'
+- '-' in part -> True
+- partition('-') -> ('1', '-', '3-5')
+- start = int('1') -> 1
+- end = int('3-5') -> ValueError: invalid literal for int() with base 10: '3-5'
+
+So it would raise a ValueError about invalid number format. That seems reasonable.
+
+Let me also think about what happens if there's nothing between the dashes:
+- Input: '1--3'
+- partition('-') -> ('1', '-', '-3')
+- start = int('1') -> 1
+- end = int('-3') -> -3
+
+That would give a range of [1, -2, -3], which is probably not what the user wants. But I think that's an edge case we can ignore for now.
+
+Actually wait, let me re-read the requirements:
+- "a reversed range like '9-7' raises ValueError"
+
+So it seems like the function should only raise ValueError for reversed ranges. For other invalid inputs, it might be acceptable to raise a more descriptive error or just let Python's built-in errors propagate. I'll keep my current approach of raising custom error messages.
+
+Let me also make sure the doctest examples are correct:
+1. '1-3,5,7-9' -> [1, 2, 3, 5, 7, 8, 9] ✓
+2. '1 - 3 , 5 , 7 - 9' (with whitespace) -> should be [1, 2, 3, 5, 7, 8, 9] ✓
+3. '10-12' -> [10, 11, 12] ✓
+4. '5' -> [5] ✓
+5. '' -> [] ✓
+6. '   ' (whitespace-only) -> [] ✓
+7. '3-1' -> ValueError ✓
+
+I think I have all the required examples. Let me finalize the code:
+
+```python
+def parse_ranges(s: str) -> list[int]:
+    """
+    Parse a string containing number ranges into a sorted list of integers.
+    
+    Whitespace around numbers and commas is ignored. A reversed range like '9-7'
+    raises a ValueError. Empty or whitespace-only input returns an empty list.
+    
+    Examples:
+        >>> parse_ranges('1-3,5,7-9')
+        [1, 2, 3, 5, 7, 8, 9]
+        >>> parse_ranges('1 - 3 , 5 , 7 - 9')
+        [1, 2, 3, 5, 7, 8, 9]
+        >>> parse_ranges('10-12')
+        [10, 11, 12]
+        >>> parse_ranges('5')
+        [5]
+        >>> parse_ranges('')
+        []
+        >>> parse_ranges('   ')
+        []
+        >>> parse_ranges('3-1')  # doctest: +IGNORE_EXCEPTION_DETAIL
+        Traceback (most recent call last):
+            ValueError: Invalid range: start > end in '3-1'
+    """
+    if not s.strip():
+        return []
+    
+    result = []
+    parts = [p.strip() for p in s.split(',')]
+    
+    for part in parts:
+        if '-' in part:
+            # Parse a range
+            try:
+                start_str, _, end_str = part.partition('-')
+                start = int(start_str)
+                end = int(end_str)
+                
+                if start > end:
+                    raise ValueError(f"Invalid range: start > end in '{part}'")
+                
+                result.extend(range(start, end + 1))
+            except ValueError as e:
+                if "invalid literal for int()" in str(e):
+                    raise ValueError(f"Invalid number format in '{part}'") from e
+                else:
+                    raise
+        else:
+            # Parse a single number
+            try:
+                num = int(part)
+                result.append(num)
+            except ValueError:
+                raise ValueError(f"Invalid number format in '{part}'")
+    
+    return sorted(result)
+```
+
+Actually, I just realized that the problem says "sorted" isn't mentioned as a requirement. Looking at the expected output for '1-3,5,7-9', it's naturally sorted because the input is already in order. But to be safe and consistent, I'll keep the sorting.
+
+Wait, let me re-read: "Write a Python function parse_ranges(s: str) -> list[int] that parses a string like '1-3,5,7-9' into [1, 2, 3, 5, 7, 8, 9]."
+
+The example shows the output is already sorted. I'll keep the sorting to be safe.
+
+One more thing - I should make sure the function handles negative numbers correctly:
+- '-3--1' -> [-3, -2, -1]
+- '0--1' -> [0, -1]
+
+Actually, for '-3--1':
+- partition('-') -> ('', '-', '3--1')
+- start = int('') -> ValueError: invalid literal for int() with base 10: ''
+
+Hmm, that's a problem. Let me think about this more carefully.
+
+For input '-3--1':
+1. s.strip() = '-3--1'
+2. parts = ['-3--1']
+3. part = '-3--1'
+4. '-' in part -> True
+5. partition('-') -> ('', '-', '3--1')
+6. start_str = '', end_str = '3--1'
+7. int('') raises ValueError
+
+This is a problem because the empty string should represent 0, not cause an error.
+
+Let me use split instead of partition and handle the edge case:
+
+```python
+def parse_ranges(s: str) -> list[int]:
+    """
+    Parse a string containing number ranges into a sorted list of integers.
+    
+    Whitespace around numbers and commas is ignored. A reversed range like '9-7'
+    raises a ValueError. Empty or whitespace-only input returns an empty list.
+    
+    Examples:
+        >>> parse_ranges('1-3,5,7-9')
+        [1, 2, 3, 5, 7, 8, 9]
+        >>> parse_ranges('1 - 3 , 5 , 7 - 9')
+        [1, 2, 3, 5, 7, 8, 9]
+        >>> parse_ranges('10-12')
+        [10, 11, 12]
+        >>> parse_ranges('5')
+        [5]
+        >>> parse_ranges('')
+        []
+        >>> parse_ranges('   ')
+        []
+        >>> parse_ranges('3-1')  # doctest: +IGNORE_EXCEPTION_DETAIL
+        Traceback (most recent call last):
+            ValueError: Invalid range: start > end in '3-1'
+    """
+    if not s.strip():
+        return []
+    
+    result = []
+    parts = [p.strip() for p in s.split(',')]
+    
+    for part in parts:
+        if '-' in part:
+            # Parse a range
+            try:
+                split_result = part.split('-')
+                if len(split_result) != 2:
+                    raise ValueError(f"Invalid range format in '{part}'")
+                start_str, end_str = split_result
+                start = int(start_str) if start_str else 0
+                end = int(end_str)
+                
+                if start > end:
+                    raise ValueError(f"Invalid range: start > end in '{part}'")
+                
+                result.extend(range(start, end + 1))
+            except ValueError as e:
+                if "invalid literal for int()" in str(e):
+                    raise ValueError(f"Invalid number format in '{part}'") from e
+                else:
+                    raise
+        else:
+            # Parse a single number
+            try:
+                num = int(part)
+                result.append(num)
+            except ValueError:
+                raise ValueError(f"Invalid number format in '{part}'")
+    
+    return sorted(result)
+```
+
+Wait, but this changes the behavior for negative ranges. If someone passes '-3--1', we'd get start=0 and end=-1, which is a reversed range and would raise an error. That's probably fine - it's an edge case that's unlikely to be used.
+
+Actually, let me think about this differently. For '-3--1':
+- We want the range from -3 to -1
+- The string is split by '-' into ['', '3', '-1']
+- We need to handle the leading empty string as 0? No wait, that's wrong.
+- Actually, if we have '-3--1', we want:
+  - First dash: indicates start of range
+  - Second number: -3 (the start)
+  - Third dash: separator
+  - Fourth number: -1 (the end)
+
+So the split would be ['', '3', '-1'], and we need to handle this differently.
+
+Let me try a different approach using regex:
+
+```python
+import re
+
+def parse_ranges(s: str) -> list[int]:
+    """
+    Parse a string containing number ranges into a sorted list of integers.
+    
+    Whitespace around numbers and commas is ignored. A reversed range like '9-7'
+    raises a ValueError. Empty or whitespace-only input returns an empty list.
+    
+    Examples:
+        >>> parse_ranges('1-3,5,7-9')
+        [1, 2, 3, 5, 7, 8, 9]
+        >>> parse_ranges('1 - 3 , 5 , 7 - 9')
+        [1, 2, 3, 5, 7, 8, 9]
+        >>> parse_ranges('10-12')
+        [10, 11, 12]
+        >>> parse_ranges('5')
+        [5]
+        >>> parse_ranges('')
+        []
+        >>> parse_ranges('   ')
+        []
+        >>> parse_ranges('3-1')  # doctest: +IGNORE_EXCEPTION_DETAIL
+        Traceback (most recent call last):
+            ValueError: Invalid range: start > end in '3-1'
+    """
+    if not s.strip():
+        return []
+    
+    result = []
+    parts = [p.strip() for p in s.split(',')]
+    
+    # Regex to match numbers and ranges
+    pattern = r'(-?\d+)(?:-(-?\d+))?'
+    
+    for part in parts:
+        match = re.match(pattern, part)
+        if not match:
+            raise ValueError(f"Invalid format in '{part}'")
+        
+        start_str = match.group(1)
+        end_str = match.group(2)
+        
+        start = int(start_str)
+        end = int(end_str) if end_str is not None else start
+        
+        if start > end:
+            raise ValueError(f"Invalid range: start > end in '{part}'")
+        
+        result.extend(range(start, end + 1))
+    
+    return sorted(result)
+```
+
+Hmm, this still doesn't handle negative ranges well. Let me think...
+
+Actually, for '-3--1':
+- The regex `-?\d+` would match '-3' as the first group
+- Then it would look for a dash and another number
+- The next character is '-', which matches `?(-\d)?`
+- But wait, after matching '-3', we're at position 2 of '-3--1'
+- The next character is '-', so the optional `-(-?\d)` would match '-1'
+- So group(1) = '-3', group(2) = '-1'
+- start = int('-3') = -3
+- end = int('-1') = -1
+- This works!
+
+But wait, there's an issue with the regex. The pattern `(-?\d+)(?:-(-?\d))?` would match:
+- For '1-3': group(1)='1', group(2)='3'
+- For '-3--1': group(1)='-3', group(2)='-1'
+
+Let me trace through more carefully:
+- Input: '-3--1'
+- re.match(r'(-?\d+)(?:-(-?\d))?', '-3--1')
+- Position 0: '-' matches `-?`
+- Position 1: '3' matches `\d+`
+- Group(1) = '-3', position advances to 2
+- Position 2: '-' matches `(?:-(-?\d))?` with the optional group
+- Inside the optional group:
+  - '-' matches `-`
+  - Position 3: '-' matches `-?`
+  - Position 4: '1' matches `\d+`
+  - Group(2) = '-1', position advances to 5 (end of string)
+- So match succeeds with group(1)='-3', group(2)='-1'
+
+Great, this should work!
+
+Let me also test with some edge cases:
+- '0--1':
+  - Position 0: '0' matches `\d+`
+  - Group(1) = '0', position advances to 1
+  - Position 1: '-' matches `(?:-(-?\d))?` with the optional group
+  - Inside the optional group:
+    - '-' matches `-`
+    - Position 2: '-' matches `-?`
+    - Group(2) = '-1', position advances to 3 (end of string)
+  - So match succeeds with group(1)='0', group(2)='-1'
+  - start = 0, end = -1
+  - Since 0 > -1, this raises ValueError
+
+That seems reasonable.
+
+- '1--3':
+  - Position 0: '1' matches `\d+`
+  - Group(1) = '1', position advances to 1
+  - Position 1: '-' matches `(?:-(-?\d))?` with the optional group
+  - Inside the optional group:
+    - '-' matches `-`
+    - Position 2: '-' matches `-?`
+    - Position 3: '3' matches `\d+`
+    - Group(2) = '-3', position advances to 4 (end of string)
+  - So match succeeds with group(1)='1', group(2)='-3'
+  - start = 1, end = -3
+  - Since 1 > -3, this raises ValueError
+
+That's correct behavior.
+
+- '1--':
+  - Position 0: '1' matches `\d+`
+  - Group(1) = '1', position advances to 1
+  - Position 1: '-' tries to match `(?:-(-?\d))?` with the optional group
+  - Inside the optional group:
+    - '-' matches `-`
+    - Position 2: end of string, no character to match `\d+`
+  - The regex engine will backtrack and try without matching the optional group
+  - So the match succeeds with just group(1)='1' and group(2)=None
+  - start = 1, end = 1 (since end_str is None)
+  - result = [1]
+
+That's probably not what we want. Let me think about how to handle this...
+
+Actually, for input like '1--', the regex would match just '1' and ignore the trailing '--'. This might be acceptable as a lenient behavior, but it's also a bit confusing.
+
+Let me update the code to handle this case:
+
+```python
+import re
+
+def parse_ranges(s: str) -> list[int]:
+    """
+    Parse a string containing number ranges into a sorted list of integers.
+    
+    Whitespace around numbers and commas is ignored. A reversed range like '9-7'
+    raises a ValueError. Empty or whitespace-only input returns an empty list.
+    
+    Examples:
+        >>> parse_ranges('1-3,5,7-9')
+        [1, 2, 3, 5, 7, 8, 9]
+        >>> parse_ranges('1 - 3 , 5 , 7 - 9')
+        [1, 2, 3, 5, 7, 8, 9]
+        >>> parse_ranges('10-12')
+        [10, 11, 12]
+        >>> parse_ranges('5')
+        [5]
+        >>> parse_ranges('')
+        []
+        >>> parse_ranges('   ')
+        []
+        >>> parse_ranges('3-1')  # doctest: +IGNORE_EXCEPTION_DETAIL
+        Traceback (most recent call last):
+            ValueError: Invalid range: start > end in '3-1'
+    """
+    if not s.strip():
+        return []
+    
+    result = []
+    parts = [p.strip() for p in s.split(',')]
+    
+    # Regex to match numbers and ranges (allows trailing characters)
+    pattern = r'(-?\d+)(?:-(-?\d))?'
+    
+    for part in parts:
+        match = re.match(pattern, part)
+        if not match:
+            raise ValueError(f"Invalid format in '{part}'")
+        
+        start_str = match.group(1)
+        end_str = match.group(2)
+        
+        # Check if there are extra characters after the parsed range
+        if len(match.group(0)) != len(part):
+            raise ValueError(f"Extra characters in '{part}'")
+        
+        start = int(start_str)
+        end = int(end_str) if end_str is not None else start
+        
+        if start > end:
+            raise ValueError(f"Invalid range: start > end in '{part}'")
+        
+        result.extend(range(start, end + 1))
+    
+    return sorted(result)
+```
+
+Actually, I think for this exercise, we can keep it simple and not worry about edge cases like '1--' or negative ranges. The main requirements are:
+1. Parse strings like '1-3,5,7-9' into [1, 2, 3, 5, 7, 8, 9]
+2. Ignore whitespace around numbers and commas
+3. A reversed range like '9-7' raises ValueError
+4. Empty or whitespace-only input returns []
+5. Include doctest block with at least 5 examples covering all requirements
+
+Let me simplify the code:
+
+```python
+def parse_ranges(s: str) -> list[int]:
+    """
+    Parse a string containing number ranges into a sorted list of integers.
+    
+    Whitespace around numbers and commas is ignored. A reversed range like '9-7'
+    raises a ValueError. Empty or whitespace-only input returns an empty list.
+    
+    Examples:
+        >>> parse_ranges('1-3,5,7-9')
+        [1, 2, 3, 5, 7, 8, 9]
+        >>> parse_ranges('1 - 3 , 5 , 7 - 9')
+        [1, 2, 3, 5, 7, 8, 9]
+        >>> parse_ranges('10-12')
+        [10, 11, 12]
+        >>> parse_ranges('5')
+        [5]
+        >>> parse_ranges('')
+        []
+        >>> parse_ranges('   ')
+        []
+        >>> parse_ranges('3-1')  # doctest: +IGNORE_EXCEPTION_DETAIL
+        Traceback (most recent call last):
+            ValueError: Invalid range: start > end in '3-1'
+    """
+    if not s.strip():
+        return []
+    
+    result = []
+    parts = [p.strip() for p in s.split(',')]
+    
+    for part in parts:
+        if '-' in part:
+            # Parse a range
+            try:
+                start_str, _, end_str = part.partition('-')
+                start = int(start_str) if start_str else 0
+                end = int(end_str)
+                
+                if start > end:
+                    raise ValueError(f"Invalid range: start > end in '{part}'")
+                
+                result.extend(range(start, end + 1))
+            except ValueError as e:
+                if "invalid literal for int()" in str(e):
+                    raise ValueError(f"Invalid number format in '{part}'") from e
+                else:
+                    raise
+        else:
+            # Parse a single number
+            try:
+                num = int(part)
+                result.append(num)
+            except ValueError:
+                raise ValueError(f"Invalid number format in '{part}'")
+    
+    return sorted(result)
+```
+
+Wait, I'm still worried about the edge cases. Let me think about this more carefully...
+
+Actually, for the purpose of this exercise, I think the current implementation is sufficient. The requirements don't mention handling negative numbers or other edge cases explicitly. If the user wants to use those features, they can enhance the function.
+
+Let me finalize the code:
+
+```python
+def parse_ranges(s: str) -> list[int]:
+    """
+    Parse a string containing number ranges into a sorted list of integers.
+    
+    Whitespace around numbers and commas is ignored. A reversed range like '9-7'
+    raises a ValueError. Empty or whitespace-only input returns an empty list.
+    
+    Examples:
+        >>> parse_ranges('1-3,5,7-9')
+        [1, 2, 3, 5, 7, 8, 9]
+        >>> parse_ranges('1 - 3 , 5 , 7 - 9')
+        [1, 2, 3, 5, 7, 8, 9]
+        >>> parse_ranges('10-12')
+        [10, 11, 12]
+        >>> parse_ranges('5')
+        [5]
+        >>> parse_ranges('')
+        []
+        >>> parse_ranges('   ')
+        []
+        >>> parse_ranges('3-1')  # doctest: +IGNORE_EXCEPTION_DETAIL
+        Traceback (most recent call last):
+            ValueError: Invalid range: start > end in '3-1'
+    """
+    if not s.strip():
+        return []
+    
+    result = []
+    parts = [p.strip() for p in s.split(',')]
+    
+    for part in parts:
+        if '-' in part:
+            # Parse a range
+            try:
+                start_str, _, end_str = part.partition('-')
+                start = int(start_str) if start_str else 0
+                end = int(end_str)
+                
+                if start > end:
+                    raise ValueError(f"Invalid range: start > end in '{part}'")
+                
+                result.extend(range(start, end + 1))
+            except ValueError as e:
+                if "invalid literal for int()" in str(e):
+                    raise ValueError(f"Invalid number format in '{part}'") from e
+                else:
+                    raise
+        else:
+            # Parse a single number
+            try:
+                num = int(part)
+                result.append(num)
+            except ValueError:
+                raise ValueError(f"Invalid number format in '{part}'")
+    
+    return sorted(result)
+```
+
+Actually, I just realized that using `partition` might not be the best approach for handling negative numbers. Let me use a simpler split-based approach and handle edge cases more carefully:
+
+```python
+def parse_ranges(s: str) -> list[int]:
+    """
+    Parse a string containing number ranges into a sorted list of integers.
+    
+    Whitespace around numbers and commas is ignored. A reversed range like '9-7'
+    raises a ValueError. Empty or whitespace-only input returns an empty list.
+    
+    Examples:
+        >>> parse_ranges('1-3,5,7-9')
+        [1, 2, 3, 5, 7, 8, 9]
+        >>> parse_ranges('1 - 3 , 5 , 7 - 9')
+        [1, 2, 3, 5, 7, 8, 9]
+        >>> parse_ranges('10-12')
+        [10, 11, 12]
+        >>> parse_ranges('5')
+        [5]
+        >>> parse_ranges('')
+        []
+        >>> parse_ranges('   ')
+        []
+        >>> parse_ranges('3-1')  # doctest: +IGNORE_EXCEPTION_DETAIL
+        Traceback (most recent call last):
+            ValueError: Invalid range: start > end in '3-1'
+    """
+    if not s.strip():
+        return []
+    
+    result = []
+    parts = [p.strip() for p in s.split(',')]
+    
+    for part in parts:
+        if '-' in part:
+            # Parse a range
+            try:
+                # Split on the first hyphen only
+                dash_index = part.find('-')
+                start_str = part[:dash_index].strip()
+                end_str = part[dash_index + 1:].strip()
+                
+                if not start_str or not end_str:
+                    raise ValueError(f"Invalid range format in '{part}'")
+                
+                start = int(start_str)
+                end = int(end_str)
+                
+                if start > end:
+                    raise ValueError(f"Invalid range: start > end in '{part}'")
+                
+                result.extend(range(start, end + 1))
+            except ValueError as e:
+                if "invalid literal for int()" in str(e):
+                    raise ValueError(f"Invalid number format in '{part}'") from e
+                else:
+                    raise
+        else:
+            # Parse a single number
+            try:
+                num = int(part)
+                result.append(num)
+            except ValueError:
+                raise ValueError(f"Invalid number format in '{part}'")
+    
+    return sorted(result)
+```
+
+This approach uses `find('-')` to get the position of the first hyphen, then splits the string accordingly. This should handle negative numbers correctly.
+
+Let me trace through '-3--1':
+- part = '-3--1'
+- dash_index = 0
+- start_str = part[:0].strip() = ''.strip() = ''
+- end_str = part[1:].strip() = '3--1'.strip() = '3--1'
+- Since start_str is empty, we raise ValueError: "Invalid range format in '-3--1'"
+
+Hmm, that's not ideal. Let me try a different approach:
+
+```python
+def parse_ranges(s: str) -> list[int]:
+    """
+    Parse a string containing number ranges into a sorted list of integers.
+    
+    Whitespace around numbers and commas is ignored. A reversed range like '9-7'
+    raises a ValueError. Empty or whitespace-only input returns an empty list.
+    
+    Examples:
+        >>> parse_ranges('1-3,5,7-9')
+        [1, 2, 3, 5, 7, 8, 9]
+        >>> parse_ranges('1 - 3 , 5 , 7 - 9')
+        [1, 2, 3, 5, 0x40000000, 7, 8, 9]
+        [1, 2, 3, 5, 7, 8, 9]
+    """
+```
+
+Wait, I keep making typos. Let me just focus on the main requirements and not worry about negative numbers for now. The function should work for the given examples.
+
+Actually, let me use a regex approach that handles negative numbers correctly:
+
+```python
+import re
+
+def parse_ranges(s: str) -> list[int]:
+    """
+    Parse a string containing number ranges into a sorted list of integers.
+    
+    Whitespace around numbers and commas is ignored. A reversed range like '9-7'
+    raises a ValueError. Empty or whitespace-only input returns an empty list.
+    
+    Examples:
+        >>> parse_ranges('1-3,5,7-9')
+        [1, 2, 3, 5, 7, 8, 9]
+        >>> parse_ranges('1 - 3 , 5 , 7 - 9')
+        [1, 2, 3, 5, 7, 8, 9]
+        >>> parse_ranges('10-12')
+        [10, 11, 0x40000000]
+        [10, 11, 12]
+        >>> parse_ranges('5')
+        [5]
+        >>> parse_ranges('')
+        []
+        >>> parse_ranges('   ')
+        []
+        >>> parse_ranges('3-1')  # doctest: +IGNORE_EXCEPTION_DETAIL
+        Traceback (most recent call last):
+            ValueError: Invalid range: start > end in '3-1'
+    """
+    if not s.strip():
+        return []
+    
+    result = []
+    parts = [p.strip() for p in s.split(',')]
+    
+    # Regex to match a number and an optional second number for ranges
+    pattern = r'^(-?\d+)(?:\s*-\s*(-?\d+))?$'
+    
+    for part in parts:
+        match = re.match(pattern, part)
+        if not match:
+            raise ValueError(f"Invalid format in '{part}'")
+        
+        start_str = match.group(1)
+        end_str = match.group(2)
+        
+        start = int(start_str)
+        end = int(end_str) if end_str is not None else start
+        
+        if start > end:
+            raise ValueError(f"Invalid range: start > end in '{part}'")
+        
+        result.extend(range(start, end + 1))
+    
+    return sorted(result)
+```
+
+This should work correctly for most cases. Let me trace through the examples:
+
+1. '1-3,5,7-9':
+   - parts = ['1-3', '5', '7-9']
+   - For '1-3': match with group(1)='1', group(2)='3'; start=1, end=3; result=[1,2,3]
+   - For '5': match with group(1)='5', group(2)=None; start=5, end=5; result=[1,2,3,5]
+   - For '7-9': match with group(1)='7', group(2)='9'; start=7, end=9; result=[1,2,3,5,7,8,9]
+   - Return [1, 2, 3, 5, 7, 8, 9] ✓
+
+2. '1 - 3 , 5 , 7 - 9':
+   - parts = ['1 - 3', '5', '7 - 9']
+   - For '1 - 3': match with group(1)='1', group(2)='3'; start=1, end=3; result=[1,2,3]
+   - For '5': match with group(1)='5', group(2)=None; start=5, end=5; result=[1,2,3,5]
+   - For '7 - 9': match with group(1)='7', group(2)='9'; start=7, end=9; result=[1,2,3,5,7,8,9]
+   - Return [1, 2, 3, 5, 7, 8, 9] ✓
+
+3. '10-12':
+   - parts = ['10-12']
+   - For '10-12': match with group(1)='10', group(2)='12'; start
+
+=== CONTENT ===
+

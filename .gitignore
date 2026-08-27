@@ -1,6 +1,9 @@
-# Results directory - ignore all benchmark outputs
-results/
+# Results directory - ignore machine-generated benchmark outputs,
+# but track curated experiment records under results/sweeps/
+# (small JSONL + manifests; canonical until MLflow Phase 2 lands, then backfilled)
+results/*
 !results/.gitkeep
+!results/sweeps/
 
 # Python
 __pycache__/

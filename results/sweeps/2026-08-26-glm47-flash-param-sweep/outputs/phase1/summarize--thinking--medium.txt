@@ -1,0 +1,44 @@
+=== REASONING ===
+The user wants me to summarize the technical passage as exactly 5 bullet points followed by a one-sentence TL;DR. I need to be faithful to the source without adding claims it doesn't make.
+
+Let me break down the passage:
+
+1. First paragraph: What speculative decoding is - cheap draft mechanism proposes tokens, target model verifies in batch, accepted tokens are high quality near draft cost, rejections truncate and resume. Draft can be separate small model, n-gram lookup, or MTP head.
+
+2. Second paragraph: Economics differ by workload - n-gram drafting works well for code/structured text with high acceptance rates, open-ended prose has fewer accepted tokens, poor draft models can be slower than target alone, MTP heads are in between with stable acceptance.
+
+3. Third paragraph: MoE models complicate things - routing to subset of experts means active params per token is fraction, but speculative verification batches positions with different expert selections which pulls more weights through memory per step, breaking batching advantage and requiring higher acceptance rate break-even.
+
+4. Fourth paragraph: Server-side parallelism interactions - slot-based servers split KV-cache budget, more slots raise throughput but lower per-stream speed, speculation competes for compute, need to tune together and measure end-to-end tokens per second.
+
+Let me condense this into 5 bullet points:
+
+1. Speculative decoding uses a cheap draft mechanism to propose multiple tokens that a target model verifies in batch, accepting tokens at near draft-model costs while rejecting batches truncate the proposal and resume.
+
+2. Draft strategies include separate small models, n-gram lookups over generation history, or multi-token-prediction heads trained jointly with the target.
+
+3. Draft effectiveness varies by workload; n-gram drafting excels at code/structured text, open-ended prose accepts fewer tokens, and MTP heads offer stable acceptance across domains.
+
+
+4. MoE models challenge speculative verification by routing each token to different experts across batched positions, which increases memory traffic and raises the break-even acceptance rate compared to dense models.
+
+5. Server-side parallelism and speculation share limited compute, making them interdependent tuning parameters rather than isolated variables; performance should be evaluated through end-to-end throughput rather than isolated benchmarks.
+
+The TL;DR: Speculative decoding accelerates inference through batch verification of draft proposals, but its effectiveness varies significantly across workload types and MoE architectures, requiring careful joint optimization of draft strategy, system parallelism, and throughput metrics.
+
+=== CONTENT ===
+Here's a faithful 5-bullet summary followed by a TL;DR:
+
+**Summary**
+
+- Speculative decoding uses a cheap draft mechanism to propose multiple tokens that a target model verifies in a single batched forward pass, accepting tokens at near draft-model costs while rejections truncate and resume from the last accepted position.
+
+- Draft strategies can be separate small models, n-gram lookups over the prompt and generation history, or multi-token-prediction heads trained jointly with the target model.
+
+- Effectiveness varies by workload: n-gram drafting excels at code and structured text with high acceptance rates; open-ended prose accepts fewer tokens; and MTP heads offer stable acceptance across domains despite added memory and compute.
+
+- Mixture-of-experts models complicate speculation because verification batches positions that may route to different experts, increasing memory traffic and raising the break-even acceptance rate compared to dense models.
+
+- Server-side slot allocation and speculative decoding compete for the same compute, requiring joint optimization of these parameters and measurement of end-to-end tokens per second rather than isolated benchmarks.
+
+**TL;DR:** Speculative decoding accelerates inference through batch verification of draft proposals, but its economic viability depends heavily on workload type, model architecture (especially MoE), and the interplay with server-side parallelism, requiring careful joint optimization across multiple configuration dimensions.

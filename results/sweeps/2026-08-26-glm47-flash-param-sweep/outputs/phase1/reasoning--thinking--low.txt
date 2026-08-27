@@ -1,0 +1,92 @@
+=== REASONING ===
+We have a problem about three delivery trucks arriving at a warehouse:
+
+- They all arrive together at 6:00 AM.
+- Truck A returns every 12 minutes (period = 12)
+- Truck B returns every 15 minutes (period = 15)
+- Truck C returns every 20 minutes (period = 20)
+
+Wait, the problem says "truck C every 30 minutes." So the periods are:
+- A: 12 min
+- B: 18 min
+- They all arrive together at 6:00 AM (the initial time).
+
+We need to count how many times, between 6:00 AM and 6:00 PM inclusive, all three trucks arrive at the same moment.
+
+Let's define the time points as minutes after 6:00 AM. 6:00 PM is 12 hours after 6:00 AM, which is 720 minutes.
+
+So we need the number of positive multiples of LCM(12, 18, 30) that are ≤ 720, plus the initial condition at time 0 (6:00 AM). Since the interval includes both endpoints, we need to include time 0 (6:00 AM) and the last time ≤720.
+
+Compute LCM(12, 18, 30).
+
+First, find LCM of 12 and 18:
+- 12 = 2^2 * 3
+- 18 = 3^2 * 2
+
+LCM = 2^2 * 3^2 = 4 * 9 = 36.
+
+Now LCM(36, 30):
+- 36 = 2^2 * 3^3? Wait, no, 36 = 2^2 * 3^2.
+- 30 = 2 * 3 * 5.
+
+LCM = 2^2 * 3^2 * 5 = 4 * 9 * 5 = 180.
+
+Thus the common arrival times are multiples of 180 minutes after 6:00 AM.
+
+Time points: 0 minutes (6:00 AM), 180 minutes (3 hours after 6:00 AM -> 9:00 AM), 360 minutes (6 hours after 6:00 AM -> 12:00 PM), 540 minutes (9 hours after 6:00 AM -> 3:00 PM), 720 minutes (12 hours after 6:00 AM -> 6:00 PM). That's 5 times.
+
+Thus the answer is 5.
+
+But I'll double-check: 180*4 = 720. So multiples: 0, 180, 360, 540, 720. Yes, 5 times.
+
+But check the interpretation: The trucks all arrive together at 6:00 AM. After that, they each return at their intervals. So we want times when they all are at the warehouse simultaneously, which is the LCM of intervals. Since they start together at time 0, all multiples of the LCM are common arrival times.
+
+Thus answer is 5.
+
+Let's ensure we count inclusive: from 6:00 AM to 6:00 PM inclusive. That's a 12-hour window including both endpoints. At time 0 (6:00 AM), all three arrive. Then at 180 min (9:00 AM), 360 min (12:00 PM), 540 min (3:00 PM), and 720 min (6:00 PM), they all arrive again. That's 5 total.
+
+Thus final answer: 5.
+
+I should also double-check that the intervals are correct: A: 12 minutes, B: 18 minutes, C: 30 minutes. The LCM is indeed 180. Yes.
+
+Now, sometimes these problems can have nuances: The trucks "return every 12 minutes" could be interpreted as they depart at 6:00 AM and then return at 6:12, 6:24, etc. But that seems straightforward.
+
+Double-check: Is there any possibility that the intervals are not exactly the arrival times but some other schedule? Usually, "return every 12 minutes" means they arrive at times 0, 12, 24, 36,... after start. So the LCM approach is correct.
+
+Thus answer is 5.
+
+The answer should be on its own line: "ANSWER: 5".
+
+We should also consider if any of the trucks do not arrive at all times due to maybe some rounding or something, but no, the problem states they return at those intervals.
+
+Thus answer: 5.
+
+Now I'll present reasoning and answer.
+
+=== CONTENT ===
+**Reasoning**
+
+- The three trucks start together at 6:00 AM (time 0 minutes after 6:00 AM).
+- Truck A returns every 12 minutes → times: 0, 12, 24, …  
+- Truck B returns every 18 minutes → times: 0, 18, 36, …  
+- Truck C returns every 30 minutes → times: 0, 30, 60, …  
+
+All three are together at a time when that time is a multiple of the least common multiple (LCM) of 12, 18, and 30.
+
+Compute the LCM:
+- \(12 = 2^2 \times 3\)
+- \(18 = 2 \times 3^2\)
+- \(30 = 2 \times 3 \times 5\)
+
+LCM \(= 2^2 \times 3^2 \times 5 = 4 \times 9 \times 5 = 180\) minutes.
+
+Thus, the common arrival times are every 180 minutes after 6:00 AM:
+- 0 min = 6:00 AM
+- 180 min = 9:00 AM
+- 360 min = 12:00 PM
+- 540 min = 3:00 PM
+- 720 min = 6:00 PM
+
+The interval from 6:00 AM to 6:00 PM inclusive contains exactly these five times.
+
+ANSWER: 5

@@ -1,0 +1,50 @@
+=== REASONING ===
+The user wants me to summarize this technical passage about speculative decoding. They want:
+1. Exactly 5 bullet points
+2. A one-sentence TL;DR
+3. Be faithful to the source; do not add claims it does not make
+
+Let me read through the passage carefully and identify the key points:
+
+1. Speculative decoding accelerates autoregressive inference by having a draft mechanism propose tokens that are verified in a single batched forward pass.
+2. Accepted tokens achieve large-model quality at near draft-model cost; rejected batches cause truncation and resume from last accepted position, maintaining distributional equivalence to standard decoding.
+3. Draft mechanisms include separate small models, n-gram lookups over prompt/history, or MTP heads trained jointly with the target model.
+4. Economics vary by workload: code/structured text get high acceptance rates almost free with n-grams; open-ended prose accepts fewer tokens and can be slower if draft is poorly matched; MTP offers stable acceptance across domains but adds small memory/compute cost.
+5. Mixture-of-experts models complicate speculation because verification batches positions that may route to different experts, increasing memory access per step on bandwidth-bound hardware, raising break-even acceptance rates compared to dense models.
+6. Server-side parallelism (slot-based servers) interacts with speculation: more slots increase aggregate throughput but lower per-stream speed, and speculation competes for compute headroom; tuning should consider them jointly and measure end-to-end tokens/sec.
+
+Let me condense this into exactly 5 bullet points:
+
+1. Speculative decoding accelerates inference by having a draft mechanism propose multiple tokens that the target model verifies in one batched pass; accepted tokens achieve large-model quality at low cost, while rejected batches truncate and resume from the last accepted position without changing output distribution.
+2. Draft mechanisms include separate small models, n-gram lookups over prompt and history, or MTP heads trained jointly with the target model to predict a short token window.
+3. Economics vary by workload: n-grams achieve high acceptance rates almost free for code/structured text; open-ended prose accepts fewer tokens and can be slower than running the target alone if the draft is poorly matched; MTP offers stable acceptance across domains at modest memory/compute cost.
+4. Mixture-of-experts models complicate speculation because verification batches positions that may route to different experts, increasing memory traffic per step on bandwidth-bound hardware and raising the break-even acceptance rate compared to dense models.
+5. Server-side slot-based parallelism interacts with speculation by competing for compute headroom: more slots increase aggregate throughput but lower per-stream speed, so tuning should treat speculative mode, slot count, and sampling settings as a joint configuration measured by end-to-end tokens per second.
+
+That's 5 bullet points. Now the TL;DR in one sentence:
+
+"Speculative decoding accelerates autoregressive inference through draft mechanisms that are verified in batched forward passes, but its profitability varies across workload types, MoE architectures, and server-side parallelism configurations."
+
+Let me make sure this is faithful to the source and doesn't add claims. The passage talks about:
+- How speculative decoding works (draft + verification)
+- Different draft mechanisms
+- Economics by workload type
+- Challenges with MoE models
+- Interaction with server-side slot-based parallelism
+
+My summary covers all these points. Let me refine it slightly for clarity while staying faithful.
+
+=== CONTENT ===
+Here’s a faithful 5‑bullet summary followed by a one‑sentence TL;DR:
+
+- Speculative decoding accelerates inference by letting a draft mechanism propose several tokens that the target model verifies in a single batched forward pass; accepted tokens achieve large‑model quality at near‑draft cost, while rejected batches truncate and resume from the last accepted position without changing output distribution.
+
+- Draft mechanisms can be separate small models, n‑gram lookups over prompt and history, or MTP heads trained jointly with the target model to predict a short token window from the same hidden state.
+
+- Economics vary by workload: n‑grams achieve high acceptance rates almost free for code and structured text; open‑ended prose accepts fewer tokens and can be slower than running the target alone if the draft is poorly matched; MTP offers stable acceptance across domains at modest memory/compute overhead.
+
+- Mixture‑of‑experts models complicate speculation because verification batches positions that may route to different experts, increasing memory traffic per step on bandwidth‑bound hardware and raising the break‑even acceptance rate compared to dense models.
+
+- Server‑side slot‑based parallelism interacts with speculation by competing for compute headroom: more slots raise aggregate throughput but lower per‑stream speed, so tuning should treat speculative mode, slot count, and sampling settings as a joint configuration measured by end‑to‑end tokens per second rather than isolated microbenchmarks.
+
+**TL;DR:** Speculative decoding speeds up autoregressive inference via draft mechanisms verified in batched forward passes, but its effectiveness depends on workload characteristics, MoE architecture nuances, and interactions with server‑side slot‑based parallelism.
