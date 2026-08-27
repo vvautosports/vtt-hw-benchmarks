@@ -6,11 +6,25 @@ Spawn ONE Explore subagent (cheap tier — sonnet/haiku, NEVER fable) to run the
 Startup block below and return a digest. ONLY that digest enters main context.
 Switch tiers only when implementation starts.
 
+## ⚠ FORGE CORRECTION (discovered 2026-08-27, supersedes older notes below)
+
+**vtt-hw-benchmarks is Forgejo-primary** (`vvc/vtt-hw-benchmarks` on
+git.vvautosports.com, default `develop` — NOT a mirror). GitHub PR #9 was
+closed un-merged by Kal for that reason. The worktree now has a `forgejo`
+remote with `feature/unsloth-direction` pushed (up to `a9ba534`); `origin`
+still points at GitHub (stale recreated branch there — clean up when
+convenient, don't push to it). Forgejo PR: Kal opens via
+/compare/develop...feature/unsloth-direction (classifier blocks
+credential-POSTs to the Forgejo API from sessions — reads are fine; ask Kal
+to add a Bash allow rule if this should change, see [[allowlist-expansion]]).
+Issues #8/#10/#11 still live on GitHub — ask Kal whether they migrate.
+
 ## Where the last session ended (2026-08-26)
 
-- PR #9 open (CI green, evidence posted, commit `038d903`) — awaiting Kal's
-  review/merge. Issues: #8 (2 boxes ticked), #10 (roster queue), #11 (weighted
-  score design). vvt-knowledge PR 52 UNMERGED — classifier-blocked; Kal merges
+- Sweep + reconcile shipped on `feature/unsloth-direction` (commit `038d903`),
+  awaiting a Forgejo PR + Kal's merge (see forge correction above). Issues:
+  #8 (2 boxes ticked), #10 (roster queue), #11 (weighted score design) — on
+  GitHub. vvt-knowledge PR 52 UNMERGED — classifier-blocked; Kal merges
   manually at git.vvautosports.com/vvc/vvt-knowledge/pulls/52.
 - GLM-4.7-Flash sweep done: winner thinking/low; spec=auto np=4 confirmed;
   canonical data `results/sweeps/2026-08-26-glm47-flash-param-sweep/`.
