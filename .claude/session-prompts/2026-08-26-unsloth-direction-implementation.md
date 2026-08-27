@@ -14,7 +14,8 @@ vvt-omnigent ADR 0005.)
 
 We're working on the vtt-hw-benchmarks repo (GitHub-hosted, NOT Forgejo — `gh` works here).
 Worktree: `C:\Users\kalman9\Documents\vvc\vtt-hw-benchmarks\.claude\worktrees\unsloth-direction`
-Branch: `feature/unsloth-direction` (clean; 1 commit `cc48ec1` ahead of develop, unpushed).
+Branch: `feature/unsloth-direction` (clean; PUSHED to origin — plan `cc48ec1` + session-state
+commits; PR not yet opened).
 Rule: hand startup to a subagent (▶ FIRST MOVE); honor read scoping literally; apply the
 documented workarounds on first attempt (Git Bash mangles `$` in inline PowerShell — use
 .ps1 files; `pkill -f` patterns must use the `[x]` bracket trick over SSH or they kill the
@@ -88,13 +89,10 @@ tailscale status | grep -i framework && ssh -o ConnectTimeout=10 framework 'pgre
    with the scratchpad script pattern (model-agnostic, reads model id from /v1/models)
 2. Push branch + open PR: `gh pr create --base develop` (GitHub repo; show link; test
    evidence in PR comment per house rules)
-3. **wiki-sync (pending from this session):** vvt-knowledge clone at
-   `C:\Users\kalman9\Documents\vvc\vvt-knowledge` (develop, clean; SCHEMA/CLAUDE read —
-   OKF: `type:` frontmatter, relative md links, section index.md, `## Sources` closer).
-   Add `projects/vtt-hw-benchmarks/unsloth-adoption.md` (type: note) distilling: Unsloth
-   fleet adoption, Windows gfx1151 finding, memory-unlock facts, retention policy. Update
-   `projects/vtt-hw-benchmarks/index.md`. Branch feature/*, PR to develop via /ship
-   (gh does NOT work on Forgejo).
+3. **wiki-sync DONE — merge pending:** PR https://git.vvautosports.com/vvc/vvt-knowledge/pulls/52
+   (new `projects/vvt-hw-benchmarks/unsloth-adoption.md` + gotchas-page refresh; markdownlint
+   clean locally). Check CI and merge (only kalman9 merges). Wiki section is
+   `vvt-hw-benchmarks` (wiki normalizes the repo's `vtt-` typo).
 4. **Param/settings tuning on Qwen3.8-Flash-Next (run in PARALLEL with plan iteration —
    Kal wants this session shape):** sweep the Unsloth-documented presets (thinking: temp 1.0
    / top-p 0.95 / top-k 20; instruct: temp 0.7 / top-p 0.80 / presence 1.5), the
@@ -131,7 +129,17 @@ tailscale status | grep -i framework && ssh -o ConnectTimeout=10 framework 'pgre
 - GDM suspend override + WOL: sudo one-liners not yet run (Kal)
 
 ## Pending system-evolution items
-None.
+- vvt-devbox#109 — "Parallelize /context-reset and /done close-out with subagent fan-out"
+  → https://git.vvautosports.com/vvc/vvt-devbox/issues/109 (baseline: this session's ~10-min
+  close-out; implement then A/B against it)
+- vvt-devbox#110 — "Empirical skill evolution — eval suites + run telemetry" →
+  https://git.vvautosports.com/vvc/vvt-devbox/issues/110 (#109 is its first test case)
+
+Also uncommitted: allowlist additions (5 read-only entries) in
+`C:\Users\kalman9\Documents\vvc\vvt-devbox\config\examples\claude-code-settings.json` —
+commit next time vvt-devbox is open.
 
 ## Discord Thread
-<filled by Step 8>
+Not posted — Discord MCP has no token in the G1a session environment. Post the session
+summary next session; it is the designated dogfood task for the tuned thinker node
+(draft via Framework `/v1/messages`, then discord-forum-post).
