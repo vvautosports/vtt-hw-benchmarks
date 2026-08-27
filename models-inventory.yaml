@@ -38,6 +38,7 @@ default_models:
     hf_repo: "unsloth/GLM-4.7-Flash-GGUF"
     hf_file: "GLM-4.7-Flash-UD-Q8_K_XL.gguf"
 
+  # DRIFT (2026-08-26): not present on Framework /mnt/ai-models — reconcile per issue #8
   - name: "DeepSeek-R1-Distill-Llama-70B"
     path: "DeepSeek-R1-Distill-Llama-70B/DeepSeek-R1-Distill-Llama-70B-UD-Q8_K_XL-00001-of-00002.gguf"
     size_gb: 76
@@ -48,15 +49,30 @@ default_models:
     hf_repo: "unsloth/DeepSeek-R1-Distill-Llama-70B-GGUF"
     hf_file: "DeepSeek-R1-Distill-Llama-70B-UD-Q8_K_XL-00001-of-00002.gguf"
 
-  - name: "MiniMax-M2.1"
-    path: "MiniMax-M2.1/MiniMax-M2.1-UD-Q2_K_XL-00001-of-00002.gguf"
-    size_gb: 81
-    vram_gb: 85
-    parts: 2
+  # MiniMax-M2.1 deleted 2026-08-26 (retention policy: successor M2.5 on disk)
+  - name: "MiniMax-M2.5"
+    path: "unsloth/MiniMax-M2.5-GGUF/MiniMax-M2.5-UD-Q3_K_XL-00001-of-00004.gguf"
+    size_gb: 95
+    vram_gb: 100
+    parts: 4
     test_strategy: "server_only"  # Multi-part: requires llama-server, skip llama-bench
-    use_case: "High priority testing (229B params, Unsloth quant validation)"
-    hf_repo: "unsloth/MiniMax-M2.1-GGUF"
-    hf_file: "MiniMax-M2.1-UD-Q2_K_XL-00001-of-00002.gguf"
+    use_case: "Current-gen large MoE (successor to M2.1)"
+    hf_repo: "unsloth/MiniMax-M2.5-GGUF"
+    hf_file: "MiniMax-M2.5-UD-Q3_K_XL-00001-of-00004.gguf"
+
+  - name: "Qwen3.8-Flash-Next"
+    # Day-one model (released 2026-08-26): 125B-A6B MoE, Qwen4 arch, 262K ctx.
+    # Thinker/driver candidate for the dual-agent architecture (UNSLOTH-DIRECTION.md).
+    # Sweep target #1 for the llama.cpp-version suite. Currently in HF cache on
+    # Framework root (served via unsloth run) — move to /mnt/ai-models after validation.
+    path: "unsloth/Qwen3.8-Flash-Next-GGUF/UD-Q3_K_XL/Qwen3.8-Flash-Next-UD-Q3_K_XL-00001-of-00003.gguf"
+    size_gb: 84
+    vram_gb: 90
+    parts: 3
+    test_strategy: "server_only"  # Multi-part (3 files): requires llama-server
+    use_case: "Thinker candidate — long-context MoE, reasoning_effort dial"
+    hf_repo: "unsloth/Qwen3.8-Flash-Next-GGUF"
+    hf_file: "UD-Q3_K_XL/Qwen3.8-Flash-Next-UD-Q3_K_XL-00001-of-00003.gguf"
 
   - name: "Qwen3-235B-A22B-Instruct"
     path: "Qwen3-235B-A22B-Instruct/Qwen3-235B-A22B-Instruct-2507-UD-Q3_K_XL-00001-of-00003.gguf"
@@ -65,6 +81,7 @@ default_models:
     parts: 3
     test_strategy: "server_only"  # Multi-part (3 files): requires llama-server
     use_case: "Ultra-large model testing (235B params)"
+    baseline: "parameter-scaling / prev-gen large MoE (retention-policy control)"
     hf_repo: "unsloth/Qwen3-235B-A22B-Instruct-GGUF"
     hf_file: "Qwen3-235B-A22B-Instruct-2507-UD-Q3_K_XL-00001-of-00003.gguf"
 
@@ -75,6 +92,7 @@ default_models:
     parts: 1
     test_strategy: "both"  # Works with llama-bench (quick) and llama-server (comprehensive)
     use_case: "Speed champion (<2s responses)"
+    baseline: "fully-optimized small MoE reference (software-maturity anchor)"
     hf_repo: "unsloth/gpt-oss-20b-F16-GGUF"
     hf_file: "gpt-oss-20b-F16.gguf"
 
