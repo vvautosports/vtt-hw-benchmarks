@@ -237,6 +237,88 @@ That last one is worth naming precisely: it is **not** the 2026-08-26 content-le
 
 **Recommendation: treat `b10472` as the production build and `b10639` as qwen4exp-experimental only.** Nothing currently depends on b10639 that works. Rollback is Kal's call; the upgrade also broke curated whisper.cpp dictation (installer: whisper requires the b10472 pairing; browser and Transformers dictation unaffected).
 
+> **Superseded same day — root cause found.** The non-termination and (at least the structural half of) the quality regressions trace to `GGML_CUDA_ENABLE_UNIFIED_MEMORY=1`, not to b10639's inference code. See the next section before acting on anything above.
+
+## Root cause: unified-memory env corruption on Strix Halo (2026-08-27, PM)
+
+The b10639 "net regression" and the Qwen3.8-Flash-Next non-termination share one root cause: **the studio wrapper auto-sets `GGML_CUDA_ENABLE_UNIFIED_MEMORY=1` for AMD unified-memory APUs, and under `b10639-mix-f6f92fe` on gfx1151 that corrupts inference itself.** Diagnosis chain (probe data on Framework `~/qwen38next-{eos,raw,umfix}-probe/`):
+
+1. **Budget was not the issue.** At `max_tokens=32768` (4× the battery cap), effort=low, the model still spent every token inside reasoning and never closed it — kills the "verbose thinker, raise the cap" hypothesis.
+2. **Non-thinking mode was garbage from token 1.** `reasoning_effort: none` and `enable_thinking: false` both produced pure `"/"` spam to the cap.
+3. **The base LM itself was broken.** Template-free raw `/completion` ("Counting: one, two, three," greedy) → `"/"` spam. So: not a stop-token bug, not a chat-template bug, not an EOS-metadata bug. The forward pass was computing garbage.
+4. **Community match.** HF `unsloth/Qwen3.8-Flash-Next-GGUF` discussion **#30**: gibberish on Strix Halo since Unsloth Desktop sets `GGML_CUDA_ENABLE_UNIFIED_MEMORY=1`; workaround `UNSLOTH_DISABLE_UNIFIED_MEMORY=1`. Opt-out verified in studio source (`studio/backend/core/inference/llama_cpp.py`, `_unified_memory_opted_out`): ggml tests *presence* of the var, so `=0` is not an off switch — the opt-out must end in the name being unset. Confirmed live: our serving `llama-server` had the var in its environment.
+5. **With the opt-out, everything works.** Greedy counting completes sanely; thinking-mode closes its reasoning at 653 tokens with the correct answer; `reasoning_effort: low` is honored (211-char reasoning); effort=none answers coherently with an `ANSWER:` line; and the **GLM-4.7-Flash summarize control on b10639 produces the exact 5-bullet + TL;DR structure** whose loss defined the b10639 quality regression.
+6. **It is an interaction, not the var alone.** The var has shipped for Strix Halo since ~June (off switch added 2026-08-13, unslothai/unsloth #8680), so the clean b10472 batch almost certainly ran *with* it. Corruption = var × b10639-mix × gfx1151.
+
+Caveats that survive the root cause:
+
+- **The 204–225 t/s Qwen3.8-Flash-Next figures were artifacts of garbage generation** — discard them. A short fixed run measured ~20 t/s raw; real numbers come from the re-validation batch.
+- Nemotron's MTP 500s and the whisper pairing break (stale `paired_llama_tag` after the in-place runtime update) are separate issues; the whisper one is metadata/linkage, not inference.
+- HF discussion #27 ("Thinking Nightmare") reports this family still over-thinks at effort medium+ on healthy runtimes — effort=low stays the battery default.
+
+**Consequences:**
+
+- **The rollback decision is reopened.** The hybrid-split decision (b10472-mix standalone as production) was made on the pre-root-cause evidence. If the re-validation batch (below) comes back clean, b10639 + `UNSLOTH_DISABLE_UNIFIED_MEMORY=1` is the production candidate and no rollback is needed. Either way, `b10472-mix-4b653db` is now staged standalone (sha256-verified against the release manifest) at Framework `~/llama-runtimes/b10472-mix-4b653db/` as a pinned A/B-fallback runtime; studio can front any external llama-server via Settings → Connections.
+- **The per-family config registry is live** (Kal directive 2026-08-27: best model per task at its best-known config; uniformity is not a constraint). `roster_batch.py` spec entries now take an optional `"env"` dict recorded into every result record. First registry entries: `UNSLOTH_DISABLE_UNIFIED_MEMORY=1` (all families, this hardware) and Nemotron's `--speculative-type off`.
+- Upstream reporting — **decided (Kal, 2026-08-27): not filing a GitHub issue.** The written draft stays in the run dir (`upstream-issue-draft.md`) as source material for a possible HF forum/community post later. HF #30 already has the community's attention on the symptom; our addition would be the template-free repro and the subtle-GLM-degradation datapoint.
+
+### Re-validation batch: b10639 + env fix (graded, 2026-08-27)
+
+[`results/sweeps/2026-08-27-b10639-umfix-batch/`](../../results/sweeps/2026-08-27-b10639-umfix-batch/) — all entries launched with `UNSLOTH_DISABLE_UNIFIED_MEMORY=1` via the new per-entry `env` registry in `roster_batch.py`.
+
+| config | t/s (reason/code/summ) | quality | verdict |
+|---|---|---|---|
+| GLM-4.7-Flash (umfix) | 31.7 / 36.1 / 31.8 | **3/3** | summarize structure back, code bloat gone (5.9K tok vs 12.3K); residual −6.7% code t/s vs b10472 |
+| **Qwen3.8-Flash-Next** (umfix) | 15.6 / 22.3 / 17.1 | **3/3** | **first clean grades ever** — terminates, tight economy (433/3847/497 tok). Real speed ~16–22 t/s; the 204–225 figures were artifacts |
+| **Nemotron-3.5-Lightning (default!)** | **56.0 / 56.3 / 53.2** | **3/3** | the "MTP defect" was the env interaction — default flags now the best config, +20% over specoff. Also resolves the b10472 run1/run2 mystery (run1 pre-dated the GTT unlock) |
+| Nemotron-3.5-Lightning (specoff) | 44.5 / 47.2 / 47.0 | 3/3 | control; slower |
+| Qwen3.6-35B-A3B-MTP (umfix) | 54.3 / 56.1 / 54.2 | 2/3 — code ✗ | **the one genuine b10639 regression**: phantom-prior-turn code failure reproduces WITH the fix (chat-template/turn-boundary, this family) |
+
+**Rollback picture inverted.** b10639 + env fix dominates b10472 for everything measured except Qwen3.6's code task — and the code specialist is Qwen3-Coder-30B, not Qwen3.6. Nemotron is now the roster speed leader on clean grades (56 t/s, default flags).
+
+**Decisions taken (Kal, 2026-08-27):**
+
+- **Env fix made permanent on the Framework**: `~/.bashrc.d/unsloth.sh` (`export UNSLOTH_DISABLE_UNIFIED_MEMORY=1` — covers interactive, ssh-command, and harness `bash -c` launches) + `~/.config/environment.d/50-unsloth.conf` (systemd user services / GUI sessions). Verified end-to-end: a prefix-free `unsloth run` relaunch produced a llama-server with the GGML var absent, healthy API, and sane greedy output. Apply the same pair on the G1a when it next serves.
+- **No rollback.** b10639 + env fix is production. The pinned `b10472-mix-4b653db` standalone stays staged as A/B insurance ([LLAMA-RUNTIME-PINNING.md](LLAMA-RUNTIME-PINNING.md)).
+- **Whisper curated dictation stays blocked upstream**: `unsloth studio verify-install` passes but does not re-pair (`paired_llama_tag` still `b10472-mix-4b653db`), and unslothai/whisper.cpp's latest prebuilt (v1.9.2-unsloth.11, 2026-08-18) predates b10639 — no compatible build exists to install. Re-check on the next whisper prebuilt release; browser/Transformers dictation unaffected. The staged b10472 libs would allow a manual re-link, deliberately not done (breaks update flow).
+
+## Scoping: frontier-benchmark cross-reference (2026-08-27)
+
+Goal: place every local-roster verdict in the context of published scores, so "best local model for task X" can be read against "how far below frontier is that."
+
+- **Sources, in trust order:** LiveBench (contamination-controlled, monthly), Aider polyglot leaderboard (matches the coder-node use case), LMArena Elo (human preference, coarse), vendor model cards (self-reported — always flagged as such).
+- **Anchor rows:** current Claude/GPT frontier scores on the same public benchmarks, so the table reads local → open-frontier → closed-frontier in one sweep.
+- **Comparison axes:** local battery grade vs published rank (do our deterministic graders order models the same way LiveBench does?); t/s-per-quality on this hardware (published scores are quality-only — our t/s column is the thing no leaderboard has); quant gap (published scores are fp16/fp8 — our Q8/Q4 measurements bound the quant tax when a family appears in both).
+- **Deliverable shape:** one cross-reference table in this doc first (manual, ~10 roster models × 3-4 published sources); a refresh script only once the table has proven it earns its keep. Store source, date, and benchmark version per cell — leaderboards move.
+- **What it will NOT do:** no cross-benchmark arithmetic (no averaging LiveBench with Arena Elo), no claiming our 3-task battery is comparable to any published suite. The mapping is directional context, not a score.
+
+## Scoping: multi-dimensional test tracks (2026-08-27)
+
+Priority order per Kal (2026-08-27): **tool-calling/agentic first**, then quant and context axes, then creative/thinking/art. Rationale: the dual-agent architecture (thinker + coder nodes) lives or dies on tool-call reliability, not prose quality.
+
+### Track 1 — tool calling & agentic (FIRST)
+
+The capability that gates every planned use: browser control, app control, screenshotting, browsing, transcribing — i.e., can the model drive tools through `/v1/chat/completions` tool-call plumbing?
+
+- **Tier 1 (deterministic, harness-gradeable now):** single tool call — correct function selection + valid JSON args from a spec (grade: schema-validate, exact-match on expected call); multi-turn chain — tool result fed back, model must use it (grade: final answer contains value only obtainable from the tool result); distractor test — 5 tools offered, only one correct; refusal test — no tool fits, model must answer directly instead of hallucinating a call.
+- **Tier 2 (scenario, semi-deterministic):** mock browser/app-control APIs (navigate/click/screenshot/read as tool specs with canned responses) — grade on action-sequence validity, not pixel outcomes. Transcription slots in as whisper.cpp round-trip fidelity (existing dictation stack), which is a runtime test more than a model test.
+- **Runtime interaction to measure explicitly:** unsloth's tool-call healing layer (`--enable-tool-call-healing`, text-form `<tool_call>` promotion) — grade each model with healing on AND off; a model that only tool-calls through healing is a different (worse) tier than one that emits clean calls. Also relevant: llama.cpp upstream issue #19513 (Qwen3-Coder-Next premature EOS on tool calls) — this family has known tool-call-boundary bugs, so the sibling models need exactly this battery.
+- **Fits the existing metrics model:** all output-changing, content-channel-graded, deterministic graders — extends `grade_sweep.py` with a `toolcall` task family.
+
+### Track 2 — quant ladder & context-length axes
+
+Both were already in workstream F's queue; Kal elevated them (2026-08-27).
+
+- **Quant ladder:** same model, same battery, quant as the only axis (e.g. Qwen3.8-Flash-Next UD-Q4_K_XL vs the UD-IQ quants on disk; GLM Q8 vs REAP). Grades + t/s + peak memory per rung. Feeds the cross-reference table's quant-gap column. HF #27's observation that different quants of the same model behaved differently on the same prompt is exactly this axis unlabeled.
+- **Context ladder:** fixed model+quant, tasks executed at 4K/32K/128K/max fill (needle-style retrieval + task-at-depth, deterministic graders). Measures both quality-at-depth and the KV-cache t/s cliff on unified memory. Directly prices the thinker-node use case (262K ctx claim vs. usable reality).
+
+### Track 3 — creative / thinking / art (after 1–2)
+
+- Creative writing with hard constraints (form, length, banned-word) — constraint compliance is deterministically gradeable; aesthetic quality is not (needs judge-model channel, kept separate from deterministic grades per the metrics model).
+- Game generation (single-file playable HTML) — grade: parses, runs headless, passes smoke asserts. Execution-based grading infrastructure from workstream F.
+- Visual/spatial reasoning (text-form) — deterministic answers exist; true image input waits on the vision-projector question (gemma-3 mmproj niche, untested).
+- Windows-vs-Linux stays an axis here (G1a stays Windows until its Windows datapoints are banked — standing decision).
+
 ## References
 
 - "The 120GB ZBook" artifact — memory-unlock research + G1a Fedora runbook (session artifact, Kal has the link)

@@ -1,0 +1,67 @@
+=== REASONING ===
+Now we have function working. Need to output final answer with function code and doctest block. The doctest examples need to be part of docstring. Provide final code. We'll include the docstring with >>> examples. Also note that doctest may need `testmod` but we can just present code; the user can run doctest.
+
+Thus final answer: Provide python function with docstring containing at least 5 examples covering all requirements. Ensure examples include normal range, single number with whitespace, whitespace around commas, reversed range ValueError, empty/whitespace returns [].
+
+We'll output the function.
+
+=== CONTENT ===
+Here’s a self‑contained Python function that meets all of the stated requirements, including a doc‑test block with five examples.
+
+```python
+def parse_ranges(s: str) -> list[int]:
+    """
+    Parse a range string like ``'1-3,5,7-9'`` into a list of integers.
+
+    Whitespace around numbers and commas is ignored.
+    A reversed range (e.g. ``'9-7'``) raises ``ValueError``.
+    Empty or whitespace‑only input returns ``[]``.
+
+    >>> parse_ranges('1-3,5,7-9')
+    [1, 2, 3, 5, 7, 8, 9]
+    >>> parse_ranges('  10  ')
+    [10]
+    >>> parse_ranges('1 - 3 , 5 , 7-9')
+    [1, 2, 3, 5, 7, 8, 9]
+    >>> parse_ranges('9-7')
+    Traceback (most recent call last):
+        ...
+    ValueError: reversed range '9-7'
+    >>> parse_ranges('   ')
+    []
+    """
+    s = s.strip()
+    if not s:
+        return []
+
+    result: list[int] = []
+    for part in s.split(','):
+        part = part.strip()
+        if not part:
+            continue                     # skip empty bits from stray commas
+        if '-' in part:
+            start_str, end_str = part.split('-', 1)
+            start = int(start_str.strip())
+            end   = int(end_str.strip())
+            if start > end:
+                raise ValueError(f"reversed range '{part}'")
+            # start <= end  →  include every integer from start to end inclusive
+            if start == end:
+                result.append(start)
+            else:
+                result.extend(range(start, end + 1))
+        else:
+            result.append(int(part))
+    return result
+```
+
+**How it satisfies the requirements**
+
+| Requirement | How it’s handled |
+|------------|------------------|
+| Ignore whitespace around numbers and commas | `part.strip()` and `start_str.strip()` / `end_str.strip()` remove surrounding spaces. |
+| Reversed range raises `ValueError` | After parsing the two bounds, `if start > end: raise ValueError(...)`. |
+| Empty or whitespace‑only input returns `[]` | `s.strip()` yields `''` → early `return []`. |
+| Doctest block with ≥5 examples | The docstring contains five `>>>` examples covering normal ranges, single numbers, whitespace tolerance, reversed ranges, and empty input. |
+
+You can run the doctests with `python -m doctest <filename>.py -v`.

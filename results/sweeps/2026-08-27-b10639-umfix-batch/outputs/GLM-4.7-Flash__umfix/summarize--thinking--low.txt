@@ -1,0 +1,50 @@
+=== REASONING ===
+The user wants me to summarize the technical passage in exactly 5 bullet points followed by a one-sentence TL;DR. I need to be faithful to the source without adding claims it doesn't make.
+
+Let me break down the passage:
+
+1. First paragraph describes speculative decoding: a draft mechanism proposes tokens, target verifies in batch, accepted tokens get large-model quality at near-draft-model cost. Rejection truncates and resumes. Draft can be a separate small model, n-gram lookup, or MTP head trained jointly with target model.
+
+2. Second paragraph discusses economics by workload:
+   - Code and structured text: n-gram drafting achieves high acceptance rates almost for free
+   - Open-ended prose: fewer speculative tokens accepted, poorly matched draft can make generation slower
+   - MTP heads: stable acceptance rates across domains because they see the exact context
+
+3. Third paragraph discusses MoE models:
+   - Each token routes to subset of experts, so active parameter count per token is a fraction
+   - Verification batches positions together, but positions may route to different experts
+   - This pulls more expert weights per step
+   - On bandwidth-bound hardware, this erodes the batching advantage of speculation
+   - Break-even acceptance rate is higher for MoE targets
+
+4. Fourth paragraph discusses server-side parallelism:
+   - Slot-based servers split KV-cache budget across concurrent sequences
+   - More slots raise aggregate throughput, lower per-stream speed
+   - Speculation competes with extra slots for compute headroom
+   - Tuning must treat speculative mode, slot count, and sampling settings as one joint configuration
+   - Measure end-to-end tokens per second on representative tasks instead of microbenchmarks
+
+I need to synthesize this into 5 distinct bullet points, each capturing a key aspect of the passage. Let me think about the best 5:
+
+1. Speculative decoding concept: draft proposals verified in batch, accepted tokens get large-model quality at draft-model cost, rejection truncates and resumes
+2. Draft options: separate small model, n-gram lookup over prompt/generation, or MTP head trained jointly with target model
+
+
+3. Domain-specific economics reveal nuanced trade-offs in token generation efficiency across different text types and model architectures.
+
+I see that code generation shows promise with high acceptance rates for n-gram drafting, while MTP heads provide stable performance across varied writing contexts. The nuanced behavior of different text generation approaches suggests careful model selection is crucial for optimal performance.
+
+Mixture-of-expert models introduce unique computational challenges. Their architecture complicates token routing, potentially disrupting speculative decoding's efficiency. The varying expert paths across different token positions can impact overall computational throughput.
+
+Server-side parallelism adds another layer of complexity. Optimizing resource allocation requires a holistic approach, integrating speculative modes, slot configurations, and sampling strategies into a unified performance measurement framework.
+
+=== CONTENT ===
+Here's a faithful 5-bullet summary of the passage:
+
+* Speculative decoding proposes tokens via a draft mechanism that the target model verifies in a single batched forward pass; accepted tokens achieve large-model quality at draft-model cost, while rejection truncates the proposal and resumes generation from the last accepted position.
+* Drafts can be implemented as a separate small model, an n-gram lookup over the prompt and generation history, or a multi-token-prediction (MTP) head trained jointly with the target model to predict a short future token window.
+* Code and structured text benefit from nearly free high acceptance rates with n-gram drafting, while open-ended prose yields fewer speculative tokens and poorly matched draft models can degrade performance relative to standard decoding; MTP heads provide stable acceptance across domains because they observe the same context as the target.
+* Mixture-of-experts models increase the expert weights processed per step because verification batches multiple positions that may route to different experts, eroding the bandwidth advantage that makes speculation profitable for dense models and raising the break-even acceptance rate.
+* Server-side tuning must treat speculative mode, slot count, and sampling settings as a joint configuration rather than independent knobs, as speculation competes with additional slots for compute headroom and end-to-end throughput should be measured on representative tasks rather than isolated microbenchmarks.
+
+**TL;DR:** Speculative decoding accelerates inference by verifying draft token proposals in batch, but its effectiveness depends on the draft mechanism and domain—n-gram drafting excels for code while MTP heads work across tasks—but both face challenges with MoE models that route experts per token and with server-side slot configurations that compete for compute resources.

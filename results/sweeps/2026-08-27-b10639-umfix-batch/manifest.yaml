@@ -1,0 +1,106 @@
+# Re-validation of b10639 with the unified-memory corruption fix. Purpose: after
+# root-causing the b10639 "net regression" + Qwen3.8-Flash-Next non-termination to
+# GGML_CUDA_ENABLE_UNIFIED_MEMORY=1 (studio-auto-set on AMD APUs) corrupting
+# inference on gfx1151 under b10639-mix, rerun the failing configurations with
+# UNSLOTH_DISABLE_UNIFIED_MEMORY=1 to separate env-induced failures from genuine
+# runtime regressions. First run of the per-family config registry ("env" per spec
+# entry, recorded in every record).
+run_id: "2026-08-27-b10639-umfix-batch"
+date: "2026-08-27"
+node: "kalman9-framework-01"
+hardware: "AMD Strix Halo (Radeon 8060S iGPU), GTT unlock ACTIVE (gttsize=131072), ~122 GB usable"
+backend: "unsloth-studio"
+runtime_build: "b10639-mix-f6f92fe"
+runtime_build_reported: "0.3.0-dev (build 10639, commit 2a36554fc)"
+studio_version: "unsloth 2026.8.22"
+api: "/v1/chat/completions"
+request_constants:
+  seed: 42
+  max_tokens: 8192
+  profile: thinking
+  reasoning_effort: low
+launch_env:
+  UNSLOTH_DISABLE_UNIFIED_MEMORY: "1"   # all entries; see root-cause section in UNSLOTH-DIRECTION.md
+
+axis: cfg
+records: "results.jsonl"
+outputs: "outputs/<cfg>/<task>--thinking--low.txt"
+grading: "py scripts/utils/grade_sweep.py results/sweeps/2026-08-27-b10639-umfix-batch results --layout cfg"
+
+entries:
+  - cfg: "GLM-4.7-Flash__umfix"
+    role: "version-sweep control — did the env var cause the b10639 quality/economy regression?"
+    quant: "UD-Q8_K_XL"
+    tps: "31.74 / 36.05 / 31.79"
+    quality: "3/3 PASS"
+    verdict: "MOSTLY CURED"
+    note: >-
+      Summarize structure is back (5 bullets + TL;DR — the b10639-batch failure) and the code
+      token bloat is gone (5895 tok vs 12339 broken, 6169 on b10472). Residual vs b10472:
+      code throughput 36.05 vs 38.64 t/s (−6.7%) — small, possibly speculation-related,
+      worth the spec-type sweep if it matters.
+
+  - cfg: "Qwen3.8-Flash-Next__umfix"
+    role: "the model the upgrade was for — was non-termination env corruption?"
+    quant: "UD-Q4_K_XL (4 shards, 104 GB)"
+    tps: "15.63 / 22.34 / 17.09"
+    quality: "3/3 PASS"
+    verdict: "USABLE — first clean grades ever for this model"
+    note: >-
+      Terminates on all three tasks with tight token economy (433/3847/497). The b10639-batch
+      204-225 t/s figures were garbage-generation artifacts; real speed at UD-Q4 is ~16-22 t/s,
+      slowest MoE in the current roster — the 'fastest model ever measured' claim is dead.
+      Speed-quality tradeoff now measurable for the thinker-node candidacy.
+
+  - cfg: "Nemotron-3.5-Lightning-30B-A3B__umfix"
+    role: "does the MTP defect (HTTP 500s on default flags) survive the env fix?"
+    quant: "UD-Q8_K_XL"
+    tps: "56.03 / 56.30 / 53.24"
+    quality: "3/3 PASS"
+    verdict: "DEFECT GONE — default flags now BEST config"
+    note: >-
+      The 'model-specific MTP breakage' was the unified-memory interaction all along. With the
+      env fix, studio-auto MTP works and beats specoff by ~+20%. Also explains the b10472
+      run1-vs-run2 mystery: run1 (pre-reboot, 62GB ttm) passed because the GTT unlock wasn't
+      active; run2 (post-reboot) hit the corrupting path. The --speculative-type off registry
+      entry is now unnecessary on fixed launches — kept in the registry as historical note.
+
+  - cfg: "Nemotron-3.5-Lightning-30B-A3B__umfix-specoff"
+    role: "control for the above"
+    tps: "44.47 / 47.16 / 47.00"
+    quality: "3/3 PASS"
+    verdict: "works, slower than default"
+
+  - cfg: "Qwen3.6-35B-A3B-MTP__umfix"
+    role: "cross-version control — is its b10639 code failure env-induced or genuine?"
+    quant: "UD-Q8_K_XL"
+    tps: "54.31 / 56.14 / 54.22"
+    quality: "2/3 — code FAILS (0 doctests)"
+    verdict: "GENUINE b10639 REGRESSION — not the env var"
+    note: >-
+      Same phantom-prior-turn failure as the un-fixed b10639 batch: reasoning says 'All 8
+      doctests pass', content is a markdown table describing tests — no function definition
+      in either channel. Reproduces WITH the env fix, so this one is real: chat-template /
+      turn-boundary handling for this family regressed between b10472-mix and b10639-mix.
+      b10472 graded it 3/3 at 57.6/58.2/50.0.
+
+summary: >-
+  b10639 is REHABILITATED except for one model. With UNSLOTH_DISABLE_UNIFIED_MEMORY=1:
+  GLM 3/3 with economy restored (−7% residual code t/s), Qwen3.8-Flash-Next 3/3 for the
+  first time (~16-22 t/s real speed), Nemotron 3/3 on DEFAULT flags at 56 t/s (best config
+  yet — the MTP defect was the env interaction). The one genuine b10639 regression is
+  Qwen3.6-35B-A3B-MTP's code task (phantom-prior-turn, both channels empty of code).
+  Rollback picture inverted: b10639 + env fix now dominates b10472 for everything except
+  Qwen3.6 code — and Qwen3-Coder-30B, not Qwen3.6, is the code specialist.
+
+caveats:
+  env_fix_scope: >-
+    UNSLOTH_DISABLE_UNIFIED_MEMORY=1 must be present at unsloth run launch (opt-out unsets
+    GGML_CUDA_ENABLE_UNIFIED_MEMORY in the child env; ggml tests presence, so =0 does NOT
+    disable). The restored GLM baseline serve at end of batch runs WITHOUT the fix pending
+    Kal's decision on making it permanent (shell profile / systemd env).
+  whisper_pairing: >-
+    Unchanged by this run: curated whisper dictation still broken (stale paired_llama_tag
+    b10472-mix after in-place update). Separate issue.
+
+driver_script: "roster_batch.py (env-registry version) + batch_b10639_umfix.json (Framework ~)"

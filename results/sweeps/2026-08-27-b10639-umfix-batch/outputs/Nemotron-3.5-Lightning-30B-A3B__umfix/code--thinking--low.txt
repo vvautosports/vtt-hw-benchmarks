@@ -1,0 +1,62 @@
+=== REASONING ===
+All 5 doctests pass. Good.
+
+Now we need to output the final answer: the function with doctest. Provide the code. Possibly include the file content, but better to just give the function definition. The user asked: "Write a Python function parse_ranges(s: str) -> list[int] that parses a string like '1-3,5,7-9' into [1, 2, 3, 5, 7, 8, 9]. Requirements: ignore whitespace around numbers and commas; a reversed range like '9-7' raises ValueError; empty or whitespace-only input returns []. Include a doctest block with at least 5 examples covering all requirements."
+
+Thus we should output the function with docstring doctest. We'll present the code in a markdown code block.
+
+We'll include the function as defined.
+
+Thus final answer.
+
+=== CONTENT ===
+Here is a self‑contained Python function that meets all of the stated requirements, including a doctest block with five examples that exercise every requirement:
+
+```python
+def parse_ranges(s: str) -> list[int]:
+    """
+    Parse a range string like '1-3,5,7-9' into a list of integers.
+
+    Whitespace around numbers and commas is ignored.
+    A reversed range like '9-7' raises ValueError.
+    Empty or whitespace-only input returns [].
+
+    >>> parse_ranges('1-3,5,7-9')
+    [1, 2, 3, 5, 7, 8, 9]
+    >>> parse_ranges(' 1 , 3-5 ')
+    [1, 3, 4, 5]
+    >>> parse_ranges('')
+    []
+    >>> parse_ranges('   ')
+    []
+    >>> parse_ranges('9-7')
+    Traceback (most recent call last):
+    ValueError: reversed range '9-7'
+    """
+    s = s.strip()
+    if not s:
+        return []
+    parts = s.split(',')
+    result = []
+    for part in parts:
+        part = part.strip()
+        if not part:
+            continue
+        if '-' in part:
+            start_str, end_str = part.split('-', 1)
+            start = int(start_str.strip())
+            end = int(end_str.strip())
+            if start > end:
+                raise ValueError(f"reversed range '{part}'")
+            result.extend(range(start, end + 1))
+        else:
+            result.append(int(part))
+    return result
+```
+
+The doctest verifies:
+
+* Normal range parsing (`'1-3,5,7-9'`).
+* Whitespace tolerance (`' 1 , 3-5 '`).
+* Empty and whitespace‑only inputs (`''` and `'   '`).
+* ValueError on a reversed range (`'9-7'`).

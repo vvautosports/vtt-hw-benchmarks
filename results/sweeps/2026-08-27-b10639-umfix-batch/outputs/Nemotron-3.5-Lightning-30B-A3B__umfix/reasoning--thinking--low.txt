@@ -1,0 +1,63 @@
+=== REASONING ===
+We have a problem: Three trucks arrive at a warehouse together at 6:00 AM. Truck A returns every 12 minutes, truck B every 18 minutes, truck C every 30 minutes. Between 6:00 AM and 6:00 PM inclusive, how many times do all three trucks arrive at the same moment?
+
+Interpretation: The trucks all start at 6:00 AM together, and then each returns periodically: A every 12 min, B every 18 min, C every 30 min. So they will all be at the warehouse at times that are multiples of their intervals after 6:00 AM, but also possibly at times that are common multiples of all three intervals, i.e., multiples of the least common multiple (LCM) of 12, 18, and 30.
+
+But careful: They all arrive at the warehouse at 6:00 AM initially. Then after that, truck A will arrive at times 6:12, 6:24, etc. Truck B at 6:18, 6:36, etc. Truck C at 6:30, 6:60 (7:00), etc. The times when all three are present simultaneously are the times that are common multiples of 12, 18, 30 after 6:00 AM, i.e., at times that are multiples of LCM(12,18,30). Let's compute LCM.
+
+12 = 2^2 * 3
+18 = 2 * 3^2
+30 = 2 * 3 * 5
+
+LCM = 2^2 * 3^2 * 5 = 4 * 9 * 5 = 180 minutes.
+
+So every 180 minutes (3 hours) all three trucks are at the warehouse together, starting at 6:00 AM. Also at 6:00 AM they all arrive together (the initial time). The question: "Between 6:00 AM and 6:00 PM inclusive, how many times do all three trucks arrive at the same moment?" 6:00 PM is 12 hours after 6:00 AM. So the interval is from 6:00 AM to 6:00 PM inclusive. That's a total of 12 hours = 720 minutes.
+
+We need to count the number of times (including the start at 6:00 AM and the end at 6:00 PM if it's a multiple) when all three trucks are present simultaneously.
+
+Times when all three are present: 6:00 AM (t=0 min), then 6:00+180 = 9:00 AM (t=180), then 12:00 PM (t=360), then 3:00 PM (t=540), then 6:00 PM (t=720). That's 5 times.
+
+But need to verify if 6:00 PM inclusive counts. Yes "Between 6:00 AM and 6:00 PM inclusive". So both endpoints inclusive. Since 6:00 PM is exactly 12 hours later, which is a multiple of 180 (720/180=4, so the 5th occurrence). So answer = 5.
+
+But let's double-check: Are there any other times when they coincide beyond LCM? No, because the LCM is the smallest positive interval after which all three align again. So only every 180 minutes.
+
+Now confirm the times: 6:00 AM + 0 = 6:00 AM; +180 = 9:00 AM; +360 = 12:00 PM; +540 = 3:00 PM; +720 = 6:00 PM. Yes.
+
+Thus answer = 5.
+
+We need to show reasoning and then state final count on its own line as 'ANSWER: <n>'.
+
+So final answer: 5.
+
+We can provide reasoning.
+
+We should also consider if there's any nuance: "Three delivery trucks all arrive at a warehouse together at 6:00 AM." So at 6:00 AM they all arrive. Then "Truck A returns every 12 minutes, truck B every 18 minutes, and truck C every 30 minutes." Does "returns every X minutes" mean that after arriving, it goes away and returns after that interval? Usually yes, they arrive at the warehouse at 6:00, then after that they come back every X minutes. So the arrival times are at 6:00 + k*interval. So indeed they will be present at those times.
+
+Thus count = floor(720/180) + 1 = 4 + 1 = 5.
+
+I'll answer accordingly.
+
+=== CONTENT ===
+The three trucks start together at 6:00 AM. After that, each returns at regular intervals: Truck A every 12 min, Truck B every 18 min, and Truck C every 30 min. All three are at the warehouse at the same moment only when the elapsed time is a common multiple of 12, 18, and 30.
+
+The least common multiple (LCM) of these intervals is:
+
+- 12 = 2² · 3
+- 18 = 2 · 3²
+- 30 = 2 · 3 · 5  
+
+LCM = 2² · 3² · 5 = 4 · 9 · 5 = 180 minutes (3 hours).
+
+Thus, after the initial 6:00 AM arrival, all three trucks coincide every 180 minutes.
+
+The window from 6:00 AM to 6:00 PM inclusive spans 12 hours = 720 minutes. The times of simultaneous arrival are:
+
+- 6:00 AM (t = 0 min)
+- 6:00 AM + 180 min = 9:00 AM (t = 180 min)
+- 6:00 AM + 360 min = 12:00 PM (t = 360 min)
+- 6:00 AM + 540 min = 3:00 PM (t = 540 min)
+- 6:00 AM + 720 min = 6:00 PM (t = 720 min)
+
+That gives 5 occurrences.
+
+ANSWER: 5

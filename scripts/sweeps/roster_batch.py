@@ -3,11 +3,20 @@
 
 Usage: python3 roster_batch.py <spec.json> <rundir>
 
-spec.json is a list of {"name", "path", "flags", "tag"} entries. Each entry gets
-its OWN output directory (outputs/<name>__<tag>/), which is the fix for the
-transcript-trampling defect that cost us run1's quality data on 2026-08-26 and
-again on the roster run: two passes over the same model previously overwrote each
-other's transcripts.
+spec.json is a list of {"name", "path", "flags", "tag"} entries, plus an optional
+"env" dict of environment variables prefixed onto the `unsloth run` launch (the
+per-family config registry: families that need launch-env or flag workarounds
+carry them in the spec, and both are recorded in every result record). First
+registry entries: Nemotron's `--speculative-type off` flag, and
+UNSLOTH_DISABLE_UNIFIED_MEMORY=1 — studio auto-sets GGML_CUDA_ENABLE_UNIFIED_MEMORY=1
+on AMD APUs, which corrupts inference on Strix Halo under b10639-mix (slash-spam /
+never-terminating reasoning; diagnosed 2026-08-27, HF unsloth/Qwen3.8-Flash-Next-GGUF
+discussion #30).
+
+Each entry gets its OWN output directory (outputs/<name>__<tag>/), which is the
+fix for the transcript-trampling defect that cost us run1's quality data on
+2026-08-26 and again on the roster run: two passes over the same model previously
+overwrote each other's transcripts.
 
 Battery is pinned to the 2026-08-26 param-sweep winner -- thinking / effort=low,
 seed=42, max_tokens=8192 -- and reuses TASKS/run_one from sweep_phase1 verbatim so
@@ -52,8 +61,11 @@ def runtime_build():
         return f"unknown ({e!r})"
 
 
-def launch(path, flags, logfile):
-    cmd = (f"setsid nohup unsloth run --model {path} -H 0.0.0.0 -p 8888 "
+def launch(path, flags, logfile, env=None):
+    env_prefix = ""
+    if env:
+        env_prefix = "env " + " ".join(f"{k}={v}" for k, v in env.items()) + " "
+    cmd = (f"setsid nohup {env_prefix}unsloth run --model {path} -H 0.0.0.0 -p 8888 "
            f"{flags} > {logfile} 2>&1 < /dev/null &")
     subprocess.Popen(["bash", "-c", cmd])
 
@@ -79,21 +91,22 @@ def main():
         for entry in spec:
             cfg = f"{entry['name']}__{entry.get('tag', 'default')}"
             flags = entry.get("flags", "")
+            env = entry.get("env") or {}
             outdir = os.path.join(rundir, "outputs", cfg)
             os.makedirs(outdir, exist_ok=True)
             logfile = os.path.join(rundir, f"serve-{cfg}.log")
 
-            log(f"=== {cfg}  flags={flags!r}")
+            log(f"=== {cfg}  flags={flags!r} env={env!r}")
             if not os.path.exists(entry["path"]):
                 log(f"{cfg}: PATH MISSING {entry['path']}")
                 records.append({"model": entry["name"], "cfg": cfg, "flags": flags,
-                                "loaded": False, "error": "path missing",
+                                "env": env, "loaded": False, "error": "path missing",
                                 "runtime_build": build})
                 flush()
                 continue
 
             sp2.kill_serve()
-            launch(entry["path"], flags, logfile)
+            launch(entry["path"], flags, logfile, env=env)
             if not sp2.wait_loaded(logfile, timeout=LOAD_TIMEOUT):
                 tail = ""
                 try:
@@ -102,7 +115,7 @@ def main():
                     pass
                 log(f"{cfg}: LOAD FAILED / timed out")
                 records.append({"model": entry["name"], "cfg": cfg, "flags": flags,
-                                "loaded": False, "runtime_build": build,
+                                "env": env, "loaded": False, "runtime_build": build,
                                 "serve_log_tail": tail})
                 flush()
                 continue
@@ -113,7 +126,8 @@ def main():
             for task, prompt in sp1.TASKS.items():
                 rec = sp1.run_one(task, prompt, PROFILE, sp1.PROFILES[PROFILE], EFFORT)
                 rec.update({"model": entry["name"], "cfg": cfg, "flags": flags,
-                            "loaded": True, "runtime_build": build, "serve_argv": argv})
+                            "env": env, "loaded": True, "runtime_build": build,
+                            "serve_argv": argv})
                 records.append(rec)
                 flush()
                 log(f"  {task}: tps={rec.get('tps_wall')} tok={rec.get('completion_tokens')} "
