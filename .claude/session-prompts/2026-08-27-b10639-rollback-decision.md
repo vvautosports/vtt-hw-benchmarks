@@ -136,15 +136,72 @@ py scripts/utils/grade_sweep.py results/sweeps/2026-08-27-b10639-batch results -
   and that last one is an ACTIVE entry in `models-inventory.yaml`. An earlier session
   wrongly proposed these as safe purges. They are not.
 
-## What to do next
-1. Ask Kal the **b10639 rollback** question. If yes, research how to pin/downgrade the
-   llama.cpp release under `unsloth studio update` before touching anything.
-2. Re-test Qwen3-Coder-Next on an idle box (item 2 above) — cheapest way to remove the one
-   real confound in this session's headline generational finding.
-3. If staying on b10639: run a spec-type sweep to confirm/deny the speculation-flattening
+## ★ KAL'S DIRECTION FOR NEXT SESSION (set 2026-08-27, end of session)
+
+### 1. PRIMARY: get Qwen3.8-Flash-Next actually working
+It loads on b10639 and is the fastest thing ever measured here (204–225 t/s) but **never
+terminates** — all three tasks ran to the 8192 cap. This is the headline task, not a
+side quest. Angles, cheapest first:
+- Inspect the chat template / EOS handling: `--jinja` is on by default; compare the
+  template baked into the GGUF against what the qwen4exp PR expects. Try explicit
+  `--chat-template-kwargs`, and try `--jinja` off.
+- Check for stop-token metadata in the GGUF (`llama-server` startup log prints EOS/BOS ids).
+- Watch **ggml-org/llama.cpp#27742** for upstream merge, and unslothai/llama.cpp for a newer
+  `-mix` carry — this may simply be fixed there.
+- Try a lower tier (UD-IQ4_XS, 87 GiB) to rule out a Q4-specific quant defect.
+- If it terminates, it becomes the thinker candidate for the dual-agent architecture.
+
+### 2. Published-benchmark cross-reference (NEW — Kal's idea)
+Kal wants to reason about local models in terms of the frontier models he actually uses:
+*"Qwen3.8 > Sonnet 4.6", "GLM is almost Opus 4.5"*. Build a mapping from **published**
+benchmark results (the Claude model cards / release posts, and each open model's own
+published scores) onto our roster, so a local model has a familiar reference point.
+- Pull historical published Claude benchmark numbers (Opus/Sonnet/Haiku across generations)
+  and the open models' claimed scores on the same suites.
+- Identify which public suites overlap enough to be comparable, and be explicit about where
+  they are NOT (different harnesses, different shot counts, vendor-reported numbers).
+- Then decide which additional tests **we** need to run locally to make the bridge honest —
+  this is where our own battery gets extended.
+- Design note: this is a *view* over data, exactly like the usage-weighted utility score in
+  issue #11. Store raw published numbers; compute comparisons at read time.
+
+### 3. Multi-dimensional tests — beyond coding (NEW — Kal's idea)
+The current battery is 3 tasks and all of them are essentially technical. Kal wants to know
+which models are **more creative, better thinkers, better at art vs better at coding**, so
+work can be routed to the right model per task type. Deliberately fun/varied:
+- "generate this game" (a small playable thing — exercises long coherent output + design)
+- the "macOS browser test" (UI/visual reasoning through generated markup)
+- creative writing, open-ended ideation, aesthetic judgment
+Visual/multimodal models are a **later** focus — but gemma-3-27b already ships an `mmproj`
+vision projector on disk, so a first vision probe is nearly free when we get there.
+Grading these needs care: the current graders are deterministic and structural, which is
+their strength. Do NOT bolt an LLM judge onto the existing battery — keep creative scoring
+in a separate, clearly-labelled track (workstream F territory).
+
+### 4. G1a / Windows as a real axis, and Fedora dual-boot timing (NEW — Kal's idea)
+Kal: dual-threading tests on the G1a is possible now, and **cross-validating Windows vs
+Linux is itself interesting** — it rationalises a smaller model tier that fits AMD 32GB GPUs.
+- Treat **OS/runtime stack as a measurement axis**, same discipline as the version sweep:
+  same model, same quant, Windows (G1a) vs Fedora (Framework).
+- That argues for **keeping the G1a on Windows for now** — dual-booting it immediately
+  destroys the only Windows datapoint before it is collected. Do the Windows runs first,
+  then dual-boot deliberately.
+- New **≤32GB tier** worth defining for AMD 32GB GPUs — most of the current roster is 26-36G
+  at Q8, so several already fit or fit at Q4/Q5.
+- Dual-boot prep state is in memory `[[g1a-dual-boot-prep]]`: BIOS 01.05.07 has a Linux
+  suspend bug, and a 368GB HF cache on C: is blocking the partition shrink. Neither is solved.
+
+## What to do next (ordered)
+1. **Ask Kal the b10639 rollback question** — blocks all runtime work. If yes, research how
+   to pin/downgrade the llama.cpp release under `unsloth studio update` first.
+2. **Qwen3.8-Flash-Next termination bug** (§1 above) — the primary focus.
+3. Re-test Qwen3-Coder-Next on an idle box — removes the one real confound in this session's
+   headline generational finding.
+4. Scope the published-benchmark cross-reference (§2) — likely its own issue.
+5. Scope the multi-dimensional test track (§3) — likely its own issue.
+6. GLM-5.3-Flash quant re-check (`hf_fs ls hf://models/unsloth/GLM-5.3-Flash-GGUF`).
+7. If staying on b10639: spec-type sweep to confirm/deny the speculation-flattening
    hypothesis.
-4. GLM-5.3-Flash quant re-check (`hf_fs ls hf://models/unsloth/GLM-5.3-Flash-GGUF`).
-5. Then #8 workstream C (version-sweep suite proper) or MLflow Phase 2.
 
 ## Section-scoped reads
 - `C:/Users/kalman9/Documents/vvc/vtt-hw-benchmarks/.claude/worktrees/unsloth-direction/results/sweeps/2026-08-27-version-sweep/manifest.yaml` — §`findings` — the whole b10639 regression case. READ FULL, it is short.
@@ -169,12 +226,29 @@ py scripts/utils/grade_sweep.py results/sweeps/2026-08-27-b10639-batch results -
   `develop`). `origin` = GitHub is a stale recreated branch — never push it. Issues #8/#10/#11
   still live on GitHub and `gh` works for them.
 
-## Harness scripts (on Framework `~`, NOT yet committed — issue #8 harness-backend item)
-`roster_batch.py` (spec-driven batch, per-config output dirs — this is the trampling fix),
-`battery.py` (3-task battery vs whatever is serving), `nemotron_retest.py`, `fetch_roster.sh`,
-plus the pre-existing `sweep_phase1.py` / `sweep_phase2.py` / `overnight_run.py`.
-Spec files: `batch_b10472.json`, `batch_b10472_mtp.json`, `batch_b10639.json`.
-Committing these is an open #8 task.
+## Harness scripts — NOW COMMITTED at `scripts/sweeps/`
+`sweep_phase1.py` (canonical TASKS/PROFILES/run_one — import these, never redefine),
+`sweep_phase2.py` (owns kill_serve/wait_loaded/refresh_key), `roster_batch.py` (**preferred
+driver** — spec-driven, one output dir per entry, this is the trampling fix), `battery.py`,
+`nemotron_retest.py`, `overnight_run.py`, `fetch_roster.sh`, and `specs/*.json`.
+Read `scripts/sweeps/README.md` for the deployment model — they run ON the inference host,
+scp'd to `$HOME`, and Windows checkouts need a CRLF strip after scp:
+`ssh framework 'sed -i "s/$//" ~/*.py ~/*.sh ~/*.json'`.
+Grading is separate at `scripts/utils/grade_sweep.py` (analysis, runs on the workstation).
+
+## PR / forge state
+- **Forgejo PR #5 is OPEN and waiting on Kal's click:**
+  https://git.vvautosports.com/vvc/vtt-hw-benchmarks/pulls/5 — mergeable, base `develop`,
+  3 commits from this session, test-evidence comment posted.
+- **CI is STUCK, not failing.** All four `CI - Linting` checks sit `pending` indefinitely —
+  the known issue where `ubuntu-latest` jobs hang on the docker-labelled runner. The only
+  runs that ever completed on this repo are #3/#4 of the older `test` workflow. Local
+  equivalents of every gate were run and posted to the PR. Merging therefore needs
+  **force_merge**, which is Kal's call.
+- **The auto-mode classifier blocks credential-carrying Forgejo WRITE calls** (PR merge, PR
+  create). Reads/GETs and plain `git push` pass. Do not engineer around it — hand Kal the
+  merge URL, or have him add a Bash allow rule.
+- GitHub PR #9 is CLOSED un-merged (correct — repo is Forgejo-primary). Never push `origin`.
 
 ## Blockers
 - **b10639 rollback decision** — Kal's call, blocks all runtime work.
