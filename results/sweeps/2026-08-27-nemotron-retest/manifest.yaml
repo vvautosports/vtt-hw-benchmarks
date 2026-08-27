@@ -1,0 +1,80 @@
+# Nemotron-3.5-Lightning HTTP-500 root-cause matrix.
+# Follow-up to 2026-08-27-roster-validation caveats.nemotron_500s.
+run_id: "2026-08-27-nemotron-retest"
+date: "2026-08-27"
+node: "kalman9-framework-01"
+hardware: "AMD Strix Halo (Radeon 8060S iGPU), GTT unlock ACTIVE (gttsize=131072)"
+backend: "unsloth-studio"
+runtime_build: "b10472-mix-4b653db"
+runtime_build_reported: "0.1.1-dev (build 10472, commit 7a556b8f9)"
+model: "Nemotron-3.5-Lightning-30B-A3B"
+quant: "UD-Q8_K_XL"
+model_path: "/mnt/ai-models/unsloth/NVIDIA-Nemotron-3.5-Lightning-30B-A3B-GGUF/NVIDIA-Nemotron-3.5-Lightning-30B-A3B-UD-Q8_K_XL.gguf"
+context_length: 1048576               # auto-selected by `unsloth run`, unchanged between configs
+api: "/v1/chat/completions"
+request_constants:
+  seed: 42
+  max_tokens: 8192
+  profile: thinking
+  reasoning_effort: low
+
+question: >-
+  Overnight run2 returned HTTP 500 on reasoning and code while summarize survived but ran 45%
+  slower and failed its quality grade. Two suspects were in play: the MTP speculation path
+  itself, and the -np > 1 conflict (the Qwen MTP docs state -np > 1 is not supported with MTP,
+  and `unsloth run` had auto-selected --parallel 4 --spec-type draft-mtp). This matrix moves
+  one variable at a time.
+
+axes:
+  spec_off_np4: "--speculative-type off --parallel 4   -> is MTP the cause?"
+  spec_mtp_np1: "--speculative-type mtp --parallel 1   -> is the -np>1 conflict the cause?"
+
+records: "results.jsonl"
+outputs: "outputs/<config>/<task>--thinking--low.txt"   # per-config dirs: no trampling
+grading: "py scripts/utils/grade_sweep.py results/sweeps/2026-08-27-nemotron-retest results --layout config"
+
+results:
+  spec_off_np4:
+    reasoning: "43.23 t/s, 977 tok, PASS (answer 5)"
+    code: "46.84 t/s, 1331 tok, PASS (10 doctests, ValueError)"
+    summarize: "46.90 t/s, 1217 tok, PASS (5 bullets, TL;DR)"
+    verdict: "CLEAN SWEEP — 3/3 tasks, 3/3 quality, no errors"
+  spec_mtp_np1:
+    reasoning: "HTTP 500 after 113.7s"
+    code: "HTTP 500 after 167.4s"
+    summarize: "27.27 t/s, 1008 tok, FAIL (2 bullets, no TL;DR)"
+    verdict: "EXACT REPRODUCTION of overnight run2 — same two tasks 500, same surviving task,
+      same 1008-token output, same quality failure"
+
+conclusion: >-
+  MTP speculation is the cause, and the -np > 1 interaction is NOT. The prior working
+  hypothesis (that the --parallel 4 + draft-mtp COMBINATION was at fault) is disproven:
+  dropping to --parallel 1 while keeping MTP still fails, identically. Dropping MTP while
+  keeping --parallel 4 fixes everything. The failure is in the MTP draft/verify path for this
+  model on this build, not in slot contention.
+
+  Note the pre/post-reboot asymmetry: run1 (pre-reboot, 62GB ttm) ran MTP successfully at
+  41-52 t/s. So MTP is not unconditionally broken here -- something about the post-reboot
+  128GiB GTT state, or a compiled-kernel cache rebuilt across that reboot, tips it over. That
+  second-order question is open; it does not block using the model.
+
+impact: >-
+  With speculation off, Nemotron-3.5-Lightning is the FASTEST validated model on this box:
+  ~43-47 t/s with 3/3 clean content-channel grades. That is ~+27% over gemma-4-26B-A4B-it
+  (~36.8 t/s) and ~+25-45% over the GLM-4.7-Flash champion (32.3-38.6 t/s on the same
+  battery, same build, same day -- see 2026-08-27-version-sweep).
+
+  Two caveats before crowning it. (1) The code task produced 1331 tokens here versus 7085 in
+  overnight run1; t/s is a rate, not a quality measure, and the far shorter answer still
+  passed the grader (10 doctests + ValueError), but the two runs are not the same answer.
+  (2) The MTP breakage is a live defect on the current build -- the model is only fast AND
+  correct when explicitly launched with --speculative-type off, which is NOT what
+  `unsloth run` auto-selects for it.
+
+action_required: >-
+  Any future run of this model must pass --speculative-type off explicitly. Studio's
+  auto-selection picks draft-mtp for it and that path is broken on b10472 post-reboot. Re-test
+  MTP after the b10639 upgrade -- if MTP works there, that is a second version-sweep datapoint
+  and the auto-selection becomes safe again.
+
+driver_script: "nemotron_retest.py (Framework ~; commit copy pending, issue #8)"

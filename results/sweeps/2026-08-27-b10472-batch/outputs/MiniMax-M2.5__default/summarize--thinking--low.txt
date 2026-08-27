@@ -1,0 +1,503 @@
+=== REASONING ===
+This TL summary covers cheap draft designs and MTP heads and speculative
+targets. The cheap draft can be a small model, an n-gram draft over
+the exact context, or a multi-token-prediction (MTP) head that predicts
+a short window of tokens.
+
+The economics differ for dense cheap drafts: small model n-gram drafting
+over the exact context; multi-token-projection heads (MTP) heads trained
+jointly with the exact target.
+
+The MTP head sits in between a small model n-gram draft over tokens.
+An MTP head trained jointly with the target sees the exact target
+context.
+
+The MTP head sits in between: it sits in between a small model n-gram
+draft, and a multi-token-projection (MTP) head trained jointly.
+
+The exact context MTP head sits in between: it sits in between a cheap
+draft.
+
+Draft heads trained cheaply, and MTP heads trained densely:
+
+- Dense cheap draft over a short window; tokens from MTP head sit cheaply
+
+- Cheap draft sits near cheap draft, and MTP head sits in between:
+
+  - cheap draft sits near cheap draft: it sits near cheap cheap draft
+  
+  - draft heads cheap cheap draft sits across cheap cheap cheap cheap cheap
+
+The exact TL summary covers cheap cheap draft designs:
+
+  - dense cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap
+  
+  - draft heads cheap cheap draft sits in between cheap cheap cheap cheap
+  
+  - draft sits cheap cheap cheap cheap cheap draft sits across cheap cheap cheap
+  
+  - draft sits cheap cheap cheap cheap cheap cheap draft sits across cheap cheap cheap
+  
+  - draft sits cheap cheap cheap draft sits across cheap cheap cheap cheap
+  
+  - cheap cheap cheap draft sits across cheap cheap draft heads across cheap
+
+The exact TL summary cheap cheap draft sits across cheap cheap cheap cheap
+
+The exact TL summary cheap cheap cheap cheap cheap draft sits across
+cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap
+draft sits across cheap cheap cheap cheap cheap draft sits across
+
+The exact cheap cheap cheap cheap cheap cheap draft sits across
+draft.
+
+Draft cheap cheap cheap draft sits across cheap cheap cheap cheap
+
+The exact cheap cheap cheap cheap cheap cheap draft sits across
+draft.
+
+Draft cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap
+
+Draft cheap cheap cheap cheap cheap draft sits across cheap cheap
+draft sits across cheap cheap cheap draft sits across cheap
+
+Mixture-of-experts models complicate the picture. An MoE layer routes
+each token to a small subset of a small n-gram lookup, and drafting
+sits across cheap cheap cheap cheap cheap cheap cheap cheap cheap
+draft sits across cheap cheap cheap cheap cheap cheap cheap cheap
+
+Draft cheap cheap cheap cheap cheap cheap draft sits across cheap
+draft.
+
+Draft cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap
+draft sits across cheap cheap cheap cheap cheap cheap cheap cheap
+
+Draft cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap
+
+The exact cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap
+
+Draft cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap draft
+sites across cheap cheap cheap cheap cheap cheap cheap cheap cheap
+
+Mixture-of-experts models complicate the exact picture. An MoE layer
+routes cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap
+
+Mixture-of-experts cheap cheap cheap cheap cheap cheap cheap cheap 
+Mixture cheap cheap cheap cheap cheap cheap cheap cheap cheap
+
+Draft heads cheap cheap cheap cheap cheap cheap cheap cheap
+
+Draft cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap
+
+Draft cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap
+draft sits across cheap cheap cheap cheap cheap cheap cheap
+
+Draft cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap
+
+Mixture-of-experts cheap cheap cheap cheap cheap cheap cheap
+draft sits across cheap cheap cheap cheap cheap cheap cheap cheap
+
+Draft cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap
+Mixture cheap cheap cheap cheap cheap cheap cheap cheap cheap
+
+Draft heads cheap cheap cheap cheap cheap cheap cheap cheap
+
+Mixture cheap cheap cheap cheap cheap cheap cheap cheap cheap
+
+Draft cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap
+
+Mixture cheap cheap cheap cheap cheap cheap cheap cheap cheap
+Mixture cheap cheap cheap cheap cheap cheap cheap cheap cheap
+
+Draft cheap cheap cheap cheap cheap cheap cheap cheap cheap
+
+Draft cheap cheap cheap cheap cheap cheap cheap cheap cheap
+
+Draft cheap cheap cheap cheap cheap cheap cheap cheap cheap
+
+Draft heads cheap cheap cheap cheap cheap cheap cheap cheap
+
+Mixture cheap cheap cheap cheap cheap cheap cheap cheap cheap
+
+Mixture cheap cheap cheap cheap cheap cheap cheap cheap
+
+Draft cheap cheap cheap cheap cheap cheap cheap cheap cheap
+
+Mixture cheap cheap cheap cheap cheap cheap cheap cheap cheap
+
+Draft cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap
+
+Draft heads cheap cheap cheap cheap cheap cheap cheap cheap cheap
+Mixture cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap
+
+Draft cheap cheap cheap cheap cheap cheap cheap cheap
+
+Draft cheap cheap cheap cheap cheap cheap cheap cheap
+
+Draft cheap cheap cheap cheap cheap cheap cheap cheap cheap
+
+Mixture-of-experts cheap cheap cheap cheap cheap cheap
+
+Mixture cheap cheap cheap cheap cheap cheap cheap
+
+Draft cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap
+
+Draft heads cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap
+
+Draft cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap
+Mixture cheap cheap cheap cheap cheap cheap cheap cheap cheap
+
+Draft cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap
+draft sits across cheap cheap cheap cheap cheap cheap cheap
+draft sits across cheap cheap cheap cheap cheap cheap cheap cheap cheap
+draft sits across cheap cheap cheap cheap cheap cheap cheap
+draft sits across cheap cheap cheap cheap cheap cheap cheap
+
+Mixture-of-experts cheap cheap cheap cheap cheap cheap cheap
+draft sits across cheap cheap cheap cheap cheap cheap cheap cheap cheap
+
+Draft cheap cheap cheap cheap cheap cheap cheap cheap cheap
+
+Draft cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap
+
+Draft heads cheap cheap cheap cheap cheap cheap cheap cheap
+
+Draft cheap cheap cheap cheap cheap cheap cheap cheap cheap
+
+Draft cheap cheap cheap cheap cheap cheap cheap cheap
+
+Draft cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap
+
+Mixture cheap cheap cheap cheap cheap cheap cheap
+
+Draft cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap
+
+Mixture cheap cheap cheap cheap cheap cheap cheap cheap
+
+Draft cheap cheap cheap cheap cheap cheap cheap cheap cheap
+
+Draft cheap cheap cheap cheap cheap cheap cheap
+
+Draft cheap cheap cheap cheap cheap cheap cheap cheap cheap
+
+Mixture-of-experts cheap cheap cheap cheap cheap cheap cheap cheap cheap
+
+Mixture cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap
+
+Draft cheap cheap cheap cheap cheap cheap cheap cheap
+
+Mixture cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap
+
+Mixture-of-experts cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap
+
+Mixture cheap cheap cheap cheap cheap cheap cheap cheap
+
+Draft cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap
+
+Mixture cheap cheap cheap cheap cheap cheap cheap cheap cheap
+
+Draft cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap
+
+Mixture cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap
+draft sits across cheap cheap cheap cheap cheap cheap
+
+Mixture cheap cheap cheap cheap cheap cheap cheap cheap
+
+Mixture cheap cheap cheap cheap cheap cheap
+
+Draft cheap cheap cheap cheap cheap cheap cheap
+
+Mixture cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap
+
+Mixture cheap cheap cheap cheap cheap cheap cheap
+
+Draft cheap cheap cheap cheap cheap cheap cheap cheap cheap
+
+Draft cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap
+
+Draft cheap cheap cheap cheap cheap cheap
+
+Draft cheap cheap cheap cheap cheap cheap cheap cheap
+
+Draft cheap cheap cheap cheap cheap cheap cheap cheap cheap
+
+Mixture cheap cheap cheap cheap cheap cheap cheap
+
+Mixture cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap
+
+Mixture cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap
+
+Draft cheap cheap cheap cheap cheap cheap cheap cheap cheap
+
+Draft cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap
+Mixture cheap cheap cheap cheap cheap cheap cheap cheap
+
+Mixture-of-experts cheap cheap cheap cheap cheap cheap cheap cheap cheap
+
+Draft cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap
+
+Mixture cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap
+
+Draft cheap cheap cheap cheap cheap cheap cheap
+
+Draft cheap cheap cheap cheap cheap cheap cheap cheap cheap
+
+Draft cheap cheap cheap cheap cheap cheap cheap cheap cheap
+
+Mixture cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap
+
+Draft cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap
+
+Mixture cheap cheap cheap cheap cheap cheap cheap
+
+Mixture cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap
+
+Mixture-of-experts cheap cheap cheap cheap cheap
+
+Mixture cheap cheap cheap cheap cheap cheap cheap cheap cheap
+
+Mixture cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap
+
+Draft cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap
+
+Mixture-of-experts cheap cheap cheap cheap cheap
+
+Mixture cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap
+
+Draft cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap
+
+Draft cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap
+
+Mixture cheap cheap cheap cheap cheap cheap cheap cheap cheap
+
+Mixture cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap
+
+Mixture cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap
+
+Draft cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap
+
+Mixture cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap
+
+Draft heads cheap cheap cheap cheap cheap cheap cheap cheap cheap
+
+Draft cheap cheap cheap cheap cheap cheap cheap
+
+Draft cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap
+
+Draft cheap cheap cheap cheap cheap cheap cheap
+
+Draft cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap
+
+Draft cheap cheap cheap cheap cheap cheap cheap
+
+Mixture cheap cheap cheap cheap cheap cheap cheap cheap cheap
+
+Mixture-of-experts cheap cheap cheap cheap cheap cheap
+
+Mixture cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap
+
+Mixture cheap cheap cheap cheap cheap cheap cheap
+
+Mixture cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap
+
+Draft cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap
+Mixture cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap
+
+Draft cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap
+
+Draft cheap cheap cheap cheap cheap cheap cheap
+
+Mixture cheap cheap cheap cheap cheap cheap cheap cheap cheap
+
+Mixture-of-experts cheap cheap cheap cheap cheap cheap cheap cheap
+
+Mixture cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap
+
+Draft cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap
+
+Mixture cheap cheap cheap cheap cheap cheap cheap cheap
+
+Draft cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap
+
+Mixture cheap cheap cheap cheap cheap cheap cheap cheap
+
+Draft cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap
+
+Mixture cheap cheap cheap cheap cheap cheap cheap cheap cheap
+
+Draft cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap
+
+Mixture-of-experts cheap cheap cheap cheap cheap cheap cheap cheap cheap
+
+Draft cheap cheap cheap cheap cheap cheap
+
+Mixture cheap cheap cheap cheap cheap cheap cheap cheap
+
+Mixture cheap cheap cheap cheap cheap cheap cheap cheap
+
+Mixture-of-experts cheap cheap cheap cheap cheap cheap cheap
+
+Mixture cheap cheap cheap cheap cheap cheap cheap cheap
+
+Draft cheap cheap cheap cheap cheap cheap cheap cheap cheap
+
+Draft cheap cheap cheap cheap cheap cheap cheap cheap cheap
+
+Mixture cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap
+
+Draft cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap
+
+Draft cheap cheap cheap cheap cheap cheap cheap cheap cheap
+
+Draft cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap
+
+Draft cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap
+
+Mixture cheap cheap cheap cheap cheap cheap cheap cheap cheap
+
+Mixture cheap cheap cheap cheap cheap cheap cheap cheap cheap
+
+Mixture cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap
+
+Mixture cheap cheap cheap cheap cheap cheap cheap cheap cheap
+
+Mixture cheap cheap cheap cheap cheap cheap cheap cheap cheap
+
+Mixture cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap
+draft sits across cheap cheap cheap cheap cheap cheap cheap cheap
+
+Mixture cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap
+
+Mixture cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap
+
+Draft cheap cheap cheap cheap cheap cheap cheap cheap cheap
+
+Draft cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap
+
+Draft cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap
+
+Mixture cheap cheap cheap cheap cheap cheap cheap cheap cheap
+
+Draft cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap
+
+Mixture cheap cheap cheap cheap cheap cheap cheap cheap cheap
+
+Mixture cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap
+
+Mixture cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap
+
+Mixture cheap cheap cheap cheap cheap cheap cheap cheap cheap
+
+Draft cheap cheap cheap cheap cheap cheap cheap cheap
+
+Draft cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap
+
+Draft cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap
+
+Mixture cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap
+
+Mixture cheap cheap cheap cheap cheap cheap cheap cheap cheap
+
+Mixture cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap
+
+Draft cheap cheap cheap cheap cheap cheap cheap cheap
+
+Mixture cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap
+
+Draft cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap
+
+Mixture cheap cheap cheap cheap cheap cheap cheap cheap cheap
+
+Mixture cheap cheap cheap cheap cheap cheap cheap cheap
+
+Mixture cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap
+
+Mixture cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap
+
+Draft cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap
+
+Mixture cheap cheap cheap cheap cheap cheap cheap cheap cheap
+
+Mixture cheap cheap cheap cheap cheap cheap cheap cheap cheap
+
+Draft cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap
+
+Mixture cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap
+
+Mixture cheap cheap cheap cheap cheap cheap cheap cheap cheap
+
+Mixture cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap
+
+Mixture cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap
+
+Mixture cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap
+
+Mixture cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap
+
+Mixture cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap
+
+Mixture cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap
+
+Draft heads cheap cheap cheap cheap cheap cheap cheap cheap
+
+Mixture cheap cheap cheap cheap cheap cheap cheap cheap cheap
+
+Draft cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap
+
+Mixture-of-experts cheap cheap cheap cheap cheap cheap cheap cheap cheap
+
+Mixture cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap
+
+Mixture cheap cheap cheap cheap cheap cheap cheap cheap cheap
+
+Mixture cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap
+
+Mixture cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap
+
+Mixture cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap
+
+Mixture cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap
+Mixture cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap
+
+Mixture cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap
+
+Mixture cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap
+
+Mixture cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap
+
+Mixture cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap
+
+Mixture cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap
+
+Mixture cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap
+
+Mixture cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap
+
+Mixture cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap
+
+Mixture cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap
+
+Mixture cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap
+
+Mixture cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap
+
+Mixture cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap
+
+Mixture cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap
+
+Mixture cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap
+
+Mixture cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap draft sits across cheap cheap cheap draft sits across cheap cheap cheap draft cheap cheap
+
+Mixture cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap
+
+Mixture cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap
+
+Mixture cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap
+
+Mixture cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap
+
+Mixture cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap cheap
+
+=== CONTENT ===
+

@@ -1,0 +1,8 @@
+=== CONTENT ===
+* Speculative decoding uses a cheap draft mechanism to propose tokens that a target model verifies in one batched pass, ensuring outputs remain distributionally identical to standard decoding.
+* Drafting methods vary from separate small models and n-gram lookups to jointly trained multi-token-prediction (MTP) heads.
+* Performance depends on the workload: n-grams excel with structured text, while poorly matched draft models can slow down open-ended prose due to wasted verification passes.
+* Mixture-of-experts (MoE) models may see reduced speculation profits on bandwidth-bound hardware because batched verification can pull more expert weights through memory.
+* Server-side optimization requires jointly tuning speculative mode, slot count, and sampling settings to maximize end-to-end tokens per second.
+
+TL;DR: Speculative decoding accelerates inference via draft proposals and target verification, though its efficiency varies by drafting method, workload, model architecture, and server configuration.

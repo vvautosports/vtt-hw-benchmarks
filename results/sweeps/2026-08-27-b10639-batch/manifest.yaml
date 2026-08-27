@@ -1,0 +1,107 @@
+# Post-upgrade batch on b10639. Purpose: run the newly-unblocked qwen4exp model,
+# re-test the Nemotron MTP defect on the new build, and carry one known-good model
+# (Qwen3.6) across the version boundary as a control.
+#
+# The control is what makes this run readable. Read it before b10639 is trusted.
+run_id: "2026-08-27-b10639-batch"
+date: "2026-08-27"
+node: "kalman9-framework-01"
+hardware: "AMD Strix Halo (Radeon 8060S iGPU), GTT unlock ACTIVE (gttsize=131072), ~122 GB usable"
+backend: "unsloth-studio"
+runtime_build: "b10639-mix-f6f92fe"
+runtime_build_reported: "0.3.0-dev (build 10639, commit 2a36554fc)"
+studio_version: "unsloth 2026.8.22"
+api: "/v1/chat/completions"
+request_constants:
+  seed: 42
+  max_tokens: 8192
+  profile: thinking
+  reasoning_effort: low
+
+axis: cfg
+records: "results.jsonl"
+outputs: "outputs/<cfg>/<task>--thinking--low.txt"
+grading: "py scripts/utils/grade_sweep.py results/sweeps/2026-08-27-b10639-batch results --layout cfg"
+
+entries:
+  - cfg: "Qwen3.8-Flash-Next__default"
+    role: "the model the upgrade was FOR — qwen4exp arch, blocked on b10472 since 2026-08-26"
+    quant: "UD-Q4_K_XL (4 shards, 104 GB)"
+    tps: "204.71 / 224.65 / 217.00"
+    quality: "0/3 — ALL THREE tasks capped at max_tokens (finish_reason=length)"
+    verdict: "LOADS BUT UNUSABLE"
+    note: >-
+      The arch blocker IS lifted — it loads and generates, which b10472 could not do at all.
+      And it is spectacularly fast: 204-225 t/s is by far the highest rate recorded anywhere
+      in this study, which is credible for a 125B-A6B MoE with only ~6B active parameters at
+      Q4. But it never terminates: all three tasks ran to the 8192-token cap. A model that
+      cannot stop is not usable, so the raw t/s figures are meaningless as a ranking.
+      Likely cause: incomplete stop-token / EOS handling in an architecture that the fork
+      carries as an OPEN, unmerged upstream PR (ggml-org/llama.cpp#27742). Re-test when that
+      PR merges upstream. Do not put this model in a rotation.
+
+  - cfg: "Nemotron-3.5-Lightning-30B-A3B__default"
+    role: "does the upgrade fix the MTP defect found on b10472?"
+    tps: "HTTP 500 / HTTP 500 / HTTP 500"
+    quality: "n/a — all errored"
+    verdict: "NO — WORSE"
+    note: >-
+      The upgrade did not fix it and made it worse. On b10472 the MTP path failed 2 of 3
+      tasks (summarize survived, degraded). On b10639 all THREE fail with HTTP 500. The
+      workaround is unchanged and still required: launch with --speculative-type off.
+
+  - cfg: "Qwen3.6-35B-A3B-MTP__default"
+    role: "CONTROL — known-good on b10472, carried across the version boundary"
+    tps: "53.55 / 55.81 / 53.84"
+    quality: "2/3 — code REGRESSED from pass to fail"
+    verdict: "REGRESSED"
+    note: >-
+      b10472: 57.55 / 58.23 / 50.04, 3/3 pass. b10639: 53.55 / 55.81 / 53.84, 2/3.
+      Modestly slower on two tasks, and the code task now FAILS. See
+      caveats.b10639_instruction_following for what the failure actually looks like — it is
+      not a grader artifact and it is not a near miss.
+
+summary: >-
+  b10639 is a NET REGRESSION on this hardware. It delivers the one thing it was taken for —
+  the qwen4exp arch loads — but that model does not terminate, so nothing is actually gained
+  yet; meanwhile two independent known-good models lost quality and Nemotron's MTP defect
+  got worse. Recommend treating b10472 as the production build and b10639 as
+  qwen4exp-experimental only, pending a rollback decision from Kal.
+
+caveats:
+  b10639_instruction_following: >-
+    TWO INDEPENDENT MODELS lost an explicitly-required structural element on b10639, having
+    produced it correctly on b10472 with the same quant, seed, prompt and sampling config.
+    Only the runtime moved.
+
+    (1) GLM-4.7-Flash, summarize: b10472 produced the requested five bullet points; b10639
+    returned a prose paragraph plus a TL;DR, with zero bullets of ANY style in either
+    channel. Verified by reading the transcript — not a bullet-character mismatch.
+
+    (2) Qwen3.6-35B-A3B-MTP, code: b10472 produced a working function with 6 doctests;
+    b10639 emitted a 2-line reasoning summary ("All 8 doctests pass") and a markdown TABLE
+    describing eight test cases — with NO function definition and NO doctest markers
+    anywhere in either the reasoning or the content channel. The model wrote as though it
+    had already produced and executed the code in a previous turn.
+
+    That second failure is NOT the 2026-08-26 content-leak defect, which was a
+    channel-routing problem (answer in reasoning_content, summary in content). Here the
+    answer exists in NEITHER channel. The shape — confidently referring back to work that
+    was never emitted — points at chat-template or turn-boundary handling, which is exactly
+    the kind of thing a build carrying two unmerged upstream PRs can break.
+
+    This is the finding the version-sweep suite (issue #8, workstream C) was built to catch,
+    and it would have been invisible without the same-day b10472 control. It also vindicates
+    content-channel grading: a whole-transcript grep would have scored the Qwen3.6 answer as
+    mentioning doctests and moved on.
+  whisper_regression: >-
+    The upgrade also broke curated whisper.cpp dictation. Installer output: "no compatible
+    prebuilt (installed llama.cpp b10639-mix-f6f92fe; whisper requires b10472-mix-4b653db)".
+    Browser and Transformers dictation are unaffected.
+  studio_version_moved_too: >-
+    This was not purely a llama.cpp bump: `unsloth studio update` also moved the studio
+    package 2026.8.21 -> 2026.8.22 and rebuilt the frontend and dependency stack. So the
+    regressions above are attributable to "the upgrade", not specifically to llama.cpp
+    b10639. Isolating which layer caused them would need a build-only swap.
+
+driver_script: "roster_batch.py + batch_b10639.json (Framework ~)"

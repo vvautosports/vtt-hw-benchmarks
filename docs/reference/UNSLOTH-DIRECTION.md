@@ -95,7 +95,8 @@ Framework serve via `unsloth run`, 202K ctx, measured through the studio API (`/
 
 Two classes of axis, measured differently — never conflated:
 
-- **Output-invariant axes** (speculative type, parallel slots): lossless by construction — they cannot change what the model says, only how fast. Speed-only measurement is *correct* here, not a shortcut.
+- **Output-invariant axes** (parallel slots; speculative type *only* for draft-model and n-gram speculation): lossless by construction — they cannot change what the model says, only how fast. Speed-only measurement is *correct* here, not a shortcut.
+  - **Amended 2026-08-27:** native-MTP speculation is **not** output-invariant in practice. The original claim rested on GLM-4.7-Flash producing byte-identical same-seed outputs across spec modes — but GLM has no native MTP head. Qwen3.6-35B-A3B-MTP, which does, produced materially different outputs with MTP on vs off (2947 vs 4432 tokens on reasoning) and its summarize grade **flipped from pass to fail**. So for any model with a native MTP head, treat speculative type as an output-changing axis and grade it.
 - **Output-changing axes** (sampling profile, reasoning_effort, quant, model): quality must be measured alongside speed. Quality lives as a structured `quality` object per JSONL record (programmatic graders: verifiable answers, doctest compliance, structure checks — deterministic, no judge). Execution-based grading (actually running generated code) and judge-scored fidelity are workstream F.
 
 **Planned: usage-weighted utility score.** Store only raw per-task/per-domain metrics (JSONL → MLflow); the composite ranking is a *view* — a versioned weight vector applied at read time, never baked into stored data. Weights derive from how VVC actually uses AI, recomputed per release from repo-activity signals: language/path mix of recent commits across VVC repos, new benchmarks added, prompts/references landed, open-issue emphasis. Re-ranking history under new weights is then free, and "best model" tracks what the org is actually doing rather than a static benchmark. Design tracked in issue #11.
@@ -137,6 +138,104 @@ Findings:
 - **Speculation is worth +26% overall and +69% on code** (auto 38.6 vs off 22.8 t/s on the code task) — structured text accepts drafts; keep it on for the coder-node use case especially.
 - **Slot count is irrelevant on this hardware**: aggregate throughput pins at ~31 t/s for np=1/4/8 — classic bandwidth-bound MoE behavior (the summarize source passage's prediction, empirically confirmed). No reason to change np=4; concurrency neither helps nor costs aggregate.
 - Ops gotcha, recorded for the harness backend: this llama-server build **ignores SIGTERM** — orchestration must escalate to SIGKILL.
+
+## Roster validation — 5 models (2026-08-27)
+
+Same battery, same request config as the param sweep (thinking / `reasoning_effort: low`, seed 42, max_tokens 8192), on `b10472-mix-4b653db`. The axis here is **model**. Canonical data: [`results/sweeps/2026-08-27-roster-validation/`](../../results/sweeps/2026-08-27-roster-validation/).
+
+The driver ran the roster twice — once pre-reboot (62GB ttm) and once post-reboot with the 128GiB GTT unlock active. Both passes are kept and tagged; the delta between them is the finding, not noise.
+
+| model | quant | t/s (reason/code/summ) | content-channel quality | verdict |
+|---|---|---|---|---|
+| **gemma-4-26B-A4B-it** | UD-Q8_K_XL | 36.6 / 36.8 / 35.0 | 3/3 pass | beats the GLM champion by ~+13%, stable across both GTT states |
+| Nemotron-3.5-Lightning-30B-A3B | UD-Q8_K_XL | 41.4 / 51.8 / 45.5 (run1) | 2/2 gradeable pass | run2 broke — see the MTP section below |
+| Qwen3.8-27B | UD-Q8_K_XL | 13.5 / 13.5 / 13.2 | 3/3 pass | no qwen4exp blocker at 27B — that is specific to Flash-Next |
+| gemma-4-31B-it | UD-Q8_K_XL | 5.6 / 5.8 / 5.4 | 3/3 pass | dense control, ~6.5× slower than the A4B MoE of similar footprint |
+| MiniMax-M3 | UD-Q3_K_XL | — | — | load failed both passes |
+
+Three corrections to earlier assumptions, all of which had been recorded as something other than what they were:
+
+- **MiniMax-M3 did not fail on architecture.** The driver logs `LOAD FAILED (arch unsupported or crash)` as a generic catch-all; the backend actually reported *"needs about 181 GB but only about 122 GB of memory is available"*. A plain capacity failure. The useful number here is **~122 GB usable**, not the nominal 128 GiB GTT. M3 stays on disk for the dual-machine RPC-pool test.
+- **`gtt_used_mib` is a broken metric.** It reads 411–418 MiB for every model in both passes against 26–36 GB of resident weights. `/sys/class/drm/card*/device/mem_info_gtt_used` is not representative on this unified-memory APU. Do not cite it; `grep gttsize /proc/cmdline` is authoritative.
+- **The transcript-trampling bug recurred.** Both passes wrote to the same `outputs/<model>/<task>--…txt` path, so only the last pass that produced output survives — and provenance is *mixed*, because Nemotron's two failed run2 tasks never overwrote run1's files. `grade_sweep.py` now encodes this: it grades only the last non-error record per group and marks the rest `graded=False, reason="transcript_trampled"`. Speed data survives; quality data does not. Fixed at the source in the batch driver, which gives every model/config its own output directory.
+
+### MTP speculation is model-specific — and was a live defect on Nemotron-3.5
+
+Nemotron-3.5's post-reboot HTTP 500s were **not** a transient compiled-cache rebuild (that line appears once at process start in both passes) and the server never crashed — it returned 500s at request time, then served the next task on the same PID. A two-config matrix ([`2026-08-27-nemotron-retest/`](../../results/sweeps/2026-08-27-nemotron-retest/)) settled it:
+
+| config | reasoning | code | summarize |
+|---|---|---|---|
+| `--speculative-type off --parallel 4` | 43.2 t/s ✓ | 46.8 t/s ✓ | 46.9 t/s ✓ |
+| `--speculative-type mtp --parallel 1` | HTTP 500 | HTTP 500 | 27.3 t/s, quality ✗ |
+
+The second row is an **exact reproduction** of overnight run2 — same two tasks failing, same surviving task, same 1008-token output, same quality failure. So:
+
+- **MTP is the cause; the `-np > 1` conflict is not.** The earlier hypothesis (that `--parallel 4` combined with `draft-mtp` was at fault) is disproven — dropping to `--parallel 1` while keeping MTP still fails identically.
+- **The breakage is model-specific, not build-wide.** Qwen3.6-35B-A3B-MTP runs MTP on the same build with no errors and gains **+31–35%** from it (57.6/58.2/50.0 with MTP vs 43.8/43.1/41.6 with it off). Combined with the phase-2 finding that pure `mtp` *hurts* GLM-4.7-Flash (no native head, verification overhead only), the rule is: MTP pays only with a native head, and having one is no guarantee it works.
+- **Operational consequence:** Nemotron-3.5 must be launched with `--speculative-type off` explicitly. Studio's auto-selection picks `draft-mtp` for it, and that path is broken on b10472 post-reboot. With speculation off it is a genuine contender at ~43–47 t/s with clean grades.
+- Open second-order question: run1 (pre-reboot) ran MTP *successfully* at 41–52 t/s, so something about the post-reboot memory state tips it over. Not blocking; worth re-testing on b10639.
+
+## Phase-2 candidates + generational control arm (2026-08-27)
+
+Nine configurations, same battery, still on `b10472` so they share a frame with the roster above. Canonical data: [`results/sweeps/2026-08-27-b10472-batch/`](../../results/sweeps/2026-08-27-b10472-batch/).
+
+The legacy models here are a **control arm, not a deletion queue**. Per Kal's directive (2026-08-27) a model is retired only once there is empirical evidence it holds no niche its successor cannot cover — this run is that evidence.
+
+| config | t/s (reason/code/summ) | quality | verdict |
+|---|---|---|---|
+| **Qwen3.6-35B-A3B-MTP** (MTP on, default) | **57.6 / 58.2 / 50.0** | 3/3 | fastest validated model; ~+50% over the champion |
+| **Ornith-1.5-35B-A3B** | 54.6 / 58.5 / 52.1 | 3/3 | dead heat with the above; non-UD quant |
+| Qwen3.6-35B-A3B-MTP (MTP off) | 43.8 / 43.1 / 41.6 | 2/3 | MTP is worth +31–35% here |
+| Nemotron-3-Nano-30B-A3B | 39.7 / 41.7 / 40.5 | 3/3 | prior generation; see below |
+| **Qwen3-Coder-30B-A3B-Instruct** | 39.5 / **73.3** / 18.9 | 2/3 | highest single figure in the study; genuine specialist |
+| GLM-4.7-Flash-REAP-23B-A3B | 30.6 / 31.3 / 24.3 | 1/3 | slower than the full champion *and* fails two graders |
+| Qwen3-Coder-Next | 18.2 / **500** / 28.6 | 0/2 | fails every task; see confound |
+| gemma-3-27b-it | 6.7 / 6.7 / 6.3 | 3/3 | correct but 5.5× slower than gemma-4-26B-A4B |
+| MiniMax-M2.5 (UD-Q3) | 71.8 / 15.6 / 35.8 — all **capped** | 0/3 | never terminates; hit the 8192 cap on all three |
+
+Generational verdicts, which is what the control arm was for:
+
+- **Qwen3-Coder-30B → Coder-Next is an inversion.** The newer, 2.7× larger model loses on every axis: 145 tokens on reasoning (no answer at all), a 500 on code, 8,238 tokens on a five-bullet summary. The predecessor turns in the best code throughput measured anywhere in this study. **Coder-30B has a clear niche and stays.** Confound worth honouring: Coder-Next's 500 landed while the 104 GiB Flash-Next download was still running, and it used `--spec-default` (not MTP), so this is unrelated to the Nemotron failure — re-test on an idle box before calling it settled.
+- **Nemotron 3-Nano → 3.5-Lightning is a real but modest gain** (+9–16%), both 3/3 clean. Nano's compensating niche: it runs correctly on *default* flags, while 3.5 returns 500s unless launched with `--speculative-type off`. For an unattended harness today, Nano is the safer of the two.
+- **gemma-3-27b holds no speed or quality niche** — gemma-4-26B-A4B is 5.5× faster at identical grades. It does ship an `mmproj-F32.gguf` vision projector the gemma-4 GGUFs on disk lack; this text battery cannot see that, so a vision niche remains untested rather than disproven.
+- **GLM-4.7-Flash-REAP-23B shows no niche at all** — smaller on disk, slower and worse on every axis measured against the full champion.
+- **MiniMax-M2.5's on-disk copy is unusable for this battery**, but it is the only UD-Q3_K_XL model in an otherwise Q8 field, so that indicts the copy, not the model. Its intended comparison against M3 stays blocked while M3 cannot load on one node.
+
+### llama.cpp-version sweep — first datapoint (issue #8, workstream C)
+
+Same model, same quant, same prompts, same seed; only the runtime moves. [`2026-08-27-version-sweep/`](../../results/sweeps/2026-08-27-version-sweep/)
+
+GLM-4.7-Flash, same quant, same prompts, same seed, same sampling — only the runtime moved. `unsloth studio update` also carried the studio package 2026.8.21 → 2026.8.22, so this measures "the upgrade", not llama.cpp in isolation.
+
+| build | reasoning | code | summarize |
+|---|---|---|---|
+| `b10472-mix-4b653db` (2026-08-18) | 32.34 t/s · 2128 tok · 65.8s · ✓ | **38.64 t/s** · 6169 tok · 159.7s · ✓ | 33.28 t/s · 1905 tok · 57.2s · ✓ |
+| `b10639-mix-f6f92fe` (2026-08-27) | 31.72 t/s · 908 tok · 28.6s · ✓ | 31.28 t/s · 12339 tok · **394.4s** · ✓ | 31.57 t/s · 870 tok · 27.6s · **✗** |
+
+**b10639 is a net regression on this hardware.** Three separate things say so, and none of them would have been visible without the same-day control:
+
+- **Throughput.** Down on all three tasks; code worst at −19.0%. On b10472 code was the *fastest* task (38.64 t/s) because speculation pays best on structured text — the phase-2 run measured +69% on code from speculation. On b10639 all three tasks land within 31.3–31.7 t/s, a flat profile that looks like speculation no longer helping. Worth a spec-type sweep on the new build to confirm.
+- **Token economy moved both ways, and it dominates wall-clock.** Reasoning fell 2128 → 908 tokens (65.8s → 28.6s — a 2.3× end-to-end *win* despite lower t/s), while code rose 6169 → 12339 tokens (159.7s → 394.4s, a 2.5× *loss*). Ranking builds on t/s alone misses both.
+- **Instruction-following broke, on two independent models.** GLM's summarize returned a prose paragraph with zero bullets of any style where b10472 produced the requested five. Qwen3.6-35B-A3B-MTP's code answer regressed from 6 doctests to **none** — it emitted a two-line reasoning summary ("All 8 doctests pass") and a markdown table describing eight test cases, with no function definition anywhere in *either* channel.
+
+That last one is worth naming precisely: it is **not** the 2026-08-26 content-leak defect. Content-leak was a channel-routing problem — the answer landed in `reasoning_content` and a summary in `content`. Here the answer exists in neither channel; the model wrote as though it had already produced and run the code in an earlier turn. That shape points at chat-template or turn-boundary handling, which is exactly what a build carrying two *unmerged* upstream PRs can break.
+
+**Consequence for the metrics model: runtime build is an output-changing axis.** It must be quality-graded, never ranked on speed alone. This also vindicates content-channel grading — a whole-transcript grep would have seen "doctests" mentioned in the Qwen3.6 answer and scored it correct.
+
+### Post-upgrade batch on b10639
+
+[`results/sweeps/2026-08-27-b10639-batch/`](../../results/sweeps/2026-08-27-b10639-batch/)
+
+| model | t/s | quality | verdict |
+|---|---|---|---|
+| Qwen3.8-Flash-Next (UD-Q4) | 204.7 / 224.7 / 217.0 | 0/3, all **capped** | loads but unusable |
+| Nemotron-3.5-Lightning (default) | 500 / 500 / 500 | — | worse than b10472 |
+| Qwen3.6-35B-A3B-MTP (control) | 53.6 / 55.8 / 53.8 | 2/3 | regressed from 3/3 |
+
+- **The qwen4exp blocker is genuinely lifted** — Qwen3.8-Flash-Next loads and generates, which b10472 could not do at all, and it is the fastest thing ever measured on this box (204–225 t/s, credible for a 125B-A6B MoE with ~6B active at Q4). But it **never terminates**: all three tasks ran to the 8192-token cap. A model that cannot stop is not usable, so those rates are not a ranking. Likely incomplete stop-token handling in an arch carried as an open PR. Re-test when ggml-org/llama.cpp#27742 merges.
+- **The upgrade did not fix Nemotron's MTP defect — it worsened it.** b10472 failed 2 of 3 tasks; b10639 fails all 3. The workaround is unchanged and still mandatory: `--speculative-type off`.
+
+**Recommendation: treat `b10472` as the production build and `b10639` as qwen4exp-experimental only.** Nothing currently depends on b10639 that works. Rollback is Kal's call; the upgrade also broke curated whisper.cpp dictation (installer: whisper requires the b10472 pairing; browser and Transformers dictation unaffected).
 
 ## References
 

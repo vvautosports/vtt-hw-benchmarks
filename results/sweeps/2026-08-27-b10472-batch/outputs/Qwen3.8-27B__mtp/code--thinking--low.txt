@@ -1,0 +1,73 @@
+=== REASONING ===
+Everything verified: doctests pass (`python3 -m doctest parse_ranges.py` → "Test passed.") and all additional edge cases also pass. Next, present the final code along with a concise explanation of the design decisions.
+
+
+=== CONTENT ===
+Verified — `python -m doctest` passes all 7 examples, plus extra edge cases (degenerate range, signed ranges, no implicit sorting). Here's the final code:
+
+```python
+import re
+
+_SINGLE = r'-?\d+'
+_RANGE = r'(-?\d+)\s*-\s*(-?\d+)'
+
+
+def parse_ranges(s: str) -> list[int]:
+    """Expand a comma-separated string of integers and ranges into a flat list.
+
+    Whitespace around numbers, dashes, and commas is ignored. A reversed
+    range (start > end) raises ValueError, as do malformed tokens including
+    empty segments such as in '1,,3'. Empty or whitespace-only input
+    returns [].
+
+    >>> parse_ranges('1-3,5,7-9')
+    [1, 2, 3, 5, 7, 8, 9]
+    >>> parse_ranges('  1 - 3 ,\\t5 , 7-9 ')
+    [1, 2, 3, 5, 7, 8, 9]
+    >>> parse_ranges('5')
+    [5]
+    >>> parse_ranges('')
+    []
+    >>> parse_ranges('   \\t ')
+    []
+    >>> parse_ranges('9-7')
+    Traceback (most recent call last):
+        ...
+    ValueError: reversed range 9-7 in '9-7'
+    >>> parse_ranges('1,,3')
+    Traceback (most recent call last):
+        ...
+    ValueError: empty segment in '1,,3'
+    """
+    if not s.strip():
+        return []
+
+    result: list[int] = []
+    for part in s.split(','):
+        part = part.strip()
+        if not part:
+            raise ValueError(f"empty segment in {s!r}")
+        m = re.fullmatch(_RANGE, part)
+        if m:
+            start, end = int(m.group(1)), int(m.group(2))
+            if start > end:
+                raise ValueError(f"reversed range {start}-{end} in {s!r}")
+            result.extend(range(start, end + 1))
+            continue
+        if not re.fullmatch(_SINGLE, part):
+            raise ValueError(f"invalid token {part!r} in {s!r}")
+        result.append(int(part))
+    return result
+```
+
+**Design notes:**
+
+- **Whitespace tolerance** — each comma-separated segment is stripped, and the range pattern allows `\s*` around the dash, so `' 1 - 3 ,\t5'` parses fine.
+- **Reversed ranges** — `start > end` raises `ValueError`; note `5-5` is *not* reversed and yields `[5]`.
+- **Empty input** — handled up front with an early return of `[]`.
+- **Two judgment calls you may want to review:**
+  1. **Malformed segments raise** rather than being skipped: `'1,,3'`, `'1-'`, or `'abc'` all produce `ValueError`. Silent skipping would hide typos.
+  2. **Signed integers are supported** (the return type is `list[int]`), so `'-3 - 1'` → `[-3, -2, -1, 0, 1]`. The `fullmatch` anchoring disambiguates: `-3-5` parses as the range −3→5, not a malformed token. If you only want non-negative numbers, change both patterns to `\d+`.
+- **Order is preserved** — `'10,2'` gives `[10, 2]`, no sorting or deduplication; ranges are inclusive on both ends.
+
+Run the tests with `python -m doctest parse_ranges.py` (or `-v` for a per-example listing).

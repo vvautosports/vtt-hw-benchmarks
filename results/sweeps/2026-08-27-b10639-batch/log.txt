@@ -1,0 +1,19 @@
+[13:48:27] build=version: 0.3.0-dev (build 10639, commit 2a36554fc)  entries=3
+[13:48:27] === Qwen3.8-Flash-Next__default  flags=''
+[13:49:38] Qwen3.8-Flash-Next__default: loaded
+[13:50:18]   reasoning: tps=204.71 tok=8192 err=None
+[13:50:54]   code: tps=224.65 tok=8192 err=None
+[13:51:32]   summarize: tps=217.0 tok=8192 err=None
+[13:51:32] === Nemotron-3.5-Lightning-30B-A3B__default  flags=''
+[13:52:02] Nemotron-3.5-Lightning-30B-A3B__default: loaded
+[13:54:29]   reasoning: tps=None tok=None err=<HTTPError 500: 'Internal Server Error'>
+[13:58:02]   code: tps=None tok=None err=<HTTPError 500: 'Internal Server Error'>
+[14:00:04]   summarize: tps=None tok=None err=<HTTPError 500: 'Internal Server Error'>
+[14:00:04] === Qwen3.6-35B-A3B-MTP__default  flags=''
+[14:00:26] Qwen3.6-35B-A3B-MTP__default: loaded
+[14:00:50]   reasoning: tps=53.55 tok=1274 err=None
+[14:01:09]   code: tps=55.81 tok=1080 err=None
+[14:01:30]   summarize: tps=53.84 tok=1123 err=None
+[14:01:30] restoring GLM baseline
+[14:02:10] baseline restored healthy=True
+[14:02:10] ROSTER BATCH COMPLETE

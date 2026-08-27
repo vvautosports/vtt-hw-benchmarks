@@ -1,0 +1,88 @@
+=== REASONING ===
+All 8 doctests pass now. The fix handles the edge case where a negative number like `-2` contains a hyphen that could be confused with a range separator. When splitting on `-`, if the first part is empty (after stripping), it's recognized as a negative number, not a range.
+
+
+=== CONTENT ===
+All 8 doctests pass. Here's the final function:
+
+```python
+def parse_ranges(s: str) -> list[int]:
+    """Parse a comma-separated string of numbers and ranges into a flat list.
+
+    Args:
+        s: A string like '1-3,5,7-9' where items are either single numbers
+           or ranges (start-end). Whitespace around tokens is ignored.
+
+    Returns:
+        A sorted list of integers with no duplicates in ascending order.
+
+    Raises:
+        ValueError: If a range is written in reverse (e.g., '9-7').
+
+    >>> parse_ranges('1-3,5,7-9')
+    [1, 2, 3, 5, 7, 8, 9]
+
+    >>> parse_ranges('  1 , 2 - 4 , 6  ')
+    [1, 2, 3, 4, 6]
+
+    >>> parse_ranges('')
+    []
+
+    >>> parse_ranges('   ')
+    []
+
+    >>> parse_ranges('9-7')
+    Traceback (most recent call last):
+        ...
+    ValueError: Reversed range '9-7': start must be <= end
+
+    >>> parse_ranges('5,5,5')
+    [5]
+
+    >>> parse_ranges('1-1')
+    [1]
+
+    >>> parse_ranges('  -2,3-3,8 ')
+    [-2, 3, 8]
+    """
+    if not s or not s.strip():
+        return []
+
+    result = set()
+    tokens = s.split(',')
+
+    for token in tokens:
+        token = token.strip()
+        if not token:
+            continue
+
+        if '-' in token:
+            parts = token.split('-')
+            # A negative number like "-2" splits into ['', '2'] — first part is empty
+            # Only treat it as a range when the first part is non-empty.
+            if len(parts) == 2 and parts[0].strip():
+                start, end = int(parts[0]), int(parts[1])
+                if start > end:
+                    raise ValueError(
+                        f"Reversed range '{parts[0]}-{parts[1]}': "
+                        f"start must be <= end"
+                    )
+                result.update(range(start, end + 1))
+            else:
+                # This is a negative number (e.g., "-2")
+                result.add(int(token))
+        else:
+            result.add(int(token))
+
+    return sorted(result)
+```
+
+**How it works:**
+
+1. **Empty/whitespace input** → returns `[]` immediately.
+2. **Split on commas** to get individual tokens.
+3. **Strip whitespace** from each token, skip empties.
+4. **Distinguish negatives from ranges**: splitting `-2` on `-` gives `['', '2']`. If the first part is empty after stripping, it's a negative number. Otherwise it's a range like `1-3`, which we validate (start ≤ end) and expand with `range()`.
+5. **Use a set** to deduplicate (e.g., `5,5,5` → `{5}`), then **sort** for ascending output.
+
+The 8 doctests cover: basic ranges, whitespace handling, empty input, whitespace-only input, reversed-range error, duplicates, single-element range, and negative numbers.

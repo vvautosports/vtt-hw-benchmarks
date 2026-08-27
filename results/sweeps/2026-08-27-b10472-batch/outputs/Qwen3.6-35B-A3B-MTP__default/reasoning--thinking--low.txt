@@ -1,0 +1,22 @@
+=== REASONING ===
+Perfect, the Python code confirms my answer. All three trucks arrive together every 3 hours (LCM of 12, 18, 30 = 180 minutes). Between 6:00 AM and 6:00 PM inclusive, they meet 5 times:
+
+1. 6:00 AM
+2. 9:00 AM
+3. 12:00 PM
+4. 3:00 PM
+5. 6:00 PM
+
+ANSWER: 5
+
+
+=== CONTENT ===
+Verified. The LCM of 12, 18, and 30 is **180 minutes (3 hours)**. Starting at 6:00 AM, all three trucks arrive together every 3 hours:
+
+1. **6:00 AM** — start
+2. **9:00 AM**
+3. **12:00 PM (noon)**
+4. **3:00 PM**
+5. **6:00 PM**
+
+ANSWER: 5

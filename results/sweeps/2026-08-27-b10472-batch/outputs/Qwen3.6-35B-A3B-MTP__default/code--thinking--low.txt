@@ -1,0 +1,81 @@
+=== REASONING ===
+All 6 doctests pass. The function covers all the requirements:
+
+1. Parses ranges like '1-3,5,7-9' → [1, 2, 3, 5, 7, 8, 9] ✓
+2. Ignores whitespace around numbers and commas ✓
+3. Reversed range like '9-7' raises ValueError ✓
+4. Empty or whitespace-only input returns [] ✓
+5. Doctest with 6 examples (≥5) ✓
+
+Let me also test some edge cases manually to make sure it's robust.
+
+
+=== CONTENT ===
+All 6 doctests pass. Here's the function:
+
+```python
+def parse_ranges(s: str) -> list[int]:
+    """Parse a comma-separated string of numbers and ranges into a flat list.
+
+    Examples:
+        >>> parse_ranges('1-3,5,7-9')
+        [1, 2, 3, 5, 7, 8, 9]
+
+        >>> parse_ranges('  1 , 2-4  , 6 ')
+        [1, 2, 3, 4, 6]
+
+        >>> parse_ranges('')
+        []
+
+        >>> parse_ranges('   ')
+        []
+
+        >>> parse_ranges('9-7')
+        Traceback (most recent call last):
+            ...
+        ValueError: reversed range '9-7'
+
+        >>> parse_ranges('5')
+        [5]
+    """
+    if not s or s.strip() == '':
+        return []
+
+    result = []
+    parts = s.split(',')
+
+    for part in parts:
+        part = part.strip()
+        if not part:
+            continue  # handle trailing commas gracefully
+
+        if '-' in part:
+            start_str, end_str = part.split('-', 1)
+            start = int(start_str.strip())
+            end = int(end_str.strip())
+            if start > end:
+                raise ValueError(f"reversed range '{part}'")
+            result.extend(range(start, end + 1))
+        else:
+            result.append(int(part))
+
+    return result
+```
+
+**How it works:**
+
+1. **Empty/whitespace input** → returns `[]` early.
+2. **Split on commas**, then strip whitespace from each part (handles `' 1 , 2-4  '` gracefully).
+3. If a part contains `-`, split into start/end integers and raise `ValueError` if `start > end`. Otherwise, extend the result with `range(start, end + 1)`.
+4. If no `-`, parse as a single integer.
+
+**Doctest coverage (6 examples):**
+
+| Example | Requirement covered |
+|---|---|
+| `'1-3,5,7-9'` | Basic ranges + single numbers |
+| `'  1 , 2-4  , 6 '` | Whitespace trimming |
+| `''` | Empty string → `[]` |
+| `'   '` | Whitespace-only → `[]` |
+| `'9-7'` | Reversed range → `ValueError` |
+| `'5'` | Single number (no range) |

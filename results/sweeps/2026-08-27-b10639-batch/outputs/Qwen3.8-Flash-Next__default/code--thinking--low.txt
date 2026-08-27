@@ -1,0 +1,7 @@
+=== CONTENT ===
+The model used its whole output allowance of 8192 tokens on reasoning and had none left for an answer.
+
+To get past this:
+- Raise Max Tokens, so a thought and an answer both fit
+- Or lower the reasoning effort, or turn thinking off
+- Or ask for a smaller piece of the task at a time

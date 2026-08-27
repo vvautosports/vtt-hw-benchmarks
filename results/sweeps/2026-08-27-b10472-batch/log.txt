@@ -1,0 +1,49 @@
+[12:04:48] build=version: 0.1.1-dev (build 10472, commit 7a556b8f9)  entries=9
+[12:04:48] === Qwen3.6-35B-A3B-MTP__default  flags=''
+[12:05:20] Qwen3.6-35B-A3B-MTP__default: loaded
+[12:06:11]   reasoning: tps=57.55 tok=2947 err=None
+[12:06:47]   code: tps=58.23 tok=2088 err=None
+[12:07:03]   summarize: tps=50.04 tok=764 err=None
+[12:07:03] === Qwen3.6-35B-A3B-MTP__specoff  flags='--speculative-type off'
+[12:07:43] Qwen3.6-35B-A3B-MTP__specoff: loaded
+[12:09:24]   reasoning: tps=43.81 tok=4432 err=None
+[12:10:16]   code: tps=43.09 tok=2250 err=None
+[12:10:32]   summarize: tps=41.63 tok=653 err=None
+[12:10:32] === Ornith-1.5-35B-A3B__default  flags=''
+[12:10:54] Ornith-1.5-35B-A3B__default: loaded
+[12:11:17]   reasoning: tps=54.55 tok=1221 err=None
+[12:11:50]   code: tps=58.53 tok=1925 err=None
+[12:12:18]   summarize: tps=52.11 tok=1481 err=None
+[12:12:18] === Nemotron-3-Nano-30B-A3B__default  flags=''
+[12:12:59] Nemotron-3-Nano-30B-A3B__default: loaded
+[12:13:28]   reasoning: tps=39.71 tok=1185 err=None
+[12:13:55]   code: tps=41.74 tok=1097 err=None
+[12:14:13]   summarize: tps=40.53 tok=736 err=None
+[12:14:13] === gemma-3-27b-it__default  flags=''
+[12:14:53] gemma-3-27b-it__default: loaded
+[12:16:26]   reasoning: tps=6.65 tok=617 err=None
+[12:17:31]   code: tps=6.74 tok=436 err=None
+[12:18:12]   summarize: tps=6.34 tok=262 err=None
+[12:18:12] === GLM-4.7-Flash-REAP-23B-A3B__default  flags=''
+[12:18:43] GLM-4.7-Flash-REAP-23B-A3B__default: loaded
+[12:19:12]   reasoning: tps=30.59 tok=906 err=None
+[12:24:50]   code: tps=31.27 tok=10562 err=None
+[12:25:27]   summarize: tps=24.29 tok=890 err=None
+[12:25:27] === Qwen3-Coder-30B-A3B-Instruct__default  flags=''
+[12:26:07] Qwen3-Coder-30B-A3B-Instruct__default: loaded
+[12:26:28]   reasoning: tps=39.51 tok=834 err=None
+[12:27:00]   code: tps=73.27 tok=2302 err=None
+[12:27:30]   summarize: tps=18.86 tok=568 err=None
+[12:27:30] === Qwen3-Coder-Next__default  flags=''
+[12:28:51] Qwen3-Coder-Next__default: loaded
+[12:28:59]   reasoning: tps=18.15 tok=145 err=None
+[12:33:53]   code: tps=None tok=None err=<HTTPError 500: 'Internal Server Error'>
+[12:38:41]   summarize: tps=28.64 tok=8238 err=None
+[12:38:41] === MiniMax-M2.5__default  flags=''
+[12:40:02] MiniMax-M2.5__default: loaded
+[12:41:56]   reasoning: tps=71.78 tok=8192 err=None
+[12:50:43]   code: tps=15.56 tok=8192 err=None
+[12:54:32]   summarize: tps=35.77 tok=8192 err=None
+[12:54:32] restoring GLM baseline
+[12:55:04] baseline restored healthy=True
+[12:55:04] ROSTER BATCH COMPLETE

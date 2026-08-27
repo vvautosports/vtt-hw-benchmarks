@@ -1,0 +1,54 @@
+=== REASONING ===
+We need to summarize the passage as exactly 5 bullet points then a TL;DR one sentence. Must be faithful, no extra claims.
+
+We must output exactly 5 bullet points, likely using dash or some bullet format. Then a one-sentence TL;DR after that.
+
+We should ensure no extra bullet points, no extra text. So output:
+
+- bullet1
+- bullet2
+- bullet3
+- bullet4
+- bullet5
+
+Then a TL;DR sentence.
+
+Make sure it's exactly 5 bullet points; bullet points probably start with a dash or a bullet character. Use simple dash.
+
+Then a one-sentence TL;DR after a line break maybe.
+
+Let's craft bullet points summarizing key ideas:
+
+1. Speculative decoding speeds up inference by using a cheap draft model to propose tokens, which a target model verifies in batch, achieving near-draft cost with large-model quality.
+
+2. The draft can be a small separate model, an n‑gram lookup, or a multi‑token‑prediction head trained jointly with the target.
+
+3. Acceptance rates and performance vary by workload: n‑gram drafting works well for repetitive code but may slow prose generation if the draft is poor; MTP heads offer stable acceptance across domains with modest overhead.
+
+4. Mixture‑of‑experts models can lose the batching benefit of speculation because tokens may route to different experts, increasing memory traffic and raising the required acceptance rate.
+
+5. Server‑side parallelism, such as slot‑based KV‑cache allocation, must be co‑tuned with speculative mode and sampling to optimize overall tokens‑per‑second rather than treating each knob independently.
+
+Now TL;DR one sentence summarizing: "Speculative decoding can significantly accelerate large model inference when the draft mechanism matches the workload and system constraints, but its speed gains depend on acceptance rates, model architecture, and server configuration."
+
+Make sure it's exactly one sentence.
+
+Thus final answer: 5 bullet points then a one-sentence TL;DR.
+
+Check bullet count: 5 bullet lines. Provide them each on separate lines preceded by dash and a space.
+
+After bullet points, maybe a blank line then TL;DR sentence.
+
+Make sure no extra bullet points or extra text. Provide exactly as requested.
+
+Let's produce.
+
+
+=== CONTENT ===
+- Speculative decoding speeds up autoregressive inference by having a cheap draft model propose multiple tokens that a target model verifies in a single batched forward pass, achieving near‑draft cost while preserving large‑model quality.  
+- The draft can be a separate small model, an n‑gram lookup over the prompt and history, or a multi‑token‑prediction (MTP) head trained jointly with the target model.  
+- Acceptance rates—and thus performance—vary by workload: n‑gram drafting excels on repetitive code, MTP heads give stable acceptance across domains, while a poorly matched draft can slow generation for open‑ended prose.  
+- Mixture‑of‑experts (MoE) models can erode the batching advantage of speculation because tokens may route to different experts, increasing memory traffic and raising the required acceptance rate.  
+- Server‑side configurations (e.g., slot‑based KV‑cache allocation) must be jointly tuned with speculative decoding and sampling settings to maximize end‑to‑end tokens‑per‑second.  
+
+TL;DR: Speculative decoding can markedly accelerate large‑model inference when the draft matches the workload and system constraints, but its speed gains depend on acceptance rates, model architecture, and server configuration.

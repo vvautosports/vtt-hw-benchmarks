@@ -1,0 +1,23 @@
+=== REASONING ===
+The count is 5. So answer: ANSWER: 5.
+
+=== CONTENT ===
+All three trucks start together at 6:00 AM (t = 0 min). They will next all arrive together at the least common multiple of their return intervals:  
+
+- Truck A: 12 min  
+- Truck B: 18 min  
+- Truck C: 30 min  
+
+**LCM(12, 18, 30) = 180 min** (3 hours).
+
+Starting at 6:00 AM, the common arrival times within the 12‑hour window (6:00 AM to 6:00 PM inclusive, i.e., 0 ≤ t ≤ 720 min) are:
+
+- t = 0 min → 6:00 AM  
+- t = 180 min → 9:00 AM  
+- t = 360 min → 12:00 PM  
+- t = 540 min → 3:00 PM  
+- t = 720 min → 6:00 PM  
+
+That gives **5** moments when all three trucks are at the warehouse simultaneously.
+
+ANSWER: 5

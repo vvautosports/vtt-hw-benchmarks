@@ -1,0 +1,13 @@
+[11:53:11] === spec_off_np4 :: --speculative-type off --parallel 4
+[11:53:42] spec_off_np4: loaded. serve argv: /home/kalman9/.unsloth/llama.cpp/llama-server -m /mnt/ai-models/unsloth/NVIDIA-Nemotron-3.5-Lightning-30B-A3B-GGUF/NVIDIA-Nemotron-3.5-Lightning-30B-A3B-UD-Q8_K_XL.gguf --port 51095 --parallel 4 --flash-attn on --no-context-shift -c 1048576 --alias NVIDIA-Nemotron-3.5-Lightning-30B-A3B-UD-Q8_K_XL -ngl -1 --fit off --metrics --slot-save-path /home/kalman9/.unsloth/studio/cache/llama-slots --kv-unif
+[11:54:05]   reasoning: wall=22.6 tok=977 tps=43.23 err=None
+[11:54:33]   code: wall=28.4 tok=1331 tps=46.84 err=None
+[11:54:59]   summarize: wall=25.9 tok=1217 tps=46.9 err=None
+[11:54:59] === spec_mtp_np1 :: --speculative-type mtp --parallel 1
+[11:55:40] spec_mtp_np1: loaded. serve argv: /home/kalman9/.unsloth/llama.cpp/llama-server -m /mnt/ai-models/unsloth/NVIDIA-Nemotron-3.5-Lightning-30B-A3B-GGUF/NVIDIA-Nemotron-3.5-Lightning-30B-A3B-UD-Q8_K_XL.gguf --port 59493 --parallel 1 --flash-attn on --no-context-shift -c 1048576 --alias NVIDIA-Nemotron-3.5-Lightning-30B-A3B-UD-Q8_K_XL -ngl -1 --fit off --metrics --slot-save-path /home/kalman9/.unsloth/studio/cache/llama-slots --jinja -
+[11:57:33]   reasoning: wall=113.7 tok=None tps=None err=<HTTPError 500: 'Internal Server Error'>
+[12:00:21]   code: wall=167.4 tok=None tps=None err=<HTTPError 500: 'Internal Server Error'>
+[12:00:58]   summarize: wall=37.0 tok=1008 tps=27.27 err=None
+[12:00:58] restoring GLM baseline
+[12:01:28] baseline restored healthy=True
+[12:01:28] NEMOTRON RETEST COMPLETE

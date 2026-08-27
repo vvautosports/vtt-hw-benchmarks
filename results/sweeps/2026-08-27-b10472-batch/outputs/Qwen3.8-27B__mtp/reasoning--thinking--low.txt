@@ -1,0 +1,23 @@
+=== REASONING ===
+Verified. Presenting the reasoning and the answer.
+
+
+=== CONTENT ===
+**Reasoning:**
+
+All three trucks arrive simultaneously whenever the elapsed time from 6:00 AM is a common multiple of their return intervals (12, 18, and 30 minutes). The least common multiple is:
+
+- 12 = 2² · 3
+- 18 = 2 · 3²
+- 30 = 2 · 3 · 5
+- LCM = 2² · 3² · 5 = **180 minutes (3 hours)**
+
+So they coincide every 3 hours. The window from 6:00 AM to 6:00 PM spans 720 minutes, and counting the endpoints gives 720 ÷ 180 + 1 = 5 arrivals:
+
+- 6:00 AM
+- 9:00 AM
+- 12:00 PM
+- 3:00 PM
+- 6:00 PM
+
+ANSWER: 5

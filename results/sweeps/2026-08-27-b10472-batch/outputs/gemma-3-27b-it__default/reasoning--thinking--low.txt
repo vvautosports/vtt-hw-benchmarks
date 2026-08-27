@@ -1,0 +1,26 @@
+=== CONTENT ===
+Let $A$, $B$, and $C$ represent the times at which trucks A, B, and C arrive at the warehouse, respectively. Truck A arrives at times $12n$ minutes past 6:00 AM, truck B arrives at times $18m$ minutes past 6:00 AM, and truck C arrives at times $30k$ minutes past 6:00 AM, where $n$, $m$, and $k$ are non-negative integers. We want to find the number of times that $12n = 18m = 30k$ for some integers $n, m, k$. This is equivalent to finding the least common multiple (LCM) of 12, 18, and 30.
+
+We can find the prime factorization of each number:
+$12 = 2^2 \cdot 3$
+$18 = 2 \cdot 3^2$
+$30 = 2 \cdot 3 \cdot 5$
+
+The LCM is the product of the highest powers of all prime factors that appear in the factorizations:
+$\text{LCM}(12, 18, 30) = 2^2 \cdot 3^2 \cdot 5 = 4 \cdot 9 \cdot 5 = 180$.
+
+So, all three trucks arrive at the warehouse at the same time every 180 minutes, which is 3 hours.
+
+We want to find how many times this happens between 6:00 AM and 6:00 PM inclusive. This is a period of 12 hours, which is $12 \cdot 60 = 720$ minutes.
+Since the trucks arrive at the same time every 180 minutes, we need to find how many multiples of 180 are in the interval $[0, 720]$, where 0 corresponds to 6:00 AM and 720 corresponds to 6:00 PM.
+The number of times is $\frac{720}{180} + 1 = 4 + 1 = 5$.
+The times are:
+6:00 AM (0 minutes)
+9:00 AM (180 minutes)
+12:00 PM (360 minutes)
+3:00 PM (540 minutes)
+6:00 PM (720 minutes)
+
+The question asks for the number of times all three trucks arrive at the same moment between 6:00 AM and 6:00 PM *inclusive*. The times are 6:00 AM, 9:00 AM, 12:00 PM, 3:00 PM, 6:00 PM. Thus, there are 5 times.
+
+ANSWER: 5

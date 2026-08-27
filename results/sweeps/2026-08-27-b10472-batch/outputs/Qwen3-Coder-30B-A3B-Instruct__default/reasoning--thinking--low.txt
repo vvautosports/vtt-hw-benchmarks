@@ -1,0 +1,64 @@
+=== CONTENT ===
+I need to find how many times all three trucks arrive at the warehouse simultaneously between 6:00 AM and 6:00 PM.
+
+Let me think about this step by step:
+
+1. All trucks start together at 6:00 AM
+2. Truck A returns every 12 minutes
+3. Truck B returns every 18 minutes  
+4. Truck C returns every 30 minutes
+5. I need to find when all three align again
+
+To find when all three trucks arrive at the same time, I need to find the Least Common Multiple (LCM) of their return intervals (12, 18, and 30 minutes).
+
+First, let me find the prime factorizations:
+- 12 = 2² × 3
+- 18 = 2 × 3²
+- 30 = 2 × 3 × 5
+
+To find LCM, I take the highest power of each prime factor:
+- Highest power of 2: 2²
+- Highest power of 3: 3²
+- Highest power of 5: 5¹
+
+LCM = 2² × 3² × 5 = 4 × 9 × 5 = 180 minutes
+
+So all three trucks will align every 180 minutes (3 hours).
+
+Now let me calculate the time window:
+- From 6:00 AM to 6:00 PM = 12 hours
+- 12 hours = 720 minutes
+
+How many times do they align in 720 minutes?
+- Start time: 6:00 AM (alignment #1)
+- Next alignments: every 180 minutes
+- Times: 6:00 AM, 9:00 AM, 12:00 PM, 3:00 PM, 6:00 PM
+
+Let me verify this:
+- 6:00 AM = 0 minutes from start
+- 9:00 AM = 180 minutes from start
+- 12:00 PM = 360 minutes from start  
+- 3:00 PM = 540 minutes from start
+- 6:00 PM = 720 minutes from start
+
+Let me double-check that these times work:
+- Truck A (12 min cycle): 0, 180, 360, 540, 720 → all divisible by 12 ✓
+- Truck B (18 min cycle): 0, 180, 360, 540, 720 → all divisible by 18 ✓
+- Truck C (30 min cycle): 0, 180, 360, 540, 720 → all divisible by 30 ✓
+
+Let me also verify there are no additional alignments in this period:
+Since 720 ÷ 180 = 4, we have 4 intervals of 180 minutes plus the initial alignment, giving us 5 total alignments.
+
+Wait, let me reconsider this more systematically. The number of alignments including the starting time is:
+(720 ÷ 180) + 1 = 4 + 1 = 5 alignments
+
+Let me verify by counting from 0 to 720 in increments of 180:
+- 0 minutes = 6:00 AM
+- 180 minutes = 3 hours later = 9:00 AM  
+- 360 minutes = 6 hours later = 12:00 PM
+- 540 minutes = 9 hours later = 3:00 PM
+- 720 minutes = 12 hours later = 6:00 PM
+
+Yes, that's 5 total times.
+
+ANSWER: 5

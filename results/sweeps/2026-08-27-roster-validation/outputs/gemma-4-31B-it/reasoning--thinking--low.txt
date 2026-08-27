@@ -1,0 +1,28 @@
+=== CONTENT ===
+To find how many times all three trucks arrive at the warehouse at the same moment, we need to determine the interval at which their arrival schedules coincide.
+
+1.  **Find the Least Common Multiple (LCM):**
+    The trucks arrive every 12, 18, and 30 minutes. The moment they all arrive together is the least common multiple of these three numbers.
+    *   Prime factorization of 12: $2^2 \times 3$
+    *   Prime factorization of 18: $2 \times 3^2$
+    *   Prime factorization of 30: $2 \times 3 \times 5$
+
+    The LCM is found by taking the highest power of each prime factor present:
+    $\text{LCM}(12, 18, 30) = 2^2 \times 3^2 \times 5 = 4 \times 9 \times 5 = 180$ minutes.
+
+2.  **Convert the interval to hours:**
+    $180 \text{ minutes} = 3 \text{ hours}$.
+    This means all three trucks arrive at the warehouse together every 3 hours.
+
+3.  **Calculate the occurrences between 6:00 AM and 6:00 PM:**
+    The time span is from 6:00 AM to 6:00 PM inclusive, which is a total of 12 hours. We list the times they arrive together starting from the initial arrival at 6:00 AM:
+    *   1st time: 6:00 AM (Start)
+    *   2nd time: 9:00 AM (6:00 AM + 3 hours)
+    *   3rd time: 12:00 PM (9:00 AM + 3 hours)
+    *   4th time: 3:00 PM (12:00 PM + 3 hours)
+    *   5th time: 6:00 PM (3:00 PM + 3 hours)
+
+Alternatively, using the formula for inclusive intervals:
+$\text{Number of times} = \frac{\text{Total Time}}{\text{Interval}} + 1 = \frac{12 \text{ hours}}{3 \text{ hours}} + 1 = 4 + 1 = 5$.
+
+ANSWER: 5

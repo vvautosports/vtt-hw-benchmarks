@@ -1,0 +1,69 @@
+=== REASONING ===
+All verified: 7 doctest examples, 0 failures; edge cases behave as documented. Now I'll present the final code with concise notes.
+
+
+=== CONTENT ===
+Verified — all 7 doctest examples pass and edge cases behave as documented. Here's the function:
+
+```python
+import re
+
+
+def parse_ranges(s: str) -> list[int]:
+    """Expand a comma-separated string of integers and ranges into a flat list.
+
+    Whitespace around numbers, dashes, and commas is ignored. Reversed
+    ranges (start > end) raise ValueError, as do malformed tokens,
+    including empty segments like in '1,,3'. Empty or whitespace-only
+    input returns [].
+
+    >>> parse_ranges('1-3,5,7-9')
+    [1, 2, 3, 5, 7, 8, 9]
+    >>> parse_ranges('  1 - 3 ,\t5 , 7-9 ')
+    [1, 2, 3, 5, 7, 8, 9]
+    >>> parse_ranges('5')
+    [5]
+    >>> parse_ranges('')
+    []
+    >>> parse_ranges('   \t ')
+    []
+    >>> parse_ranges('9-7')
+    Traceback (most recent call last):
+        ...
+    ValueError: reversed range 9-7 in '9-7'
+    >>> parse_ranges('1,,3')
+    Traceback (most recent call last):
+        ...
+    ValueError: empty segment in '1,,3'
+    """
+    if not s.strip():
+        return []
+
+    result = []
+    for part in s.split(','):
+        part = part.strip()
+        if not part:
+            raise ValueError(f"empty segment in {s!r}")
+        m = re.fullmatch(r'(-?\d+)\s*-\s*(-?\d+)', part)
+        if m:
+            start, end = int(m.group(1)), int(m.group(2))
+            if start > end:
+                raise ValueError(f"reversed range {start}-{end} in {s!r}")
+            result.extend(range(start, end + 1))
+            continue
+        if not re.fullmatch(r'-?\d+', part):
+            raise ValueError(f"invalid token {part!r} in {s!r}")
+        result.append(int(part))
+    return result
+```
+
+**How it works**
+- The whole string is checked first: empty or whitespace-only → `[]`.
+- Otherwise split on `,`, strip each segment, and classify it: a range (`start-end`, with optional internal whitespace) or a single integer. Anything else (e.g. `'abc'`, `'1-2x'`, `'--3'`) raises `ValueError` with the offending token in the message.
+- The reversed-range check uses `start > end`, so `'5-5'` is valid and yields `[5]`.
+
+**Design decisions worth noting** (not pinned down by your spec, but documented in the docstring):
+- Empty *segments* like `'1,,3'` or `','` raise `ValueError` rather than being silently skipped — a parser should surface malformed input.
+- Negative integers are supported (`'-3,-1'` → `[-3, -1]`) since the return type is `list[int]`; the range regex handles this unambiguously.
+
+The doctest block covers all four requirements: basic parsing, whitespace tolerance (spaces and a tab), both empty-input forms, reversed-range `ValueError`, plus single-number and malformed-token cases — 7 examples total, all passing under `python -m doctest`.

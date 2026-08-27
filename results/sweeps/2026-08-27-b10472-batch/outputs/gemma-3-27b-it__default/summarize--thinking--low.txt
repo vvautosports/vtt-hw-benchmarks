@@ -1,0 +1,14 @@
+=== CONTENT ===
+Here's a 5-bullet point summary of the passage, followed by a TL;DR:
+
+*   Speculative decoding uses a “draft” model to propose tokens, which a larger “target” model then verifies in a single pass, aiming for draft-model cost with target-model quality.
+*   The effectiveness of different draft methods (small models, n-grams, or multi-token prediction (MTP) heads) varies by workload; code benefits from n-grams, while MTP heads offer stable performance across domains.
+*   Mixture-of-Experts (MoE) models present a challenge as batching for speculative verification can increase memory bandwidth demands, requiring higher acceptance rates to remain efficient.
+*   Server-side parallelism, specifically slot-based servers managing KV-cache, competes with speculative decoding for compute resources, influencing overall throughput.
+*   Optimal performance requires tuning speculative mode, slot count, and sampling settings *together* and measuring end-to-end token generation speed on real tasks, not relying on isolated benchmarks.
+
+**TL;DR:** Speculative decoding speeds up text generation by predicting and verifying tokens in batches, but its efficiency depends on the model type, task, server configuration, and careful tuning of multiple parameters.
+
+
+
+
