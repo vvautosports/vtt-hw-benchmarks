@@ -1,0 +1,21 @@
+=== REASONING ===
+Confirmed that they meet at 5 o'clock. The first occurrence is simultaneous arrival (t=0), and t=720 min = 6:00 PM.
+
+
+=== CONTENT ===
+**Reasoning:**
+
+1. All three trucks are together again only at multiples of each truck's interval — so the co-arrival period is the least common multiple of 12, 18, and 30.
+   - 12 = 2²·3, 18 = 2·3², 30 = 2·3·5
+   - LCM = 2²·3²·5 = **180 minutes = 3 hours**
+
+2. The window from 6:00 AM to 6:00 PM is 12 hours = 720 minutes. Since both endpoints are included, the qualifying times are multiples of 180 within [0, 720]:
+   - 0 min → 6:00 AM (the initial simultaneous arrival)
+   - 180 min → 9:00 AM
+   - 360 min → 12:00 PM (noon)
+   - 540 min → 3:00 PM
+   - 720 min → 6:00 PM
+
+3. Count = ⌊720/180⌋ + 1 = 4 + 1 = 5, confirmed by the enumeration above.
+
+ANSWER: 5

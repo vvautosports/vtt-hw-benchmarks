@@ -315,6 +315,19 @@ Caveats that survive the root cause:
 
 **Protocol consequence (harness + production):** on b10639, multi-request grading sessions are contaminated — **isolated (fresh server per task) is ground truth** until the bleed is fixed. Any server-reusing batch measures "model + session history". Production multi-request serving on this build carries the same risk; weigh the pinned b10472 standalone for anything stateful-sensitive.
 
+### Qwen3.8-Flash-Next settings matrix: 12/12 (2026-08-27 night)
+
+[`results/sweeps/2026-08-27-qwen38-settings-matrix/`](../../results/sweeps/2026-08-27-qwen38-settings-matrix/) — vendor-doc coverage (effort ladder + recommended instruct sampling), fresh server per task per the bleed protocol:
+
+| config | tokens (r/c/s) | battery wall | quality |
+|---|---|---|---|
+| thinking / **low** | 433 / 1095 / 344 | 113s | 3/3 |
+| thinking / medium | 514 / 2335 / 390 | 178s | 3/3 |
+| thinking / xhigh (vendor default) | 553 / 5379 / 575 | 325s | 3/3 — most thorough code (9 doctests) |
+| **instruct** (0.7/0.80/20, presence 1.5) | 308 / 1384 / 351 | **107s** | 3/3 |
+
+All four configs are quality-equivalent on this battery — the differentiator is pure economy. xhigh costs 2.9× low for no grade gain; instruct is the fastest config and passes everything including reasoning. HF #27's "over-thinks at medium+" does **not** reproduce on the fixed runtime (even xhigh fits 8192 comfortably) — that report was observing the corruption. The dual-agent "idle low / xhigh interrupts" dial is validated. Battery default stays thinking/low. Also note: isolated effort-low code = 1095 tok vs 3847 sequential — even Qwen3.8's passing sequential numbers were session-history-inflated, reinforcing the fresh-server protocol.
+
 ## Scoping: frontier-benchmark cross-reference (2026-08-27)
 
 Goal: place every local-roster verdict in the context of published scores, so "best local model for task X" can be read against "how far below frontier is that."

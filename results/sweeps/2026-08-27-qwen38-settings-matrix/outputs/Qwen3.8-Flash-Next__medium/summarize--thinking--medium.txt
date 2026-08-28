@@ -1,0 +1,16 @@
+=== REASONING ===
+I need to create 5 bullet points with a TL;DR summary of the conversation.
+
+
+=== CONTENT ===
+- Speculative decoding has a cheap draft mechanism propose multiple tokens that the target model verifies in one batched forward pass; accepted tokens are at large-model quality, and rejections simply truncate the proposal so outputs stay distributionally identical to standard decoding.
+
+- Draft options include a separate small model, an n-gram lookup over prompt and generation history, or a multi-token-prediction (MTP) head trained jointly with the target that predicts a short future window from the same hidden state.
+
+- Gains are workload-dependent: code and structured text repeat long spans so n-gram drafting gets high acceptance nearly free, open-ended prose accepts fewer tokens, and a poorly matched draft model can make generation slower than the target alone since every rejected batch wastes a full verification pass; MTP heads trade a little extra memory/compute per step for more stable acceptance across domains.
+
+- MoE targets erode the advantage: verification batches several positions that may route to different experts, pulling more expert weights through memory per step, so on bandwidth-bound hardware the break-even acceptance rate is higher than for dense models — even though MoE's low active-parameter count is what makes large models decode quickly on unified-memory integrated GPUs.
+
+- Because slot-based servers split the KV-cache budget (more slots raise aggregate throughput but lower per-stream speed) and speculation competes with slots for the same headroom, speculative mode, slot count, and sampling settings must be tuned as one joint configuration and judged by end-to-end tokens per second on representative tasks rather than microbenchmarks.
+
+TL;DR: Speculative decoding speeds up inference with no quality loss via draft-then-verify token proposal, but its real payoff depends heavily on workload, draft choice, MoE memory behavior, and server slot configuration, so it demands joint end-to-end tuning.

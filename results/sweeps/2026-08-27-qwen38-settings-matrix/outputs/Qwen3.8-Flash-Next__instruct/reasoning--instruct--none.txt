@@ -1,0 +1,11 @@
+=== CONTENT ===
+**Reasoning:**
+
+1. The trucks coincide only at multiples of all three intervals — i.e., at multiples of LCM(12, 18, 30).
+   - 12 = 2²·3, 18 = 2·3², 30 = 2·3·5 → LCM = 2²·3²·5 = **180 minutes** (3 hours).
+
+2. The window from 6:00 AM to 6:00 PM inclusive is 720 minutes. Sync arrivals occur at minute marks 0, 180, 360, 540, 720.
+
+3. That's 720 ÷ 180 + 1 = 5 moments: 6:00 AM, 9:00 AM, 12:00 PM, 3:00 PM, and 6:00 PM (both endpoints included).
+
+ANSWER: 5
