@@ -338,6 +338,30 @@ Goal: place every local-roster verdict in the context of published scores, so "b
 - **Deliverable shape:** one cross-reference table in this doc first (manual, ~10 roster models × 3-4 published sources); a refresh script only once the table has proven it earns its keep. Store source, date, and benchmark version per cell — leaderboards move.
 - **What it will NOT do:** no cross-benchmark arithmetic (no averaging LiveBench with Arena Elo), no claiming our 3-task battery is comparable to any published suite. The mapping is directional context, not a score.
 
+### First cross-reference table (2026-08-27)
+
+Research snapshot 2026-08-27 (two web sweeps; primary leaderboards are JS-rendered, so unverifiable numbers are marked). Tags: **VC** = vendor/self-reported claim · **3P** = third-party measured · **NL** = not listed on that leaderboard · **~** = aggregator-sourced, unconfirmed against the primary site.
+
+**The meta-finding:** our sub-40B local roster is largely ABSENT from LiveBench/Aider/LMArena — the honest common denominator is vendor-claimed SWE-bench (Verified/Pro), plus Arena Elo where a vendor cites it. Treat every VC number as marketing until we or a third party reproduce it.
+
+| model | local grades (best clean run) | local t/s (r/c/s) | SWE-bench (VC) | other published |
+|---|---|---|---|---|
+| Qwen3.8-Flash-Next | 3/3 | 15.6 / 22.3 / 17.1 | Pro 62.5 | LiveCodeBench 91.9 VC; BenchLM composite 67.5 ~ ; Arena NL |
+| Ornith-1.5-35B | 3/3 | 54.1 / 52.7 / 56.6 | **Verified 79** (VC, uncorroborated) | all major boards NL |
+| Qwen3.6-35B-A3B | 3/3 (isolated) | 54.8 / 57.7 / 48.9 | Verified 73.4 | Artificial Analysis II 32 3P; Arena NL |
+| Qwen3-Coder-Next | 3/3 (isolated) | 28.3 / 41.9 / 23.7 | Verified 74.2 | Aider figures conflict (71.2 vs 61.0 VC) — unreconciled |
+| Qwen3-Coder-30B | 3/3 | 39.9 / 74.5 / 38.2 | — | Aider polyglot ~60.9 @Q4 3P-blog, not on official board |
+| Nemotron-3.5-Lightning | 3/3 | 56.0 / 56.3 / 53.2 | Verified 51.6 | Artificial Analysis II 24, 293 tok/s 3P |
+| gemma-4-26B-A4B | 3/3 | 35.7 / 38.0 / 35.5 | — | **Arena Elo 1441** (VC-cited from tech report) |
+| gemma-4-31B | 3/3 (b10472) | 5.6 / 5.8 / 5.4 | — | **Arena Elo 1452** (VC-cited); LiveCodeBench v6 80.0 VC |
+| GLM-4.7-Flash | 3/3 | 31.7 / 36.1 / 31.8 | Verified 59.2 | AIME25 91.6 VC; all boards NL |
+| Qwen3.8-27B | 3/3 (b10472) | 13.5 / 13.5 / 13.2 | — | Code Arena #9 (1595) 3P; BenchLM 72.5 ~ |
+| MiniMax-M3 | cannot load (181 GB) | — | Pro 59.0 | Arena "pending at launch" |
+
+**Frontier anchors** (Arena.ai text Elo, snapshot 2026-08-27, 3P): claude-fable-5 **1507** (#1) · claude-opus-4-7-high 1502 · gemini-3.1-pro-preview 1487 · gpt-5.5-high 1482. LiveBench anchors exist only via a mirror with internal inconsistencies — recorded as low-confidence: Fable 5 0.783, Opus 4.8 0.772, Gemini 3.1 Pro 0.799, GPT-5.5 0.807. Aider's official board (page stamped 2025-11-20) predates the current frontier generation entirely.
+
+**Directional reads (not score arithmetic):** the gemma-4 pair's vendor-cited Arena Elo (1441–1452) sits ~40–65 points under the closed frontier (1482–1507) — Elo compresses at the top, so this overstates closeness, but it is the only same-scale bridge we have. On vendor SWE-bench Verified the local cluster (52–79) spans a wide range, with Ornith's uncorroborated 79 the claim most worth an independent re-test. Benchmark-version bookkeeping: LiveBench rotates ~1/6 of questions monthly; Aider polyglot is a static 225-exercise set updated ad hoc — record snapshot dates on any refresh.
+
 ## Scoping: multi-dimensional test tracks (2026-08-27)
 
 Priority order per Kal (2026-08-27): **tool-calling/agentic first**, then quant and context axes, then creative/thinking/art. Rationale: the dual-agent architecture (thinker + coder nodes) lives or dies on tool-call reliability, not prose quality.
