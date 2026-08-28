@@ -1,0 +1,38 @@
+[
+  {
+    "name": "Qwen3-Coder-30B-A3B-Instruct",
+    "tag": "toolson_specauto",
+    "path": "/mnt/ai-models/unsloth/Qwen3-Coder-30B-A3B-Instruct-GGUF/Qwen3-Coder-30B-A3B-Instruct-UD-Q8_K_XL.gguf",
+    "flags": "",
+    "env": {
+      "UNSLOTH_DISABLE_UNIFIED_MEMORY": "1"
+    }
+  },
+  {
+    "name": "Qwen3-Coder-30B-A3B-Instruct",
+    "tag": "toolsoff_specauto",
+    "path": "/mnt/ai-models/unsloth/Qwen3-Coder-30B-A3B-Instruct-GGUF/Qwen3-Coder-30B-A3B-Instruct-UD-Q8_K_XL.gguf",
+    "flags": "--disable-tools",
+    "env": {
+      "UNSLOTH_DISABLE_UNIFIED_MEMORY": "1"
+    }
+  },
+  {
+    "name": "Qwen3-Coder-30B-A3B-Instruct",
+    "tag": "toolson_specoff",
+    "path": "/mnt/ai-models/unsloth/Qwen3-Coder-30B-A3B-Instruct-GGUF/Qwen3-Coder-30B-A3B-Instruct-UD-Q8_K_XL.gguf",
+    "flags": "--speculative-type off",
+    "env": {
+      "UNSLOTH_DISABLE_UNIFIED_MEMORY": "1"
+    }
+  },
+  {
+    "name": "Qwen3-Coder-30B-A3B-Instruct",
+    "tag": "toolsoff_specoff",
+    "path": "/mnt/ai-models/unsloth/Qwen3-Coder-30B-A3B-Instruct-GGUF/Qwen3-Coder-30B-A3B-Instruct-UD-Q8_K_XL.gguf",
+    "flags": "--disable-tools --speculative-type off",
+    "env": {
+      "UNSLOTH_DISABLE_UNIFIED_MEMORY": "1"
+    }
+  }
+]

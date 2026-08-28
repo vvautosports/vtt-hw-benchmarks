@@ -60,14 +60,13 @@ entries:
     prev: "39.9 / 74.5 / 38.2"
     quality: "3/3 PASS"
     note: >-
-      THE ANOMALY OF THIS RUN. Every other model gained 10-21%; this one's code cell went
-      the other way, 74.5 -> 43.55. Note the shape change: the old run was spiky
-      (39.9 / 74.5 / 38.2, code a huge intra-run outlier) and the clean run is flat
-      (43.7 / 43.55 / 40.27, all three within 8%). The reasoning and summarize cells both
-      rose normally. Do NOT retire the "code king" title on this single measurement --
-      n-gram speculative decoding genuinely does favour repetitive code text, so 74.5 may
-      have been real and something other than --disable-tools may have changed. This needs
-      a dedicated A/B before either number is trusted. See caveats.coder30b_code_anomaly.
+      THE ANOMALY OF THIS RUN, since RESOLVED. Every other model gained 10-21%; this one's
+      code cell went the other way, 74.5 -> 43.55, and the profile flattened (spiky
+      39.9 / 74.5 / 38.2 -> flat 43.7 / 43.55 / 40.27). The same-day A/B
+      (2026-08-28-coder30b-code-anomaly) explains it: server-side tools inflated this task's
+      OUTPUT ~4.3x (3009 vs 737 completion tokens) with repetitive tool-loop scaffolding,
+      and n-gram speculation drafted that boilerplate extremely well. The 74.5 was real
+      throughput on work no consumer wanted. 43.55 is the true figure.
 
   - cfg: "GLM-4.7-Flash__toolsoff"
     quant: "UD-Q8_K_XL"
@@ -94,8 +93,11 @@ summary: >-
   GLM-4.7-Flash and gpt-oss-120b converging at ~33-34.
 
   The single exception is Qwen3-Coder-30B's code cell, which moved DOWN and against the
-  trend. That is the one number this run leaves less certain rather than more, and it is
-  the thing to measure next.
+  trend. A same-day 2x2 (2026-08-28-coder30b-code-anomaly) resolved it: the old 74.5 was
+  speculative decoding racing through ~3000 tokens of tool-injection boilerplate, not code
+  speed. That also carries a corpus-wide warning — the inflation is uneven across models
+  and tasks (it depends on how much boilerplate each emitted and how well speculation
+  drafted it), so old numbers cannot be corrected by scaling. They must be re-measured.
 
 verdicts:
   injection_cleared: >-
@@ -103,17 +105,19 @@ verdicts:
   leaderboard_changed: >-
     YES. Ornith-1.5 is the clean speed leader; the top three are within 5% of each other.
   code_king_title: >-
-    UNRESOLVED. Qwen3-Coder-30B's 74.5 code figure did not reproduce. Needs a dedicated
-    A/B (tools on/off at fixed speculative settings) before either number is cited.
+    RESOLVED same day by 2026-08-28-coder30b-code-anomaly. The 74.5 was speculative
+    decoding accelerating ~3000 tokens of tool-injection boilerplate, not code-generation
+    speed. True clean figure is ~43.6 t/s, stable with speculation on or off. Retired as a
+    speed claim; the 3/3 quality record stands.
 
 caveats:
   coder30b_code_anomaly: >-
-    Qwen3-Coder-30B code went 74.5 -> 43.55 while every other cell on the roster rose.
-    --disable-tools should not slow generation, so the likely candidates are (a) the old
-    74.5 was inflated by a tool-loop artifact, or (b) speculative-decoding behaviour
-    differed between the runs (n-gram drafting is genuinely very effective on repetitive
-    code text, which is exactly the shape of that task). Not resolvable from this data.
-    Next step: a 2x2 of tools on/off x --speculative-type auto/off on this model alone.
+    RESOLVED — see results/sweeps/2026-08-28-coder30b-code-anomaly/. It was BOTH candidates
+    at once: tools inflated code output ~4.3x (3009 vs 737 completion tokens) with
+    repetitive tool-loop scaffolding, and n-gram speculation drafted that boilerplate
+    extremely well. Holding the injected work and removing speculation drops code 65.5 ->
+    40.68; holding speculation and removing the injected work changes nothing (43.61 vs
+    43.99). The 74.5 was real throughput on work no consumer wanted.
   nemotron_summarize_format_miss: >-
     quality.bullets=5, has_tldr=false. The content is correct; only the literal "TL;DR"
     label is absent. The grader is strict here by design (it catches models that drift out
