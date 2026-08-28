@@ -15,9 +15,15 @@ OUT = os.path.join(HOME, "sweep-results-phase1.jsonl")
 OUTDIR = os.path.join(HOME, "sweep-out")
 DONE = os.path.join(HOME, "sweep_phase1.done")
 
-with open(os.path.join(HOME, "unsloth-serve.log")) as f:
-    keys = re.findall(r"sk-unsloth-[A-Za-z0-9_-]+", f.read())
-KEY = keys[-1]
+# Import-safe: on a box with no baseline serve log (e.g. the G1a driver importing this
+# module only for TASKS/PROFILES), KEY stays None; sweep_phase2.wait_loaded() refreshes it
+# per serve before any request goes out.
+try:
+    with open(os.path.join(HOME, "unsloth-serve.log")) as f:
+        keys = re.findall(r"sk-unsloth-[A-Za-z0-9_-]+", f.read())
+    KEY = keys[-1] if keys else None
+except OSError:
+    KEY = None
 
 SUMMARY_SOURCE = """
 Speculative decoding accelerates autoregressive inference by letting a cheap
