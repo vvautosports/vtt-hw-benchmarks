@@ -1,0 +1,42 @@
+# Framework co-residency, GRADED — closes the no_quality_check caveat of
+# 2026-08-28-coresidency. Same pair, same 3 phases, but every answer captured and graded:
+# does the dual-agent pair (GLM orchestrator + Coder sub-agent) stay CORRECT under
+# memory pressure and concurrent load on one Strix Halo box? YES — 18/18.
+run_id: "2026-08-28-coresidency-graded"
+date: "2026-08-28"
+node: "kalman9-framework-01"
+hardware: "AMD Strix Halo (Radeon 8060S iGPU), GTT unlock ACTIVE, ~122 GB usable"
+backend: "llama-server driven directly (studio build), ports 8801/8802"
+driver_script: "scripts/sweeps/coresidency_test.py (answer-capturing version)"
+ctx: 32768
+
+pair:
+  - {model: "GLM-4.7-Flash UD-Q8_K_XL", role: orchestrator, port: 8801}
+  - {model: "Qwen3-Coder-30B-A3B-Instruct UD-Q8_K_XL", role: sub-agent, port: 8802}
+
+axis: cfg    # <phase>__<model>; 3 phases x 2 models x 3 text tasks = 18 graded cells
+records: "results.jsonl"
+grading: "py scripts/utils/grade_sweep.py results/sweeps/2026-08-28-coresidency-graded results --layout cfg"
+
+throughput:   # mean t/s wall over the 3-task battery
+  GLM-4.7-Flash:                {solo: 33.94, coresident_sequential: 34.09, concurrent: 30.68, contention: "-10.0%"}
+  Qwen3-Coder-30B-A3B-Instruct: {solo: 43.15, coresident_sequential: 42.97, concurrent: 29.26, contention: "-31.9%"}
+
+verdict:
+  coresident: true
+  correctness_survives_contention: true
+  summary: >
+    18/18 correct — every cell of both models passes in solo, coresident-sequential AND
+    concurrent phases. Memory pressure alone costs nothing (sequential ~= solo for both).
+    Under true concurrency the pair converges to ~30 t/s each (GLM -10%, Coder -31.9%),
+    still fully interactive. Combined with the G1a light-pair result the same day
+    (2026-08-28-g1a-coresidency, also zero grades flipped), the dual-agent
+    one-box architecture is validated on BOTH boxes: co-residency is a throughput tax,
+    never a correctness tax, on this stack.
+
+caveats:
+  - "Direct llama-server path: GLM and Coder both emit gradeable content on it (unlike
+     Nemotron, whose direct-path channel-routing issue is documented in
+     2026-08-28-g1a-coresidency). Same-pair studio-path numbers are not directly
+     comparable to these t/s figures."
+  - "Single seed per cell; contention percentages are one battery long, not steady-state."

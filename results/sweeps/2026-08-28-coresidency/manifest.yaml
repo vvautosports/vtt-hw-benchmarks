@@ -138,6 +138,9 @@ caveats:
     RESOLVED -- the heavy pair was tested (see heavy_pair below). Other combinations remain
     untested; a third co-resident model would fit in the light pair's ~48 GiB headroom.
   no_quality_check: >-
-    This measured throughput and health only. Battery outputs were not graded, so it does
-    NOT establish that answers stay correct under contention. Grading a co-resident run is
-    the obvious follow-up.
+    RESOLVED same day — this run measured throughput and health only, but the graded rerun
+    (2026-08-28-coresidency-graded, same pair, answer-capturing driver) scored 18/18: the
+    grade pattern is identical across solo, coresident-sequential and concurrent phases.
+    Correctness survives contention; co-residency is a throughput tax only. The G1a light
+    pair reproduces the same zero-grades-flipped result on Windows
+    (2026-08-28-g1a-coresidency).
