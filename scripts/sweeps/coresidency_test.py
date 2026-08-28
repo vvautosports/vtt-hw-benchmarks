@@ -16,6 +16,13 @@ Three phases:
 The t/s delta between phase 2 and 3 is the cost of co-residency under load. Phase 1 vs 2
 isolates pure memory pressure from compute contention.
 
+Each request's answer is written as a transcript (grader section format) under
+<rundir>/outputs/<phase>__<model>/<task>--thinking--low.txt, and every record is streamed to
+<rundir>/results.jsonl. That makes correctness gradeable, not just speed:
+  grade_sweep.py <rundir> results --layout cfg
+answers the question phase 3 exists for -- do answers stay CORRECT under contention, not just
+fast. Without this the run can only prove throughput, which is the no_quality_check caveat.
+
 Deliberately bypasses `unsloth run` and drives llama-server directly, because studio binds
 one model per instance. That also makes this the first harness code that talks to a plain
 llama-server -- the same shim MI50 testing will need, since gfx906 has no supported ROCm
@@ -94,8 +101,12 @@ def wait_health(port, timeout=1200):
     return None
 
 
-def run_task(port, name, task, prompt):
-    """One battery request against a plain llama-server (no API key)."""
+def run_task(port, name, task, prompt, outdir=None):
+    """One battery request against a plain llama-server (no API key).
+
+    When outdir is given, the answer is written as a grader-format transcript
+    (REASONING then CONTENT) so the record can be graded for correctness, not just speed.
+    Content-channel grading is deliberate: the text graders read the CONTENT section only."""
     body = {"model": name, "messages": [{"role": "user", "content": prompt}],
             "max_tokens": 8192, "seed": 42, **sp1.PROFILES["thinking"]}
     req = urllib.request.Request(
@@ -110,18 +121,35 @@ def run_task(port, name, task, prompt):
         return {"task": task, "error": repr(e)[:200],
                 "wall_s": round(time.monotonic() - t0, 1)}
     wall = time.monotonic() - t0
+    choice = (data.get("choices") or [{}])[0]
+    msg = choice.get("message", {}) or {}
+    content = msg.get("content") or ""
+    reasoning = msg.get("reasoning_content") or ""
     usage = data.get("usage", {}) or {}
     comp = usage.get("completion_tokens")
+    if outdir:
+        os.makedirs(outdir, exist_ok=True)
+        with open(os.path.join(outdir, f"{task}--thinking--low.txt"),
+                  "w", encoding="utf-8") as f:
+            if reasoning:
+                f.write("=== REASONING ===\n" + reasoning + "\n\n")
+            f.write("=== CONTENT ===\n" + content + "\n\n")
     return {"task": task, "wall_s": round(wall, 1),
             "prompt_tokens": usage.get("prompt_tokens"), "completion_tokens": comp,
             "tps_wall": round(comp / wall, 2) if comp and wall > 0 else None,
-            "finish_reason": (data.get("choices") or [{}])[0].get("finish_reason")}
+            "content_chars": len(content),
+            "finish_reason": choice.get("finish_reason")}
 
 
-def battery(model, out):
+def battery(model, out, phase, rundir):
+    """Run the 3-task text battery, tagging records with a cfg = <phase>__<model> so the three
+    phases grade as distinct cells (grade_sweep --layout cfg) instead of trampling each other."""
+    cfg = f"{phase}__{model['name']}"
+    outdir = os.path.join(rundir, "outputs", cfg)
     for task, prompt in sp1.TASKS.items():
-        rec = run_task(model["port"], model["name"], task, prompt)
-        rec.update({"model": model["name"], "role": model["role"]})
+        rec = run_task(model["port"], model["name"], task, prompt, outdir)
+        rec.update({"model": model["name"], "role": model["role"], "phase": phase,
+                    "cfg": cfg, "profile": "thinking", "effort": "low"})
         out.append(rec)
 
 
@@ -158,6 +186,11 @@ def main():
     def save():
         with open(os.path.join(rundir, "coresidency.json"), "w") as f:
             json.dump(results, f, indent=2)
+        # Flat, gradeable stream across all phases: grade_sweep.py <rundir> results --layout cfg
+        with open(os.path.join(rundir, "results.jsonl"), "w", encoding="utf-8") as f:
+            for recs in results["phases"].values():
+                for r in recs:
+                    f.write(json.dumps(r) + "\n")
 
     try:
         # ---- phase 1: solo ----
@@ -172,7 +205,7 @@ def main():
                 log(f"{m['name']}: SOLO LOAD FAILED")
                 continue
             log(f"{m['name']}: loaded in {load}s, mem {base} -> {mem_used_gib()} GiB")
-            battery(m, solo)
+            battery(m, solo, "solo", rundir)
             log(f"  mean t/s {mean_tps(solo, m['name'])}")
         results["phases"]["solo"] = solo
         save()
@@ -201,7 +234,7 @@ def main():
         log("### PHASE 2: co-resident, sequential")
         seq = []
         for m in MODELS:
-            battery(m, seq)
+            battery(m, seq, "coresident_sequential", rundir)
             log(f"  {m['name']} mean t/s {mean_tps(seq, m['name'])}")
         results["phases"]["coresident_sequential"] = seq
         save()
@@ -212,7 +245,7 @@ def main():
 
         def worker(m):
             local = []
-            battery(m, local)
+            battery(m, local, "coresident_concurrent", rundir)
             with lock:
                 con.extend(local)
 
