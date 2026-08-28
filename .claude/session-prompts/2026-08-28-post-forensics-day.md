@@ -19,7 +19,7 @@ Per the session-startup doctrine, spawn ONE cheap-tier Explore subagent (digest-
 - **Roster:** Nemotron-3.5 default flags = speed leader (56 t/s, 3/3); Coder-30B = code king (74.5); Qwen3.8-Flash-Next fully working (3/3, Q4_K_XL stays serving quant after 9/9 ladder — economy inversion: smaller quants faster per-token but verbose, Q4 wins wall-clock); gpt-oss-120b 3/3 @ 27–32 t/s; Coder-Next + MiniMax rehabilitated (M2.5 Q3 copy deleted as fragile).
 - **Disk:** deleted M2.5/Nano/REAP-23B/reap-218b/gemma-3-27b (~283 GB); added Qwen3.8 IQ4_XS + Q2_K_XL. ~62 GB free at last check — verify with `df -h /mnt/ai-models`.
 - **Wiki:** vvt-knowledge PR #53 MERGED (serving rules + roster pages live on develop). **8→7 open wiki PRs remain (Aug 15–27) — Kal triage needed; PR #52 now CONFLICTS with #53 (both touched strix gotchas) and needs a rebase.** The SSO/Quartz wiki site has NO CD workflow in the repo — deploy mechanism is external (documented in unmerged PR #21); staleness of the SSO link is (a) unmerged PR backlog + (b) possibly a Quartz build pulling main (5 behind develop).
-- **Artifact:** shareable report published — https://claude.ai/code/artifact/342ffca1-6388-463c-b823-06940f73ed2d (Kal can share to team).
+- **Artifact:** shareable report published — https://claude.ai/code/artifact/342ffca1-6388-463c-b823-06940f73ed2d (Kal can share to team). Rewritten explainer-first per Kal's feedback (no campy headlines; battery mechanics + pass criteria lead; per-task columns, no coded triples); repo-tracked copy at `docs/reports/2026-08-27-bench-report.html`. **Style rule for future reports: explain the test before the scores; no single-letter metric coding; plain headlines.**
 
 ## Task queue (priority order)
 
