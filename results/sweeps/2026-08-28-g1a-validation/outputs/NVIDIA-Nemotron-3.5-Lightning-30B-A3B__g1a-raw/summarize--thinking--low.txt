@@ -1,0 +1,139 @@
+=== REASONING ===
+Here's a thinking process:
+
+1.  **Analyze the Request:**
+   - Summarize the technical passage.
+   - Output format: exactly 5 bullet points followed by a one-sentence TL;DR.
+   - Must be faithful to the source; no added claims.
+   - I need to extract the key points from the passage and condense them into 5 bullet points, then a single-sentence TL;DR.
+
+2.  **Analyze the Passage:**
+   Let me break down the passage into its main ideas:
+
+   - **Speculative decoding**: Draft mechanism proposes tokens, target model verifies in batched forward pass. Accepted tokens = large-model quality near draft-model cost. Rejection truncates and resumes from last accepted position, output distributionally identical to standard decoding.
+   - **Draft types**: separate small model, n-gram lookup over prompt/history, or newer MTP head trained jointly with target model predicting short window of future tokens from same hidden state.
+   - **Economics by workload**: 
+     - Code/structured text: long spans repeat, n-gram drafting high acceptance almost free.
+     - Open-ended prose: accepts fewer speculative tokens. Poorly matched draft model can make generation slower than target alone (rejected batch wastes full verification pass).
+     - MTP heads: middle ground. Small memory/compute per step. Acceptance rates stable across domains because head sees exact context target sees.
+   - **Mixture-of-experts (MoE) complications**: MoE routes each token to small subset of experts, active params = fraction of total (hence big models decode quickly on integrated GPUs with unified memory). But speculative verification batches several positions together, each may route to different experts, pulling more expert weights through memory per step. On bandwidth-bound hardware, this erodes batching advantage that makes speculation profitable, so break-even acceptance rate higher for MoE targets than dense ones.
+   - **Server-side parallelism interaction**: Slot-based servers split KV-cache budget across concurrent sequences; more slots raise aggregate throughput while lowering per-stream speed. Speculation competes with extra slots for same compute headroom. Tuning must treat speculative mode, slot count, and sampling settings as joint config, not independent knobs. Must measure end-to-end tokens/sec on representative tasks, not trust microbenchmarks.
+
+   Key themes/points to capture in 5 bullets:
+   1. Speculative decoding mechanism: draft proposes, target verifies in batch; accepted tokens give high quality near draft cost; rejected truncates and resumes identically.
+   2. Draft mechanisms: can be separate small model, n-gram lookup, or MTP head trained jointly with target, predicting short token window from same hidden state.
+   3. Workload-dependent economics: n-gram drafting excels on code/structured text with high acceptance near-free; open-ended prose accepts fewer tokens and poor draft match can slow things down; MTP heads offer stable acceptance across domains with modest overhead.
+   4. MoE-specific challenges: MoE's expert routing reduces active params per token, but speculative batching pulls multiple expert weights per step, eroding batching advantage on bandwidth-bound hardware, requiring higher break-even acceptance rate vs. dense models.
+   5. Server parallelism interplay: slot-based KV-cache trade-offs; speculation competes with extra slots for compute headroom; tuning must be joint (speculative mode, slot count, sampling settings) and measured end-to-end on representative tasks, not microbenchmarks.
+
+   Now, I need to format these into exactly 5 bullet points. I must ensure each bullet is concise but captures the essence. No extra claims. I'll draft them carefully.
+
+   Bullet 1: Speculative decoding uses a draft mechanism to propose multiple tokens, which the target model verifies in a single batched forward pass; accepted tokens achieve large-model quality near draft-model cost, while rejections truncate the proposal and the target resumes from the last accepted position, preserving distribution identity to standard decoding.
+
+   Bullet 2: Drafts can take three forms: a separate small model, an n-gram lookup over prompt and generation history, or a newer multi-token-prediction (MTP) head trained jointly with the target to predict a short future window from the same hidden state.
+
+   Bullet 3: Economics vary by content type: n-gram drafting achieves high acceptance rates almost for free on code and structured text with long repeated spans, but open-ended prose accepts fewer speculative tokens, and a poorly matched draft can slow generation below target-only speed due to wasted verification batches.
+
+   Bullet 4: Mixture-of-experts (MoE) models complicate speculative verification, as batching multiple positions pulls distinct expert weights through memory per step, eroding the batching advantage on bandwidth-bound hardware and necessitating a higher break-even acceptance rate compared to dense models.
+
+   Bullet 5: Server-side parallelism interacts strongly with speculation, as slot-based KV-cache splitting trades off aggregate throughput against per-stream speed, and speculation competes with extra slots for compute headroom, requiring joint tuning of speculative mode, slot count, and sampling settings, measured via end-to-end tokens per second on representative tasks rather than microbenchmarks.
+
+   That's 5 bullets. Now the TL;DR: one sentence that summarizes the whole passage. Must be faithful, one sentence. I'll craft: "Speculative decoding accelerates inference by having a draft model propose tokens for batch verification by a target model, but its economic viability and interaction with hardware—especially MoE architectures and server parallelism—depend heavily on content type, draft-match quality, and joint configuration of slots and sampling settings."
+
+   Check against requirements:
+   - Exactly 5 bullet points followed by a one-sentence TL;DR. Yes.
+   - Faithful to source; no added claims. I need to make sure I don't distort. I'll review.
+   - The bullets should be summaries of the passage. I think they are.
+   - TL;DR one sentence.
+
+   Let me double-check the bullets for any inadvertent added claims or exaggerations. I'll rewrite slightly to be more strictly faithful.
+
+   Bullet 1: "Speculative decoding uses a draft mechanism to propose multiple tokens, which the target model then verifies in a single batched forward pass; accepted tokens achieve large-model quality near draft-model cost, while rejections truncate the proposal and the target resumes from the last accepted position, keeping outputs distributionally identical to standard decoding." -> Good.
+
+   Bullet 2: "Draft mechanisms fall into three categories: a separate small model, an n-gram lookup over the prompt and generation history, or a newer multi-token-prediction (MTP) head trained jointly with the target that predicts a short window of future tokens from the same hidden state." -> Good.
+
+   Bullet 3: "Economics differ by workload: code and structured text allow n-gram drafting to achieve high acceptance rates almost for free due to long repeated spans, whereas open-ended prose accepts fewer speculative tokens, and a poorly matched draft model can make generation slower than running the target alone because every rejected batch wastes a full verification pass." -> Good.
+
+   Bullet 4: "Mixture-of-experts (MoE) layers route each token to a subset of experts, reducing active parameters per token, but speculative verification batches multiple positions together, and each position may route to different experts, pulling more expert weights through memory per step; on bandwidth-bound hardware this erodes the batching advantage that makes speculation profitable, raising the break-even acceptance rate compared to dense models." -> Good.
+
+   Bullet 5: "Server-side parallelism, particularly slot-based KV-cache splitting, trades off aggregate throughput against per-stream speed, and speculation competes with extra slots for the same compute headroom; therefore, tuning must treat speculative mode, slot count, and sampling settings as one joint configuration rather than independent knobs, measuring end-to-end tokens per second on representative tasks instead of microbenchmarks." -> Good.
+
+   TL;DR: "Speculative decoding speeds up inference by batch-verifying draft-proposed tokens, but its efficiency and interaction with MoE hardware and server parallelism depend on content type, draft-match quality, and joint configuration of slots and sampling settings, requiring end-to-end measurement on representative tasks."
+
+   Check TL;DR sentence count: one sentence. Yes.
+
+   Now, format exactly as requested: 5 bullet points, then a one-sentence TL;DR. I'll output with bullet points (maybe using dash or asterisk). The prompt says "exactly 5 bullet points followed by a one-sentence TL;DR." I'll use standard bullet format, e.g., "- " or "• ". I'll use dash for simplicity. I'll make sure there are exactly 5 bullet lines, then a blank line maybe, then the TL;DR sentence. I'll output:
+
+   - [bullet 1]
+   - [bullet 2]
+   - [bullet 3]
+   - [bullet 4]
+   - [bullet 5]
+
+   TL;DR: [sentence]
+
+   Ensure no extra text. I'll review again for faithfulness. The passage says: "Speculative decoding accelerates autoregressive inference by letting a cheap draft mechanism propose several tokens which the target model then verifies in a single batched forward pass. Accepted tokens land at large-model quality but near draft-model cost; a rejection truncates the proposal and the target model resumes from the last accepted position, so outputs remain distributionally identical to standard decoding." My bullet 1 captures this.
+
+   "The draft can be a separate small model, an n-gram lookup over the prompt and generation history, or - in newer designs - a multi-token-prediction (MTP) head trained jointly with the target model that predicts a short window of future tokens from the same hidden state." Bullet 2 captures.
+
+   "The economics differ sharply by workload. Code and structured text repeat long spans, so n-gram drafting achieves high acceptance rates almost for free. Open-ended prose accepts fewer speculative tokens, and a poorly matched draft model can make generation slower than running the target alone, because every rejected batch wastes a full verification pass. MTP heads sit in between: they add a small amount of memory and compute per step, but their acceptance rates tend to be stable across domains because the head sees the exact context the target sees." Bullet 3 captures the economics part, but I need to make sure I include MTP heads' stable acceptance. My bullet 3 says: "Economics differ by workload: code and structured text allow n-gram drafting to achieve high acceptance rates almost for free due to long repeated spans, whereas open-ended prose accepts fewer speculative tokens, and a poorly matched draft model can make generation slower than running the target alone, because every rejected batch wastes a full verification pass." It doesn't explicitly mention MTP heads' stable acceptance, but it says "MTP heads sit in between" in the passage. I should include that nuance. Let me adjust bullet 3 to include MTP heads. I'll rephrase bullet 3 to cover all three workload aspects and MTP.
+
+   Revised bullet 3: "Economics vary by content: n-gram drafting achieves near-free high acceptance on code and structured text with long repeated spans, open-ended prose accepts fewer speculative tokens and can slow below target-only speed if the draft model is poorly matched (since rejected batches waste full verification passes), while MTP heads sit in between, adding modest memory/compute per step with acceptance rates stable across domains because they see the exact target context."
+
+   That's good. It captures the "sit in between" and stable acceptance.
+
+   Bullet 4: MoE part. Passage: "Mixture-of-experts models complicate the picture. An MoE layer routes each token to a small subset of experts, so the active parameter count per token is a fraction of the total - which is why a model with tens of billions of parameters can decode quickly on integrated GPUs with unified memory. But speculative verification batches several positions together, and each position may route to different experts, pulling more expert weights through memory per step. On bandwidth-bound hardware this erodes the batching advantage that makes speculation profitable in the first place, so the break-even acceptance rate is higher for MoE targets than for dense ones." My bullet 4 captures this.
+
+   Bullet 5: Server-side parallelism. Passage: "Server-side parallelism interacts with all of this. Slot-based servers split the KV-cache budget across concurrent sequences; more slots raise aggregate throughput while lowering per-stream speed, and speculation competes with extra slots for the same compute headroom. Tuning therefore has to treat speculative mode, slot count, and sampling settings as one joint configuration rather than three independent knobs, and measure end-to-end tokens per second on representative tasks instead of trusting microbenchmarks." My bullet 5 captures this.
+
+   All good. I'll output exactly as required. I'll make sure the TL;DR is one sentence, no extra period at the end? It should have a period. "one-sentence TL;DR." I'll make it a sentence ending with a period.
+
+   Final check of the bullets formatting. I'll use proper markdown bullet points. The prompt says "exactly 5 bullet points followed by a one-sentence TL;DR." I'll output:
+
+   - Speculative decoding uses a draft mechanism to propose multiple tokens, which the target model verifies in a single batched forward pass; accepted tokens achieve large-model quality near draft-model cost, while rejections truncate the proposal and the target resumes from the last accepted position, preserving distribution identity to standard decoding.
+   - Draft mechanisms can take three forms: a separate small model, an n-gram lookup over prompt and generation history, or a newer multi-token-prediction (MTP) head trained jointly with the target to predict a short future window from the same hidden state.
+   - Economics vary by content: n-gram drafting achieves near-free high acceptance on code and structured text with long repeated spans, open-ended prose accepts fewer speculative tokens and can slow below target-only speed if the draft model is poorly matched (since rejected batches waste full verification passes), while MTP heads sit in between, adding modest memory/compute per step with acceptance rates stable across domains because they see the exact target context.
+   - Mixture-of-experts (MoE) layers route each token to a subset of experts, reducing active parameters per token, but speculative verification batches multiple positions together, and each position may route to different experts, pulling more expert weights through memory per step; on bandwidth-bound hardware this erodes the batching advantage that makes speculation profitable, raising the break-even acceptance rate compared to dense models.
+   - Server-side parallelism, particularly slot-based KV-cache splitting, trades off aggregate throughput against per-stream speed, and speculation competes with extra slots for the same compute headroom, requiring joint tuning of speculative mode, slot count, and sampling settings rather than independent knobs, with effectiveness measured via end-to-end tokens per second on representative tasks rather than microbenchmarks.
+
+   TL;DR: Speculative decoding accelerates inference by batch-verifying draft-proposed tokens, but its economic viability and interaction with MoE hardware and server parallelism depend heavily on content type, draft-match quality, and joint configuration of slots and sampling settings, necessitating end-to-end measurement on representative tasks.
+
+   Check bullet 5: "Server-side parallelism, particularly slot-based KV-cache splitting, trades off aggregate throughput against per-stream speed, and speculation competes with extra slots for the same compute headroom, requiring joint tuning of speculative mode, slot count, and sampling settings rather than independent knobs, with effectiveness measured via end-to-end tokens per second on representative tasks rather than microbenchmarks." That's a long bullet, but it's one bullet point. It's fine.
+
+   I'll make sure there are exactly 5 bullet points. Yes. And then the TL;DR sentence. I'll output that. I'll review once more for any claim that's not in the source. The source says "outputs remain distributionally identical to standard decoding." My bullet 1 says "preserving distribution identity to standard decoding." That's faithful. "large-model quality but near draft-model cost" -> I said "achieve large-model quality near draft-model cost". Faithful.
+
+   Source: "a poorly matched draft model can make generation slower than running the target alone, because every rejected batch wastes a full verification pass." My bullet 3 says "can slow below target-only speed if the draft model is poorly matched (since rejected batches waste full verification passes)". Good.
+
+   Source: "MTP heads sit in between: they add a small amount of memory and compute per step, but their acceptance rates tend to be stable across domains because the head sees the exact context the target sees." My bullet 3 says "MTP heads sit in between, adding modest memory/compute per step with acceptance rates stable across domains because they see the exact target context." Good.
+
+   Source: "Mixture-of-experts models complicate the picture... so the active parameter count per token is a fraction of the total - which is why a model with tens of billions of parameters can decode quickly on integrated GPUs with unified memory." My bullet 4 mentions active parameters per token subset, and the MoE decoding quickly on integrated GPUs part I didn't explicitly state, but I said "reducing active parameters per token" which implies it. I could add "enabling quick decoding on integrated GPUs" but it's okay; the bullet covers the complication. I'll keep it concise. The bullet says: "Mixture-of-experts (MoE) layers route each token to a subset of experts, reducing active parameters per token, but speculative verification batches multiple positions together, and each position may route to different experts, pulling more expert weights through memory per step; on bandwidth-bound hardware this erodes the batching advantage that makes speculation profitable, raising the break-even acceptance rate compared to dense models." It doesn't explicitly mention the "tens of billions of parameters can decode quickly on integrated GPUs with unified memory" but it's not essential for the bullet's point about the complication. The prompt says "Be faithful to the source; do not add claims it does not make." I'm not adding false claims, but I might omit a detail. That's fine as long as I don't add. The bullet is a summary; omitting a detail isn't adding a claim. I think it's fine.
+
+   Similarly, bullet 5: "measure end-to-end tokens per second on representative tasks instead of trusting microbenchmarks." I captured that.
+
+   TL;DR: "Speculative decoding accelerates inference by batch-verifying draft-proposed tokens, but its economic viability and interaction with MoE hardware and server parallelism depend heavily on content type, draft-match quality, and joint configuration of slots and sampling settings, necessitating end-to-end measurement on representative tasks." This is one sentence. It summarizes the main points. It doesn't add claims; it's derived from the passage.
+
+   I'll output now. Ensure format: 5 bullet points, then TL;DR line. I'll put a blank line between bullets and TL;DR for clarity, but not required. I'll just do:
+
+   - ...
+   - ...
+   - ...
+   - ...
+   - ...
+
+   TL;DR: ...
+
+   Make sure no extra bullets or lines. I'll count: 5 bullet lines. Then TL;DR. Good.
+
+   Proceed. 
+   Output matches the final.✅
+
+
+=== CONTENT ===
+- Speculative decoding uses a draft mechanism to propose multiple tokens, which the target model verifies in a single batched forward pass; accepted tokens achieve large-model quality near draft-model cost, while rejections truncate the proposal and the target resumes from the last accepted position, preserving distribution identity to standard decoding.  
+- Draft mechanisms can take three forms: a separate small model, an n-gram lookup over prompt and generation history, or a newer multi-token-prediction (MTP) head trained jointly with the target to predict a short future window from the same hidden state.  
+- Economics vary by content: n-gram drafting achieves near-free high acceptance on code and structured text with long repeated spans, open-ended prose accepts fewer speculative tokens and can slow below target-only speed if the draft model is poorly matched (since rejected batches waste full verification passes), while MTP heads sit in between, adding modest memory/compute per step with acceptance rates stable across domains because they see the exact target context.  
+- Mixture-of-experts (MoE) layers route each token to a subset of experts, reducing active parameters per token, but speculative verification batches multiple positions together, and each position may route to different experts, pulling more expert weights through memory per step; on bandwidth-bound hardware this erodes the batching advantage that makes speculation profitable, raising the break-even acceptance rate compared to dense models.  
+- Server-side parallelism, particularly slot-based KV-cache splitting, trades off aggregate throughput against per-stream speed, and speculation competes with extra slots for the same compute headroom, requiring joint tuning of speculative mode, slot count, and sampling settings rather than independent knobs, with effectiveness measured via end-to-end tokens per second on representative tasks rather than microbenchmarks.  
+
+TL;DR: Speculative decoding accelerates inference by batch-verifying draft-proposed tokens, but its economic viability and interaction with MoE hardware and server parallelism depend heavily on content type, draft-match quality, and joint configuration of slots and sampling settings, necessitating end-to-end measurement on representative tasks.
+

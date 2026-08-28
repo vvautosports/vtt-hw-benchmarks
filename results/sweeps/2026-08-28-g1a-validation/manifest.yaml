@@ -1,0 +1,48 @@
+# HP G1a (Windows) serve-validation of the b10639 unified-memory env fix.
+# UNSLOTH_DISABLE_UNIFIED_MEMORY=1 was staged on this box via setx but never serve-verified;
+# until this run, NOTHING measured on the HP under Windows was trustworthy. This is the first
+# graded battery on the G1a: 3 text cells + 7 Tier 2 tool-call cells, fresh server per cell.
+run_id: "2026-08-28-g1a-validation"
+date: "2026-08-28"
+node: "hp-g1a-windows"
+hardware: "HP ZBook Ultra G1a — AMD Strix Halo (Radeon 8060S iGPU), Windows 11, 128 GB (~96 GB usable under Windows)"
+backend: "unsloth-studio (unsloth run), ROCm gfx1151 Windows build"
+api: "/v1/chat/completions via studio proxy on 8888 (llama-server spawned per serve)"
+isolation: "fresh-server-per-case (g1a_validation.py)"
+
+launch_env:
+  UNSLOTH_DISABLE_UNIFIED_MEMORY: "1"   # injected explicitly into every launch (presence-tested flag)
+flags: "--disable-tools --disable-tool-call-healing --disable-tool-call-nudging"   # raw rung
+
+model: "NVIDIA-Nemotron-3.5-Lightning-30B-A3B-UD-Q8_K_XL (roster model — enables cross-box comparison)"
+text_cells: "reasoning/code/summarize at thinking/low (roster-baseline config), max_tokens 8192"
+tool_cells: "toolcall_cases.json (= toolcall_cases_tier2.json copy), greedy per request_constants"
+
+axis: cfg
+records: "results.jsonl"
+outputs: "outputs/NVIDIA-Nemotron-3.5-Lightning-30B-A3B__g1a-raw/"
+grading: "py scripts/utils/grade_sweep.py results/sweeps/2026-08-28-g1a-validation results --layout cfg"
+driver_script: "scripts/sweeps/g1a_validation.py"
+
+verdict:
+  env_fix_serve_verified: true
+  summary: >
+    9/10 correct. All 3 text cells pass; decode ~33-36 t/s wall across every cell; server
+    loads rock-steady at 50.4s each (10/10, no drift); no b10639 symptoms (no pathological
+    slowdown, no garbage output, no load failures). The G1a is now a trustworthy graded
+    inference node under Windows.
+  the_one_failure: >
+    tc_parallel — Nemotron-3.5 emitted 1 of 3 required parallel calls. The reasoning stream
+    explicitly plans all three ("then Boston, then Seattle... We'll make three calls") but
+    only the Denver call lands in structured output: an intent-vs-emission gap in multi-call
+    serialisation, not a comprehension failure. First discriminative Tier 2 signal — the
+    framework roster run grades the same case across all 6 models.
+
+caveats:
+  - "tps_server is null on the 3 text cells (studio proxy returned no timings for the
+     thinking-profile requests); tps_wall stands in. Tool cells did return server timings
+     (~36.3-36.6 t/s, agreeing with tps_wall)."
+  - "Single model, single seed — a validation gate, not a leaderboard entry."
+  - "Studio auto-configured -c 1027584 across 4 slots with kv_unified; not tuned."
+  - "Cross-box caveat: framework Tier 1/2 runs use the same studio stack but Linux ROCm;
+     compare shapes, not absolute t/s, until a same-model same-quant A/B is done."

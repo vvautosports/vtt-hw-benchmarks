@@ -1,0 +1,56 @@
+=== REASONING ===
+We are given: "Three delivery trucks all arrive at a warehouse together at 6:00 AM. Truck A returns every 12 minutes, truck B every 18 minutes, and truck C every 30 minutes. Between 6:00 AM and 6:00 PM inclusive, how many times do all three trucks arrive at the same moment? Show your reasoning, then state the final count on its own line as 'ANSWER: <n>'."
+
+We need to find the number of times from 6:00 AM to 6:00 PM inclusive that all three trucks arrive at the same moment.
+
+First, they all arrive together at 6:00 AM. Then they will arrive together again at the least common multiple (LCM) of their intervals. The intervals are 12 min, 18 min, 30 min. LCM of 12, 18, 30.
+
+Calculate LCM: 
+12 = 2^2 * 3
+18 = 2 * 3^2
+30 = 2 * 3 * 5
+LCM = 2^2 * 3^2 * 5 = 4 * 9 * 5 = 180 minutes.
+
+So they arrive together every 180 minutes (3 hours).
+
+Now we need the interval from 6:00 AM to 6:00 PM inclusive. Let's compute the total time span.
+
+6:00 AM to 6:00 PM is exactly 12 hours. In minutes: 12 * 60 = 720 minutes.
+
+They start together at 6:00 AM. The times they all arrive together are at t = 0, 180, 360, 540, 720 minutes after 6:00 AM? Let's check: 0 corresponds to 6:00 AM. 180 = 3:00 PM? Wait, 180 minutes = 3 hours. 6:00 AM + 3 hours = 9:00 AM. Then 360 = 6 hours = 12:00 PM (noon). 540 = 9 hours = 3:00 PM. 720 = 12 hours = 6:00 PM. So times: 6:00 AM, 9:00 AM, 12:00 PM, 3:00 PM, 6:00 PM. That's 5 times.
+
+But we must be careful: "Between 6:00 AM and 6:00 PM inclusive". Inclusive means both endpoints are included. The starting point 6:00 AM counts, and 6:00 PM counts. The times are at 0, 180, 360, 540, 720 minutes after 6:00 AM. That's 5 times.
+
+Is there any chance that they arrive together at some other times? No, because LCM is the period of simultaneous arrivals. So all times are of the form 180k minutes for integer k. k = 0,1,2,3,4 correspond to the 5 times.
+
+Thus the count is 5.
+
+But wait, let's verify the intervals: "Truck A returns every 12 minutes, truck B every 18 minutes, and truck C every 30 minutes." They arrive at 6:00 AM together. Then they will return after those intervals. So they arrive at 6:12, 6:18, etc. The next simultaneous arrival is at LCM = 180 minutes = 3 hours later, which is 9:00 AM. Then 12:00 PM, 3:00 PM, 6:00 PM.
+
+Inclusive means 6:00 AM to 6:00 PM inclusive. The times are exactly at 6:00, 9:00, 12:00, 3:00, 6:00. That's 5 times.
+
+But is 6:00 PM considered "between 6:00 AM and 6:00 PM inclusive"? Yes, inclusive means both endpoints are included. So 5 times.
+
+Thus answer is 5.
+
+We need to output: "ANSWER: 5".
+
+=== CONTENT ===
+The three trucks arrive together every 12, 18, and 30 minutes. The least common multiple (LCM) of these intervals is the period at which all three trucks will simultaneously arrive. 
+
+12 = 2² × 3  
+18 = 2 × 3²  
+30 = 2 × 3 × 5  
+LCM = 2² × 3² × 5 = 180 minutes (3 hours).
+
+Starting at 6:00 AM, the simultaneous arrivals occur at:
+- 6:00 AM (t = 0 min)
+- 9:00 AM (t = 180 min)
+- 12:00 PM (t = 360 min)
+- 3:00 PM (t = 540 min)
+- 6:00 PM (t = 720 min)
+
+Since the period is inclusive of both 6:00 AM and 6:00 PM, there are exactly 5 instances.
+
+ANSWER: 5
+
