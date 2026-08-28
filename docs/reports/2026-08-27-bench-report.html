@@ -1,0 +1,280 @@
+<title>Strix Halo Bench Report</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&family=Source+Sans+3:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+  :root{
+    --ground:#F2F5F4; --surface:#FFFFFF; --ink:#17272B; --muted:#54666A;
+    --line:#D5DEDC; --accent:#0E7C6B; --accent-soft:#E0EEEA;
+    --pass:#2E7D32; --pass-soft:#E4F0E4; --fail:#B3383B; --fail-soft:#F5E4E4;
+    --caution:#8A6207; --caution-soft:#F2EBD8;
+    --mono:'IBM Plex Mono',ui-monospace,Consolas,monospace;
+    --body:'Source Sans 3',system-ui,Segoe UI,sans-serif;
+    --display:'Bricolage Grotesque','Source Sans 3',system-ui,sans-serif;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --ground:#101B1D; --surface:#162426; --ink:#DCE7E5; --muted:#93A6A4;
+      --line:#28393B; --accent:#4FD6BC; --accent-soft:#1B3833;
+      --pass:#7BC98A; --pass-soft:#1E3323; --fail:#E58A8A; --fail-soft:#3A2224;
+      --caution:#D9B36A; --caution-soft:#37301C;
+    }
+  }
+  :root[data-theme="dark"]{
+    --ground:#101B1D; --surface:#162426; --ink:#DCE7E5; --muted:#93A6A4;
+    --line:#28393B; --accent:#4FD6BC; --accent-soft:#1B3833;
+    --pass:#7BC98A; --pass-soft:#1E3323; --fail:#E58A8A; --fail-soft:#3A2224;
+    --caution:#D9B36A; --caution-soft:#37301C;
+  }
+  *{box-sizing:border-box}
+  body{background:var(--ground);color:var(--ink);font-family:var(--body);
+    font-size:1.05rem;line-height:1.6;margin:0;padding:0 1.25rem 5rem;}
+  main{max-width:58rem;margin:0 auto;display:flex;flex-direction:column;gap:2.5rem;}
+  header.hero{padding:3rem 0 0;display:flex;flex-direction:column;gap:.75rem;}
+  .eyebrow{font-family:var(--mono);font-size:.72rem;font-weight:600;letter-spacing:.14em;
+    text-transform:uppercase;color:var(--accent);}
+  h1{font-family:var(--display);font-weight:800;font-size:clamp(1.9rem,4.5vw,2.6rem);
+    line-height:1.1;margin:0;text-wrap:balance;}
+  .standfirst{font-size:1.1rem;color:var(--muted);max-width:46rem;margin:0;}
+  h2{font-family:var(--display);font-weight:600;font-size:1.45rem;margin:0 0 .25rem;text-wrap:balance;}
+  h3{font-family:var(--display);font-weight:600;font-size:1.05rem;margin:0;}
+  section{display:flex;flex-direction:column;gap:1rem;}
+  p{margin:0;max-width:46rem;}
+  a{color:var(--accent);}
+  code{font-family:var(--mono);font-size:.85em;background:var(--accent-soft);
+    padding:.05em .35em;border-radius:.25rem;}
+  .tasks{display:grid;grid-template-columns:repeat(auto-fit,minmax(16rem,1fr));gap:.85rem;}
+  .task{background:var(--surface);border:1px solid var(--line);border-radius:.4rem;
+    padding:1rem 1.1rem;display:flex;flex-direction:column;gap:.55rem;}
+  .task .tname{font-family:var(--mono);font-size:.72rem;font-weight:600;letter-spacing:.12em;
+    text-transform:uppercase;color:var(--accent);}
+  .task p{font-size:.93rem;}
+  .task .passbar{border-top:1px solid var(--line);padding-top:.55rem;font-size:.88rem;}
+  .task .passbar b{color:var(--pass);}
+  .metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(15rem,1fr));gap:.85rem;}
+  .metric{background:var(--surface);border:1px solid var(--line);border-radius:.4rem;padding:.85rem 1rem;font-size:.93rem;}
+  .metric b{font-family:var(--mono);font-size:.8rem;letter-spacing:.06em;text-transform:uppercase;
+    display:block;margin-bottom:.2rem;}
+  .tablewrap{overflow-x:auto;background:var(--surface);border:1px solid var(--line);border-radius:.4rem;}
+  table{border-collapse:collapse;width:100%;min-width:46rem;font-size:.92rem;}
+  th{font-family:var(--mono);font-size:.7rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;
+    color:var(--muted);text-align:left;padding:.7rem .8rem;border-bottom:1px solid var(--line);}
+  td{padding:.55rem .8rem;border-bottom:1px solid var(--line);vertical-align:top;}
+  tr:last-child td{border-bottom:none;}
+  td.num{font-family:var(--mono);font-variant-numeric:tabular-nums;white-space:nowrap;font-size:.86rem;}
+  td.cell{font-family:var(--mono);font-variant-numeric:tabular-nums;white-space:nowrap;font-size:.86rem;}
+  .ok{color:var(--pass);font-weight:600;}
+  .bad{color:var(--fail);font-weight:600;}
+  .mid{color:var(--caution);font-weight:600;}
+  .pill{display:inline-block;font-family:var(--mono);font-size:.72rem;font-weight:600;
+    padding:.1rem .5rem;border-radius:1rem;white-space:nowrap;}
+  .pill.pass{background:var(--pass-soft);color:var(--pass);}
+  .pill.part{background:var(--caution-soft);color:var(--caution);}
+  .pill.fail{background:var(--fail-soft);color:var(--fail);}
+  .legend{font-size:.85rem;color:var(--muted);max-width:none;}
+  .joblist{display:flex;flex-direction:column;gap:.65rem;}
+  .job{background:var(--surface);border:1px solid var(--line);border-radius:.4rem;
+    padding:.8rem 1rem;display:flex;flex-wrap:wrap;gap:.35rem .75rem;align-items:baseline;}
+  .job .role{font-family:var(--mono);font-size:.72rem;font-weight:600;letter-spacing:.1em;
+    text-transform:uppercase;color:var(--accent);flex-basis:100%;}
+  .job b{font-family:var(--display);font-weight:600;}
+  .job span{color:var(--muted);font-size:.92rem;}
+  .note{border-left:3px solid var(--caution);background:var(--caution-soft);
+    padding:.75rem 1rem;border-radius:0 .4rem .4rem 0;font-size:.95rem;max-width:46rem;}
+  .issue{background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--fail);
+    border-radius:.4rem;padding:1rem 1.15rem;display:flex;flex-direction:column;gap:.45rem;font-size:.95rem;}
+  ul{margin:0;padding-left:1.2rem;max-width:46rem;display:flex;flex-direction:column;gap:.35rem;}
+  footer{border-top:1px solid var(--line);padding-top:1rem;font-size:.85rem;color:var(--muted);
+    font-family:var(--mono);line-height:1.7;}
+</style>
+<main>
+<header class="hero">
+  <div class="eyebrow">VVC · local model benchmarks · Framework Desktop (Strix Halo, 128 GB) · 2026-08-27</div>
+  <h1>Local model benchmark results, and how to read them</h1>
+  <p class="standfirst">Which local models pass our tests, how fast they run, and exactly what "pass" means.
+  All numbers below come from committed runs with full transcripts in the vtt-hw-benchmarks repo.</p>
+</header>
+
+<section>
+  <h2>What the benchmark actually is</h2>
+  <p>Every model gets the same <b>three tasks</b>, sent one at a time through the same API a real app would use
+  (identical settings for every model: sampling fixed, seed fixed, 8,192-token output limit). A script then checks
+  each answer against <b>mechanical pass criteria</b> — no human judging, no "AI grading AI." A result is either
+  verifiably right or it isn't, and re-running the check always gives the same grade.</p>
+
+  <div class="tasks">
+    <div class="task">
+      <div class="tname">Task 1 · Reasoning</div>
+      <p>A multi-step word problem: three delivery trucks return to a warehouse every 12, 18, and 30 minutes —
+      how many times between 6&nbsp;AM and 6&nbsp;PM do all three arrive together? The model must show its work,
+      then state the count on its own line as <code>ANSWER: &lt;n&gt;</code>.</p>
+      <div class="passbar"><b>Pass:</b> the answer line exists and the number is exactly <b>5</b> (the provably correct count).</div>
+    </div>
+    <div class="task">
+      <div class="tname">Task 2 · Coding</div>
+      <p>Write a Python function that parses a range string like <code>"1-3,5,7-9"</code> into
+      <code>[1,2,3,5,7,8,9]</code> — with rules: ignore stray whitespace, reject reversed ranges like
+      <code>"9-7"</code> with a <code>ValueError</code>, return <code>[]</code> for empty input — and include a
+      doctest block (embedded, runnable examples) covering at least 5 cases.</p>
+      <div class="passbar"><b>Pass:</b> the reply contains a real function with <b>≥ 5 doctest examples</b> and handles the <code>ValueError</code> requirement.</div>
+    </div>
+    <div class="task">
+      <div class="tname">Task 3 · Summarization</div>
+      <p>Summarize a ~430-word technical passage (about speculative decoding) as <b>exactly 5 bullet points</b>
+      followed by a one-sentence TL;DR — no invented claims. This tests instruction-following under a strict
+      format, which is where degrading models slip first.</p>
+      <div class="passbar"><b>Pass:</b> exactly <b>5 bullets</b> + a labeled <b>TL;DR</b> line, both present.</div>
+    </div>
+  </div>
+
+  <h3 style="margin-top:.5rem">The three numbers we record per task</h3>
+  <div class="metrics">
+    <div class="metric"><b>Speed — tokens/sec</b>How fast the model writes. A token ≈ ¾ of a word. On this hardware,
+    ~30 tok/s feels responsive for chat; 50+ is fast; under 15 you're waiting on it.</div>
+    <div class="metric"><b>Output tokens</b>How much the model wrote (thinking included) to reach its answer.
+    Lower is better at equal quality — a model that needs 3× the tokens is 3× slower in practice even at the same tok/s.</div>
+    <div class="metric"><b>Pass / fail</b>The mechanical check above. We report per-task marks, not an averaged score —
+    a model that fails coding but aces summaries is a different tool than the reverse, and an average would hide that.</div>
+  </div>
+</section>
+
+<section>
+  <h2>Results — every model, every task</h2>
+  <p class="legend">✓ = passed the task's check · ✗ = failed it · the number is generation speed in tokens/sec for that task.
+  Each row uses the model's <em>cleanest</em> measured run (see "trust notes" below). Reference point: GLM-4.7-Flash,
+  our incumbent daily driver, runs ~32–36 tok/s.</p>
+  <div class="tablewrap"><table>
+    <tr><th>Model</th><th>Disk size</th><th>Reasoning</th><th>Coding</th><th>Summarization</th><th>Overall</th></tr>
+    <tr><td><b>Nemotron-3.5-Lightning 30B</b></td><td class="num">36 GB</td>
+      <td class="cell"><span class="ok">✓</span> 56.0</td><td class="cell"><span class="ok">✓</span> 56.3</td><td class="cell"><span class="ok">✓</span> 53.2</td>
+      <td><span class="pill pass">3/3 · fastest overall</span></td></tr>
+    <tr><td>Ornith-1.5 35B</td><td class="num">36 GB</td>
+      <td class="cell"><span class="ok">✓</span> 54.1</td><td class="cell"><span class="ok">✓</span> 52.7</td><td class="cell"><span class="ok">✓</span> 56.6</td>
+      <td><span class="pill pass">3/3</span></td></tr>
+    <tr><td>Qwen3.6 35B</td><td class="num">37 GB</td>
+      <td class="cell"><span class="ok">✓</span> 54.8</td><td class="cell"><span class="ok">✓</span> 57.7</td><td class="cell"><span class="ok">✓</span> 48.9</td>
+      <td><span class="pill pass">3/3</span></td></tr>
+    <tr><td><b>Qwen3-Coder 30B</b></td><td class="num">34 GB</td>
+      <td class="cell"><span class="ok">✓</span> 39.9</td><td class="cell"><span class="ok">✓</span> <b>74.5</b></td><td class="cell"><span class="ok">✓</span> 38.2</td>
+      <td><span class="pill pass">3/3 · best coder</span></td></tr>
+    <tr><td>Nemotron-3-Nano 30B</td><td class="num">38 GB</td>
+      <td class="cell"><span class="ok">✓</span> 39.5</td><td class="cell"><span class="ok">✓</span> 45.3</td><td class="cell"><span class="bad">✗</span> 41.3</td>
+      <td><span class="pill part">2/3</span></td></tr>
+    <tr><td>gemma-4 26B (MoE)</td><td class="num">26 GB</td>
+      <td class="cell"><span class="ok">✓</span> 35.7</td><td class="cell"><span class="ok">✓</span> 38.0</td><td class="cell"><span class="ok">✓</span> 35.5</td>
+      <td><span class="pill pass">3/3 · smallest passer</span></td></tr>
+    <tr><td>GLM-4.7-Flash <span style="color:var(--muted)">(incumbent)</span></td><td class="num">33 GB</td>
+      <td class="cell"><span class="ok">✓</span> 34.7</td><td class="cell"><span class="ok">✓</span> 33.8</td><td class="cell"><span class="ok">✓</span> 33.4</td>
+      <td><span class="pill pass">3/3</span></td></tr>
+    <tr><td>Qwen3-Coder-Next</td><td class="num">87 GB</td>
+      <td class="cell"><span class="ok">✓</span> 28.3</td><td class="cell"><span class="ok">✓</span> 41.9</td><td class="cell"><span class="ok">✓</span> 23.7</td>
+      <td><span class="pill pass">3/3</span></td></tr>
+    <tr><td>gpt-oss-120b</td><td class="num">61 GB</td>
+      <td class="cell"><span class="ok">✓</span> 27.3</td><td class="cell"><span class="ok">✓</span> 32.0</td><td class="cell"><span class="ok">✓</span> 31.2</td>
+      <td><span class="pill pass">3/3 · biggest clean passer</span></td></tr>
+    <tr><td>Qwen3.8-Flash-Next 125B</td><td class="num">104 GB</td>
+      <td class="cell"><span class="ok">✓</span> 15.7</td><td class="cell"><span class="ok">✓</span> 17.9</td><td class="cell"><span class="ok">✓</span> 14.1</td>
+      <td><span class="pill pass">3/3 · slow but deep</span></td></tr>
+    <tr><td>Qwen3-235B</td><td class="num">98 GB</td>
+      <td class="cell"><span class="ok">✓</span> 15.1</td><td class="cell"><span class="ok">✓</span> 15.2</td><td class="cell"><span class="bad">✗</span> 13.3</td>
+      <td><span class="pill part">2/3</span></td></tr>
+    <tr><td>MiniMax-M2.5</td><td class="num">95 GB</td>
+      <td class="cell"><span class="ok">✓</span> 21.2</td><td class="cell"><span class="bad">✗</span> —</td><td class="cell"><span class="bad">✗</span> 21.6</td>
+      <td><span class="pill fail">1/3 · removed</span></td></tr>
+  </table></div>
+  <ul class="legend" style="padding-left:1.2rem">
+    <li>Nemotron-3-Nano's fail is a near-miss: correct 5-bullet summary, but it omitted the literal "TL;DR" label the check requires. The check is strict on purpose — format compliance is the point of that task.</li>
+    <li>Qwen3-235B wrote 4 bullets instead of 5 in its clean run. Its coding pass is real (7 working doctest examples).</li>
+    <li>MiniMax-M2.5's coding fail was not a near-miss: it rambled incoherently to the output cap. The copy we had was a heavily-compressed variant; it's been deleted rather than judged as the model family.</li>
+  </ul>
+</section>
+
+<section>
+  <h2>Which model for which job</h2>
+  <div class="joblist">
+    <div class="job"><span class="role">Fast general workhorse</span><b>Nemotron-3.5-Lightning</b><span>fastest clean sweep (~56 tok/s everywhere), no special configuration needed</span></div>
+    <div class="job"><span class="role">Code generation</span><b>Qwen3-Coder 30B</b><span>74.5 tok/s writing code — the single best per-task figure we've ever measured — and it passes the other tasks too</span></div>
+    <div class="job"><span class="role">Long documents &amp; hard reasoning</span><b>Qwen3.8-Flash-Next</b><span>the only roster model with a 262K-token context window and an adjustable "thinking depth" dial; ~16 tok/s means you use it for depth, not chat</span></div>
+    <div class="job"><span class="role">When memory is tight</span><b>gemma-4 26B</b><span>the smallest model that passes everything — leaves the most room for other workloads</span></div>
+    <div class="job"><span class="role">Big-model reference</span><b>gpt-oss-120b</b><span>the largest thing that passes everything at usable speed (27–32 tok/s)</span></div>
+  </div>
+  <div class="note"><b>What this can't tell you yet:</b> these are text tasks. The ability that decides which model can
+  drive tools — browsers, screenshots, app control, transcription — is a separate test track we've designed but not yet run.
+  Treat this table as "quality of written output," not "quality as an agent."</div>
+</section>
+
+<section>
+  <h2>Why some earlier numbers changed</h2>
+  <p>While benchmarking we found three defects in the <em>serving stack</em> (not the models) that had been quietly
+  distorting results. Each is now fixed or worked around, and affected runs were re-measured — that's why some
+  models "got better" today:</p>
+  <div class="issue">
+    <h3>1 · A memory setting was corrupting model output</h3>
+    <p>The serving software enables a special unified-memory mode on this hardware; combined with the current runtime
+    it garbles what models compute — from subtle formatting loss all the way to endless gibberish. Proven by asking a
+    model to continue "one, two, three," and getting <code>////////</code> back. Disabling the mode fixed every symptom,
+    and it's now off permanently on both machines. This alone had made two good models look broken.</p>
+  </div>
+  <div class="issue">
+    <h3>2 · The server was leaking one request's context into the next</h3>
+    <p>Models sometimes "remembered" things from a <em>previous, unrelated request</em> — e.g. claiming they'd already
+    written the code, or answering the prior question. Verified by reordering tests and by giving each test a freshly
+    started server: on fresh servers, every affected model passed. All grading now uses a fresh server per task.</p>
+  </div>
+  <div class="issue">
+    <h3>3 · The server was silently giving models tools mid-benchmark</h3>
+    <p>The serving software attaches web-search and code-execution tools to every request by default (~1,200 hidden
+    tokens per request), and one model actually tried to <em>run</em> its answer instead of writing it. Benchmarks now
+    explicitly disable server tools; pass/fail grades were unaffected, but speed comparisons before/after this fix
+    aren't apples-to-apples.</p>
+  </div>
+</section>
+
+<section>
+  <h2>Compression levels: is a smaller download as good?</h2>
+  <p>Models ship at different <b>quantization</b> (compression) levels — smaller files, slightly lower fidelity.
+  We ran Qwen3.8-Flash-Next at three levels to see what compression actually costs:</p>
+  <div class="tablewrap"><table>
+    <tr><th>Version</th><th>Disk size</th><th>All 3 tasks</th><th>Speed (tok/s)</th><th>Words written to finish</th><th>Real wait, whole battery</th></tr>
+    <tr><td>Q4 — standard</td><td class="num">104 GB</td><td><span class="pill pass">pass</span></td><td class="num">14–18</td><td class="num">lowest</td><td class="num"><b>113 s</b> ← fastest</td></tr>
+    <tr><td>IQ4 — lighter</td><td class="num">94 GB</td><td><span class="pill pass">pass</span></td><td class="num">15–20</td><td class="num">higher</td><td class="num">338 s</td></tr>
+    <tr><td>Q2 — heavy compression</td><td class="num">79 GB</td><td><span class="pill pass">pass</span></td><td class="num">20–25</td><td class="num">3× the standard</td><td class="num">272 s</td></tr>
+  </table></div>
+  <p>The counterintuitive result: heavier compression generates tokens <em>faster</em> (less data to move per token on
+  this memory-limited hardware) but the model becomes <b>more long-winded</b> — it needs far more words to reach the same
+  answer, so you actually wait longer. Compression damage shows up as rambling before it shows up as wrong answers.
+  <b>Conclusion: keep the standard Q4 version for serving;</b> the 79 GB version is a validated fallback when disk/memory demands it.</p>
+</section>
+
+<section>
+  <h2>Trust notes</h2>
+  <ul>
+    <li><b>One prompt set, one seed.</b> This battery is a consistent yardstick, not a statistical survey — a single-cell
+    pass/fail flip (like the two near-misses above) is within its noise floor. Trends and big gaps are the signal.</li>
+    <li><b>"Cleanest run" means:</b> measured after all three serving fixes, with a fresh server per task and tools disabled
+    where available; otherwise the best-controlled earlier run, noted in the repo manifests.</li>
+    <li><b>Every row is reproducible:</b> the exact prompts, raw model outputs, and grading script are committed alongside
+    each run in <code>results/sweeps/</code>.</li>
+    <li>Numbers are from one machine (Framework Desktop, Strix Halo). The Windows machine (G1a) gets its own pass later —
+    OS is itself a test axis.</li>
+  </ul>
+</section>
+
+<section>
+  <h2>What's next</h2>
+  <ul>
+    <li><b>Tool-calling tests</b> (top priority): can each model correctly call functions, chain 15+ tool steps without
+    breaking, and refuse when no tool fits — graded mechanically like everything above.</li>
+    <li><b>New arrivals:</b> DeepSeek-V4-Flash (now fits after disk cleanup) and Muse-Glimmer-30B — our first modern
+    vision-capable model, for the screenshot/browser track.</li>
+    <li>A clean re-run of the speed table with server tools disabled everywhere, removing the last measurement caveat.</li>
+  </ul>
+</section>
+
+<footer>
+  Data: vtt-hw-benchmarks · results/sweeps/2026-08-2{6,7}-* (manifests + full transcripts committed) ·
+  branch feature/unsloth-direction, PR #5 on git.vvautosports.com<br>
+  Hardware: Framework Desktop — AMD Strix Halo, Radeon 8060S iGPU, 128 GB unified memory (~122 GB usable) ·
+  Runtime: unsloth studio 2026.8.22 / llama.cpp b10639-mix, unified-memory mode disabled<br>
+  Grading: deterministic checks (grade_sweep.py) — no LLM judges · Assembled 2026-08-27 night, revised for readability same night.
+</footer>
+</main>
