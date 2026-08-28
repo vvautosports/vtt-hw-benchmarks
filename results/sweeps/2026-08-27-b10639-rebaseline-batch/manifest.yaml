@@ -1,0 +1,116 @@
+# Roster re-baseline on b10639 + the unified-memory fix. Purpose: re-grade the
+# remaining b10472 leaders on the new production runtime config, retest
+# Qwen3-Coder-Next on a genuinely idle box (the queued confound-removal), and
+# retest MiniMax-M2.5, whose cap-out-on-everything failure matched the corruption
+# signature root-caused in 2026-08-27-b10639-umfix-batch.
+run_id: "2026-08-27-b10639-rebaseline-batch"
+date: "2026-08-27"
+node: "kalman9-framework-01"
+hardware: "AMD Strix Halo (Radeon 8060S iGPU), GTT unlock ACTIVE (gttsize=131072), ~122 GB usable"
+box_state: "idle at launch (load 0.16, no concurrent downloads) — Coder-Next confound removed"
+backend: "unsloth-studio"
+runtime_build: "b10639-mix-f6f92fe"
+runtime_build_reported: "0.3.0-dev (build 10639, commit 2a36554fc)"
+studio_version: "unsloth 2026.8.22"
+api: "/v1/chat/completions"
+request_constants:
+  seed: 42
+  max_tokens: 8192
+  profile: thinking
+  reasoning_effort: low
+launch_env:
+  UNSLOTH_DISABLE_UNIFIED_MEMORY: "1"   # all entries (also now permanent on the node via ~/.bashrc.d)
+
+axis: cfg
+records: "results.jsonl"
+outputs: "outputs/<cfg>/<task>--thinking--low.txt"
+grading: "py scripts/utils/grade_sweep.py results/sweeps/2026-08-27-b10639-rebaseline-batch results --layout cfg"
+
+entries:
+  - cfg: "Ornith-1.5-35B-A3B__umfix"
+    role: "co-leader from the b10472 batch, re-baselined"
+    quant: "Q8_0 (non-UD)"
+    tps: "54.13 / 52.72 / 56.60"
+    quality: "3/3 PASS"
+    verdict: "holds its title on the new runtime — dead heat with Qwen3.6 speeds, clean grades"
+
+  - cfg: "Qwen3-Coder-30B-A3B-Instruct__umfix"
+    role: "code specialist, re-baselined"
+    quant: "UD-Q8_K_XL"
+    tps: "39.94 / 74.50 / 38.21"
+    quality: "3/3 PASS"
+    verdict: "BEST FULL RESULT YET for this model — code speed king confirmed (74.5 t/s), and summarize now passes (was 2/3 on b10472 with an 18.9 t/s summarize)"
+
+  - cfg: "gemma-4-26B-A4B-it__umfix"
+    role: "roster-validation leader, re-baselined"
+    quant: "UD-Q8_K_XL"
+    tps: "35.68 / 38.00 / 35.47"
+    quality: "3/3 PASS"
+    verdict: "stable across runtimes, ~36 t/s, clean"
+
+  - cfg: "Nemotron-3-Nano-30B-A3B__umfix"
+    role: "prior-gen control — retirement evidence now that 3.5 works on default flags"
+    quant: "UD-Q8_K_XL"
+    tps: "39.49 / 45.32 / 41.26"
+    quality: "2/3 — summarize near-miss"
+    verdict: "niche eroding"
+    note: >-
+      Summarize failure is a formatting near-miss: five clean bullets plus a final summary
+      sentence WITHOUT the literal 'TL;DR' label (grader is strict by design; verified by
+      reading the transcript). Substantively fine. But Nano's stated niche was 'safe on
+      default flags while 3.5 needs specoff' — and on the fixed runtime Nemotron-3.5 runs
+      default flags 3/3 at ~56 t/s, strictly faster and cleaner. Retention call is Kal's
+      (retention policy: evidence-gated, designated successor exists and now dominates).
+
+  - cfg: "Qwen3-Coder-Next__umfix-idle"
+    role: "generational-inversion retest on an idle box"
+    quant: "UD-Q8_K_XL (3 shards)"
+    tps: "27.89 / 42.23 / 25.70"
+    quality: "2/3 — code FAILS (0 doctests)"
+    verdict: "REHABILITATED from 0/2 to 2/3; remaining failure is the b10639 Qwen phantom-turn defect"
+    note: >-
+      The b10472-batch 'inversion' (145-token non-answer, HTTP 500, 8238-token summary) is
+      gone: reasoning passes, summarize passes tightly (325 tok), no errors. The code failure
+      is the exact phantom-prior-turn shape seen on Qwen3.6-MTP: 'I've implemented the
+      function... includes a doctest block with 7 examples' — with no function definition or
+      doctest anywhere in either channel. Two Qwen3-family models now show this identical
+      defect on b10639 while Qwen3.8-Flash-Next (qwen4exp template) does not.
+
+  - cfg: "MiniMax-M2.5__umfix"
+    role: "corruption-signature retest (capped all 3 tasks on b10472-batch)"
+    quant: "UD-Q3_K_XL (4 shards)"
+    tps: "21.23 / 25.06 / 21.64"
+    quality: "2/3 — summarize FAILS"
+    verdict: "REHABILITATED from 0/3 — terminates on everything; 'unusable copy' verdict was wrong, it was the corruption"
+    note: >-
+      All three tasks finish_reason=stop at 21-25 t/s (was: all capped at 8192). Reasoning
+      and code (8 doctests) pass — first passes ever for this model. The summarize failure
+      is remarkable, see caveat below: it answered about parse_ranges, the PREVIOUS
+      request's topic.
+
+summary: >-
+  The b10472-era roster verdicts survive re-baselining: Ornith and Coder-30B keep their
+  crowns (Coder-30B turns in its best-ever full result), gemma-4-26B stable. Two models
+  written off as broken are rehabilitated — Coder-Next (2/3, idle box) and MiniMax-M2.5
+  (2/3, terminates everywhere) — both prior verdicts were corruption/confound artifacts.
+  Residual b10639 failures now cluster into ONE suspicious shape: models responding as if
+  earlier turns existed (Qwen3.6 code, Coder-Next code, MiniMax summarize-answers-the-
+  code-question). See cross_request_bleed caveat.
+
+caveats:
+  cross_request_bleed_hypothesis: >-
+    MiniMax's summarize answer opens 'I don't see any mention of a parse_ranges function
+    in the source material' — parse_ranges is the CODE task, which ran as the immediately
+    preceding request on the same server. The model was simultaneously aware of the
+    summarize source AND a question it was never asked in this request. Combined with the
+    phantom-prior-turn code failures (models claiming to have 'already' written code, on
+    two Qwen3-family models), a unified hypothesis: b10639-mix leaks state across requests
+    (slot reuse / --kv-unified / --slot-save-path interaction), and models rationalize the
+    leaked context as prior conversation turns. DISCRIMINATING TEST for a next session:
+    reorder the battery (summarize first / code last) or restart the server between tasks —
+    if failures follow request ORDER rather than task, it is runtime state leakage, which
+    would also retroactively explain the b10639 version-sweep instruction-following
+    regressions and should gate any production use of parallel slots on this build.
+  nano_near_miss: "Nemotron-3-Nano summarize failure is a missing 'TL;DR' label only — content is substantively correct."
+
+driver_script: "roster_batch.py (env-registry version) + batch_b10639_rebaseline.json (Framework ~)"

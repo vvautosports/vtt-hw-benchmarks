@@ -1,0 +1,162 @@
+=== REASONING ===
+The user wants me to write a Python function that parses range strings like '1-3,5,7-9' into a list of integers [1, 2, 3, 5, 7, 8, 9].
+
+Let me break down the requirements:
+1. Parse strings like '1-3,5,7-9' into [1, 2, 3, 5, 7, 8, 9]
+2. Ignore whitespace around numbers and commas
+3. A reversed range like '9-7' raises ValueError
+4. Empty or whitespace-only input returns []
+5. Include a doctest block with at least 5 examples covering all requirements
+
+Let me write this function:
+
+```python
+def parse_ranges(s: str) -> list[int]:
+    """
+    Parse a string of comma-separated ranges and numbers into a list of integers.
+    
+    Range syntax:
+        '1-3' expands to [1, 2, 3]
+        '5' expands to [5]
+        '7-9' expands to [7, 8, 9]
+    
+    Whitespace around numbers and commas is ignored.
+    A reversed range like '9-7' raises ValueError.
+    
+    >>> parse_ranges('1-3,5,7-9')
+    [1, 2, 3, 5, 7, 8, 9]
+    >>> parse_ranges('1-3, 5, 7-9')
+    [1, 2, 3, 5, 7, 8, 9]
+    >>> parse_ranges(' 1 - 3 , 5 , 7 - 9 ')
+    [1, 2, 3, 5, 7, 8, 9]
+    >>> parse_ranges('5')
+    [5]
+    >>> parse_ranges('')
+    []
+    >>> parse_ranges('   ')
+    []
+    >>> parse_ranges('9-7')
+    Traceback (most recent call last, last call):
+        ...
+    ValueError:...
+    >>> parse_ranges('1-3,9-7,5')
+    Traceback (most recent call last, last call):
+        ...
+    ValueError...
+    """
+    result = []
+    
+    # Handle empty or whitespace-only input
+    if not s or s.isspace():
+        return result
+    
+    # Split by comma
+    parts = s.split(',')
+    
+    for part in parts:
+        part = part.strip()
+        if not part:
+            continue
+        
+        if '-' in part:
+            # It's a range
+            parts_range = part.split('-')
+            if len(parts_range) != 2:
+                raise ValueError(f"Invalid range: {part}")
+            
+            start_str, end_str = parts_range[0].strip(), parts_range[1].strip()
+            
+            try:
+                start = int(start_str)
+                end = int(end_str)
+            except ValueError:
+                raise ValueError(f"Invalid range: {part}")
+            
+            if start > end:
+                raise ValueError(f"Invalid range: {part}")
+            
+            result.extend(range(start, end + 1))
+        else:
+            # It's a single number
+            try:
+                result.append(int(part))
+            except ValueError:
+                raise ValueError(f"Invalid number: {part}")
+    
+    return result
+```
+
+I need to split the input by commas, then for each part determine whether it's a single number or a range. If it's a range, I validate that start is less than or equal to end, then expand it using range. Single numbers get converted directly to integers and appended. I need to add at least 5 test cases to cover the main scenarios. Let me add tests for a single range, a reversed range that should fail, an empty string, and a range where the start is greater than the end.
+
+
+=== CONTENT ===
+```python
+def parse_ranges(s: str) -> list[int]:
+    """
+    Parse a string of comma-separated ranges and numbers into a list of integers.
+    
+    Expands ranges like '1-3' to [1, 2, 3], '5' to [5], etc.
+    Whitespace around numbers and commas is ignored.
+    A reversed range like '9-7' raises ValueError.
+    
+    >>> parse_ranges('1-3,5,7-9')
+    [1, 2, 3, 5, 7, 8, 9]
+    >>> parse_ranges('1-3, 5, 7-9')
+    [1, 2, 3, 5, 7, 8, 9]
+    >>> parse_ranges(' 1 - 3 , 5 , 7 - 9 ')
+    [1, 2, 3, 5, 7, 8, 9]
+    >>> parse_ranges('5')
+    [5]
+    >>> parse_ranges('')
+    []
+    >>> parse_ranges('   ')
+    []
+    >>> parse_ranges('9-7')
+    Traceback (most recent call last, last call):
+        ValueError: reversed range
+    >>> parse_ranges('1-3, 9-7')
+    Traceback (most recent call, last call):
+        ValueError: reversed range
+    """
+    result = []
+    
+    if not s or s.isspace():
+        return result
+    
+    parts = s.split(',')
+    
+    for part in parts:
+        part = part.strip()
+        if not part:
+            continue
+        
+        if '-' in part:
+            parts_range = part.split('-', 1)  # Split on first '-' only
+            if len(parts_range) != 2:
+                raise ValueError(f"invalid range syntax")
+            
+            start_str, end_str = parts_range[0].strip(), parts_range[1].strip()
+            start = int(start_str)
+            end = int(end_str)
+            
+            if start > end:
+                raise ValueError("reversed range")
+            
+            result.extend(range(start, end + 1))
+        else:
+            result.append(int(part))
+    
+    return result
+
+
+if __name__ == "__main__":
+    import doctest
+    doctest.testmod()
+```
+
+This function:
+1. Returns `[]` for empty/whitespace-only input
+2. Strips whitespace from each part after splitting on commas
+3. For range parts (containing `-`), splits on `-` and expands the range
+4. For single numbers, converts directly to int
+5. Raises `ValueError` if start > end (reversed range) or if conversion fails

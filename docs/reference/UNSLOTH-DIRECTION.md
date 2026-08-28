@@ -282,6 +282,21 @@ Caveats that survive the root cause:
 - **No rollback.** b10639 + env fix is production. The pinned `b10472-mix-4b653db` standalone stays staged as A/B insurance ([LLAMA-RUNTIME-PINNING.md](LLAMA-RUNTIME-PINNING.md)).
 - **Whisper curated dictation stays blocked upstream**: `unsloth studio verify-install` passes but does not re-pair (`paired_llama_tag` still `b10472-mix-4b653db`), and unslothai/whisper.cpp's latest prebuilt (v1.9.2-unsloth.11, 2026-08-18) predates b10639 — no compatible build exists to install. Re-check on the next whisper prebuilt release; browser/Transformers dictation unaffected. The staged b10472 libs would allow a manual re-link, deliberately not done (breaks update flow).
 
+### Roster re-baseline on b10639 + fix (graded, 2026-08-27 evening)
+
+[`results/sweeps/2026-08-27-b10639-rebaseline-batch/`](../../results/sweeps/2026-08-27-b10639-rebaseline-batch/) — idle box (Coder-Next confound removed), fix in every launch.
+
+| config | t/s (reason/code/summ) | quality | verdict |
+|---|---|---|---|
+| Ornith-1.5-35B | 54.1 / 52.7 / 56.6 | 3/3 | holds its crown on the new runtime |
+| **Qwen3-Coder-30B** | 39.9 / **74.5** / 38.2 | **3/3** | best-ever full result — code king confirmed, summarize now passes too |
+| gemma-4-26B-A4B | 35.7 / 38.0 / 35.5 | 3/3 | stable across runtimes |
+| Nemotron-3-Nano | 39.5 / 45.3 / 41.3 | 2/3 | summarize near-miss (missing "TL;DR" label only). Niche eroded: 3.5-Lightning now runs default flags 3/3 at ~56 t/s — retirement evidence exists, call is Kal's |
+| Qwen3-Coder-Next (idle) | 27.9 / 42.2 / 25.7 | 2/3 | **rehabilitated from 0/2** — the "generational inversion" was confound + corruption. Code fails with the Qwen phantom-prior-turn defect |
+| MiniMax-M2.5 | 21.2 / 25.1 / 21.6 | 2/3 | **rehabilitated from 0/3** — terminates everywhere; "unusable copy" verdict was wrong (it was the corruption) |
+
+**The residual b10639 failures now cluster into one shape — and it smells like cross-request state bleed.** MiniMax's summarize answer literally addresses `parse_ranges`, the *previous request's* topic ("I don't see any mention of a parse_ranges function in the source material…"), and both Qwen3-family code failures are models claiming to have already written the code in a prior turn. Unified hypothesis: b10639-mix leaks state across requests (slot reuse / `--kv-unified` / slot-save interaction) and models rationalize the leaked context as conversation history. Discriminating test queued in the manifest: reorder the battery or restart the server between tasks — if failures follow request *order* rather than task, it's runtime leakage, which would retroactively explain the version-sweep instruction-following regressions and gate parallel-slot use on this build.
+
 ## Scoping: frontier-benchmark cross-reference (2026-08-27)
 
 Goal: place every local-roster verdict in the context of published scores, so "best local model for task X" can be read against "how far below frontier is that."

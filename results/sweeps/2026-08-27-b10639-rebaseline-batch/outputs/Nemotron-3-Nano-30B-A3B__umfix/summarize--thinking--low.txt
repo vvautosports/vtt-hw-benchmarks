@@ -1,0 +1,86 @@
+=== REASONING ===
+We need to summarize the passage as exactly 5 bullet points then a TL;DR one sentence. Must be faithful, no extra claims.
+
+We must produce exactly 5 bullet points. Then a one-sentence TL;DR after them.
+
+Bullet points should capture key ideas: speculative decoding uses cheap draft to propose tokens, verification in batch, acceptance yields high-quality tokens at low cost, rejection truncates and continues; different draft types; economics vary with workload; MoE models complicate due to routing; server-side parallelism interacts.
+
+Make sure exactly 5 bullet points, each likely starting with a dash or a bullet symbol. Probably use hyphen or asterisk. Must be exactly 5 bullet points, then TL;DR sentence.
+
+No extra text. So output will be something like:
+
+- Speculative decoding uses a cheap draft model or method to propose multiple tokens, which the target model verifies in a single batched forward pass, producing high-quality tokens at near-draft cost.
+- When a proposal is rejected, generation stops at the last accepted token and resumes from there, preserving the same distribution as standard autoregressive decoding.
+- The effectiveness varies by workload: n‑gram drafts excel on repetitive code, while language prose may see lower acceptance and possible slowdown if the draft is poorly matched; multi‑token‑prediction heads sit in between.
+- Mixture‑of‑experts models route tokens to a subset of experts, reducing per‑token compute, but speculative verification can pull many expert weights simultaneously, increasing memory bandwidth use and raising the break‑even acceptance threshold.
+- Server‑side parallelism (e.g., slot‑based KV‑cache sharing) couples with speculation, requiring joint tuning of speculation, slot count, and sampling to maximize tokens‑per‑second rather than relying on microbenchmarks.
+
+TL;DR: Speculative decoding can speed up large language model inference dramatically, but its gains depend on the draft method, workload characteristics, and system configuration.
+
+Make sure exactly 5 bullet points and one TL;DR sentence after them. No extra bullet. Should be exactly 5 bullet points, not more, not less. Must be bullet points. Usually bullet points preceded by hyphen or asterisk. Use hyphen.
+
+Let's count bullet points:
+
+1. Speculative decoding uses a cheap draft model or method...
+2. When a proposal is rejected...
+3. The effectiveness varies by workload...
+4. Mixture‑of‑experts models route tokens...
+5. Server‑side parallelism (e.g., slot‑based KV‑cache sharing)...
+
+That's 5 bullet points. Then TL;DR sentence.
+
+Make sure no extra punctuation that could be considered bullet. Also no extra lines after TL;DR? It says "followed by a one-sentence TL;DR." So after the bullet points, a one-sentence TL;DR. Could be on same line or separate line, but must be one sentence.
+
+Thus output:
+
+- ... 
+- ...
+- ...
+- ...
+- ...
+
+TL;DR: ...
+
+Make sure TL;DR is one sentence, ending with period.
+
+Check for any extra bullet or extra sentences. Ensure bullet points are exactly 5. Use hyphen and a space.
+
+Let's craft bullet points succinctly but faithful.
+
+Bullet 1: Speculative decoding lets a cheap draft mechanism propose several tokens, which the target model verifies in a single batched forward pass, delivering high‑quality tokens at near‑draft computational cost.
+
+Bullet 2: If a proposal is rejected, generation stops at the last accepted token and resumes from there, preserving the same output distribution as standard autoregressive decoding.
+
+Bullet 3: The economic benefit varies by workload: n‑gram drafts work well for repetitive code with high acceptance, while open‑ended prose often sees lower acceptance and can even slow down if the draft is poorly matched; multi‑token‑prediction heads fall in between.
+
+Bullet 4: In mixture‑of‑experts models, tokens are routed to a subset of experts, reducing per‑token parameter count, but speculative verification may pull many expert weights together, increasing memory bandwidth use and raising the required acceptance rate.
+
+Bullet 5: Server‑side parallelism such as slot‑based KV‑cache sharing couples with speculation, so tuning must jointly consider speculation, slot count, and sampling to maximize overall tokens‑per‑second rather than relying on isolated microbenchmarks.
+
+Now TL;DR sentence: "Speculative decoding can dramatically speed up inference of large models, but its speedups depend heavily on the draft method, workload, and system configuration."
+
+Make sure it's one sentence, ends with period.
+
+Thus final output:
+
+- Speculative decoding lets a cheap draft mechanism propose several tokens, which the target model verifies in a single batched forward pass, delivering high‑quality tokens at near‑draft computational cost.
+- If a proposal is rejected, generation stops at the last accepted token and resumes from there, preserving the same output distribution as standard autoregressive decoding.
+- The economic benefit varies by workload: n‑gram drafts excel on repetitive code with high acceptance, while prose often sees lower acceptance and can even slow down if the draft is poorly matched; multi‑token‑prediction heads sit in between.
+- In mixture‑of‑experts models, tokens are routed to a subset of experts, reducing per‑token parameter count, but speculative verification can pull many expert weights simultaneously, increasing memory bandwidth use and raising the required acceptance rate.
+- Server‑side parallelism such as slot‑based KV‑cache sharing couples with speculation, so tuning must jointly adjust speculation, slot count, and sampling to maximize overall tokens‑per‑second rather than relying on isolated microbenchmarks.
+Speculative decoding can dramatically speed up inference of large models, but its speedups depend heavily on the draft method, workload, and system configuration.
+
+Check bullet count: 5 bullets. Yes.
+
+Make sure no extra bullet or extra punctuation that could be interpreted as bullet. The hyphens at start of each bullet are fine. The TL;DR line does not start with a bullet; it's just a sentence.
+
+Now produce final answer.
+
+
+=== CONTENT ===
+- Speculative decoding lets a cheap draft mechanism propose several tokens, which the target model verifies in a single batched forward pass, delivering high‑quality tokens at near‑draft computational cost.  
+- If a proposal is rejected, generation stops at the last accepted token and resumes from there, preserving the same output distribution as standard autoregressive decoding.  
+- The economic benefit varies by workload: n‑gram drafts excel on repetitive code with high acceptance, while prose often sees lower acceptance and can even slow down if the draft is poorly matched; multi‑token‑prediction heads sit in between.  
+- In mixture‑of‑experts models, tokens are routed to a subset of experts, reducing per‑token parameter count, but speculative verification can pull many expert weights simultaneously, increasing memory bandwidth use and raising the required acceptance rate.  
+- Server‑side parallelism such as slot‑based KV‑cache sharing couples with speculation, so tuning must jointly adjust speculation, slot count, and sampling to maximize overall tokens‑per‑second rather than relying on isolated microbenchmarks.  
+Speculative decoding can dramatically speed up inference of large models, but its speedups depend heavily on the draft method, workload, and system configuration.

@@ -1,0 +1,56 @@
+=== CONTENT ===
+I need to find how many times all three trucks arrive at the warehouse at the same time between 6:00 AM and 6:00 PM.
+
+First, let me understand the problem:
+- All trucks arrive together at 6:00 AM
+- Truck A returns every 12 minutes
+- Truck B returns every 18 minutes  
+- Truck C returns every 30 minutes
+- I need to find how many times they all align again within the 12-hour period (6:00 AM to 6:00 PM)
+
+To find when all three trucks arrive simultaneously, I need to find the Least Common Multiple (LCM) of their return intervals (12, 18, and 30 minutes).
+
+Let me find the LCM of 12, 18, and 30:
+
+First, I'll find the prime factorizations:
+- 12 = 2² × 3
+- 18 = 2 × 3²
+- 30 = 2 × 3 × 5
+
+The LCM is found by taking the highest power of each prime factor:
+LCM = 2² × 3² × 5 = 4 × 9 × 5 = 180 minutes
+
+So all three trucks will arrive together every 180 minutes (3 hours).
+
+Now I need to determine how many times this happens between 6:00 AM and 6:00 PM inclusive:
+
+The time period is 12 hours (from 6:00 AM to 6:00 PM).
+12 hours = 12 × 60 = 720 minutes
+
+If they arrive together every 180 minutes starting at 6:00 AM:
+- First arrival: 6:00 AM
+- Second arrival: 6:00 AM + 180 minutes = 9:00 AM
+- Third arrival: 9:00 AM + 180 minutes = 12:00 PM
+- Fourth arrival: 12:00 PM + 180 minutes = 3:00 PM
+- Fifth arrival: 3:00 PM + 180 minutes = 6:00 PM
+
+Let me verify this by using a calculation:
+Number of intervals = 720 ÷ 180 = 4 intervals
+But this gives us 4 intervals, meaning 5 total arrivals (including the initial one at 6:00 AM).
+
+Wait, let me reconsider this more carefully.
+
+If they all arrive together at time 0 (6:00 AM), and then every 180 minutes after that:
+- Time 0: All trucks arrive (6:00 AM)
+- Time 180: All trucks arrive (9:00 AM)  
+- Time 360: All trucks arrive (12:00 PM)
+- Time 540: All trucks arrive (3:00 PM)
+- Time 720: All trucks arrive (6:00 PM)
+
+So in 720 minutes, they arrive together 5 times.
+
+Alternatively, I can compute: (End time - Start time) ÷ Interval + 1 = (720 - 0) ÷ 180 + 1 = 4 + 1 = 5
+
+Therefore, all three trucks arrive at the same moment 5 times between 6:00 AM and 6:00 PM inclusive.
+
+ANSWER: 5
