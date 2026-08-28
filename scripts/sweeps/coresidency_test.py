@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Can one Strix Halo box host an orchestrator AND a sub-agent at the same time?
 
-Usage: python3 coresidency_test.py <rundir> [--ctx 32768]
+Usage: python3 coresidency_test.py <rundir> [pair.json] [--ctx 32768]
 
 The dual-agent architecture assumes two specialised models (a thinker orchestrating, a
 coder doing high-volume tool work). The open question is whether that needs two nodes.
@@ -143,9 +143,15 @@ def main():
         else:
             args.append(argv[i])
         i += 1
-    if len(args) != 1:
+    if len(args) not in (1, 2):
         raise SystemExit(__doc__.strip())
     rundir = args[0]
+    # Optional pair spec: [{"name","role","port","path"}, ...]. Lets the same driver test a
+    # heavier orchestrator (gpt-oss-120b, 61 GiB) without duplicating the harness.
+    if len(args) == 2:
+        global MODELS
+        MODELS = json.load(open(args[1], encoding="utf-8"))
+        log(f"pair from {args[1]}: {[m['name'] for m in MODELS]}")
     os.makedirs(rundir, exist_ok=True)
     results = {"ctx": ctx, "phases": {}}
 

@@ -8,11 +8,11 @@ hardware: "AMD Strix Halo (Radeon 8060S iGPU), 128 GB UMA, GTT unlock ACTIVE, ~1
 runtime_build: "b10639-mix-f6f92fe (llama-server driven DIRECTLY, not via unsloth studio)"
 api: "/v1/chat/completions on two ports (8801, 8802)"
 driver_script: "scripts/sweeps/coresidency_test.py"
-records: "coresidency.json"
+records: "coresidency.json (light pair) + coresidency-heavy.json (heavy pair)"
 
 # Studio binds one model per instance, so this drives llama-server directly. That also
 # makes it the first harness code in the repo that talks to a plain llama-server -- the
-# same shim MI50 testing needs, since gfx906 has no supported ROCm path.
+# same shim MI50 testing needs, since gfx906 is unoptimised under ROCm (see AI-SERVER-GFX906-PLAN.md).
 # GGML_CUDA_ENABLE_UNIFIED_MEMORY is simply never set, which sidesteps gotcha (a) entirely
 # rather than opting out of it.
 request_constants:
@@ -78,6 +78,35 @@ summary: >-
   both at once is not a compromise against time-slicing them — it is strictly better on
   total tokens/second, and only worse on any single stream's latency.
 
+heavy_pair:
+  question: "Does a 61 GiB orchestrator work co-resident, and is it worth it?"
+  config: "gpt-oss-120b (61 GiB) + Qwen3-Coder-30B (34 GiB), ctx 16384 each"
+  memory_gib: 100.0
+  loaded: true
+  results:
+    - model: "gpt-oss-120b"
+      solo_tps: 34.44
+      coresident_tps: 34.59
+      concurrent_tps: 27.39
+      contention: "-20.8%"
+    - model: "Qwen3-Coder-30B-A3B-Instruct"
+      solo_tps: 43.0
+      coresident_tps: 42.74
+      concurrent_tps: 23.76
+      contention: "-44.4%"
+  aggregate_concurrent_tps: 51.15
+  verdict: >-
+    WORKS but is NOT worth it. 95 GiB of weights co-resident stay healthy at 100 GiB total,
+    and co-residency is free again (34.59 vs 34.44). But gpt-oss-120b solo is 34.44 against
+    GLM-4.7-Flash's 33.92 -- essentially identical orchestrator speed. So the heavy pair
+    costs 26 GiB more memory and drops aggregate concurrent throughput from 59.8 to 51.2
+    t/s for no speed gain, and contention roughly doubles on both models.
+  conclusion: >-
+    GLM-4.7-Flash + Qwen3-Coder-30B is the dual-agent config. Against gpt-oss-120b, GLM wins
+    on memory (74.3 vs 100 GiB), aggregate throughput (59.8 vs 51.2), chain context growth
+    (10.5k vs 12.5k), contention (-10% vs -20.8%) AND long-chain reliability (60/60 vs the
+    depth-31 fabrication in 2026-08-28-deepchain-19513). It loses only on nothing measured.
+
 verdicts:
   dual_model_on_one_box: >-
     CONFIRMED. The orchestrator/sub-agent split does NOT require two nodes, Thunderbolt, or
@@ -106,9 +135,8 @@ caveats:
     how far context can be pushed with two models resident; the KV budget is the binding
     constraint and is unmeasured.
   two_models_only: >-
-    GLM + Qwen3-Coder-30B were chosen as the leanest plausible pair (67 GiB of weights).
-    A gpt-oss-120b (61 GiB) + Qwen3-Coder-30B (34 GiB) pair would be 95 GiB and is untested
-    -- that is the configuration to try next if the orchestrator needs more capacity.
+    RESOLVED -- the heavy pair was tested (see heavy_pair below). Other combinations remain
+    untested; a third co-resident model would fit in the light pair's ~48 GiB headroom.
   no_quality_check: >-
     This measured throughput and health only. Battery outputs were not graded, so it does
     NOT establish that answers stay correct under contention. Grading a co-resident run is
