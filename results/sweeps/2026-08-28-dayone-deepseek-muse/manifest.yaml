@@ -19,6 +19,7 @@ launch_env:
 
 axis: cfg
 records: "results.jsonl"
+vision_smoke: "vision-smoke.json (image: bars.png, driver: scripts/testing/muse_vision_smoke.py)"
 outputs: "outputs/<cfg>/<task>--thinking--low.txt"
 grading: "py scripts/utils/grade_sweep.py results/sweeps/2026-08-28-dayone-deepseek-muse results --layout cfg"
 driver_script: "scripts/sweeps/isolated_battery.py"
@@ -57,25 +58,31 @@ summary: >-
   served. For scale, it is roughly 3x the size of GLM-4.7-Flash and runs at ~40% of its
   speed — a reasonable trade for the capability class.
 
-  Muse-Glimmer passes on text but that is not what it is for. Its vision path is untested
-  and remains the open item.
+  Muse-Glimmer passes on text, and its vision path was confirmed working the same day: the
+  BF16 mmproj loaded in 15.0s and the model read a generated 3-bar image correctly on both
+  deterministic checks (count and left-to-right colour order). That is a capability
+  confirmation on an easy image, not a vision quality benchmark.
 
 verdicts:
   deepseek_viable: >-
     YES at pinned 16384 context. Viable as a batch/quality tier, not an interactive one at
     14 t/s. Context headroom is the open question, not capability.
   muse_vision: >-
-    UNTESTED. Text-only result. Needs an image-input smoke against the mmproj before Muse
-    can be called a working replacement for gemma-3-27b's vision niche.
+    PASS, tested same day (2/2). scripts/testing/muse_vision_smoke.py loaded the BF16 mmproj
+    in 15.0s and Muse read a generated 3-bar image correctly: count "3" and left-to-right
+    order "red, green, blue", both deterministic checks, ~19s per image query at 192-196
+    prompt tokens. Muse is a working replacement for gemma-3-27b's vision niche.
 
 caveats:
   deepseek_context_pinned: >-
     --max-seq-length 16384 was set for load safety, so nothing here says what context
     DeepSeek can actually hold on this hardware. Finding the real ceiling is a separate
     experiment and the KV budget is tight (~25 GiB after weights).
-  muse_vision_untested: >-
-    mmproj-Muse-Glimmer-30B-BF16.gguf is on disk but was never loaded. The 3/3 pass covers
-    the text battery only and must not be quoted as vision validation.
+  muse_vision_scope: >-
+    The vision smoke (vision-smoke.json, bars.png) is a CAPABILITY check, not a quality
+    benchmark: solid colour bars on white are about the easiest possible visual input.
+    It proves the mmproj loads and the image path works end-to-end; it says nothing about
+    OCR, fine detail, charts or real photographs. Those need a harder image set.
   no_prior_baseline: >-
     Both models are new, so there is no before/after comparison — these are first
     measurements, not re-baselines. They ARE directly comparable to the same-day

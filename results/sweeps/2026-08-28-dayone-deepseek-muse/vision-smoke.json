@@ -1,0 +1,31 @@
+{
+  "image": {
+    "width": 480,
+    "height": 200,
+    "bars": [
+      "red",
+      "green",
+      "blue"
+    ]
+  },
+  "checks": [
+    {
+      "content": "3",
+      "wall_s": 19.0,
+      "prompt_tokens": 192,
+      "completion_tokens": 133,
+      "case": "count",
+      "correct": true
+    },
+    {
+      "content": "red, green, blue",
+      "wall_s": 18.4,
+      "prompt_tokens": 196,
+      "completion_tokens": 130,
+      "case": "order",
+      "correct": true
+    }
+  ],
+  "loaded": true,
+  "load_seconds": 15.0
+}
