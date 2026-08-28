@@ -1,0 +1,59 @@
+=== REASONING ===
+We are given: Three delivery trucks all arrive at a warehouse together at 6:00 AM. Truck A returns every 12 minutes, truck B every 18 minutes, truck C every 30 minutes. Between 6:00 AM and 6:00 PM inclusive, how many times do all three trucks arrive at the same moment? Show your reasoning, then state the final count on its own line as 'ANSWER: <n>'.
+
+We need to count the number of times between 6:00 AM and 6:00 PM inclusive that all three trucks arrive simultaneously. They all start at 6:00 AM, which is time 0. Then subsequent simultaneous arrivals occur at times that are multiples of the least common multiple (LCM) of their intervals. So we need the LCM of 12, 18, 30.
+
+Compute prime factorizations:
+12 = 2^2 * 3
+18 = 2 * 3^2
+30 = 2 * 3 * 5
+
+LCM takes highest powers: 2^2, 3^2, 5 => 4 * 9 * 5 = 180 minutes.
+
+Thus simultaneous arrivals occur every 180 minutes. Starting at 0 minutes (6:00 AM). Next at 180 minutes (3 hours later) => 9:00 AM. Next at 360 minutes => 12:00 PM (noon). Next at 540 minutes => 3:00 PM. Next at 720 minutes => 6:00 PM (since 720 minutes = 12 hours). Check: 6:00 AM to 6:00 PM is 12 hours = 720 minutes inclusive of both endpoints? The question: "Between 6:00 AM and 6:00 PM inclusive" means times from 6:00 AM up to and including 6:00 PM. So we include both start and end times. The simultaneous arrivals at 6:00 AM and at 6:00 PM are both included. So the times are multiples of 180 from 0 up to 720 inclusive. That gives 0, 180, 360, 540, 720. That's 5 times.
+
+But need to ensure that 6:00 PM is included: 6:00 PM is 12 hours after 6:00 AM = 720 minutes. Yes, it's included. So answer is 5.
+
+But wait: There might be a nuance: "Between 6:00 AM and 6:00 PM inclusive" typically includes both endpoints. So answer 5.
+
+Double-check: Sometimes problems ask "between" exclusive, but says inclusive, so it's clear.
+
+Thus answer is 5.
+
+But we should also consider if the trucks "return every 12 minutes" meaning they arrive at 6:00, then next at 6:12, etc. Yes.
+
+Thus final answer: 5.
+
+But let's confirm LCM: 12 and 18 lcm = 36; 36 and 30 lcm = 180? 36 and 30: gcd=6, lcm=36*30/6=180. Yes.
+
+Thus simultaneous arrivals at times that are multiples of 180 minutes from start.
+
+Now count: times t = 0, 180, 360, 540, 720 minutes. That's 5.
+
+So answer: 5.
+
+We'll present reasoning and then final line.
+
+I'll write explanation in the response.
+
+Thus final.
+
+=== CONTENT ===
+The trucks start together at 6:00 AM. They all arrive simultaneously again at times that are multiples of the least common multiple (LCM) of their return intervals.
+
+- Truck A: every 12 minutes → 12 = 2²·3
+- Truck B: every 18 minutes → 18 = 2·3²
+- Truck C: every 30 minutes → 30 = 2·3·5
+
+LCM = 2²·3²·5 = 4·9·5 = 180 minutes.
+
+Thus simultaneous arrivals occur every 180 minutes. Starting at 6:00 AM (time 0 minutes), the times are:
+- 0 min = 6:00 AM
+- 180 min = 9:00 AM
+- 360 min = 12:00 PM
+- 540 min = 3:00 PM
+- 720 min = 6:00 PM
+
+The interval from 6:00 AM to 6:00 PM inclusive covers 720 minutes, so we include both endpoints. Therefore, there are 5 such times.
+
+ANSWER: 5
