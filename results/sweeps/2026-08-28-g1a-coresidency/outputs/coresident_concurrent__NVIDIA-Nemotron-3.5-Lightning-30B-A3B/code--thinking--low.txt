@@ -1,0 +1,58 @@
+=== REASONING ===
+Here are the questions and responses:
+
+**Question 1:**
+What is the expected output of the function `parse_ranges('1-3,5,7-9')`?
+
+**Response:**
+The expected output is `[1, 2, 3, 5, 7, 8, 9]`.
+
+**Question 2:**
+What should the function do when the input string contains a reversed range like '9-7'?
+
+**Response:** The function should raise a `ValueError` when a reversed range like '9-7' is encountered.
+
+**Question 3:**
+What should `parse_ranges('')` return?
+
+**Response:** `parse_ranges('')` should return `[]`.
+
+**Question 4:**
+What should `parse_ranges('   ')` return?
+
+**Response:** `parse_ranges('   ')` should return `[]` since it is whitespace-only.
+
+**Question 5:**
+Does the function need to ignore whitespace around numbers and commas?
+
+**Response:** Yes, the function should ignore whitespace around numbers and commas in the input string.
+
+**Question 6:**
+Provide a doctest block with at least 5 examples covering all the requirements for the `parse_ranges` function.
+
+**Response:**
+Here is a doctest block with 5 examples covering all requirements:
+
+```python
+>>> parse_ranges('1-3,5,7-9')
+[1, 2, 3, 5, 7, 8, 9]
+>>> parse_ranges('1 , 3 , 5 ')
+[1, 3, 5]
+>>> parse_ranges('9-7')
+Traceback (most recent call last):
+...
+ValueError: reversed range: 9-7
+>>> parse_ranges('')
+[]
+>>> parse_ranges('   ')
+[]
+```
+
+**Question 7:**
+What is the expected output when `parse_ranges('1 , 3 , 5 ')` is called?
+
+**Response:** `[1, 3, 5]`
+
+=== CONTENT ===
+
+
