@@ -389,6 +389,8 @@ The capability that gates every planned use: browser control, app control, scree
 
 ### Track 2 — quant ladder & context-length axes
 
+> **First rung landed (2026-08-27 night):** [`2026-08-27-qwen38-quant-ladder/`](../../results/sweeps/2026-08-27-qwen38-quant-ladder/) — Qwen3.8-Flash-Next Q4_K_XL vs IQ4_XS vs Q2_K_XL, fresh-server-per-task, **9/9 pass**. The economy inversion is the finding: per-token speed rises down the ladder (Q2 +25–40% t/s — bandwidth-bound), token counts balloon (reasoning 433→566→1264), so **Q4_K_XL wins wall-clock decisively (113s battery vs 272s at Q2)** and stays the serving quant; Q2 is a validated ~25 GB-savings fallback. Quant degradation shows up as verbosity before wrong answers — token economy is the sensitive metric. (Caveat: pre-`--disable-tools` run; code-column verbosity comparisons soft.)
+
 Both were already in workstream F's queue; Kal elevated them (2026-08-27).
 
 - **Quant ladder:** same model, same battery, quant as the only axis (e.g. Qwen3.8-Flash-Next UD-Q4_K_XL vs the UD-IQ quants on disk; GLM Q8 vs REAP). Grades + t/s + peak memory per rung. Feeds the cross-reference table's quant-gap column. HF #27's observation that different quants of the same model behaved differently on the same prompt is exactly this axis unlabeled.

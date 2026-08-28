@@ -1,0 +1,13 @@
+=== REASONING ===
+Verified via both the LCM method and brute-force simulation: at times = 0, 180, 360, 540, 720 minutes after 6:00 AM → 6:00 AM, 9:00 AM, 12:00 noon, 3:00 PM, 6:00 PM. Count = 5.
+
+
+=== CONTENT ===
+The code confirms my reasoning:
+
+- **LCM(12, 18, 30) = 180 minutes**, so all three trucks coincide every 3 hours.
+- Over the 12-hour window (720 minutes) from 6:00 AM to 6:00 PM inclusive, brute-force simulation of every arrival shows coincidences at minutes **0, 180, 360, 540, and 720** — that is 6:00 AM, 9:00 AM, 12:00 PM, 3:00 PM, and 6:00 PM.
+
+Count = 720 ÷ 180 + 1 = **5** (adding 1 because the starting moment at 6:00 AM counts).
+
+ANSWER: 5
