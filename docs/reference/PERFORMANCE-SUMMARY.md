@@ -49,6 +49,27 @@ Battery: 3 fixed tasks (multi-step reasoning with a verifiable answer, code with
 
 ---
 
+## Tool-calling (Track 1)
+
+Deterministic client-tool passthrough battery, greedy (temp 0, seed 42), raw healing rung (`--disable-tools --disable-tool-call-healing --disable-tool-call-nudging`), fresh server per case. Graded on the server-parsed `tool_calls`, expectations travel with each run dir.
+
+- **Tier 1** (single/distractor/refusal/chain/longchain-20): **saturated 90/90** across 6 models × 3 healing rungs — a floor, not a ranking. [`2026-08-28-toolcall-tier1`](../../results/sweeps/2026-08-28-toolcall-tier1/manifest.yaml)
+- **Tier 2** (parallel×3, nested, union, distractor@pos1/3, ambiguous, coercion): **ranks** — [`2026-08-28-toolcall-tier2`](../../results/sweeps/2026-08-28-toolcall-tier2/manifest.yaml)
+
+| Tier 2 (7 cases, raw, greedy) | Score | Failure mode |
+|---|---|---|
+| Qwen3-Coder-30B / Coder-Next / Qwen3.8-Flash-Next / GLM-4.7-Flash | **7/7** | — |
+| Nemotron-3.5-Lightning-30B-A3B | 6/7 | **parallel-call serialisation**: reasoning plans 3 calls, emits 1. Reproduced identically on the HP G1a (different box, OS, build) → model trait |
+| gpt-oss-120b | 5/7 | same 1-of-3 parallel gap, plus **union collapse** (reasons "exact datetime", emits the enum branch, hides the datetime in a free-text field) |
+
+Also settled: **no distractor positional bias** at n=5 tools — all six pass with the correct tool at positions 1, 3, and 5. Deep-chain: every model but gpt-oss-120b survives 60 sequential calls (gpt-oss abandons at 31 on all rungs, [`2026-08-28-deepchain-19513`](../../results/sweeps/2026-08-28-deepchain-19513/manifest.yaml)); the 100-call probe is in flight.
+
+**Agent-lane implication:** a sub-agent behind Nemotron-3.5 or gpt-oss-120b must not rely on parallel tool calls in one turn — serialize, or route parallel-fan-out work to the Qwen/GLM band.
+
+**HP G1a is now a trustworthy graded node** ([`2026-08-28-g1a-validation`](../../results/sweeps/2026-08-28-g1a-validation/manifest.yaml)): first Windows serve-verification of `UNSLOTH_DISABLE_UNIFIED_MEMORY=1` — Nemotron-3.5 Q8, 9/10 graded cells (the miss is the parallel trait above), ~33–36 t/s wall, 10/10 loads at a rock-steady 50.4s, no b10639 symptoms.
+
+---
+
 ## Retired / demoted models
 
 | Model | Reason | Evidence |
@@ -68,5 +89,5 @@ Battery: 3 fixed tasks (multi-step reasoning with a verifiable answer, code with
 - **Tools-injection caveat (quantified 2026-08-27 night; full re-baseline still queued):** `unsloth run` enables server-side tools (web search, code execution) by default. A full-corpus scan found 48 records with prompt_tokens in the 2,000–16,000 range where the battery prompt is ~100 tokens — evidence of injected tool-schema content or spontaneous tool invocation (confirmed on the Qwen3-235B code cell, which triggered a server-side code-execution loop and returned a non-answer). The [tools on/off A/B](../../results/sweeps/2026-08-27-toolsoff-rerun-ab/manifest.yaml) has since **measured the injection at ~1,200 tok/request** of schema plus tool loops, and the 235B code cell passes clean once tools are off. **Any t/s or token-economy comparison made before `--disable-tools` should still be treated with caution** — content-channel pass/fail grades are unaffected (they measure what the consumer actually received), but wall-clock and token-count comparisons may be measuring tool-loop overhead rather than raw generation. This affects, at minimum, the version-sweep code-cell token-bloat finding. A full champion re-baseline under `--disable-tools` remains queued.
 - **`--disable-tools` is *not* the tool-calling switch.** It governs server-side built-ins only. The client-tool passthrough (`tools:[...]` in a request) is a separate mechanism with its own two flags — `--enable/--disable-tool-call-healing` and `--enable/--disable-tool-call-nudging`, both **on** by default, both able to flatter a model by repairing or retrying a call it got wrong. See [SERVING-GOTCHAS-STRIX-HALO.md § (d)](SERVING-GOTCHAS-STRIX-HALO.md) before running or reading any tool-calling benchmark.
 - **Cross-request state bleed on `b10639`** (confirmed 2026-08-27, see [SERVING-GOTCHAS-STRIX-HALO.md](SERVING-GOTCHAS-STRIX-HALO.md)) means any multi-request server session can leak context between unrelated requests. All figures above from `rebaseline`/`umfix`/non-isolated batches carry this risk for models known to be sensitive to it (Qwen3.6-MTP, Qwen3-Coder-Next, MiniMax-M2.5); rows explicitly marked "isolated" are immune and should be preferred when available.
-- **Tool-calling is untested.** Everything in this document is prose/code generation via plain chat completion. Whether these models can reliably drive tool-call plumbing (function selection, multi-turn chains, distractor rejection) is the next benchmarking track and has no data yet — do not infer tool-calling reliability from these grades.
+- **Tool-calling now has its own data — do not infer it from the text grades (or vice versa).** See the Tool-calling (Track 1) section above: Tier 1 is a saturated floor, Tier 2 ranks. Notably the ranking DISAGREES with this leaderboard's ordering — Nemotron-3.5 is a top-3 text model but carries the parallel-call defect, and the mid-table Qwen coders are flawless at 7/7. Pick agents' models per-axis.
 - **Runtime build is an output-changing axis, not just a speed axis** — a same-model, same-quant, same-prompt comparison across `b10472` → `b10639` changed both token economy and instruction-following before the unified-memory fix was found. Always check which runtime build a number came from (recorded in each manifest) before comparing across rows from different dates.
