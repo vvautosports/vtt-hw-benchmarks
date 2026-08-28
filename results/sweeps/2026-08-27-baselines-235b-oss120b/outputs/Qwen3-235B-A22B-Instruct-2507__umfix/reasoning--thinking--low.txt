@@ -1,0 +1,94 @@
+=== CONTENT ===
+The three delivery trucks return to the warehouse at regular intervals:
+
+- Truck A returns every 12 minutes.
+- Truck B returns every 18 minutes.
+- Truck C returns every 30 minutes.
+
+We are to determine how many times all three trucks arrive simultaneously between 6:00 AM and 6:00 PM inclusive.
+
+### Step 1: Understand the cycle
+
+Let $ t = 0 $ minutes correspond to 6:00 AM.
+
+Each truck returns at the following intervals:
+
+- Truck A: returns at $ t = 12k $, $ k = 0, 1, 2, \ldots $
+- Truck B: returns at $ t = 18m $, $ m = 0, 1, 2, \ldots $
+- Truck C: returns at $ t = 30n $, $ n = 0, 1, 2, \ldots $
+
+They all return simultaneously at time $ t $ where:
+
+$$
+t \text{ is a multiple of } 12, 18, \text{ and } 30
+$$
+
+So the time $ t $ at which all three meet is a common multiple of 12, 18, and 30.
+
+The **least common multiple (LCM)** of these three numbers tells us how often this happens.
+
+### Step 2: Compute LCM of 12, 18, and 30
+
+Factor each number:
+
+- $ 12 = 2^2 \cdot 3 $
+- $ 18 = 2 \cdot 3^2 $
+- $ 30 = 2 \cdot 3 \cdot 5 $
+
+To compute the LCM, take the highest power of each prime:
+
+- $ 2^2 $
+- $ 3^2 $
+- $ 5^1 $
+
+So:
+
+$$
+\text{LCM} = 2^2 \cdot 3^2 \cdot 5 = 4 \cdot 9 \cdot 5 = 36 \cdot 5 = 180
+$$
+
+So the three trucks return together every **180 minutes**.
+
+### Step 3: Determine time window
+
+We are interested in times from **6:00 AM** to **6:00 PM** inclusive.
+
+This is a **12-hour** window.
+
+Convert to minutes:
+
+$$
+12 \text{ hours} \times 60 = 720 \text{ minutes}
+$$
+
+So we consider $ t = 0 $ (6:00 AM) up to and including $ t = 720 $ (6:00 PM).
+
+The trucks meet simultaneously every 180 minutes, starting at $ t = 0 $.
+
+So the times they meet are:
+
+$$
+t = 0, 180, 360, 540, 720
+$$
+
+### Step 4: Count how many times
+
+- $ t = 0 $: 6:00 AM
+- $ t = 180 $: 9:00 AM
+- $ t = 360 $: 12:00 PM
+- $ t = 540 $: 3:00 PM
+- $ t = 720 $: 6:00 PM
+
+That is **5** times.
+
+And note that 720 is a multiple of 180:
+
+$$
+720 \div 180 = 4 \Rightarrow t = 4 \times 180 = 720
+$$
+
+So yes, they meet at both 6:00 AM and 6:00 PM.
+
+### Final Answer
+
+ANSWER: 5

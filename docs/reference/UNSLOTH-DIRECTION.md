@@ -320,6 +320,12 @@ Caveats that survive the root cause:
 
 **Protocol consequence (harness + production):** on b10639, multi-request grading sessions are contaminated — **isolated (fresh server per task) is ground truth** until the bleed is fixed. Any server-reusing batch measures "model + session history". Production multi-request serving on this build carries the same risk; weigh the pinned b10472 standalone for anything stateful-sensitive.
 
+### Server-side tools contamination (2026-08-27 night)
+
+The 235B/oss-120b baseline run ([`2026-08-27-baselines-235b-oss120b/`](../../results/sweeps/2026-08-27-baselines-235b-oss120b/)) exposed a second uncontrolled serving axis: **`unsloth run` enables server-side tools (web search, code execution) by default**, and the 235B spontaneously invoked code execution on the code task (prompt_tokens 16,021 vs the ~100-token battery prompt; studio's tool loop failed and returned an apology string). A full-corpus scan then found **48 records across nearly every run with prompt_tokens 2,000–16,000** — studio injects system/tool-schema content into serves (varying by model), and the largest values are multi-leg tool loops. Includes the version-sweep code cells behind the "b10639 code token bloat" finding (b10472: 8,019; b10639: 15,323), so that comparison partly measured tool-loop behavior, not raw generation.
+
+**Standing rule from here:** content-channel grades stand (they measure what the consumer receives), but token-economy/wall-clock cross-comparisons carry this caveat until re-measured. All future battery serves pass **`--disable-tools`** (registry-wide). Queued: tools-on/off A/B to quantify the injection; champion-table re-baseline under `--disable-tools`; 235B code-cell re-run.
+
 ### Qwen3.8-Flash-Next settings matrix: 12/12 (2026-08-27 night)
 
 [`results/sweeps/2026-08-27-qwen38-settings-matrix/`](../../results/sweeps/2026-08-27-qwen38-settings-matrix/) — vendor-doc coverage (effort ladder + recommended instruct sampling), fresh server per task per the bleed protocol:

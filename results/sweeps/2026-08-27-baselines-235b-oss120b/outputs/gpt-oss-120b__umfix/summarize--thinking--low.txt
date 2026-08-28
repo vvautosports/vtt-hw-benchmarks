@@ -1,0 +1,29 @@
+=== REASONING ===
+We need to summarize the passage in exactly 5 bullet points, then a one-sentence TL;DR. Ensure we reflect the main ideas: speculative decoding accelerates inference by using a cheap draft model to propose multiple tokens, then target model verifies; acceptance rates high for code but low for open-ended prose; MTP heads are intermediate; MoE models cause memory issues in verification step because each token may need different experts; speculation vs MoE; server-side parallelism splits KV-cache budget across concurrent sequences; more slots increase throughput but lower per-stream speed; speculation competes for compute; tuning requires joint config and measuring end-to-end performance. Provide bullet points summarizing these points.
+
+We need exactly 5 bullet points. Then TL;DR.
+
+Make bullet points concise but capture main ideas.
+
+Let's propose bullet points:
+
+1. Speculative decoding speeds up autoregressive generation by using a cheap draft model to generate multiple candidate tokens that the large target model validates in one batched forward pass, keeping output distribution identical.
+2. Accepted tokens achieve the large model’s quality at draft‑model cost; a rejection truncates the draft sequence and the target continues from the last accepted token.
+3. For repetitive code and structured text, n‑gram drafting works well with high acceptance, while open‑ended prose yields lower acceptance and may even slow generation if the draft model mismatches.
+4. Multi‑token‑prediction (MTP) heads, trained jointly with the target, predict short token windows from the same hidden state and give more stable acceptance across domains, adding modest memory and compute overhead.
+5. In Mixture‑of‑Experts (MoE) models, speculation can hurt performance because each token may need different experts, increasing memory traffic and raising the break‑even acceptance rate; server‑side parallelism further intertwines speculation, slot count, and sampling settings, requiring joint tuning and end‑to‑end throughput measurement.
+
+Now TL;DR: A single sentence summarizing the key point: Speculative decoding speeds up large‑model text generation by using a cheap draft to pre‑sample tokens, but its benefits vary with content type, model architecture, and must be balanced against parallelism and resource constraints.
+
+Make sure to include mention of acceptance rates, MoE, etc. Should be concise.
+
+Let's produce final answer.
+
+=== CONTENT ===
+- Speculative decoding speeds up autoregressive inference by having a fast draft model generate multiple tokens that a larger target model verifies in a single batched forward pass, keeping the output distribution identical to standard decoding.  
+- If the draft’s predictions are accepted, the result has full‑model quality at draft‑model cost; a rejection truncates the draft and the target resumes from the last accepted token.  
+- Code and other highly repetitive structured text achieve very high acceptance rates with cheap n‑gram drafting, whereas open‑ended prose often yields lower acceptance and can even be slower if the draft model is poorly matched.  
+- Multi‑token‑prediction (MTP) heads, trained jointly with the target model, predict short token windows from the same hidden state and provide more stable acceptance across domains while adding modest memory/compute overhead.  
+- In Mixture‑of‑Experts (MoE) models, speculative verification may require loading different expert weights per token, reducing batching benefits; server‑side parallelism also couples speculation with slot count and sampling settings, so they must be tuned together and measured on end‑to‑end throughput rather than microbenchmarks.
+
+**TL;DR:** Speculative decoding speeds up LLM generation by batching draft token verification, but its gains depend on the data type, model architecture (e.g., MoE), and must be balanced with parallelism and resource constraints.

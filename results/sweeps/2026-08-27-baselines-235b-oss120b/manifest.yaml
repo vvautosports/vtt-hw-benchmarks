@@ -1,0 +1,88 @@
+# First CLEAN baselines for the two retention-table anchor models (Kal-requested,
+# sequenced before the quant ladder). First production run of isolated_battery.py:
+# fresh server per (model, task) per the bleed protocol.
+run_id: "2026-08-27-baselines-235b-oss120b"
+date: "2026-08-27"
+node: "kalman9-framework-01"
+hardware: "AMD Strix Halo (Radeon 8060S iGPU), GTT unlock ACTIVE, ~122 GB usable"
+backend: "unsloth-studio"
+runtime_build: "b10639-mix-f6f92fe"
+studio_version: "unsloth 2026.8.22"
+api: "/v1/chat/completions"
+isolation: "fresh-server-per-task (isolated_battery.py)"
+request_constants:
+  seed: 42
+  max_tokens: 8192
+  profile: thinking
+  reasoning_effort: low
+launch_env:
+  UNSLOTH_DISABLE_UNIFIED_MEMORY: "1"
+
+axis: cfg
+records: "results.jsonl"
+outputs: "outputs/<cfg>/<task>--thinking--low.txt"
+grading: "py scripts/utils/grade_sweep.py results/sweeps/2026-08-27-baselines-235b-oss120b results --layout cfg"
+
+entries:
+  - cfg: "gpt-oss-120b__umfix"
+    role: "software-maturity anchor (fully-optimized MoE reference), first graded run"
+    quant: "F16 (native MXFP4 MoE weights), 61 GB single file"
+    tps: "27.26 / 31.95 / 31.17"
+    quality: "3/3 PASS"
+    verdict: "EXCELLENT ANCHOR"
+    note: >-
+      A 120B-class model passing the full battery at ~27-32 t/s with tight token economy
+      (392/747/757). Faster than GLM-4.7-Flash (33 GB) on reasoning-adjacent wall-clock and
+      close on the rest — the 'software maturity' thesis (gpt-oss has had the most runtime
+      optimization attention) shows up in the numbers. Retention-table exemption validated.
+
+  - cfg: "Qwen3-235B-A22B-Instruct-2507__umfix"
+    role: "prev-gen large-MoE / parameter-scaling control, first graded run"
+    quant: "UD-Q3_K_XL (3 shards, 98 GB)"
+    tps: "13.61 / 34.70 / 10.41"
+    quality: "2/3 — code UNGRADEABLE (see server_side_tools caveat)"
+    verdict: "reasoning + summarize clean at 10-14 t/s; code cell invalid, re-run required"
+    note: >-
+      Reasoning (806 tok) and summarize (283 tok — tightest summary in the study) pass
+      cleanly. The code 'failure' is NOT model quality: see caveat. Per-token speed 10-14 t/s
+      on the graded cells is consistent with a 22B-active MoE at Q3 on this bandwidth.
+
+summary: >-
+  gpt-oss-120b: 3/3 at 27-32 t/s — the strongest large-model baseline in the study and a
+  validated anchor. Qwen3-235B: 2/3 with clean cells at 10-14 t/s; its code cell was
+  invalidated by a server-side tool loop (below), not by the model.
+
+caveats:
+  server_side_tools_contamination: >-
+    THE FINDING OF THIS RUN. The 235B code cell shows prompt_tokens=16021 (battery prompt is
+    ~100), completion_tokens=22046 across an agentic loop, and a final content of just
+    "The tool call encountered an issue..." — the model spontaneously invoked studio's
+    SERVER-SIDE code-execution tool (on by default: `unsloth run` --enable-tools defaults
+    ON for every bind) to actually run the doctests; the tool loop failed; studio returned
+    an apology string. Consequences: (1) battery serves must pass --disable-tools — added
+    to the per-family config registry as a BATTERY-WIDE flag; (2) a full-corpus scan for
+    the signature found this is NOT isolated — see prompt_inflation_corpus_wide below;
+    (3) re-run the 235B with --disable-tools before recording its code grade; (4) for
+    Track 1 this is also signal: the 235B is the first model observed attempting real
+    tool use unprompted.
+  prompt_inflation_corpus_wide: >-
+    A scan of every results JSONL for prompt_tokens > 2000 (battery prompts are ~100-700
+    tokens) found 48 affected records spanning nearly EVERY run in the study — including
+    isolated fresh-server cells (e.g. Coder-Next isolated reasoning: 2333) and the
+    version-sweep code cells (b10472: 8019; b10639: 15323 — the run behind the "code token
+    bloat" finding). Interpretation: studio injects system-prompt/tool-schema content into
+    serves (magnitude varies by model, ~2-3.5K), and larger values are multi-leg tool-loop
+    activity. Impact: content-channel GRADES remain valid (they grade what the API consumer
+    receives), but token-economy and wall-clock comparisons carry an uncontrolled
+    prompt-composition axis, and the b10472-vs-b10639 GLM code-bloat comparison may partly
+    reflect tool-loop behavior rather than raw generation. Remediation queued: (a)
+    --disable-tools battery-wide; (b) a tools-on/off A/B on one model to quantify the
+    injection; (c) re-baseline the champion table under --disable-tools before the next
+    roster verdict round.
+  max_tokens_semantics: >-
+    completion_tokens=22046 > max_tokens=8192 with finish_reason=stop confirms studio's
+    agentic loop accounts budget per-leg, not per-request. Harness treats any record with
+    prompt_tokens >> battery prompt size as tool-loop-contaminated regardless of
+    finish_reason.
+
+driver_script: "isolated_battery.py + batch_baselines_235b_oss120b.json (Framework ~, via chain_v2.sh)"
