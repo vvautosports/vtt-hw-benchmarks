@@ -1,0 +1,20 @@
+[
+  {
+    "name": "gpt-oss-120b",
+    "tag": "healed",
+    "path": "/mnt/ai-models/openai/gpt-oss-120b/gpt-oss-120b-F16.gguf",
+    "flags": "--disable-tools --enable-tool-call-healing --disable-tool-call-nudging",
+    "env": {
+      "UNSLOTH_DISABLE_UNIFIED_MEMORY": "1"
+    }
+  },
+  {
+    "name": "gpt-oss-120b",
+    "tag": "full",
+    "path": "/mnt/ai-models/openai/gpt-oss-120b/gpt-oss-120b-F16.gguf",
+    "flags": "--disable-tools --enable-tool-call-healing --enable-tool-call-nudging",
+    "env": {
+      "UNSLOTH_DISABLE_UNIFIED_MEMORY": "1"
+    }
+  }
+]
