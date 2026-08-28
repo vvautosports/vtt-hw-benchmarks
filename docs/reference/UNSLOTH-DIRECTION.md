@@ -79,7 +79,7 @@ Models are deleted only with a **designated successor** (newer same-family gen o
 | gemma-3-27b (unsloth copy) | Dense-vs-MoE at ~27B |
 | Qwen3-235B-A22B | Prev-gen large MoE / parameter scaling; family lineage vs Qwen3.8 |
 | gpt-oss-120b + 20b | Fully-optimized MoE reference pair (software-maturity anchor) |
-| GLM-4.7 Flash / REAP-23B / REAP-218B | Pruning axis, two scales, one family |
+| GLM-4.7 Flash / REAP-218B | Pruning axis (REAP-23B deleted 2026-08-27 — no niche, datapoint recorded) |
 | Apriel-1.5-15B-Thinker | Small dense reasoning |
 | Ministral-3-14B | Small dense instruct |
 
@@ -296,6 +296,24 @@ Caveats that survive the root cause:
 | MiniMax-M2.5 | 21.2 / 25.1 / 21.6 | 2/3 | **rehabilitated from 0/3** — terminates everywhere; "unusable copy" verdict was wrong (it was the corruption) |
 
 **The residual b10639 failures now cluster into one shape — and it smells like cross-request state bleed.** MiniMax's summarize answer literally addresses `parse_ranges`, the *previous request's* topic ("I don't see any mention of a parse_ranges function in the source material…"), and both Qwen3-family code failures are models claiming to have already written the code in a prior turn. Unified hypothesis: b10639-mix leaks state across requests (slot reuse / `--kv-unified` / slot-save interaction) and models rationalize the leaked context as conversation history. Discriminating test queued in the manifest: reorder the battery or restart the server between tasks — if failures follow request *order* rather than task, it's runtime leakage, which would retroactively explain the version-sweep instruction-following regressions and gate parallel-slot use on this build.
+
+### Bleed-order test: cross-request state bleed CONFIRMED (2026-08-27 night)
+
+[`results/sweeps/2026-08-27-bleed-order-test/`](../../results/sweeps/2026-08-27-bleed-order-test/) — three affected models, each run reversed (one server) and isolated (fresh server per task), driver [`bleed_order_test.py`](../../scripts/sweeps/bleed_order_test.py):
+
+| model / task | forward | reversed | isolated |
+|---|---|---|---|
+| Qwen3.6-MTP code | ✗ (req 2) | ✗ (req 2) | **✓ 6 doctests** |
+| Qwen3-Coder-Next code | ✗ (req 2, after reasoning) | ✓ (req 2, after summarize) | **✓ 6 doctests** |
+| MiniMax-M2.5 summarize | ✗ (answered prior topic) | ✗ (no TL;DR label) | ✗ (no TL;DR label) |
+| MiniMax-M2.5 code | ✓ (req 2) | ✓ (req 2) | **✗ capped 8192, incoherent** |
+
+- **The bleed is real.** Both Qwen-family "b10639 regressions" dissolve in isolation — Qwen3.6-MTP and Coder-Next are 3/3 on a fresh server per task. The phantom-prior-turn shape is the model rationalizing leaked context as history. **b10639 + env fix's single remaining defect is the bleed itself.**
+- **MiniMax-M2.5 UD-Q3 is genuinely fragile**, bleed aside: first-request code runs to the cap with incoherent output (fake tags, drifts into HTML diffs), and its rebaseline code "pass" was *flattered* by leaked context. The Q3 copy stays indicted.
+- **Determinism held**: same seed + same session position reproduces token counts exactly across variants — position was the hidden variable, the harness is sound.
+- Suspected mechanism (untested): `--parallel 4 --kv-unified --slot-save-path` slot save/restore + LRU slot reuse on a build carrying unmerged KV-tracking changes. b10472 is *not* fully exonerated (its batches were multi-request but graded clean — weak evidence); the pinned standalone makes a b10472 order-test cheap if wanted.
+
+**Protocol consequence (harness + production):** on b10639, multi-request grading sessions are contaminated — **isolated (fresh server per task) is ground truth** until the bleed is fixed. Any server-reusing batch measures "model + session history". Production multi-request serving on this build carries the same risk; weigh the pinned b10472 standalone for anything stateful-sensitive.
 
 ## Scoping: frontier-benchmark cross-reference (2026-08-27)
 

@@ -1,0 +1,205 @@
+=== REASONING ===
+The user asks: "Write a function parse_ranges(s: str) -> list[int] that parses a string like '1-3,5,7-9' into [1, 2, 3, 5, 7, 8, 9]. Requirements: ignore whitespace around numbers and commas; a reversed range like '9-7' raises ValueError; empty or whitespace-only input returns []. Include a doctest block with at least 5 examples covering all requirements."
+
+We need to implement parse_ranges that accepts a string s containing ranges separated by commas. For each part, if it's a single number, parse int. If it's a range "a-b, parse a to b inclusive: produce the sequence from a to b inclusive, but if b < a raise ValueError. Use a ValueError. Need to ignore whitespace: we can .split(','), then for each part, strip whitespace: part.strip(). The parts could be empty (e.g., because input " , " maybe). Empty/whitespace-only returns []; if after stripping whitespace and ignoring empties, produce empty list. We also handle case where input string after stripping whitespace is empty string. Should return [].
+
+Implement as a function that returns list[int]. Should include doctest. Provide at least 5 examples covering requirements: basic ranges, whitespace, reversed range raises ValueError, empty input returns [], multiple ranges and single numbers; also something like '1-3, 4-5' with whitespace.
+
+Implementation approach:
+
+def parse_ranges(s: str) -> list[int]:
+
+    result = []
+    if not s or s.strip() == '':
+        return []
+    parts = s.split(',')
+    for p in parts:
+        p = p.strip()
+        if not p:
+            continue
+        if '-' in p:
+            left, right = p.split('-', 1) # Use maxsplit 1 to avoid something like negative numbers? The spec doesn't require handling negative numbers. Could treat negative numbers as a part with - in the middle? But likely ignore. Keep as is; both trimmed.
+            a = int(left)
+            b = int(right)
+            if b < a:
+                raise ValueError(f"Invalid range: {a}-{b}")
+            result.extend(range(a, b+1))
+        else:
+            result.append(int(p))
+    return result
+
+But range expects start <= stop < step positive; if b < a, we raise ValueError.
+
+Potential issues: If p contains something like '2-5-7'? That's not given. Keep simple.
+
+Testing: parse_ranges('1-3,5,7-9') -> [1,2,3,5,7,8,9]. parse_ranges(' 1-3 , 5 , 7-9 ') -> works. parse_ranges('9-7') -> raise ValueError. parse_ranges('') -> []. parse_ranges('   ') -> [].
+
+Now produce doctest with at least 5 examples.
+
+Add:
+
+>>> parse_ranges('1-3,5,7-9')
+[1, 2, 3, 5, 7, 8, 9]
+>>> parse_ranges(' 1-3 , 5 , 7-9 ')
+[1, 2, 3, 5, 7, 8, 9]
+>>> parse_ranges('')
+[]
+>>> parse_ranges('   ')
+[]
+>>> parse_ranges('9-7')
+Traceback (most recent call last):
+...
+ValueError: ... (maybe). Also test something with a range where start > end, but we also can test error message.
+
+Add maybe parse_ranges('2, 4-6, 8') yields [2,4,5,6,8].
+
+We also need to ignore whitespace around numbers: parse_ranges('  2 - 3 ') yields [2,3] maybe. Actually need [2,3]? Wait range: "2-3" -> [2,3]. That's fine.
+
+We also need to support reversed range but raising ValueError.
+
+Add test for whitespace after comma: parse_ranges(', , 1-2') maybe yields [1,2] ignoring empties.
+
+Also need to ensure whitespace after comma is ignored: parse_ranges('1, 2, 3') -> [1,2,3]. Could be a range? Already covered.
+
+Now incorporate these. Provide function docstring, type hints. Provide final code.
+
+One nuance: The docstring may also require explanation.
+
+Edge Cases:
+
+- Input like "1-1" returns [1]; okay.
+
+- Input like "0-0" returns [0].
+
+- Input may contain negative? Not required but could work.
+
+But ensure if number part might be something like "-5"? The parser will treat as int.
+
+But the requirement is ignore whitespace around numbers and commas. Also a reversed range like '9-7' should raise.
+
+Edge Cases: If whitespace only after splitted parts, skip empties.
+
+Now provide final answer: function code.
+
+Will produce as python code with doctest. Use triple quotes for docstring.
+
+Potential approach: Use re: re.findall(r'\s*(\d+)\s*(?:-(\d+)\s*)?', but easier as split.
+
+Now output answer: explanation with code.
+
+We also need to include at least 5 test cases.
+
+Will provide:
+
+>>> parse_ranges('1-3,5,7-9')
+[1,2,3,5,7,8,9]
+
+>>> parse_ranges(' 1-3 , 5 , 7-9 ')
+[1,2,3,5,7,8,9]
+
+>>> parse_ranges('')
+[]
+
+>>> parse_ranges('   ')
+[]
+
+>>> parse_ranges('9-7')
+Traceback (most recent call last):
+...
+ValueError: Invalid range: 9-7
+
+>>> parse_ranges('2-4,8,10-12')
+[2, 3, 4, 8, 10, 11, 12]
+
+Will also maybe include additional:
+
+>>> parse_ranges('1-2, 3')
+[1,2,3]
+
+That's fine.
+
+Make function parse_ranges robust.
+
+Now answer.
+
+We need to mention error message.
+
+Also note we need to maintain order: ranges produce numbers ascending.
+
+All good.
+
+Will output in a code block.
+
+Will include type hint and docstring.
+
+Now answer.
+
+
+=== CONTENT ===
+Here is a small, self‑contained implementation that follows the specification.  
+It splits the input on commas, trims whitespace, expands each range, and raises `ValueError` if a range is given in reverse order.
+
+```python
+def parse_ranges(s: str) -> list[int]:
+    """
+    Convert a compact range description into an explicit list of integers.
+
+    The description may contain single numbers, ranges, and optional whitespace.
+    Whitespace around commas and numbers is ignored.  An empty or whitespace‑only
+    string yields an empty list.  A reversed range (e.g. "9‑7") raises ValueError.
+
+    Examples
+    --------
+    >>> parse_ranges('1-3,5,7-9')
+    [1, 2, 3, 5, 7, 8, 9]
+
+    >>> parse_ranges(' 1-3 , 5 , 7-9 ')
+    [1, 2, 3, 5, 7, 8, 9]
+
+    >>> parse_ranges('')
+    []
+
+    >>> parse_ranges('   ')
+    []
+
+    >>> parse_ranges('9-7')
+    Traceback (most recent call last):
+        ...
+    ValueError: Invalid range: 9-7
+
+    >>> parse_ranges('2-4,8,10-12')
+    [2, 3, 4, 8, 10, 11, 12]
+
+    >>> parse_ranges('1, 2, 3-5')
+    [1, 2, 3, 4, 5]
+    """
+    # Empty or pure‑whitespace input -> empty list
+    if not s or s.strip() == '':
+        return []
+
+    result: list[int] = []
+    for part in s.split(','):
+        part = part.strip()
+        if not part:                     # skip empty fragments caused by stray commas
+            continue
+
+        if '-' in part:                  # a range "a-b"
+            left, right = part.split('-', 1)   # split only on the first '-'
+            a = int(left)
+            b = int(right)
+            if b < a:
+                raise ValueError(f'Invalid range: {a}-{b}')
+            result.extend(range(a, b + 1))
+        else:                            # a single number
+            result.append(int(part))
+
+    return result
+```
+
+**Explanation of key points**
+
+* `s.split(',')` correctly handles the commas, and `strip()` removes surrounding whitespace.
+* For a range like `"a‑b"` we expand the inclusive sequence with `range(a, b+1)`. If `b < a` we raise `ValueError`.
+* Single numbers are turned into integers and appended directly.
+* An empty or whitespace‑only input yields an empty list as required.
+* The doctests demonstrate all the requested behaviours (basic ranges, whitespace handling, reversed ranges, empty input, and a few extra cases).

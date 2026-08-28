@@ -1,0 +1,25 @@
+=== REASONING ===
+All 7 doctests pass. The function handles all requirements: parsing ranges, ignoring whitespace, raising ValueError on reversed ranges, and returning [] for empty/whitespace input. Let me present the solution.
+
+
+=== CONTENT ===
+All 7 doctests pass. Here's a summary of the `parse_ranges` function:
+
+**How it works:**
+1. **Empty input check** — returns `[]` immediately if the string is empty or whitespace-only.
+2. **Split on commas** — iterates over each token after splitting.
+3. **Token classification** — if a token contains `-`, it's treated as a range; otherwise it's a single number.
+4. **Range expansion** — `range(start, end + 1)` expands inclusive ranges.
+5. **Reversed range guard** — raises `ValueError` if `start > end`.
+
+**Doctest coverage (7 examples):**
+
+| # | Input | Output / Behavior | Requirement Covered |
+|---|-------|-------------------|---------------------|
+| 1 | `'1-3,5,7-9'` | `[1, 2, 3, 5, 7, 8, 9]` | Basic parsing |
+| 2 | `'  4 , 6-8  '` | `[4, 6, 7, 8]` | Whitespace handling |
+| 3 | `''` | `[]` | Empty input |
+| 4 | `'   '` | `[]` | Whitespace-only input |
+| 5 | `'5'` | `[5]` | Single number (no range) |
+| 6 | `'1-3,5,5,7-7'` | `[1, 2, 3, 5, 5, 7]` | Duplicates & single-item ranges preserved |
+| 7 | `'9-7'` | Raises `ValueError` | Reversed range check |

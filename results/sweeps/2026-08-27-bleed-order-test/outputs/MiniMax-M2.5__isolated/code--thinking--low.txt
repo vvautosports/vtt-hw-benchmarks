@@ -1,0 +1,1631 @@
+=== REASONING ===
+1. 
+
+
+=== CONTENT ===
+<think_thought
+1. Think about what's the most problem.  
+2. The user wants a parse function that split ranges Ranges into 2. 
+user_thought
+0. It's a parse_ranges function that takes a string ranges 
+1. It should have some test
+2. 
+ user_thought
+3. It should parse_ranges
+4. user_input
+- user_input
+   - user_input_string ( :param-type: <error>
+5. user_input_string ranges Ranges Ranges Ranges:
+   - user_input
+   - user_user_id: user_id_1, user_id1: "user_id_1", user_id_1:1
+     - 
+
+
+
+1. The user request involves a JSON
+2. user_id_2: "some_id_2" 
+3 
+4. user_path_2": 
+5. 
+6. parse_ranges parse_ranges?
+7. The user_id_ 
+7. "path_2": "some_id_2"
+8. path_user_id_2": 
+9. user_id_2:
+10. "path_1": "some_id-2-", "some_id-1", "description": "some_id_1", 
+   - "user_id_id_2",
+   </user_id_2>
+   <tool name="user_id_1">
+- user_id_1 
+2. "user_id_2": <error_msg>
+3. "user_id_2": user_id_2</tool>
+   - user_id_2:
+    - "user_id_2": "user_id_2","user_id_2
+3. "name": "user_id_1,
+- name": "user    <path_2": "name","type": "user_id_2","value": "value_1"},
+  "user_id_1": {
+    "user_id_1": "value_1",
+    "user_id_, "user_id_1": "value_1",
+    "user_id_1": "user_id_1"   
+}
+
+- "user_id_1": "type_1"
+}
+- user_id_1": "type_1" 
+     - "user_id_1": type_1 
+     - "name": "type_1", "key": "path_1", "user_id_1": "user_id_1", "user_id_1":2"
+  }
+  <li>
+    "user_id_2: "user_id_1", "type_1","user_id_1": "user_id_1"},
+  "user_id_2": {
+    "name": "user_id_1-2-2"
+  },
+  "user_id": "type_1"  },
+  "user_id_1": "type_2",
+  "type_":2",
+  "user_id_1": {
+    "user_id_id_1": "value_1_value_2",
+user_id_1": "0",
+    "name": "user_id_1"},
+    "user_id_1","type": "user_id_1","type": "value_1"},
+    "user_id_2":   "userid": 1 
+}
+"</script> 
+
+# user_thought
+def  "type": "function", "properties": {
+    "type": "number",
+    "user_th think_thought1: "number": "type1"
+}
+  
+<scripttype>
+1. "type": "user_id_1" user_id_1",
+    "user_id_1": "type_2",
+    " },
+  "type": "user_id_1",
+    "```javascript
+  "user_id_1": "user_id_1",
+    "path_1": "type_     "user_id_1": "user_ids",
+    "user_id_1": "user_id_1",
+    user_id_1" },
+  "name": "type": "value_1",
+  ```javascript
+    "user_id_1_2": "type_2",
+    "user_id_1},
+    "user_id_2: {
+        "value_1": "type_1",
+        "path_ 
+      "path_id_1": "user_id_1"
+    "id": 1,
+    "user_id_2",
+        "type":",
+        "user_id_1",
+    },
+    "name": "name",
+    "user_id_1",
+    "name": "0",
+    "1": "user_id_1", "value_ "type": {
+      "user_id_1",
+      "id": "value_1_user_id_1",
+      " user_id_id_1": "value_", "user_name": "1"}
+    },
+    "user_id": "value_1_user_id_1,
+    "value": "2",
+    "    "name": "value_1"
+},
+    "user_id_1": "type_1",
+    "name": "user_id_1
+}
+</script> 
+```
+
+The "type": "user_id_1", <span class="pl-ml-0.1">
+  <span></span></span>
+<scriptp class="pl-ml-0.1">
+<li>
+    <span class="pl-ml- 
+<li>
+      <span class="pl-ml-0.1 pl-ml-0.1">
+        <span></span></span>
+<span></0.1"> 
+         <span class="pl-ml-0.1"> 
+         <span></span></span> 
+      </span></span>
+      <span></span></span>
+    <li>
+        <span></span> 
+        <span class="pl-ml-0.1 
+       <span class="pl-ml-0.1">
+         <span></span></span>
+       <span></span></span>
+     <span class="pl-ml-1">
+         <span></span></span></span>
+        <span></span></span>
+       <span class="pl-ml-6.4.0.2 pl-ml-0.2"> 
+        <span class="pl-ml-0. 
+       <span style="margin-left:.2em"> 
+         <span></span></span>
+         <span></text"><span></span></span></span>
+         <span></text </span>
+       <span class="pl-ml-0.2 pl-m-ml-```javascript
+       <span class="pl-ml-0. 
+         <span class="pl-ml- </span></span>
+       <span class="pl-ml-0.2 pl-ml-0.1">
+           "type": "type_1"> 
+          <span class="pl-ml-0.1">
+          </span></span>
+     </span>
+       <span class="pl-ml-0.1 pl-ml->
+           <span></span>
+         </span>
+         <span class="plml-0.1">
+        <span class="pl-ml-0.1 pl-ml-0.3">
+          <span class="pl-ml-0.1 pl-ml-0.>0.1">
+            <span></span>
+        </span>
+        <span class="pl-ml-0.1">
+             <span></span>
+        </span>
+         <span class="pl-ml-0.1">
+             <span class="pl-ml-0.1">
+             <span class="pl-ml-1">
+             <span class="pl-ml-0.6">
+              <span></span>
+         <span class="pl-ml-0.1">
+              <span class="pl-ml-0.1">
+                 <span class="pl-ml-0.1">
+                   <span class="pl-ml-0.2 
+                 </span>
+             <span class="pl-ml-0.1">
+                 <span class="la-0.1">
+                   <span></span>
+                
+                 <span class="pl-ml-0.1">
+               </span>
+             </span>
+         </span>
+         <span class="pl-ml-0.1">
+             <span class="pl-ml-0.1 pl-ml-0. </span>
+         <!-- </span></span>
+         <span class="pl-ml-0.1">
+         <span class="pl-ml-0.1 pl-ml-0.1">
+                <span class="pl-ml-0.1">
+                  <span class="pl-ml-0.1">
+                  <span class="span-0.1">
+                    <span class="pl-ml-0.1">
+                    <span class="pl-ml-0.1">
+                         <span class="pl-ml-0.
+                         <span class="pl-ml-1"></span></span>
+                       <span class="pl-ml-0.1">
+                     </span>
+                     <span class="
+-ml-0.1">
+                         <span class="pl-ml-0.1">
+                         <span class="pl-ml-2ml-0.1">
+                      <span class="pl-ml-0.1">
+                        <span class="pl-ml-0.1">
+                          <span class="q-ml-0.1">
+                            <span></span>
+                          </span>
+                        </span>
+                        <span class="pl-ml-0.1">
+                            
+                              <span class="pl-ml-0. 
+                         </span>
+                       </span>
+                    </span>
+                    <span class="pl-ml-0.1">
+                    </span>
+                          <span class="pl-ml-1-0.1">
+                          <span class="pl-ml-0.1">
+                          <span class="pl-ml-1"> 
+                             <span class="pl-ml-1">
+                          <span class="pl-m0.1"> 
+                         </span>
+                          <span class="pl-ml-0.1">
+                               <span class="pl-ml-0. 
+                             </span>
+                             <span class="q-w 
+                             <span class="q-w 
+                             <span class="pl-ml-0.1">
+                             <span class="q-w 
+                              <span class="pl-ml-0.1">
+                              <span class="q-w 
+                               <span class="pl-ml-
+                               <span class="pl-ml-0.1">
+                                 <span </span>
+                                 <span>
+                              </span>
+                             <span class="q-w 
+                               <span class="pl-ml0.1">
+                                 <span class="pl-ml-0.1">
+                                    <span class="pl-ml-
+                                 </span>
+                               <span class="q-w 
+                                 <span></{
+                               <span class="pl-mml-0.1">
+                              <span class="pl-ml-0.1">
+                              <span </ span>   
+                            </span>
+                          <span class="pl-ml-0.1">
+                               <span class="pl-ml-0.1">
+                             </span>
+                              <span class="pl-ml0.1">
+                            </span>
+                            <span class="pl-ml0.1">
+                              <span class="pl-ml-ml-0.1"> 
+                                   <span class="0-1">
+                                 </span>
+                               </span>
+                          <span class="pl-ml-0.1">
+                               <span class="pl-ml0.1 
+                                 <span class="pl-ml-0.1">
+                                   <span class="pl-ml-0.0.1">
+                                 </span>
+                              
+
+The following function retrieves the text. </span>
+<span 
+3. It is recommended to avoid using 
+</span>
+<li class="pl-ml-0.1">
+    <span class="pl-ml-0.1">
+         <span class="pl-ml-0.1">
+         <span class="pl-ml-0.1">
+             <span class="pl-ml0.1 pl-ml-0.1">
+                 <span class="pl-mml-0.1">
+                      <span class="pl-ml-0. 
+                         <span class="pl-ml-0.0.1">
+                            <span class="pl-ml-0.1">
+                             <span class="pl-ml-0.1">
+                            </span>
+                       <span class="pl-ml-0.1">
+                          <span class="pl-ml-0.0.1 
+                             <span class="pl-ml-0.1">
+                                <span class="pl-ml-0.1">
+                                    <span class="pl-ml-0.1">
+                                       <span class="pl-ml-0.0.1">
+                                      <span class="pl-ml-0.1">
+                                     </span>
+                               <span class="plml-0.1">
+                                    <span class="pl-ml-0.2 pl-ml-0.1">
+                                 <span class="pl-ml-0.1">
+                                     <span class="pl-ml-0.2 pl-ml1 pl-ml-0.1">
+                                          <span class="pl-ml-0.2 pl-ml-0.1">
+                                            <span class="pl-ml-0.1">
+                                            </span>
+                                        </span>
+                                    </span>
+                                    <span class="pl-ml-ml0.1">
+                                         <span class="pl-ml-0.2 pl-ml-0.1">
+                                         
+                                         <span class=" "vm-li-1">
+                                         
+                                         <button type="button" class="btn btn-primary" onclick="window.location.reload()">Reload pagebutton"> 
+                                            <span class="pl-ml-0.1">
+                                                  <span class="pl-ml-0.1">
+                                                      <span class="fa fa-angle-double-left"></span>  
+                                                     Reload
+                                                 </span>
+                                            </button>    
+                                         </span>
+                                      </span>
+                                        </span>
+                                 </span> 
+                                        
+                                        
+                                    </span> 
+                                </divdiv>
+                             </divdiv>
+                            </div>
+                             
+                             <script type="text/javascript">
+                                // Get the value of the input field
+                                var text = document.getElementById('text');
+                    
+                                //   var lines = text.split('\n');
+                                // var linesArray = text.split('\n');
+                                // var regex = /[0-9]+/g;
+                                // if (text.match(/regex/)) linesArray[0] + '' !== '');
+                                // }
+                                // else { alert('Please enter some text.'); }
+                                // return; // return false;
+                            </script>
+                             <script type="text/javascript">
+                            </script>
+                             <button type="button" class="btn btn-primary" onclick="window.location.reload()">Reload pagebutton"> 
+                                <span class="fa fa-angle-double-left"></span>
+                                 <span class="fa fa-angle-double-left"></span> 
+                             </button>
+                        </button>
+                     </span>
+                </span></span>
+                                <script src="https://unpkg.com/mocha/mocha"></script>
+                         </script>
+                         <script src="https://unpkg.com/mocha/mocha@1.8.2"></script> 
+                         <script src="https://cdnjs.cloudflare.com/ajax/libs.com/mocha/1.8.2/mocha.js"></script> 
+                         <script src="https://unpkg.com/mocha/mocha@1.8.2"></script> 
+                         </script>
+                         <span class="pl-ml-0.1">
+                              
+                        </span>
+                    </span>
+                 </span>
+            </span>
+         </span>
+      </ul>  
+       
+     </li>
+    </ul>
+     
+    <!-- <button type="button" onclick="window.location.reload()">
+         <span class="fa fa-angle-double-left"></span>
+    </button>
+      -->
+       
+       
+       
+        
+       
+    </body>
+</html> 
+</li>
+</ul>
+</ul>
+
+<script type="text/javascript">
+    
+   <!DOCTYPE html>
+   <html>
+   <head>
+   <title>Project</title>
+   <title>Project</title>
+   <style>
+      body {margin: 0;}
+      body {font-size: 14px;}
+      body, html {font-family: Arial, sans-serif;}
+   </style>
+   
+</head>
+   <body>
+   <h3>${user_input}</h3>
+   <!-- First, create a hidden form ( -->
+   <form action="/action_page">
+       <!-- <input type="button" value="Reload page"> -->
+       <button onclick="window.location.reload()">Reload page</button>
+    </form>
+   </form>
+   <button type="button" onclick="window.location.reload()"> 
+           <!-- <input type="button"onclick="window.location.href = '/pages/loader.html';"> -->
+        <!-- <input type="button" onclick="window.location.href='/pages/contact.html';">Reload -->
+       <!-- <button onclick="window.location.reload()"> -->
+             <!-- <button onclick="window.location.reload()"> -->
+             <input type="button" onclick="window.location.reload()">
+             window.location.reload()">
+             <span class="fa fa-angle-d loader">
+                  <span class="fa fa-angle-double-left"></span>
+                   <span class="fa fa-angle-left">
+                        <span class="fa fa-angle-left">
+                        </span>
+                       <script type="text/javascript" src="//unpkg.com/mocha/mocha@1.8.2"></script>
+                         <span class="fa fa-angle-double-left">
+                             <span script src="//unpkg.com/mocha/mocha@1.8.2/mocha.js"></script>
+                             <script class="pl-ml-0.1">
+                                <span class="pl-ml-0.4">
+                                   <span class="fa fa-angle-left"></span>
+                               </span> 
+                               <span class="fa fa-angle-double-left">
+                                </span>
+                           </span>
+                     </span>
+                     <!-- <input type="button" onclick="window.location.href='/pages/loader.html';reload()">
+                              <span class="fa fa-angle-left">
+                             </span>
+                            <index">
+                           </span>
+                   
+                              <span class="fa fa-angle-left"></
+                   </span>
+                  </span>
+             </span>
+             <span class="fa fa-angle-left">
+                 <span class="fa fa-angle-1">
+                 <span class="fa-angle-left"></span>
+                 <span class="pl-ml-0.1">
+                     
+                         <span class="fa fa-angle-left"> 
+                             <span class="fa fa-angle-double-left">
+                             </span>
+                             <span class="fa fa-angle-left">
+                             <span class="pl-ml-4.0.2">
+                             </span>
+                         </span>
+                         <span>
+                             <span class="fa fa-angle-left">
+                         </span>
+                         <span class="pl-ml-0.1">
+                               <span class="pl-ml-0.1">
+                                   <span class="pl-ml-0.1 
+                                   <span class="fa fa-angle-double-left"> 
+                                        <span class="pl-ml-0.1"> 
+                                        <span class="pl-ml-0.1">
+                                             <span class="fa fa-angle-left">
+                                        </span> 
+                                   </span>
+                              </span>
+                          </span>
+                     </li>
+              </ul>
+          </ul>
+        </li>
+  </ul>
+  </nav>
+  <p>Enter <script type="text/javascript"> </script>
+   <script src="//unpkg.com/mocha/mocha@1.8.2"></script>
+                         <script src="https://unpkg.com/mocha/mocha@1.8.2/mocha.js"></script>
+                             <script src="https://unjsdelivr.net/npm/mocha@1.8.2"></script>
+                            <span class="pl-ml-0.1">
+                                 <span class="fa fa-angle-double-left">
+                                      
+                                      
+                                      
+                                       <span class="pl-ml-0.2 pl-ml-0.1">
+                                       </span>
+                                    <p>The user_id_1">Enter a 
+                                        <p>You can't be serious, you must be serious you can 
+                                         <span class="pl-ml-0.1">
+                                         
+                                         
+                                         
+                                    <div class="pl-ml-0.1">
+                                         
+                                          
+                                        
+                                         
+                                              <span class="pl-ml-0.1">
+                                              </td class="pl-ml-0.1 pl-ml-0.1">
+                                         <span class="pl-ml-0.1">
+                                         
+                                         <span class="pl-ml-0.1">
+                                         <span class="pl-ml-0.1">
+                                         <span class="pl-m-0.1">
+                                         <span class="pl-ml-0.">
+                                         <span class="pl-ml-0.1">
+                                         
+                                         
+                                        
+                                        <div class="pl-ml-0.1">
+                                            <ul>
+                                              <script type="text/javascript">
+                      // Get the value of the input field
+                              <script type="text/javascript">
+                                        var lines = text.split('\n');
+                                        var user_id = document.getElementById('user_id').value; 
+                                        // var user_id = "user_id_1";
+                                         var user_id = ${user_id};
+                                         // var user_id = "user_id_1";
+                                         // var user_id =  "user_id_1";
+                                         // var user_id = user_id;
+                                         
+                                          
+                                        const user_id = document.querySelectorAll('.user_id');
+                                        // user_id.addEventListener('click', () => {
+                                        //     const user_id = document.querySelectorAll('.user_id');
+                                        // });
+                                        // let user_id = user_id;
+                                        // user_id.addEventListener('click', function() {
+                                        //    user_id = user_id; 
+                                        //         var user_id = "user user_id_1"; 
+                                        //         var user_id = document.querySelector('.user_id');
+                                        //         document.getElementById('user_id_1');
+                                        //         // var user_id_1 = "user_id_1"; 
+                                        //         // var user_id_ 
+                                        
+                                        
+                                        //         // 
+                                        
+                                         // 
+                                         // var user_id = document.querySelectorAll('.user_id');
+                                        // const user_id = document.getElementById('user_id');
+                                        // user_id = document.getElementById('li-1');
+                                        // var user_id = document.querySelectorAll('.user_id');
+                                        //         // var user_id = document.querySelectorAll('.user_id_1');
+                                        //         // var user_id = document.querySelectorAll('.user_id'); 
+                                        //         // 
+                                    
+                                         // 
+                                    
+                                        // 
+                                    
+                                    // <div class="pl-ml-0.1">
+                                    // <p>Enter some text between 0 and 9</p>
+                                <script>
+                                // <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" />
+                                <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+                                <!-- JavaScript -->
+                                <!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" />
+                                <!-- -->
+                                
+                                
+                            </script>
+                             <script src="https://unpkg.com/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+                            <!-- -->
+                                
+                                
+                            </script>
+                            <!-- -->
+                            <script src="https://unpkg.com/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+                                
+                          </head>
+                          <body>
+                            <!-- -->
+                            
+                          
+                          </head>
+                          <body>
+                             
+                          </body>
+                          <td class="pl-ml-0.1">
+                              <h1>Hello</h1>
+                              <p>This is a list of the first 5 characters of a user-defined name.</p>
+                              <button onclick="this.remove()">Remove</button>
+                          </body>
+                          <td>
+                          </td>
+                      </td>
+                      </td>
+                      <td class="pl-ml-0.1">
+                     </td>
+                     <td class="pl-ml-0.1"></td>
+                  </td> 
+                   <button onclick="this.remove()">Remove</button>
+                   <button onclick="this.remove()">Reload page</button>
+                       <span class="fa fa-angle-double-left"></span>
+                      <span class="pl-ml-0.1">
+                         <!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bol.min.js">
+                         <!-- -->
+                         <span class="pl-ml-0.1">
+                         <button type="button" class="btn btn-primary" onclick="window.location.reload()"> 
+                             <span class="fa fa-angle-double-left">
+                             </span>
+                            <span class="fa fa-angle-double-left">
+                                  <span class="fa fa-angle-left">
+                                  </span>
+                             <span class="fa fa-angle-left">
+                             </span>
+                             <span class="fa fa-angle-left">
+                             </span>
+                             <span>
+                             <span>
+                             <span class="fa fa-angle-left">
+                            <span provided 
+                              <input type="text/javascript" src="https://unpkg.com/mocha@1.8.2"></script>
+                            <!--   
+                                  <span class="fa fa-angle-left">
+                                  </span>
+                                  
+                                  
+                                  <span class="fa fa-angle-double-left"> 
+                                    
+                                  <button type="button" class="btn btn-primary" onclick="window.location.reload()">
+                                  </span> 
+                                  <span class="fa fa-angle-left">
+                                      <span class="fa fa-angle-double-left">
+                                      <script class="fa fa-angle-left"> 
+                                         
+                                         
+                                  <button type="button" class="btn btn-primary" onclick="window.location.reload()">
+                                       
+                                  <span class="fa fa-angle-left"> 
+                                        <span class="fa fa-angle-left"> 
+                                  </span>
+                            </span>
+                            <!-- 
+                                  
+                                  <span class="fa fa-angle-double-left">
+                                  <span 
+                                  <span class="fa fa-angle-left">
+                                      
+                                          
+                                  <span class="fa fa-angle-left"> 
+                                  <span class="fa fa-angle-left">
+                                         <span class="pl-ml-0.1">
+                                          
+                                         
+                                    <!-- <button type="button" class="btn btn-primary" onclick="window.location.reload()"> 
+                                         <span class="fa fa-angle-d-left">
+                                         </span>
+                                       
+                                          
+                                  <span class="fa fa-angle-left">
+                                      
+                                  <span class="fa fa-angle-left">
+                                      <span class="fa fa-angle-double-left">
+                                          
+                                          
+                                          <span class="fa fa-angle-left"> 
+                                          
+                                          
+                                          
+                                          <span class="fa fa-angle-left">
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          <span class="pl-ml-0.0.2 pl-ml-0.1">
+                                         <span class="fa fa-angle-left">
+                                          
+                                          
+                                            
+                                          <span class="fa fa-angle-left">
+                                      
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          <span class="fa fa-angle-left"> 
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+  
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                  
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                  
+                                          
+                  
+                                          
+                  
+                                          
+                                          
+                  
+                                          
+                                          
+                                          
+                  
+                                          
+                                          
+                                          
+                                          
+                                          
+                  
+                                          
+                                          
+                                          
+                                          
+                                          
+                  
+                  
+                                          
+                                          
+                                          
+                  
+                  
+                                          
+                  
+                  
+                  
+                                          
+                  
+                                          
+                                          
+                                  
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                  
+                                          
+                                          
+                  
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                  
+                                          
+                  
+                                          
+                                          
+                                          
+                                          
+                                          
+                                  
+                                  
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                  
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                  
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                  
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                  
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                  
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                  
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                  
+                                          
+                  
+                                          
+                  
+                                          
+                                          
+                                          
+                                          
+                                          
+                  
+                                          
+                                          
+                                          
+                                          
+                                          
+                  
+                                          
+                                                          
+                  
+                                          
+                                          
+                                          
+                                          
+                  
+                                          
+                                          
+                                          
+                  
+                                          
+                  
+                                          
+                                          
+                  
+                                          
+                  
+                                          
+                  
+                                          
+                                          
+                  
+                                          
+                  
+                  
+                                          
+                                          
+                  
+                                          
+                                          
+                  
+                                          
+                  
+                                          
+                  
+                  
+                                          
+                  
+                                          
+                  
+                                          
+                  
+                                          
+                                          
+                  
+                                          
+                  
+                                          
+                                          
+                  
+                                          
+                                          
+                  
+                                          
+                                          
+                                          
+                  
+                  
+                                          
+                                          
+                  
+                                          
+                  
+                                          
+                  
+                                          
+                  
+                                          
+                  
+                  
+                                          
+                                          
+                  
+                                          
+                                          
+                  
+                                          
+                  
+                                          
+                  
+                  
+                                          
+                                          
+                  
+                  
+                  
+                                          
+                                          
+                  
+                                          
+                  
+                  
+                  
+                                          
+                  
+                                          
+                  
+                  
+                                          
+                                          
+                  
+                                          
+                  
+                  
+                                          
+                  
+                  
+                                          
+                                          
+                  
+                  
+                                          
+                                          
+                  
+                                          
+                  
+                                          
+                  
+                                          
+                  
+                                          
+                  
+                  
+                                          
+                  
+                                          
+                  
+                                          
+                                          
+                  
+                                          
+                                          
+                  
+                                          
+                                          
+                  
+                                          
+                                          
+                  
+                  
+                  
+                                          
+                  
+                  
+                                          
+                  
+                  
+                  
+                                          
+                  
+                  
+                                          
+                  
+                                          
+                  
+                                          
+                  
+                                          
+                  
+                  
+                  
+                  
+                                          
+                  
+                  
+                                          
+                  
+                  
+                                          
+                  
+                                          
+                  
+                  
+                                          
+                  
+                  
+                                          
+                  
+                  
+                  
+                  
+                                          
+                  
+                  
+                                          
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                                          
+                                          
+                  
+                  
+                                          
+                  
+                  
+                  
+                  
+                  
+                  
+                                          
+                  
+                  
+                  
+                                          
+                  
+                                          
+                  
+                  
+                  
+                                          
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+
+## <h1>User</h1>
+   <h1 class="text-center">Add new content</h1>
+   <h1> 
+       <title>Add new content</title>
+ 
+## <h1>Add new content</h1>
+   <h1 class="text-center">Add new content</h1>
+   <h1>Add new content</h1>
+   <h1>Add new content</h1>
+   <h1>Add new content</h1>
+   <!doctype html>
+   <html>
+   <head>
+       <meta charset="UTF-8">
+   </head>
+   <body> 
+    <!-- <h1>User Menu</h1>
+   <ul>
+        <li>user_id</li>
+   </ul> -->
+   <h1>User Menu</h1>
+   <h1 class="text-center">Add new content</h1> 
+         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>     <script src="https://cdn.jsdelpl
+@@ -1,5 +1,6 @@
+-    <!doctype html>
+-    <html>
++   <!doctype html>
++    <html lang="en">
++   <head>
++       <meta charset="UTF-8">
+     <meta charset="UTF-8">
+     <title>Project</title>
+     <style>
+       
+@@ -1,7 +1,6 @@
+-    <title>Add new content</title>
+-    <title>1. 2</title>
+-    <meta charset="utf-8" />
++    <title>Project</title>
++    <title>Add new content</title>
+     <style>
+

@@ -49,25 +49,14 @@ default_models:
   # is needed again.
 
   # MiniMax-M2.1 deleted 2026-08-26 (retention policy: successor M2.5 on disk)
-  - name: "MiniMax-M2.5"
-    path: "unsloth/MiniMax-M2.5-GGUF/MiniMax-M2.5-UD-Q3_K_XL-00001-of-00004.gguf"
-    size_gb: 95
-    vram_gb: 100
-    parts: 4
-    test_strategy: "server_only"  # Multi-part: requires llama-server, skip llama-bench
-    use_case: "Current-gen large MoE (successor to M2.1)"
-    tps: "71.8 / 15.6 / 35.8 — ALL capped at max_tokens"
-    quality: "0/3"
-    note: >-
-      BENCHMARKED 2026-08-27: loads fine (so ~95 GB fits the ~122 GB ceiling) but hit the
-      8192-token cap on all three tasks — it never terminates. The 71.8 t/s reasoning figure
-      is the fastest raw rate recorded anywhere in the study and is meaningless: a runaway
-      generation. CONFOUND: this is the only UD-Q3_K_XL model in an otherwise Q8 field, so
-      this indicts THIS COPY, not the model. KEEP — its intended M2.5-vs-M3 comparison is
-      blocked while M3 cannot load on a single node, so by the evidence-first rule the
-      question is unresolved rather than answered. A UD-Q8 re-pull would settle it.
-    hf_repo: "unsloth/MiniMax-M2.5-GGUF"
-    hf_file: "MiniMax-M2.5-UD-Q3_K_XL-00001-of-00004.gguf"
+
+  # MiniMax-M2.5 UD-Q3_K_XL (95 GB) deleted 2026-08-27 (Kal-approved cleanup for the
+  # Qwen3.8 quant ladder). Evidence: after the unified-memory fix it terminates, but the
+  # bleed-order test showed the Q3 copy is genuinely fragile — first-request code ran to
+  # the 8192 cap with incoherent output, and its earlier code "pass" was flattered by
+  # b10639 cross-request state bleed (2026-08-27-bleed-order-test). Designated successor:
+  # MiniMax-M3 on disk (family), or a UD-Q8 re-pull of M2.5 if the M2.5-vs-M3 comparison
+  # is ever revived.
 
   - name: "Qwen3.8-Flash-Next"
     # Day-one model (released 2026-08-26): 125B-A6B MoE, qwen4exp arch, 262K ctx.
@@ -182,21 +171,12 @@ all_models:
     hf_repo: "unsloth/NVIDIA-Nemotron-3.5-Lightning-30B-A3B-GGUF"
     hf_file: "NVIDIA-Nemotron-3.5-Lightning-30B-A3B-UD-Q8_K_XL.gguf"
 
-  - name: "Nemotron-3-Nano-30B-A3B"
-    path: "unsloth/Nemotron-3-Nano-30B-A3B-GGUF/Nemotron-3-Nano-30B-A3B-UD-Q8_K_XL.gguf"
-    size_gb: 38
-    vram_gb: 42
-    parts: 1
-    test_strategy: "both"
-    use_case: "Prior-gen control vs 3.5-Lightning — KEEP"
-    tps: "39.7 / 41.7 / 40.5"
-    quality: "3/3"
-    note: >-
-      Successor 3.5-Lightning is only +9-16% faster, and Nano runs correctly on DEFAULT
-      flags where 3.5 needs an explicit override. Safer choice for an unattended harness;
-      niche demonstrated, not a deletion candidate.
-    hf_repo: "unsloth/Nemotron-3-Nano-30B-A3B-GGUF"
-    hf_file: "Nemotron-3-Nano-30B-A3B-UD-Q8_K_XL.gguf"
+  # Nemotron-3-Nano-30B-A3B (38 GB) deleted 2026-08-27 (Kal-approved cleanup). Its
+  # demonstrated niche — "runs correctly on DEFAULT flags while 3.5-Lightning needs
+  # --speculative-type off" — was eliminated by the unified-memory root cause: with the
+  # fix, 3.5-Lightning runs default flags 3/3 at ~56 t/s vs Nano's 39-45
+  # (2026-08-27-b10639-umfix-batch / -rebaseline-batch). Designated successor:
+  # NVIDIA-Nemotron-3.5-Lightning-30B-A3B on disk.
 
   - name: "Qwen3-Coder-30B-A3B-Instruct"
     path: "unsloth/Qwen3-Coder-30B-A3B-Instruct-GGUF/Qwen3-Coder-30B-A3B-Instruct-UD-Q8_K_XL.gguf"
@@ -223,21 +203,12 @@ all_models:
     hf_repo: "unsloth/gemma-4-26B-A4B-it-GGUF"
     hf_file: "gemma-4-26B-A4B-it-UD-Q8_K_XL.gguf"
 
-  - name: "GLM-4.7-Flash-REAP-23B-A3B"
-    path: "unsloth/GLM-4.7-Flash-REAP-23B-A3B-GGUF/GLM-4.7-Flash-REAP-23B-A3B-UD-Q8_K_XL.gguf"
-    size_gb: 26
-    vram_gb: 30
-    parts: 1
-    test_strategy: "both"
-    use_case: "REAP-pruned variant of the champion — NO NICHE FOUND"
-    tps: "30.6 / 31.3 / 24.3"
-    quality: "1/3"
-    note: >-
-      Slower than the full 33G champion AND fails reasoning + code (10,562-token code answer
-      vs the champion's 6,169). Smaller on disk is its only advantage. Retirement candidate
-      once Kal reviews — successor GLM-4.7-Flash is on disk.
-    hf_repo: "unsloth/GLM-4.7-Flash-REAP-23B-A3B-GGUF"
-    hf_file: "GLM-4.7-Flash-REAP-23B-A3B-UD-Q8_K_XL.gguf"
+  # GLM-4.7-Flash-REAP-23B-A3B (26 GB) deleted 2026-08-27 (Kal-approved cleanup). No
+  # niche on any axis: slower than the full 33 GB champion AND 1/3 on quality (b10472
+  # batch). The pruning-axis datapoint is measured and recorded in UNSLOTH-DIRECTION.md;
+  # note the b10639 bleed finding means its multi-request grades carry the standard
+  # session-history caveat, but the speed deficit alone settles the niche question.
+  # Designated successor: GLM-4.7-Flash (full) on disk.
 
   - name: "Qwen3-Coder-Next"
     path: "unsloth/Qwen3-Coder-Next-GGUF/Qwen3-Coder-Next-UD-Q8_K_XL-00001-of-00003.gguf"

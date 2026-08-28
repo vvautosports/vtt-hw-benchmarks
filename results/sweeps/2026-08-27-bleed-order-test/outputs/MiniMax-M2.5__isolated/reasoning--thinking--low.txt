@@ -1,0 +1,67 @@
+=== REASONING ===
+Let me solve this step by step.
+
+We have three trucks arriving at a warehouse:
+- Truck A returns every 12 minutes
+- Truck B returns every 18 minutes
+- Truck C returns every 30 minutes
+
+All three arrive together at 6:00 AM.
+
+We need to find when they'll all arrive together again within the time window from 6:00 AM to 6:00 PM inclusive.
+
+First, let's find the least common multiple (LCM) of 12, 18, and 30.
+
+Prime factorization:
+- 12 = 2² × 3
+- 18 = 2 × 3²
+- 30 = 2 × 3 × 5
+
+The LCM uses the highest power of each prime:
+- 2² from 12
+- 3² from 18
+- 5 from 30
+
+LCM = 2² × 3² × 5 = 4 × 9 × 5 = 180 minutes
+
+So all three trucks arrive together every 180 minutes, or every 3 hours.
+
+Now let's count the arrivals:
+- 6:00 AM - first meeting
+- After 180 minutes = 9:00 AM
+- After 360 minutes = 12:00 PM (noon)
+- After 540 minutes = 3:00 PM
+- After 720 minutes = 6:00 PM
+
+Wait, 6:00 PM is 12 hours after 6:00 AM, which is 720 minutes.
+
+Let me count more carefully:
+- 6:00 AM (0 minutes) - first meeting
+- 6:00 AM + 180 min = 9:00 AM (180 minutes)
+- 6:00 AM + 360 min = 12:00 PM (360 minutes)
+- 6:00 AM + 540 min = 3:00 PM (540 minutes)
+- 6:00 AM + 720 min = 6:00 PM (720 minutes)
+
+
+- 6:00 AM to 6:00 PM spans 12 hours (720 minutes). Starting at 6:00 AM, I add 180-minute intervals: 6:00 AM, 9:00 AM, 12:00 PM, 3:00 PM, and 6:00 PM. That's 5 moments when all three arrive together.
+
+
+=== CONTENT ===
+To find when all three trucks arrive together, I need the least common multiple (LCM) of their intervals: 12, 18, and 30 minutes.
+
+**Finding the LCM:**
+- Prime factorization: 12 = 2² × 3, 18 = 2 × 3², 30 = 2 × 3 × 5
+- LCM = 2² × 3² × 5 = 4 × 9 × 5 = **180 minutes (3 hours)**
+
+This means all three trucks arrive together every 180 minutes.
+
+**Counting from 6:00 AM to 6:00 PM:**
+- 6:00 AM (0 minutes) — first meeting
+- 9:00 AM (180 minutes)
+- 12:00 PM (360 minutes)
+- 3:00 PM (540 minutes)
+- 6:00 PM (720 minutes)
+
+There are 5 times when all three trucks arrive together.
+
+ANSWER: 5

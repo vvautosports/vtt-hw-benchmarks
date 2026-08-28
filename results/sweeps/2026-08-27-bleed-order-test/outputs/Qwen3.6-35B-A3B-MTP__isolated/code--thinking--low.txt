@@ -1,0 +1,86 @@
+=== REASONING ===
+All 6 doctests pass. The function handles all the requirements correctly. Let me provide a summary to the user.
+
+
+=== CONTENT ===
+Here's the `parse_ranges` function with its doctest block:
+
+```python
+def parse_ranges(s: str) -> list[int]:
+    """Parse a comma-separated string of numbers and ranges into a flat list of ints.
+
+    Whitespace is ignored around tokens and within tokens. A reversed range raises
+    ``ValueError``. Empty/whitespace-only input returns an empty list.
+
+    Examples
+    --------
+    >>> parse_ranges('1-3,5,7-9')
+    [1, 2, 3, 5, 7, 8, 9]
+
+    >>> parse_ranges('')
+    []
+
+    >>> parse_ranges('   ')
+    []
+
+    >>> parse_ranges('1 - 3 , 5')
+    [1, 2, 3, 5]
+
+    >>> parse_ranges('9-7')
+    Traceback (most recent call last):
+        ...
+    ValueError: reversed range: 9-7
+
+    >>> parse_ranges('0,2-2,5 - 7')
+    [0, 2, 5, 6, 7]
+    """
+    if not s or s.strip() == "":
+        return []
+
+    result: list[int] = []
+    parts = s.split(",")
+
+    for part in parts:
+        tokens = part.split("-")
+
+        if len(tokens) == 1:
+            # Plain number
+            try:
+                n = int(tokens[0].strip())
+            except ValueError:
+                raise ValueError(f"invalid token: {part.strip()!r}")
+            result.append(n)
+
+        elif len(tokens) == 2:
+            start = int(tokens[0].strip())
+            end = int(tokens[1].strip())
+
+            if start > end:
+                raise ValueError(
+                    f"reversed range: {tokens[0].strip()}-{tokens[1].strip()}"
+                )
+
+            result.extend(range(start, end + 1))
+
+        else:
+            # Multiple dashes — treat each sub-token as a standalone number
+            for token in tokens:
+                try:
+                    n = int(token.strip())
+                except ValueError:
+                    raise ValueError(f"invalid token: {token.strip()!r}")
+                result.append(n)
+
+    return result
+```
+
+**All 6 doctests pass**, covering every requirement:
+
+| Example | What it tests |
+|---|---|
+| `'1-3,5,7-9'` | Normal ranges and single numbers |
+| `''` | Empty input → `[]` |
+| `'   '` | Whitespace-only input → `[]` |
+| `'1 - 3 , 5'` | Whitespace around numbers/commas is ignored |
+| `'9-7'` | Reversed range raises `ValueError` |
+| `'0,2-2,5 - 7'` | Edge cases (single-element range `2-2`) and mixed whitespace |
