@@ -1,0 +1,32 @@
+=== REASONING ===
+--- turn 1 ---
+Need to call function convert_currency with amount 1500, from USD to EUR.
+
+=== CONTENT ===
+
+
+=== TOOLCALLS ===
+[
+ {
+  "name": "convert_currency",
+  "arguments": {
+   "amount": 1500,
+   "from_currency": "USD",
+   "to_currency": "EUR"
+  },
+  "arguments_raw": "{\n  \"amount\": 1500,\n  \"from_currency\": \"USD\",\n  \"to_currency\": \"EUR\"\n}",
+  "args_parsed": true
+ }
+]
+
+=== META ===
+{
+ "finish_reason": "tool_calls",
+ "turns": 1,
+ "n_calls": 1,
+ "chain_depth_reached": 1,
+ "raw_toolcall_text_detected": false,
+ "args_parse_failures": 0,
+ "prompt_tokens": 178,
+ "case": "tc_coercion"
+}

@@ -1,0 +1,44 @@
+=== REASONING ===
+--- turn 1 ---
+We need to call create_order.
+
+=== CONTENT ===
+
+
+=== TOOLCALLS ===
+[
+ {
+  "name": "create_order",
+  "arguments": {
+   "customer": {
+    "name": "Ada Lovelace",
+    "tier": "gold"
+   },
+   "items": [
+    {
+     "sku": "AX-19",
+     "qty": 2
+    },
+    {
+     "sku": "BX-7",
+     "qty": 5
+    }
+   ],
+   "rush": true
+  },
+  "arguments_raw": "{\n  \"customer\": {\n    \"name\": \"Ada Lovelace\",\n    \"tier\": \"gold\"\n  },\n  \"items\": [\n    {\n      \"sku\": \"AX-19\",\n      \"qty\": 2\n    },\n    {\n      \"sku\": \"BX-7\",\n      \"qty\": 5\n    }\n  ],\n  \"rush\": true\n}",
+  "args_parsed": true
+ }
+]
+
+=== META ===
+{
+ "finish_reason": "tool_calls",
+ "turns": 1,
+ "n_calls": 1,
+ "chain_depth_reached": 1,
+ "raw_toolcall_text_detected": false,
+ "args_parse_failures": 0,
+ "prompt_tokens": 207,
+ "case": "tc_nested"
+}

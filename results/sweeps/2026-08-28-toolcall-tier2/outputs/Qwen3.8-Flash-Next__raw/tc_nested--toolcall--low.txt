@@ -1,0 +1,50 @@
+=== REASONING ===
+--- turn 1 ---
+The user wants me to create an order with the following details:
+- Customer: Ada Lovelace, tier: gold
+- Items: 2 units of SKU AX-19, 5 units of SKU BX-7
+- Rush shipping: true
+
+This is straightforward - all information is provided and there are no dependencies between calls. I can make a single create_order call.
+
+
+=== CONTENT ===
+
+
+=== TOOLCALLS ===
+[
+ {
+  "name": "create_order",
+  "arguments": {
+   "customer": {
+    "name": "Ada Lovelace",
+    "tier": "gold"
+   },
+   "items": [
+    {
+     "sku": "AX-19",
+     "qty": 2
+    },
+    {
+     "sku": "BX-7",
+     "qty": 5
+    }
+   ],
+   "rush": true
+  },
+  "arguments_raw": "{\"customer\":{\"name\": \"Ada Lovelace\", \"tier\": \"gold\"},\"items\":[{\"sku\": \"AX-19\", \"qty\": 2}, {\"sku\": \"BX-7\", \"qty\": 5}],\"rush\":true}",
+  "args_parsed": true
+ }
+]
+
+=== META ===
+{
+ "finish_reason": "tool_calls",
+ "turns": 1,
+ "n_calls": 1,
+ "chain_depth_reached": 1,
+ "raw_toolcall_text_detected": false,
+ "args_parse_failures": 0,
+ "prompt_tokens": 468,
+ "case": "tc_nested"
+}

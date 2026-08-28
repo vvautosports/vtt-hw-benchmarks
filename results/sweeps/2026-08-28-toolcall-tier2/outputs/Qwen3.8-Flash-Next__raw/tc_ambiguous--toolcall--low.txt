@@ -1,0 +1,31 @@
+=== REASONING ===
+--- turn 1 ---
+The user wants to know the status of flight UA 448. I have a tool called `get_flight_status` that takes a flight number as input. Let me use it with "UA448" as the flight number.
+
+
+=== CONTENT ===
+
+
+=== TOOLCALLS ===
+[
+ {
+  "name": "get_flight_status",
+  "arguments": {
+   "flight_no": "UA448"
+  },
+  "arguments_raw": "{\"flight_no\":\"UA448\"}",
+  "args_parsed": true
+ }
+]
+
+=== META ===
+{
+ "finish_reason": "tool_calls",
+ "turns": 1,
+ "n_calls": 1,
+ "chain_depth_reached": 1,
+ "raw_toolcall_text_detected": false,
+ "args_parse_failures": 0,
+ "prompt_tokens": 424,
+ "case": "tc_ambiguous"
+}
