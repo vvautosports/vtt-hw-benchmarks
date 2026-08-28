@@ -36,9 +36,33 @@ ssh -n framework 'setsid nohup python3 ~/roster_batch.py ~/spec.json ~/rundir > 
 | `battery.py` | Runs the 3-task battery against whatever is currently serving, and records the runtime build. Used for the llama.cpp-version sweep. |
 | `nemotron_retest.py` | One-off root-cause matrix for the Nemotron-3.5 MTP defect. Kept as the worked example of an A/B config matrix. |
 | `fetch_roster.sh` | Downloads a model list to `/mnt/ai-models`, logging sizes and free space. Downloads only — deliberately decoupled from testing. |
+| `fetch_2026_08_28.sh` | Same shape, 2026-08-28 targets (Muse-Glimmer vision anchor + DeepSeek-V4-Flash). |
+| `sweep_toolcall.py` | **Owns `run_tool_case()`** and the multi-turn tool loop — the Track 1 counterpart to `sweep_phase1.py`. Case definitions live in `toolcall_cases.json`. |
+| `toolcall_battery.py` | **Track 1 driver.** Fresh server per (entry, case); the healing ladder is expressed purely in spec `flags`. |
 
 Grading lives separately at [`../utils/grade_sweep.py`](../utils/grade_sweep.py) — analysis,
-not execution. Run it on your workstation against the harvested run directory.
+not execution. Run it on your workstation against the harvested run directory. Its tool-call
+graders have a self-test at [`../testing/test_grade_toolcall.py`](../testing/test_grade_toolcall.py)
+that needs no inference host — run it before spending a matrix on graders that might be wrong.
+
+## Three tool flags, three different things
+
+Easy to conflate, and conflating them wrecks a run. `unsloth run` exposes:
+
+| Flag | Default | Governs |
+|---|---|---|
+| `--enable-tools` / `--disable-tools` | **on** | **Server-side** built-ins (web search, code exec). The source of the corpus-wide ~1200 tok/request prompt inflation. |
+| `--enable-tool-call-healing` / `--disable-...` | **on** | Promotes text-form `<tool_call>` output into structured calls on the **client-tool passthrough**. |
+| `--enable-tool-call-nudging` / `--disable-...` | **on** | **Retries once with a nudge** when healing could not repair the call. Non-streaming only. |
+
+The Track 1 battery tests the **client-tool passthrough** (`tools:[...]` in the request),
+which is a *different mechanism* from the server-side built-ins. So a tool-calling run still
+wants `--disable-tools` — server-side tools are noise there, exactly as they are for the text
+battery. What varies across the Track 1 rungs is healing and nudging.
+
+Nudging matters more than it looks: left on, it silently grants a second attempt, so the
+production default flatters every model. A model that only passes with healing and nudging on
+is a worse tier than one that emits clean calls with both off.
 
 ## The trampling rule
 

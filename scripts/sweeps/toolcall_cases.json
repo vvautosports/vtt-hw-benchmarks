@@ -1,0 +1,366 @@
+{
+  "version": 1,
+  "family": "toolcall",
+  "notes": [
+    "Track 1 Tier 1 \u2014 deterministic tool-calling battery. Single source of truth for case",
+    "definitions, shared by sweep_toolcall.py (execution) and grade_sweep.py (grading).",
+    "The driver copies this file into the run dir so a harvested run grades self-contained.",
+    "",
+    "SAMPLING: temperature 0 (greedy), NOT the battery's thinking profile (temp 1.0). Tool",
+    "calling is a pass/fail binary, so at temp 1.0 with n=1 you cannot separate 'model can't'",
+    "from 'unlucky sample'. Greedy is also what BFCL and friends use, which is what makes a",
+    "low score here comparable to a vendor's published claim instead of noise.",
+    "",
+    "enable_tools:false is sent on every request. That suppresses SERVER-SIDE built-ins (web",
+    "search, code exec) \u2014 a different mechanism from the client-tool passthrough under test.",
+    "Belt-and-braces with --disable-tools at launch; contamination is caught by the per-case",
+    "prompt-token ceilings described below.",
+    "",
+    "PROMPT-TOKEN CEILINGS are per-case (expect.max_prompt_tokens), not global. Prompt size",
+    "scales with how many tool schemas a case offers -- tc_distractor legitimately costs ~775",
+    "tokens for its 5 schemas, where tc_single costs ~340. A single global threshold flags the",
+    "distractor case as contaminated on every run. Real server-side injection ran 2000-16000,",
+    "so a ~2x-baseline ceiling separates the two without false positives."
+  ],
+  "request_constants": {
+    "max_tokens": 2048,
+    "seed": 42,
+    "temperature": 0.0,
+    "top_p": 1.0,
+    "reasoning_effort": "low",
+    "enable_tools": false
+  },
+  "cases": {
+    "tc_single": {
+      "kind": "single",
+      "intent": "Correct function selection + valid JSON args when exactly one tool fits.",
+      "prompt": "What is the current temperature in Denver? Use the available tool; do not guess.",
+      "tools": [
+        {
+          "type": "function",
+          "function": {
+            "name": "get_weather",
+            "description": "Get the current weather for a city.",
+            "parameters": {
+              "type": "object",
+              "properties": {
+                "city": {
+                  "type": "string",
+                  "description": "City name"
+                },
+                "unit": {
+                  "type": "string",
+                  "enum": [
+                    "c",
+                    "f"
+                  ],
+                  "description": "Temperature unit"
+                }
+              },
+              "required": [
+                "city"
+              ]
+            }
+          }
+        }
+      ],
+      "expect": {
+        "n_calls": 1,
+        "name": "get_weather",
+        "args_match": {
+          "city": "(?i)denver"
+        },
+        "max_prompt_tokens": 800
+      }
+    },
+    "tc_distractor": {
+      "kind": "single",
+      "intent": "Five tools offered, exactly one correct. Catches models that pattern-match the first tool or the most recently described one.",
+      "prompt": "How much is 250 US dollars in euros right now? Use the available tools.",
+      "tools": [
+        {
+          "type": "function",
+          "function": {
+            "name": "get_weather",
+            "description": "Get the current weather for a city.",
+            "parameters": {
+              "type": "object",
+              "properties": {
+                "city": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "city"
+              ]
+            }
+          }
+        },
+        {
+          "type": "function",
+          "function": {
+            "name": "send_email",
+            "description": "Send an email to a recipient.",
+            "parameters": {
+              "type": "object",
+              "properties": {
+                "to": {
+                  "type": "string"
+                },
+                "subject": {
+                  "type": "string"
+                },
+                "body": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "to",
+                "subject",
+                "body"
+              ]
+            }
+          }
+        },
+        {
+          "type": "function",
+          "function": {
+            "name": "create_calendar_event",
+            "description": "Create a calendar event.",
+            "parameters": {
+              "type": "object",
+              "properties": {
+                "title": {
+                  "type": "string"
+                },
+                "start_iso": {
+                  "type": "string"
+                },
+                "duration_minutes": {
+                  "type": "integer"
+                }
+              },
+              "required": [
+                "title",
+                "start_iso"
+              ]
+            }
+          }
+        },
+        {
+          "type": "function",
+          "function": {
+            "name": "search_flights",
+            "description": "Search for flights between two airports.",
+            "parameters": {
+              "type": "object",
+              "properties": {
+                "origin": {
+                  "type": "string"
+                },
+                "destination": {
+                  "type": "string"
+                },
+                "date": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "origin",
+                "destination"
+              ]
+            }
+          }
+        },
+        {
+          "type": "function",
+          "function": {
+            "name": "convert_currency",
+            "description": "Convert an amount from one currency to another at the live rate.",
+            "parameters": {
+              "type": "object",
+              "properties": {
+                "amount": {
+                  "type": "number",
+                  "description": "Amount to convert"
+                },
+                "from_currency": {
+                  "type": "string",
+                  "description": "ISO 4217 code, e.g. USD"
+                },
+                "to_currency": {
+                  "type": "string",
+                  "description": "ISO 4217 code, e.g. EUR"
+                }
+              },
+              "required": [
+                "amount",
+                "from_currency",
+                "to_currency"
+              ]
+            }
+          }
+        }
+      ],
+      "expect": {
+        "n_calls": 1,
+        "name": "convert_currency",
+        "args_match": {
+          "amount": "^250(\\.0+)?$",
+          "from_currency": "(?i)usd",
+          "to_currency": "(?i)eur"
+        },
+        "max_prompt_tokens": 1400
+      }
+    },
+    "tc_refusal": {
+      "kind": "single",
+      "intent": "No offered tool fits. The model must answer directly rather than hallucinate a call. A get_weather('Paris') here is the classic failure.",
+      "prompt": "What is the capital city of France?",
+      "tools": [
+        {
+          "type": "function",
+          "function": {
+            "name": "get_weather",
+            "description": "Get the current weather for a city.",
+            "parameters": {
+              "type": "object",
+              "properties": {
+                "city": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "city"
+              ]
+            }
+          }
+        },
+        {
+          "type": "function",
+          "function": {
+            "name": "send_email",
+            "description": "Send an email to a recipient.",
+            "parameters": {
+              "type": "object",
+              "properties": {
+                "to": {
+                  "type": "string"
+                },
+                "body": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "to",
+                "body"
+              ]
+            }
+          }
+        },
+        {
+          "type": "function",
+          "function": {
+            "name": "search_flights",
+            "description": "Search for flights between two airports.",
+            "parameters": {
+              "type": "object",
+              "properties": {
+                "origin": {
+                  "type": "string"
+                },
+                "destination": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "origin",
+                "destination"
+              ]
+            }
+          }
+        }
+      ],
+      "expect": {
+        "n_calls": 0,
+        "content_match": "(?i)paris",
+        "max_prompt_tokens": 1000
+      }
+    },
+    "tc_chain": {
+      "kind": "chain",
+      "intent": "Multi-turn: the tool result must actually be consumed. The count 4731 is unguessable, so a correct 9462 cannot be produced without reading the tool response.",
+      "prompt": "Look up how many units of SKU AX-19 are in stock, then tell me what that count would be if it were doubled. State the doubled number on its own line as 'RESULT: <n>'.",
+      "max_turns": 4,
+      "tools": [
+        {
+          "type": "function",
+          "function": {
+            "name": "get_inventory_count",
+            "description": "Get the current in-stock unit count for a SKU.",
+            "parameters": {
+              "type": "object",
+              "properties": {
+                "sku": {
+                  "type": "string",
+                  "description": "Stock keeping unit, e.g. AX-19"
+                }
+              },
+              "required": [
+                "sku"
+              ]
+            }
+          }
+        }
+      ],
+      "tool_results": {
+        "get_inventory_count": {
+          "sku": "AX-19",
+          "count": 4731,
+          "warehouse": "DEN-1"
+        }
+      },
+      "expect": {
+        "min_calls": 1,
+        "name": "get_inventory_count",
+        "content_match": "9462",
+        "max_prompt_tokens": 800
+      }
+    },
+    "tc_longchain": {
+      "kind": "longchain",
+      "intent": "Regression for ggml-org/llama.cpp#19513 \u2014 premature EOS after roughly 10-20 sequential tool calls. Reported against Qwen3-Coder-Next, MiniMax-M2 and GLM-4.5-Air. Pass = survives 15 chained calls.",
+      "prompt": "Call step with n=0. It returns the next value of n. Keep calling step with the value it returns, one call at a time, until it returns done=true. Then report the token it gives you on its own line as 'TOKEN: <token>'. Do not skip ahead and do not guess the token.",
+      "max_turns": 25,
+      "target_depth": 20,
+      "pass_depth": 15,
+      "final_token": "ZEPHYR-7731",
+      "tools": [
+        {
+          "type": "function",
+          "function": {
+            "name": "step",
+            "description": "Advance the counter by one and return the next value of n.",
+            "parameters": {
+              "type": "object",
+              "properties": {
+                "n": {
+                  "type": "integer",
+                  "description": "Current value of n"
+                }
+              },
+              "required": [
+                "n"
+              ]
+            }
+          }
+        }
+      ],
+      "expect": {
+        "pass_depth": 15,
+        "completion_match": "ZEPHYR-7731",
+        "max_prompt_tokens": 800
+      }
+    }
+  }
+}
