@@ -37,14 +37,20 @@ Graders (static, deterministic -- no LLM judge):
   code:      >= 5 doctest examples ('>>>') AND raises/mentions ValueError
   summarize: exactly 5 bullets before the TL;DR line, TL;DR present
 
-Tool-call family (Track 1 Tier 1) -- tc_single, tc_distractor, tc_refusal, tc_chain,
-tc_longchain. These read the `=== TOOLCALLS ===` and `=== META ===` sections that
-sweep_toolcall.py writes, and check them against the expectations in
-<run_dir>/toolcall_cases.json. That file is copied into the run dir by the driver, so
-expectations travel WITH the run: editing the repo's case definitions can never silently
-re-grade an already-committed run. Cells whose prompt_tokens exceed 500 are flagged
-tools_injection_suspect -- the server-side built-ins came back on -- but are not
-auto-failed, since a real pass is still a real pass.
+Tool-call family. Tier 1 (saturated): tc_single, tc_distractor, tc_refusal, tc_chain,
+tc_longchain. Tier 2 (discriminative): tc_parallel, tc_nested, tc_union, tc_distractor_p1,
+tc_distractor_p3, tc_ambiguous, tc_coercion. These read the `=== TOOLCALLS ===` and
+`=== META ===` sections that sweep_toolcall.py writes, and check them against the expectations
+in <run_dir>/toolcall_cases.json (whichever cases file the driver copied in). That file is
+copied into the run dir by the driver, so expectations travel WITH the run: editing the repo's
+case definitions can never silently re-grade an already-committed run. Cells whose prompt_tokens
+exceed the case ceiling are flagged tools_injection_suspect -- the server-side built-ins came
+back on -- but are not auto-failed, since a real pass is still a real pass.
+
+Two expectation forms beyond the single-call checks: expect.calls is a list of {name, args_match}
+specs matched order-insensitively against the turn's calls (parallel cases), and any args_match
+pattern may be a LIST of patterns that must all match one arg -- used to assert several substrings
+inside one nested object/array argument.
 
 Grading reads only the `=== CONTENT ===` section -- content-channel grading, which
 is what catches a model writing its real answer into the reasoning stream and
@@ -58,7 +64,14 @@ import re
 import sys
 
 TEXT_TASKS = ("reasoning", "code", "summarize")
-TOOLCALL_TASKS = ("tc_single", "tc_distractor", "tc_refusal", "tc_chain", "tc_longchain")
+TOOLCALL_TASKS = (
+    # Tier 1 (saturated 90/90 -- a floor, not a ranking)
+    "tc_single", "tc_distractor", "tc_refusal", "tc_chain", "tc_longchain",
+    # Tier 2 -- discriminative pressure: parallel calls, nested/union schemas,
+    # distractor-position rotation, tool ambiguity, argument coercion.
+    "tc_parallel", "tc_nested", "tc_union",
+    "tc_distractor_p1", "tc_distractor_p3", "tc_ambiguous", "tc_coercion",
+)
 TASKS = TEXT_TASKS + TOOLCALL_TASKS
 
 SECTION_RE = re.compile(r"(?m)^=== [A-Z]+ ===\n")
@@ -102,6 +115,23 @@ def _json_section(path, marker, default):
         return json.loads(raw)
     except ValueError:
         return default
+
+
+def _match_pattern(val, pat):
+    """One arg value matches when str(val) satisfies the pattern -- or, when pat is a list,
+    EVERY pattern in it. The list form lets a single nested arg (an object or array serialised
+    to str) be asserted against several independent substrings, e.g. items=["AX-19", "BX-7"]."""
+    if val is None:
+        return False
+    pats = pat if isinstance(pat, list) else [pat]
+    return all(re.search(p, str(val)) is not None for p in pats)
+
+
+def _args_match(args, spec):
+    """True when every (arg -> pattern) in spec matches. spec values may be str or [str]."""
+    if not isinstance(args, dict):
+        return False
+    return all(_match_pattern(args.get(k), pat) for k, pat in spec.items())
 
 
 def grade_toolcall(task, path, cases):
@@ -152,14 +182,25 @@ def grade_toolcall(task, path, cases):
     elif "name" in exp:
         checks.append(False)
     if "args_match" in exp:
-        args = (calls[0].get("arguments") if calls else None) or {}
-        ok = isinstance(args, dict)
-        if ok:
-            for k, pat in exp["args_match"].items():
-                val = args.get(k)
-                ok = ok and val is not None and re.search(pat, str(val)) is not None
+        ok = _args_match((calls[0].get("arguments") if calls else None) or {}, exp["args_match"])
         q["args_ok"] = ok
         checks.append(ok)
+    if "calls" in exp:
+        # Parallel/multi-call turn: each expected spec must match a DISTINCT actual call,
+        # order-insensitive. A model that emits two of the three, or repeats one, fails.
+        remaining = list(range(len(calls)))
+        matched = 0
+        for spec in exp["calls"]:
+            hit = next(
+                (idx for idx in remaining
+                 if (not spec.get("name") or calls[idx].get("name") == spec["name"])
+                 and _args_match(calls[idx].get("arguments") or {}, spec.get("args_match", {}))),
+                None)
+            if hit is not None:
+                remaining.remove(hit)
+                matched += 1
+        q["calls_matched"] = matched
+        checks.append(matched == len(exp["calls"]))
     if "content_match" in exp:
         hit = re.search(exp["content_match"], content) is not None
         q["content_ok"] = hit

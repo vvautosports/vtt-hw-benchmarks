@@ -21,6 +21,11 @@ import grade_sweep as gs  # noqa: E402
 
 CASES = json.load(open(os.path.join(REPO, "sweeps", "toolcall_cases.json"),
                        encoding="utf-8"))["cases"]
+# Tier 2 lives in its own file (keeps the saturated Tier 1 baseline reproducible). Merge it
+# so one run of this self-test covers both batteries against the same grader.
+TIER2 = json.load(open(os.path.join(REPO, "sweeps", "toolcall_cases_tier2.json"),
+                       encoding="utf-8"))["cases"]
+CASES = {**CASES, **TIER2}
 
 
 def write(tmp, name, content, calls, meta):
@@ -76,6 +81,51 @@ FIXTURES = [
     ("tc_longchain", "fail-premature-eos", False, "",
      [call("step", {"n": i}) for i in range(9)],
      meta(finish_reason="stop", turns=10, n_calls=9, chain_depth_reached=9)),
+
+    # --- Tier 2 ---
+    ("tc_parallel", "pass", True, "",
+     [call("get_weather", {"city": "Denver"}), call("get_weather", {"city": "Boston"}),
+      call("get_weather", {"city": "Seattle"})], meta(n_calls=3)),
+    ("tc_parallel", "fail-only-two", False, "",
+     [call("get_weather", {"city": "Denver"}), call("get_weather", {"city": "Boston"})],
+     meta(n_calls=2)),
+    ("tc_parallel", "fail-dup-city", False, "",
+     [call("get_weather", {"city": "Denver"}), call("get_weather", {"city": "Denver"}),
+      call("get_weather", {"city": "Seattle"})], meta(n_calls=3)),
+
+    ("tc_nested", "pass", True, "",
+     [call("create_order", {"customer": {"name": "Ada Lovelace", "tier": "gold"},
+                            "items": [{"sku": "AX-19", "qty": 2}, {"sku": "BX-7", "qty": 5}],
+                            "rush": True})], meta(n_calls=1)),
+    ("tc_nested", "fail-missing-item", False, "",
+     [call("create_order", {"customer": {"name": "Ada Lovelace", "tier": "gold"},
+                            "items": [{"sku": "AX-19", "qty": 2}], "rush": True})],
+     meta(n_calls=1)),
+
+    ("tc_union", "pass", True, "",
+     [call("set_reminder", {"note": "x", "when": {"date": "2026-09-01", "time": "14:30"}})],
+     meta(n_calls=1)),
+    ("tc_union", "fail-enum-branch", False, "",
+     [call("set_reminder", {"note": "x", "when": "afternoon"})], meta(n_calls=1)),
+
+    ("tc_distractor_p1", "pass", True, "",
+     [call("convert_currency", {"amount": 250, "from_currency": "USD", "to_currency": "EUR"})],
+     meta(n_calls=1)),
+    ("tc_distractor_p3", "pass", True, "",
+     [call("convert_currency", {"amount": 250, "from_currency": "USD", "to_currency": "EUR"})],
+     meta(n_calls=1)),
+
+    ("tc_ambiguous", "pass", True, "",
+     [call("get_flight_status", {"flight_no": "UA448"})], meta(n_calls=1)),
+    ("tc_ambiguous", "fail-route-search", False, "",
+     [call("search_flights", {"origin": "DEN", "destination": "SFO"})], meta(n_calls=1)),
+
+    ("tc_coercion", "pass", True, "",
+     [call("convert_currency", {"amount": 1500, "from_currency": "USD", "to_currency": "EUR"})],
+     meta(n_calls=1)),
+    ("tc_coercion", "fail-word-string", False, "",
+     [call("convert_currency", {"amount": "fifteen hundred", "from_currency": "USD",
+                                "to_currency": "EUR"})], meta(n_calls=1)),
 ]
 
 # Behaviours that must be visible in the record even though they do not flip `correct`.
@@ -88,6 +138,11 @@ EXTRA = [
     ("tc_longchain", "survived-but-no-token", "completed", False,
      "", [call("step", {"n": i}) for i in range(16)],
      meta(finish_reason="stop", turns=17, n_calls=16, chain_depth_reached=16)),
+    # Order-insensitive multi-call matching: two of three cities matched, so calls_matched=2
+    # even though n_calls=3 -- the partial credit is visible without flipping correct.
+    ("tc_parallel", "partial-two-of-three", "calls_matched", 2,
+     "", [call("get_weather", {"city": "Denver"}), call("get_weather", {"city": "Denver"}),
+          call("get_weather", {"city": "Seattle"})], meta(n_calls=3)),
 ]
 
 
@@ -120,6 +175,15 @@ def main():
         print(f"  {'ok  ' if ok else 'FAIL'} missing case definition -> {q}")
         if not ok:
             failures.append(f"missing-definition: {q}")
+
+        # Registration gate: every case in either battery must route to the toolcall grader.
+        # grade_toolcall is exercised directly above, so an unregistered name would still
+        # "pass" the fixtures while silently grading as graded:False in a real run.
+        for name in CASES:
+            reg_ok = name in gs.TOOLCALL_TASKS
+            print(f"  {'ok  ' if reg_ok else 'FAIL'} {name:<18} registered in TOOLCALL_TASKS")
+            if not reg_ok:
+                failures.append(f"{name}: not in gs.TOOLCALL_TASKS")
 
     if failures:
         print(f"\n{len(failures)} FAILURE(S):")
