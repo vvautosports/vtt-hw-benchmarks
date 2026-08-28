@@ -1,0 +1,31 @@
+=== REASONING ===
+--- turn 1 ---
+The user wants to know the current temperature in Denver. I have a weather tool available that can provide this information. I'll call it with "Denver" as the city parameter.
+
+
+=== CONTENT ===
+
+
+=== TOOLCALLS ===
+[
+ {
+  "name": "get_weather",
+  "arguments": {
+   "city": "Denver"
+  },
+  "arguments_raw": "{\"city\":\"Denver\"}",
+  "args_parsed": true
+ }
+]
+
+=== META ===
+{
+ "finish_reason": "tool_calls",
+ "turns": 1,
+ "n_calls": 1,
+ "chain_depth_reached": 1,
+ "raw_toolcall_text_detected": false,
+ "args_parse_failures": 0,
+ "prompt_tokens": 344,
+ "case": "tc_single"
+}

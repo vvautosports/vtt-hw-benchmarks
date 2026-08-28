@@ -1,6 +1,6 @@
 # Serving Gotchas — Strix Halo (Unsloth / llama.cpp)
 
-Operational quick-reference for anyone serving LLMs on VVC's AMD Strix Halo boxes (Framework Desktop, Fedora; HP G1a, Windows) via Unsloth Studio (`unsloth run`, which wraps llama-server). Each gotcha found the hard way during the 2026-08-26/27 benchmarking campaign — full narrative and evidence chain in [UNSLOTH-DIRECTION.md](UNSLOTH-DIRECTION.md).
+Operational quick-reference for anyone serving LLMs on VVC's AMD Strix Halo boxes (Framework Desktop, Fedora; HP G1a, Windows) via Unsloth Studio (`unsloth run`, which wraps llama-server). Each gotcha found the hard way during the 2026-08-26/28 benchmarking campaign — full narrative and evidence chain in [UNSLOTH-DIRECTION.md](UNSLOTH-DIRECTION.md).
 
 ---
 
@@ -40,7 +40,7 @@ Operational quick-reference for anyone serving LLMs on VVC's AMD Strix Halo boxe
 
 **ROOT CAUSE:** `unsloth run` enables server-side tools (web search, code execution) by default. Studio injects system/tool-schema content into the prompt, varying by model, and the model can spontaneously invoke a server-side tool (confirmed: a 235B model invoked code execution on a plain code-writing task, studio's tool loop failed, and it returned an apology string instead of code). A full corpus scan found 48 records across nearly every run in this campaign with prompt_tokens in the 2,000–16,000 range against a battery prompt of ~100 tokens.
 
-**FIX:** pass **`--disable-tools`** on every benchmark serve going forward (now a registry-wide rule). Content-channel pass/fail grades from before this fix still stand (they measure what the consumer actually received), but **any t/s or token-economy comparison predating this fix should be treated as suspect** — some of the "regression" findings earlier in the campaign (e.g. part of the b10639 code-token-bloat finding, 8,019→15,323 tokens) may partly reflect tool-loop overhead rather than raw generation. A `--disable-tools` re-baseline and a tools-on/off A/B are queued but not yet run.
+**FIX:** pass **`--disable-tools`** on every benchmark serve going forward (now a registry-wide rule). Content-channel pass/fail grades from before this fix still stand (they measure what the consumer actually received), but **any t/s or token-economy comparison predating this fix should be treated as suspect** — some of the "regression" findings earlier in the campaign (e.g. part of the b10639 code-token-bloat finding, 8,019→15,323 tokens) may partly reflect tool-loop overhead rather than raw generation. The tools-on/off A/B has since been **run and graded** (2026-08-27 night, [`results/sweeps/2026-08-27-toolsoff-rerun-ab/`](../../results/sweeps/2026-08-27-toolsoff-rerun-ab/manifest.yaml)): injection costs ~1,200 tok/request of schema and tool loops, and the 235B code cell passes clean under `--disable-tools`. A full champion re-baseline under `--disable-tools` is still queued.
 
 **SIGNATURE TO WATCH FOR:** `prompt_tokens > 2000` on a request that should be short is the tell — treat any such record as suspect until re-measured under `--disable-tools`.
 
@@ -48,7 +48,37 @@ Operational quick-reference for anyone serving LLMs on VVC's AMD Strix Halo boxe
 
 ---
 
-## (d) Smaller operational notes
+## (d) Client-tool passthrough: three tool flags, and two of them are confounds
+
+**SYMPTOM:** A tool-calling benchmark that looks clean but silently measures the wrong thing — either because server-side tool injection is still inflating the prompt, or because the server quietly repaired/retried a call the model got wrong and the score credits the model for it.
+
+**ROOT CAUSE:** `unsloth run` exposes **three** separate tool switches that are easy to conflate. They govern different mechanisms:
+
+| Flag | Default | Governs |
+|---|---|---|
+| `--enable-tools` / `--disable-tools` | **on** | **Server-side built-ins** (web search, code exec) — gotcha (c) above |
+| `--enable-tool-call-healing` / `--disable-...` | **on** | Promotes text-form tool calls back into structured ones on the **client-tool passthrough** |
+| `--enable-tool-call-nudging` / `--disable-...` | **on** | **Retries once with a nudge** when healing could not repair the call. Non-streaming only |
+
+The trap: a tool-calling battery tests the **client-tool passthrough** (`tools:[...]` in the request), which is a *different mechanism* from the server-side built-ins. So a tool-calling run still wants `--disable-tools` — server-side tools are noise there exactly as they are for the text battery. Assuming "tools are the subject, so leave tools on" reintroduces the gotcha-(c) injection for no benefit.
+
+Nudging is the subtler confound: left on, it silently grants a second attempt, so the production default flatters every model. A model that only passes with healing and nudging on is a worse tier than one that emits clean calls with both off. Grade the ladder — `raw` (both off) / `healed` / `full` — rather than a single number.
+
+**FLAGS MAP TO ENV VARS**, which is what actually reaches the backend: `--enable/--disable-tool-call-healing` sets `UNSLOTH_DISABLE_TOOL_CALL_HEALING=0/1`, and `--enable/--disable-tool-call-nudging` sets `UNSLOTH_TOOL_CALL_NUDGE=1/0`. Both are **value-tested** (`== "1"`), not presence-tested like `UNSLOTH_DISABLE_UNIFIED_MEMORY` — so `=0` genuinely means off here, the opposite of the unified-memory var's convention. Read once at import in `passthrough_healing.py`.
+
+**THE CLI DOES NOT VALIDATE UNKNOWN FLAGS.** `unsloth run --bogus-flag-xyz` is accepted silently and proceeds to load the model. "The server started" is therefore *no evidence* that a flag was honored — verify effects behaviourally or by reading the source, never by absence of an error.
+
+**HEALING ONLY FIRES ON FIVE SIGNALS**, listed in `passthrough_healing.py::_HEAL_SIGNALS`: `<tool_call>`, `<|tool_call>`, `<function=`, `[TOOL_CALLS]`, `<|content_invoke_tool_json|>`. A ```json fence or a bare JSON object is **not** a heal signal. Two of the five are also **unreachable through the content channel** on b10639-mix: the server rewrites `<tool_call>` to `< tool_call>` and `<function=` to `< function=`, inserting a space that stops the healer's own matcher from seeing them. Only `[TOOL_CALLS]` was demonstrably promotable.
+
+**CONSEQUENCE FOR GRADING:** identical results across all three rungs is the *expected* outcome for a well-behaved model — healing has nothing to repair when the model emits clean structured calls. That is not evidence the axis is inert. Verify the axis separately with [`scripts/testing/probe_healing_axis.py`](../../scripts/testing/probe_healing_axis.py) before concluding anything from rung equality.
+
+**FIX:** for any tool-calling benchmark serve, pass `--disable-tools` **plus** an explicit healing/nudging pair, and send `enable_tools: false` per request as belt-and-braces. Never rely on the defaults.
+
+**EVIDENCE:** [`results/sweeps/2026-08-28-toolcall-tier1/`](../../results/sweeps/2026-08-28-toolcall-tier1/manifest.yaml); axis demonstration in `probe_healing_axis.py` (2026-08-28: `raw` left `[TOOL_CALLS]` as literal text with `finish_reason=stop`, `full` promoted it to a structured call with `finish_reason=tool_calls`).
+
+---
+
+## (e) Smaller operational notes
 
 - **llama-server ignores SIGTERM.** This build family does not shut down on SIGTERM — orchestration and harness code must escalate to **SIGKILL** to actually stop the process.
 - **`kill_serve()` / `pkill -f llama-server` takes out every llama-server on the box**, including a pinned production server, not just the one the harness started. Before mixing a pinned/production server with harness batch runs, scope the pkill to match the specific runtime path (e.g. `.unsloth/llama.cpp`) or accept the outage.
