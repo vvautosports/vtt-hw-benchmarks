@@ -1,0 +1,92 @@
+=== REASONING ===
+We need to write a Python function parse_ranges(s: str) -> list[int] that parses a comma-separated list of numbers and ranges. The format: each token is either a single integer or a range like "a-b". Ignore whitespace around numbers and commas. If reversed range (i.e., start > end) raise ValueError. Empty or whitespace-only input returns [].
+
+We need to include a doctest block with at least 5 examples covering all requirements.
+
+We'll implement:
+
+- Split by commas. But we must ignore whitespace around commas and numbers. So we can split by ',' and then strip each token. Also handle empty string or whitespace-only: return [].
+- For each token, strip whitespace. If token is empty (shouldn't happen if input has trailing comma? maybe handle), but if token is empty after strip, we might skip? Actually if input has something like "1,,2" that would have an empty token, maybe raise ValueError? The requirement only says empty or whitespace-only input returns []. For tokens, we should handle properly. Maybe we raise ValueError for invalid tokens like empty token? Not specified but we can be lenient: skip empty tokens? But better to raise ValueError for invalid tokens. However, the requirement doesn't mention that. I'll assume that input is well-formed except for whitespace. But we can still handle empty token by skipping? Actually if we split by ',' then for input "1, ,2", after stripping we get tokens: "1", "", "2". The empty token could be ignored. But if input is just "," then tokens are ["",""] -> empty after strip -> return []? Probably not. But we can decide: if all tokens are empty after strip, return [] (but that's essentially whitespace-only). For simplicity, we can filter out empty tokens? But that would change behavior for "1,,2" which might be considered invalid. I think it's safer to raise ValueError for empty token. But the requirement doesn't specify. The problem statement only mentions that empty or whitespace-only input returns [], so we can check if s.strip() is empty and return [] before splitting. Then for tokens, we assume they are non-empty after stripping (unless there are multiple commas, but that could be considered invalid input). I'll raise ValueError for empty tokens after stripping (or token that is just whitespace) because it's malformed.
+
+- For each token, check if it contains a dash '-'. If not, parse as integer. If yes, split on '-', but careful: there could be negative numbers? The problem doesn't mention negative numbers, but ranges like "-5" or "3--2"? Probably not. We'll assume positive numbers only. But we should handle dash carefully: split on '-' and get exactly two parts. If more than one dash, it's invalid. So we do token.split('-') and check len == 2. Also strip each part.
+
+- Convert parts to int. If start > end, raise ValueError. Otherwise generate range(start, end+1) and extend the result list.
+
+- Accumulate all numbers in order.
+
+We'll include doctest examples:
+
+1. '1-3,5,7-9' -> [1,2,3,5,7,8,9] (basic)
+2. ' 1 - 3 , 5 , 7 - 9 ' -> same (whitespace ignored)
+3. '1,2,3' -> [1,2,3] (no ranges)
+4. '' -> [] (empty)
+5. '   ' -> [] (whitespace only)
+6. '9-7' -> raises ValueError (reversed range)
+7. '1-3,10-12' -> [1,2,3,10,11,12] (multiple ranges)
+8. Maybe '1-3, 5-7' -> [1,2,3,5,6,7] (mixed)
+We need at least 5 examples covering all requirements: whitespace handling, reversed range error, empty input, normal ranges, single numbers.
+
+I'll write doctest with these.
+
+Now implement.
+
+Let's write code.
+
+=== CONTENT ===
+```python
+def parse_ranges(s: str) -> list[int]:
+    """
+    Parse a string of comma-separated numbers and ranges into a flat list of ints.
+
+    The string may contain whitespace around numbers and commas. A range is
+    written as 'a-b' and expands to all integers from a to b inclusive.
+    If a reversed range (start > end) is encountered, ValueError is raised.
+    Empty or whitespace-only input returns an empty list.
+
+    >>> parse_ranges('1-3,5,7-9')
+    [1, 2, 3, 5, 7, 8, 9]
+    >>> parse_ranges(' 1 - 3 , 5 , 7 - 9 ')
+    [1, 2, 3, 5, 7, 8, 9]
+    >>> parse_ranges('1,2,3')
+    [1, 2, 3]
+    >>> parse_ranges('')
+    []
+    >>> parse_ranges('   ')
+    []
+    >>> parse_ranges('9-7')
+    Traceback (most recent call last):
+    ValueError: Reversed range: 9 > 7
+    >>> parse_ranges('1-3,10-12')
+    [1, 2, 3, 10, 11, 12]
+    """
+    # Handle empty or whitespace-only input
+    if s.strip() == '':
+        return []
+
+    result = []
+    # Split by commas and strip whitespace from each token
+    for token in s.split(','):
+        token = token.strip()
+        if not token:  # token empty (e.g., "1,,2") → invalid
+            raise ValueError(f"Empty token in input: {s!r}")
+
+        # Check if token is a range (contains '-')
+        if '-' in token:
+            # Split into start and end parts
+            parts = token.split('-')
+            if len(parts) != 2:
+                raise ValueError(f"Invalid range format: {token!r}")
+            start_str, end_str = parts[0].strip(), parts[1].strip()
+            if not start_str or not end_str:
+                raise ValueError(f"Invalid range format: {token!r}")
+            start, end = int(start_str), int(end_str)
+            if start > end:
+                raise ValueError(f"Reversed range: {start} > {end}")
+            # Extend result with the range
+            result.extend(range(start, end + 1))
+        else:
+            # Single number
+            result.append(int(token))
+
+    return result
+```

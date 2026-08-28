@@ -1,0 +1,15 @@
+=== REASONING ===
+We need answer. Need solve. Need be careful inclusive 6 AM to 6 PM. Trucks arrive at warehouse together at 6:00 AM. Then A returns every 12 min, B every 18, C every 30. We need count times all three arrive at same moment between 6 AM and 6 PM inclusive. Since all arrive together at 6 AM, interval LCM(12,18,30). Compute LCM: 12=2^2*3, 18=2*3^2, 30=2*3*5 => 2^2*3^2*5=180 minutes = 3 hours. So every 3 hours, all arrive same moment starting at 6:00 AM. From 6 AM to 6 PM inclusive = 12 hours = 720 minutes. Events at 6:00 AM, 9:00 AM, 12:00 PM, 3:00 PM, 6:00 PM? Let's list every 180 min: t=0,180,360,540,720 minutes after 6 AM. 720 min = 6 PM inclusive. That's 5 times. But need consider "all three trucks arrive at same moment" includes "arrive together at 6:00 AM" yes. Between 6 AM and 6 PM inclusive includes both endpoints. Count 5. But wait question: "Three delivery trucks all arrive at a warehouse together at 6:00 AM. Truck A returns every 12 minutes, truck B every 18 minutes, and truck C every 30 minutes. Between 6:00 AM and 6:00 PM inclusive, how many times do all three trucks arrive at the same moment?" There might be subtle: Truck A returns every 12 minutes after arrival? At 6:00 AM they arrive together, then return at intervals. At 6:00 PM? 12 hours after 6 AM = 720 min. LCM 180. 720/180 = 4 intervals after start, including both start and end? If between inclusive: endpoints plus 4 intervals => 5. If "returns every..." after arrival? At 6:00 AM they arrive, and maybe after they depart? They return every 12 minutes (first return at 6:12). But all three arriving together at 6 AM is given. Count includes 6 AM and 6 PM? "Between 6:00 AM and 6:00 PM inclusive" yes includes 6:00 AM and 6:00 PM. Need final line ANSWER: 5. But need show reasoning maybe concise.
+
+=== CONTENT ===
+The three trucks arrive together every:
+
+LCM(12, 18, 30) = 180 minutes = 3 hours.
+
+Starting at 6:00 AM, they coincide at:
+
+6:00 AM, 9:00 AM, 12:00 PM, 3:00 PM, 6:00 PM
+
+That is 5 times.
+
+ANSWER: 5

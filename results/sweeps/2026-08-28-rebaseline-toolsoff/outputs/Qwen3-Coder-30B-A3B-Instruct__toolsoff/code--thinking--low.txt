@@ -1,0 +1,97 @@
+=== CONTENT ===
+```python
+def parse_ranges(s: str) -> list[int]:
+    """
+    Parse a string of ranges into a list of integers.
+    
+    Args:
+        s: A string containing ranges separated by commas, e.g., '1-3,5,7-9'
+        
+    Returns:
+        A list of integers representing all numbers in the ranges
+        
+    Raises:
+        ValueError: If a range is reversed (like '9-7')
+        
+    Examples:
+        >>> parse_ranges('1-3,5,7-9')
+        [1, 2, 3, 5, 7, 8, 9]
+        
+        >>> parse_ranges('  1 - 3 , 5 , 7 - 9  ')
+        [1, 2, 3, 5, 7, 8, 9]
+        
+        >>> parse_ranges('10-12,15,17-19')
+        [10, 11, 12, 15, 17, 18, 19]
+        
+        >>> parse_ranges('')
+        []
+        
+        >>> parse_ranges('  ')
+        []
+        
+        >>> parse_ranges('5-3')
+        Traceback (most recent call last):
+        ...
+        ValueError: Reversed range: 5-3
+    """
+    # Handle empty or whitespace-only input
+    if not s or not s.strip():
+        return []
+    
+    result = []
+    
+    # Split by comma and process each part
+    for part in s.split(','):
+        part = part.strip()
+        if not part:  # Skip empty parts
+            continue
+            
+        # Check if it's a range (contains '-')
+        if '-' in part:
+            try:
+                start_str, end_str = part.split('-')
+                start = int(start_str.strip())
+                end = int(end_str.strip())
+                
+                # Check for reversed range
+                if start > end:
+                    raise ValueError(f"Reversed range: {start}-{end}")
+                
+                # Add all numbers in the range (inclusive)
+                result.extend(range(start, end + 1))
+                
+            except ValueError as e:
+                # Re-raise ValueError for invalid ranges
+                if "Reversed range" in str(e):
+                    raise e
+                # For invalid integers, raise ValueError
+                raise ValueError(f"Invalid range format: {part}")
+        else:
+            # Single number
+            try:
+                num = int(part)
+                result.append(num)
+            except ValueError:
+                raise ValueError(f"Invalid number: {part}")
+    
+    return result
+
+if __name__ == "__main__":
+    import doctest
+    doctest.testmod()
+```
+
+This function satisfies all requirements:
+
+1. **Parses ranges correctly**: Converts strings like '1-3,5,7-9' into [1, 2, 3, 5, 7, 8, 9]
+2. **Ignores whitespace**: Handles input with spaces around numbers and commas
+3. **Reversed range validation**: Raises ValueError for reversed ranges like '9-7'
+4. **Empty input handling**: Returns [] for empty or whitespace-only strings
+5. **Doctest coverage**: Includes 5+ examples that test all requirements
+
+The function:
+- Splits the input by commas and strips whitespace
+- Processes each part, handling both single numbers and ranges
+- Validates that ranges aren't reversed
+- Properly handles edge cases like empty strings and whitespace-only inputs
+- Raises appropriate ValueError exceptions with descriptive messages

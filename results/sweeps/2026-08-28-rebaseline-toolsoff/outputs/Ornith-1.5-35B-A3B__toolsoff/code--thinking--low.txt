@@ -1,0 +1,228 @@
+=== REASONING ===
+The user wants a Python function `parse_ranges(s: str) -> list[int]` that parses a string of ranges and individual numbers into a list of integers.
+
+Let me break down the requirements:
+1. Parse a string like '1-3,5,7-9' into [1, 2, 3, 5, 7, 8, 9]
+2. Ignore whitespace around numbers and commas
+3. A reversed range like '9-7' raises ValueError
+4. Empty or whitespace-only input returns []
+5. Include a doctest block with at least 5 examples covering all requirements
+
+Let me think about the implementation:
+
+```python
+def parse_ranges(s: str) -> list[int]:
+    """
+    Parse a comma-separated string of numbers and ranges into a flat list of integers.
+
+    Whitespace around numbers and commas is ignored. Reversed ranges like '9-7'
+    raise a ValueError. Empty or whitespace-only input returns [].
+
+    >>> parse_ranges('1-3,5,7-9')
+    [1, 2, 3, 5, 7, 8, 9]
+    >>> parse_ranges('')
+    []
+    >>> parse_ranges('   ')
+    []
+    >>> parse_ranges('10')
+    [10]
+    >>> parse_ranges('3-3')
+    [3]
+    >>> parse_ranges('9-7')
+    Traceback (most recent call last):
+        ...
+    ValueError: ...
+    """
+    result = []
+    for part in s.split(','):
+        part = part.strip()
+        if not part:
+            continue
+        if '-' in part:
+            start_str, end_str = part.split('-', 1)
+            start = int(start_str.strip())
+            end = int(end_str.strip())
+            if end < start:
+                raise ValueError(f"Reversed range: {start}-{end}")
+            result.extend(range(start, end + 1))
+        else:
+            result.append(int(part))
+    return result
+```
+
+Wait, let me think about edge cases:
+- Empty input: `s.split(',')` returns `['']`, and stripping gives `''`, which is empty, so we `continue`. Result is `[]`. Good.
+- Whitespace-only input: `s.split(',')` returns `['   ']`, stripping gives `''`, continue. Result is `[]`. Good.
+- Single number '10': no '-', so append `int('10')` = 10. Result `[10]`. Good.
+- Range start == end '3-3': range(3, 4) = [3]. Good.
+- Reversed range '9-7': end < start, raise ValueError. Good.
+
+Let me double check the doctest for ValueError. In doctests, we can test that an exception is raised using `Traceback` and `ValueError`. The message doesn't need to match exactly, but the type must match.
+
+Let me refine the implementation a bit. I think it's good.
+
+Actually, let me reconsider the whitespace handling. The requirement says "ignore whitespace around numbers and commas". My handling:
+- Split by comma
+- Strip each part
+- For ranges, strip the start and end strings too (in case there's internal whitespace like '1 - 3')
+
+That should handle '1 - 3, 5 , 7-9' correctly.
+
+Let me verify: '1 - 3, 5 , 7-9'
+- split(',') = ['1 - 3', ' 5 ', ' 7-9']
+- '1 - 3'.strip() = '1 - 3', has '-', split('-', 1) = ['1 ', ' 3'], int('1 '.strip())=1, int(' 3'.strip())=3. range(1, 4) = [1,2,3]. Good.
+- ' 5 '.strip() = '5', no '-', int('5') = 5. Good.
+- ' 7-9'.strip() = '7-9', has '-', split('-', 1) = ['7', '9'], int=7, int=9. range(7,10) = [7,8,9]. Good.
+
+Result: [1,2,3,5,7,8,9]. 
+
+Let me think about whether negative numbers could be an issue. The '-' is the range operator. If someone has a negative number, it's ambiguous. But the problem doesn't mention negative numbers, so I'll ignore that. Actually, let me consider it briefly. If someone inputs '-3-5', that would be split into ['-3', '5'], giving start=-3, end=5. Hmm, that's a weird edge case. But since the problem doesn't mention negatives, I'll not worry about it. Actually, my split('-', 1) would handle '-3-5' as start=-3, end=5 which might be unintended. But again, the problem doesn't require handling negatives so I'll leave it.
+
+Let me finalize.
+
+Let me count the doctests:
+1. '1-3,5,7-9' -> [1,2,3,5,7,8,9] (main example)
+2. '' -> [] (empty input)
+3. '   ' -> [] (whitespace-only)
+4. '10' -> [10] (single number)
+5. '3-3' -> [3] (single-element range)
+6. '9-7' -> ValueError (reversed range)
+7. Whitespace handling: '1 - 3, 5 , 7-9' -> [1,2,3,5,7,8,9]
+
+That's at least 5 examples (7 total) covering all requirements. 
+
+Let me write the final version. I'll also think about whether to include whitespace handling example since it's a requirement. Yes, I'll include one to demonstrate whitespace handling.
+
+Let me write it cleanly.
+
+```python
+def parse_ranges(s: str) -> list[int]:
+    """Parse a comma-separated list of integers and ranges into a flat list.
+
+    Whitespace around numbers and commas is ignored. A reversed range such as
+    ``'9-7'`` raises ``ValueError``. Empty or whitespace-only input yields ``[]``.
+
+    >>> parse_ranges('1-3,5,7-9')
+    [1, 2, 3, 5, 7, 8, 9]
+    >>> parse_ranges('1 - 3, 5 ,7-9')
+    [1, 2, 3, 5, 7, 8, 9]
+    >>> parse_ranges('10')
+    [10]
+    >>> parse_ranges('3-3')
+    [3]
+    >>> parse_ranges('')
+    []
+    >>> parse_ranges('     ')
+    []
+    >>> parse_ranges('9-7')
+    Traceback (most recent call last):
+        ...
+    ValueError: reversed range '9-7'
+    """
+    result: list[int] = []
+    for chunk in s.split(','):
+        chunk = chunk.strip()
+        if not chunk:
+            continue
+        if '-' in chunk:
+            low_str, high_str = chunk.split('-', 1)
+            low = int(low_str.strip())
+            high = int(high_str.strip())
+            if high < low:
+                raise ValueError(f"reversed range '{low}-{high}'")
+            result.extend(range(low, high + 1))
+        else:
+            result.append(int(chunk))
+    return result
+```
+
+This looks good. Let me verify all the doctests once more mentally:
+
+1. '1-3,5,7-9':
+   - '1-3': low=1, high=3, range(1,4)=[1,2,3]
+   - '5': append 5
+   - '7-9': low=7, high=9, range(7,10)=[7,8,9]
+   - Result: [1,2,3,5,7,8,9] ✓
+
+2. '1 - 3, 5 ,7-9':
+   - '1 - 3'.strip()='1 - 3', split('-',1)=['1 ', ' 3'], low=1, high=3, [1,2,3]
+   - ' 5 '.strip()='5', append 5
+   - '7-9'.strip()='7-9', low=7, high=9, [7,8,9]
+   - Result: [1,2,3,5,7,8,9] ✓
+
+3. '10': append 10. Result [10] ✓
+
+4. '3-3': low=3, high=3, range(3,4)=[3]. Result [3] ✓
+
+5. '': split(',')=[''], '' is empty, continue. Result [] ✓
+
+6. '     ': split(',')=['     '], .strip()='', continue. Result [] ✓
+
+7. '9-7': low=9, high=7, high<low, raise ValueError('reversed range \'9-7\'') ✓
+
+All good. The ValueError doctest checks the traceback contains ValueError and the message 'reversed range \'9-7\''.
+
+I'm confident in this solution. Let me present it.
+
+
+=== CONTENT ===
+Here's a clean implementation with a comprehensive doctest block:
+
+```python
+def parse_ranges(s: str) -> list[int]:
+    """Parse a comma-separated list of integers and ranges into a flat list.
+
+    Whitespace around numbers and commas is ignored. A reversed range such as
+    ``'9-7'`` raises ``ValueError``. Empty or whitespace-only input yields ``[]``.
+
+    >>> parse_ranges('1-3,5,7-9')
+    [1, 2, 3, 5, 7, 8, 9]
+    >>> parse_ranges('1 - 3, 5 ,7-9')
+    [1, 2, 3, 5, 7, 8, 9]
+    >>> parse_ranges('10')
+    [10]
+    >>> parse_ranges('3-3')
+    [3]
+    >>> parse_ranges('')
+    []
+    >>> parse_ranges('     ')
+    []
+    >>> parse_ranges('9-7')
+    Traceback (most recent call last):
+        ...
+    ValueError: reversed range '9-7'
+    """
+    result: list[int] = []
+    for chunk in s.split(','):
+        chunk = chunk.strip()
+        if not chunk:
+            continue
+        if '-' in chunk:
+            low_str, high_str = chunk.split('-', 1)
+            low = int(low_str.strip())
+            high = int(high_str.strip())
+            if high < low:
+                raise ValueError(f"reversed range '{low}-{high}'")
+            result.extend(range(low, high + 1))
+        else:
+            result.append(int(chunk))
+    return result
+```
+
+### How it works
+
+- **Splitting:** `s.split(',')` breaks the input into comma-separated tokens.
+- **Whitespace handling:** `chunk.strip()` trims surrounding whitespace. Each bound of a range is also stripped, so internal spacing like `'1 - 3'` is tolerated.
+- **Empty input:** An empty string `''.split(',')` gives `['']`, and whitespace-only input gives `['     ']`; after stripping both become `''`, which the `if not chunk: continue` guard skips, yielding `[]`.
+- **Ranges:** `'9-7'` is split on the first `'-'` into `'9'` and `'7'`; since `high < low`, a `ValueError` is raised. Single-element ranges like `'3-3'` correctly produce `[3]` via `range(3, 4)`.
+- **Single numbers:** Tokens without a `'-'` are converted directly with `int()`.
+
+### Verify with doctests
+
+Run from the command line:
+
+```bash
+python -m doctest your_file.py -v
+```
+
+The doctest covers all requirements: the main example, whitespace tolerance, single numbers, single-element ranges, empty input, whitespace-only input, and the reversed-range error.

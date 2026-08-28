@@ -1,0 +1,309 @@
+=== REASONING ===
+Write a Python function parse_ranges(s: str) -> list[int] that parses a string like '1-3,5,7-9' into [1, 2, 3, 5, 7, 8, 9]. Requirements: ignore whitespace around numbers and commas; a reversed range like '9-7' raises ValueError; empty or whitespace-only input returns []. Include a doctest block with at least 5 examples covering all requirements.
+
+We need to write Python function with doctest block.
+
+We should ensure parse_ranges returns list[int]. Probably sorted? If input is '5,1-3' should return [5,1,2,3]? Or perhaps preserve order? Usually parse ranges would expand in order given. Might be fine to maintain order. Probably better to preserve order of appearance. But typical expectation may be to keep order as parsed. Could also flatten and keep order. If they have overlapping? Might just generate in order.
+
+Specification: parse string like '1-3,5,7-9' into [1,2,3,5,7,8,9]. So order preserved.
+
+Whitespace ignore. Empty or whitespace-only -> [].
+
+Reversed range raises ValueError.
+
+Include doctest block with at least 5 examples covering all requirements.
+
+We need to output code.
+
+Probably define function parse_ranges(s: str) -> list[int]:...
+
+Implementation steps:
+
+if not s or s.strip() == '' -> return []
+
+Split by comma. For each part strip. If empty? Could skip? Might raise? Probably skip.
+
+If '-' in part: split at '-', maxsplit=1. left,right strip. Convert to int. If left > right -> raise ValueError. Else expand range(left, right+1). Append.
+
+Else: single number -> int.
+
+Return list.
+
+Edge cases: whitespace around numbers and commas: ' 1 - 3 , 5 ' works.
+
+Doctest examples:
+
+>>> parse_ranges('1-3,5,7-9')
+[1,2,3,5,7,8,9]
+
+>>> parse_ranges(' 1 - 3 , 5 , 7 - 9 ')
+[1,2,3,5,7,8,9]
+
+>>> parse_ranges('')
+[]
+
+>>> parse_ranges('   ')
+[]
+
+>>> parse_ranges('5')
+[5]
+
+>>> parse_ranges('9-7')
+ValueError
+
+Need at least 5 examples covering all requirements. Could have reversed range test with raises.
+
+Doctest syntax for raises: >>> parse_ranges('9-7') -> ValueError? In doctest, we can use:
+
+>>> parse_ranges('9-7')
+Traceback (most recent call last):
+...
+ValueError
+
+Better to use ... ? Might use:
+
+>>> parse_ranges('9-7')
+Traceback (most recent call last):
+...
+ValueError
+
+Simpler: use assertRaises? Not standard. Could do:
+
+>>> bool(parse_ranges('9-7'))
+... Actually raises.
+
+In doctest, to test exception: 
+
+>>> parse_ranges('9-7')
+Traceback (most recent call last):
+  ...
+ValueError
+
+We'll provide.
+
+Maybe also test whitespace.
+
+We need to ensure function returns list[int].
+
+Potential nuance: duplicate numbers? Keep duplicates? Probably okay.
+
+Implementation details.
+
+Return list of ints.
+
+Complexities trivial.
+
+We should output code block with function and doctest.
+
+Maybe include if __name__ == '__main__': import doctest; doctest.testmod()
+
+The prompt asks: Write a Python function parse_ranges... Include a doctest block with at least 5 examples covering all requirements.
+
+So provide code.
+
+Possibly ensure no extra spaces.
+
+Provide final answer.
+
+Maybe use Python type hints.
+
+Edge: part like '1-3-5'? Split maxsplit=1 => left '1', right '3-5' -> int conversion fails -> ValueError. Could be acceptable.
+
+Maybe also handle negative numbers? Not required. Could handle? '-' could be negative sign. Ambiguity. Could assume no negative numbers. Might be okay.
+
+If we split by '-', we might mis-handle negative numbers. But requirement not mention negatives. Could ignore.
+
+Better robust: use regex? Simpler: for each token, strip, then use re.split? Could parse with regex for numbers.
+
+Simpler implementation: use regex pattern r'\s*(-?\d+)\s*-\s*(-?\d+)\s*|\s*(-?\d+)\s*' but complicated.
+
+Let's assume non-negative.
+
+Provide function.
+
+Potential pitfalls: empty token after split by comma, e.g., '1,,3' -> empty string -> int conversion error. Might want to skip empty tokens.
+
+We could filter: if not token.strip(): continue.
+
+Implement:
+
+def parse_ranges(s: str) -> list[int]:
+    if not s or not s.strip():
+        return []
+    result = []
+    parts = s.split(',')
+    for part in parts:
+        part = part.strip()
+        if not part:
+            continue
+        if '-' in part:
+            # split only on first '-'? But could be multiple? Use partition
+            # Avoid splitting negative numbers? Assume no.
+            left_str, sep, right_str = part.partition('-')
+            # If sep not present? Already checked
+            # However partition will split at first '-'
+            # If left empty or right empty -> error
+            if not left_str or not right_str:
+                raise ValueError(f"Invalid range: {part}")
+            try:
+                start = int(left_str.strip())
+                end = int(right_str.strip())
+            except ValueError:
+                raise ValueError(f"Invalid numbers in range: {part}")
+            if start > end:
+                raise ValueError(f"Reversed range: {start}-{end}")
+            result.extend(range(start, end+1))
+        else:
+            try:
+                result.append(int(part))
+            except ValueError:
+                raise ValueError(f"Invalid number: {part}")
+    return result
+
+Works.
+
+Doctest examples: at least 5.
+
+Let's craft:
+
+def parse_ranges...
+    """
+    >>> parse_ranges('1-3,5,7-9')
+    [1, 2, 3, 5, 7, 8, 9]
+    >>> parse_ranges(' 1 - 3 , 5 , 7 - 9 ')
+    [1, 2, 3, 5, 7, 8, 9]
+    >>> parse_ranges('')
+    []
+    >>> parse_ranges('   ')
+    []
+    >>> parse_ranges('5')
+    [5]
+    >>> parse_ranges('9-7')
+    Traceback (most recent call last):
+        ...
+    ValueError
+    """
+
+Provide.
+
+Maybe also test whitespace around numbers.
+
+Could also test single range.
+
+Ok.
+
+Return list.
+
+Potential improvement: ensure result is list[int] not generator.
+
+Let's output final code.
+
+Make sure code is valid Python.
+
+Possibly add import? Not needed.
+
+Provide final answer with code snippet.
+
+Maybe also provide usage example.
+
+The prompt simply asks write function. So provide code.
+
+I'll output in final channel.
+
+Make sure doctest block with at least 5 examples covering all requirements.
+
+We have: normal parse, whitespace ignore, empty, whitespace-only, single number, reversed range raises. That's 6.
+
+All good.
+
+Edge: reversed range raises ValueError. Could also test '1-3, 4-2' raises.
+
+Ok.
+
+Potential issue: part.partition('-') for '1-3' left='1', sep='-', right='3'. Works.
+
+If part contains spaces '1 - 3' left='1 ', right=' 3' -> int conversion works after strip.
+
+Ok.
+
+Return.
+
+Possibly ensure no duplicate? Not needed.
+
+Ok produce final answer.
+
+Make sure formatting clean.
+
+Add if __name__ == '__main__': doctest.testmod()
+
+Maybe not required.
+
+I'll deliver.
+
+Potential nuance: doctest expects exact output format. Use same spacing.
+
+Let's produce final answer.
+
+Ensure function signature parse_ranges(s: str) -> list[int]
+
+Done.
+
+Output code block.
+
+Probably use triple quotes docstring.
+
+Ok.
+
+Final.
+
+=== CONTENT ===
+```python
+def parse_ranges(s: str) -> list[int]:
+    """
+    Parse a comma separated list of numbers and ranges.
+
+    >>> parse_ranges('1-3,5,7-9')
+    [1, 2, 3, 5, 7, 8, 9]
+    >>> parse_ranges(' 1 - 3 , 5 , 7 - 9 ')
+    [1, 2, 3, 5, 7, 8, 9]
+    >>> parse_ranges('')
+    []
+    >>> parse_ranges('   ')
+    []
+    >>> parse_ranges('5')
+    [5]
+    >>> parse_ranges('9-7')
+    Traceback (most recent call last):
+        ...
+    ValueError
+    """
+    if not s or not s.strip():
+        return []
+
+    result: list[int] = []
+    for part in s.split(','):
+        part = part.strip()
+        if not part:
+            continue
+
+        if '-' in part:
+            left_str, sep, right_str = part.partition('-')
+            if not sep or not left_str.strip() or not right_str.strip():
+                raise ValueError(f"Invalid range: {part}")
+            start = int(left_str.strip())
+            end = int(right_str.strip())
+            if start > end:
+                raise ValueError(f"Reversed range: {start}-{end}")
+            result.extend(range(start, end + 1))
+        else:
+            result.append(int(part))
+
+    return result
+
+
+if __name__ == "__main__":
+    import doctest
+    doctest.testmod()
+```
+
+The function ignores whitespace around numbers and commas, returns `[]` for empty input, expands `a-b` to `a … b`, and raises `ValueError` for a reversed range like `9-7`.

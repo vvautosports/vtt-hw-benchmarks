@@ -1,0 +1,25 @@
+=== REASONING ===
+We need to summarize the technical passage into exactly 5 bullet points followed by a one-sentence TL;DR. Faithful to source, no extra claims.
+
+The passage covers speculative decoding: mechanism, draft types, economics, MoE complications, server-side parallelism.
+
+Let's extract key points:
+
+1. Speculative decoding uses a cheap draft to propose tokens, verified in one batch by target model; outputs match standard decoding.
+2. Draft types: small model, n-gram lookup, or MTP head trained with target.
+3. Economics: code/structured text benefit from n-gram; open-ended prose lower acceptance; poorly matched draft can slow down.
+4. MoE targets: verification batches multiple positions with different experts, increases memory traffic, raising break-even acceptance rate.
+5. Server-side: slots, throughput vs per-stream speed, tuning must consider speculative mode, slot count, sampling settings jointly.
+
+TL;DR: one sentence summarizing.
+
+Need to be concise.
+
+=== CONTENT ===
+- Speculative decoding lets a draft model propose tokens that the target model verifies in one batch, preserving output quality and distribution while reducing cost.
+- Draft options include a separate small model, n-gram lookup, or a multi-token-prediction head trained jointly with the target.
+- Acceptance rates vary: n-gram works well for code/structured text, but open-ended prose accepts fewer tokens and a poor draft can make generation slower than the target alone.
+- For mixture-of-experts targets, verification batches can route to different experts, increasing memory traffic and raising the break-even acceptance rate relative to dense models.
+- Server tuning must jointly consider speculative mode, slot count, and sampling settings, measuring end-to-end tokens per second on representative tasks.
+
+TL;DR: Speculative decoding accelerates generation with varied draft strategies and workload-dependent trade-offs, but MoE targets and server parallelism require joint tuning to realize gains.

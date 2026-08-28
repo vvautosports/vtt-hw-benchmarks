@@ -1,0 +1,115 @@
+# Can ONE Strix Halo box host an orchestrator AND a sub-agent simultaneously?
+# Answer: yes. Co-residency itself is free; the cost only appears under simultaneous
+# generation, and even then aggregate throughput goes UP.
+run_id: "2026-08-28-coresidency"
+date: "2026-08-28"
+node: "kalman9-framework-01"
+hardware: "AMD Strix Halo (Radeon 8060S iGPU), 128 GB UMA, GTT unlock ACTIVE, ~122 GB usable"
+runtime_build: "b10639-mix-f6f92fe (llama-server driven DIRECTLY, not via unsloth studio)"
+api: "/v1/chat/completions on two ports (8801, 8802)"
+driver_script: "scripts/sweeps/coresidency_test.py"
+records: "coresidency.json"
+
+# Studio binds one model per instance, so this drives llama-server directly. That also
+# makes it the first harness code in the repo that talks to a plain llama-server -- the
+# same shim MI50 testing needs, since gfx906 has no supported ROCm path.
+# GGML_CUDA_ENABLE_UNIFIED_MEMORY is simply never set, which sidesteps gotcha (a) entirely
+# rather than opting out of it.
+request_constants:
+  seed: 42
+  max_tokens: 8192
+  profile: thinking
+  ctx_per_instance: 32768
+
+models:
+  - name: "GLM-4.7-Flash"
+    role: "orchestrator candidate"
+    quant: "UD-Q8_K_XL (33 GiB)"
+    port: 8801
+    load_seconds: 5.0
+  - name: "Qwen3-Coder-30B-A3B-Instruct"
+    role: "sub-agent candidate"
+    quant: "UD-Q8_K_XL (34 GiB)"
+    port: 8802
+    load_seconds: 20.0
+
+memory:
+  before_gib: 2.1
+  both_loaded_gib: 74.3
+  headroom_gib: ~48
+  note: >-
+    74.3 GiB for both models plus two 32768-token KV caches, against ~122 GiB usable.
+    Weights alone are ~67 GiB, so the two KV caches cost roughly 7 GiB combined at this
+    context. Comfortable; a third small model would still fit.
+
+# Three phases isolate memory pressure from compute contention.
+phases:
+  solo: "each model alone on its own port, battery run sequentially"
+  coresident_sequential: "both loaded, battery run sequentially (memory pressure, no compute contention)"
+  coresident_concurrent: "both loaded, batteries run SIMULTANEOUSLY in threads (the real question)"
+
+results:
+  - model: "GLM-4.7-Flash"
+    solo_tps: 33.92
+    coresident_tps: 34.06
+    concurrent_tps: 30.66
+    contention: "-10.0%"
+  - model: "Qwen3-Coder-30B-A3B-Instruct"
+    solo_tps: 42.91
+    coresident_tps: 42.19
+    concurrent_tps: 29.09
+    contention: "-31.1%"
+
+concurrent_wall_s: 235.1
+
+summary: >-
+  Both models loaded and stayed healthy at 74.3 GiB with ~48 GiB to spare.
+
+  Merely being co-resident costs NOTHING: GLM 33.92 -> 34.06 and Qwen3-Coder 42.91 -> 42.19
+  are both within noise. Holding a second model in memory does not slow the first one down.
+
+  Contention appears only under genuinely simultaneous generation, and it is ASYMMETRIC:
+  GLM loses 10% while Qwen3-Coder loses 31%. The faster model loses more, which is what
+  bandwidth-bound hardware predicts — Qwen3-Coder was consuming more of the shared memory
+  bandwidth, so it has more to give up when the two compete.
+
+  The number that matters most for the architecture: AGGREGATE throughput under concurrency
+  is 30.66 + 29.09 = 59.8 t/s, which is HIGHER than either model achieves alone. Running
+  both at once is not a compromise against time-slicing them — it is strictly better on
+  total tokens/second, and only worse on any single stream's latency.
+
+verdicts:
+  dual_model_on_one_box: >-
+    CONFIRMED. The orchestrator/sub-agent split does NOT require two nodes, Thunderbolt, or
+    any new hardware. Two llama-server instances on different ports is the whole mechanism.
+  cost_model: >-
+    Free when the two models are not generating at the same instant (the common case for an
+    orchestrator that thinks, delegates, then waits). Worst case, both generating flat out,
+    costs the sub-agent ~31% of its single-stream speed and the orchestrator ~10%.
+  relation_to_phase_6: >-
+    ORTHOGONAL. vvt-devbox Phase 6 (Thunderbolt/vLLM cluster) POOLS memory across two nodes
+    for models too large for one. This PARTITIONS one node between two specialised models.
+    Different goal, different mechanism, and this one is not blocked on the G1a dual-boot.
+
+caveats:
+  single_seed: >-
+    One battery pass per phase per model, temperature 1.0. The solo-vs-coresident deltas
+    (~0.4%) are well inside noise and should be read as "no measurable difference", not as
+    a real ranking. The concurrency deltas (10%, 31%) are far outside it.
+  worst_case_by_construction: >-
+    Phase 3 runs both models flat out for their entire battery, which is the WORST case for
+    contention and not what an orchestrator/sub-agent workload looks like in practice. Real
+    agentic traffic is bursty and mostly alternating, so expect the true cost to sit much
+    closer to the phase-2 (free) result than the phase-3 numbers.
+  context_pinned_low: >-
+    32768 per instance, chosen so both KV caches fit comfortably. Nothing here establishes
+    how far context can be pushed with two models resident; the KV budget is the binding
+    constraint and is unmeasured.
+  two_models_only: >-
+    GLM + Qwen3-Coder-30B were chosen as the leanest plausible pair (67 GiB of weights).
+    A gpt-oss-120b (61 GiB) + Qwen3-Coder-30B (34 GiB) pair would be 95 GiB and is untested
+    -- that is the configuration to try next if the orchestrator needs more capacity.
+  no_quality_check: >-
+    This measured throughput and health only. Battery outputs were not graded, so it does
+    NOT establish that answers stay correct under contention. Grading a co-resident run is
+    the obvious follow-up.

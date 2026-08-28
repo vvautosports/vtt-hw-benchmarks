@@ -1,0 +1,129 @@
+# Champion re-baseline under --disable-tools. Closes the last open caveat on the corpus:
+# every t/s and token-economy number measured before this was inflated by server-side
+# tool injection. This is the first clean speed table for the roster.
+run_id: "2026-08-28-rebaseline-toolsoff"
+date: "2026-08-28"
+node: "kalman9-framework-01"
+hardware: "AMD Strix Halo (Radeon 8060S iGPU), GTT unlock ACTIVE, ~122 GB usable"
+backend: "unsloth-studio"
+runtime_build: "b10639-mix-f6f92fe"
+studio_version: "unsloth 2026.8.22"
+api: "/v1/chat/completions"
+isolation: "fresh-server-per-task (isolated_battery.py)"
+request_constants:
+  seed: 42
+  max_tokens: 8192
+  profile: thinking
+  reasoning_effort: low
+launch_env:
+  UNSLOTH_DISABLE_UNIFIED_MEMORY: "1"
+launch_flags: "--disable-tools"
+
+axis: cfg
+records: "results.jsonl"
+outputs: "outputs/<cfg>/<task>--thinking--low.txt"
+grading: "py scripts/utils/grade_sweep.py results/sweeps/2026-08-28-rebaseline-toolsoff results --layout cfg"
+driver_script: "scripts/sweeps/isolated_battery.py"
+
+# t/s as reasoning / code / summarize. "prev" is the best previously-published number for
+# that model, all of which were measured with server-side tools ON.
+entries:
+  - cfg: "Ornith-1.5-35B-A3B__toolsoff"
+    quant: "Q8_0"
+    tps: "64.52 / 63.91 / 57.39"
+    prev: "54.1 / 52.7 / 56.6"
+    quality: "3/3 PASS"
+    note: "New roster speed leader on clean numbers. Largest gain of any model, ~+19% on reasoning."
+
+  - cfg: "NVIDIA-Nemotron-3.5-Lightning-30B-A3B__toolsoff"
+    quant: "UD-Q8_K_XL"
+    tps: "63.14 / 62.01 / 62.94"
+    prev: "56.0 / 56.3 / 53.2"
+    quality: "2/3 — summarize FAIL"
+    note: >-
+      Fastest and most uniform across the three tasks. The summarize failure is a FORMAT
+      miss, not a comprehension one: the model produced exactly 5 correct bullets and a
+      correct one-sentence summary but omitted the literal "TL;DR" label the grader
+      requires (quality.bullets=5, has_tldr=false). Worth a second seed before treating
+      this as a real regression against its previous 3/3.
+
+  - cfg: "Qwen3.6-35B-A3B-MTP__toolsoff"
+    quant: "UD-Q8_K_XL"
+    tps: "61.25 / 62.28 / 61.90"
+    prev: "54.8 / 57.7 / 48.9"
+    quality: "3/3 PASS"
+    note: "Third of a tight top-three cluster. Biggest summarize gain on the roster (+27%)."
+
+  - cfg: "Qwen3-Coder-30B-A3B-Instruct__toolsoff"
+    quant: "UD-Q8_K_XL"
+    tps: "43.70 / 43.55 / 40.27"
+    prev: "39.9 / 74.5 / 38.2"
+    quality: "3/3 PASS"
+    note: >-
+      THE ANOMALY OF THIS RUN. Every other model gained 10-21%; this one's code cell went
+      the other way, 74.5 -> 43.55. Note the shape change: the old run was spiky
+      (39.9 / 74.5 / 38.2, code a huge intra-run outlier) and the clean run is flat
+      (43.7 / 43.55 / 40.27, all three within 8%). The reasoning and summarize cells both
+      rose normally. Do NOT retire the "code king" title on this single measurement --
+      n-gram speculative decoding genuinely does favour repetitive code text, so 74.5 may
+      have been real and something other than --disable-tools may have changed. This needs
+      a dedicated A/B before either number is trusted. See caveats.coder30b_code_anomaly.
+
+  - cfg: "GLM-4.7-Flash__toolsoff"
+    quant: "UD-Q8_K_XL"
+    tps: "34.76 / 33.90 / 33.48"
+    prev: "31.7 / 36.1 / 31.8"
+    quality: "3/3 PASS"
+    note: "Baseline control. Modest, even gain; code cell essentially flat."
+
+  - cfg: "gpt-oss-120b__toolsoff"
+    quant: "F16 (native MXFP4 MoE weights)"
+    tps: "33.10 / 33.83 / 30.29"
+    prev: "27.3 / 32.0 / 31.2"
+    quality: "3/3 PASS"
+    note: "Largest reasoning gain (+21%). A 120B-class model matching GLM-4.7-Flash (33 GB) on t/s."
+
+summary: >-
+  17/18 cells pass. Prompt tokens across the whole run are 91-586, against the 2,000-16,000
+  seen in contaminated records — the injection is definitively gone.
+
+  Removing it raised throughput 10-21% for five of six models, so the entire previously
+  published speed table understated the roster. It also RESHUFFLED the order: the clean
+  top three are Ornith-1.5 (64.5), Nemotron-3.5 (63.1) and Qwen3.6-35B-MTP (61.3), a much
+  tighter cluster than the old numbers implied, with Qwen3-Coder-30B dropping to ~43 and
+  GLM-4.7-Flash and gpt-oss-120b converging at ~33-34.
+
+  The single exception is Qwen3-Coder-30B's code cell, which moved DOWN and against the
+  trend. That is the one number this run leaves less certain rather than more, and it is
+  the thing to measure next.
+
+verdicts:
+  injection_cleared: >-
+    YES. This table supersedes every previously published t/s figure for these six models.
+  leaderboard_changed: >-
+    YES. Ornith-1.5 is the clean speed leader; the top three are within 5% of each other.
+  code_king_title: >-
+    UNRESOLVED. Qwen3-Coder-30B's 74.5 code figure did not reproduce. Needs a dedicated
+    A/B (tools on/off at fixed speculative settings) before either number is cited.
+
+caveats:
+  coder30b_code_anomaly: >-
+    Qwen3-Coder-30B code went 74.5 -> 43.55 while every other cell on the roster rose.
+    --disable-tools should not slow generation, so the likely candidates are (a) the old
+    74.5 was inflated by a tool-loop artifact, or (b) speculative-decoding behaviour
+    differed between the runs (n-gram drafting is genuinely very effective on repetitive
+    code text, which is exactly the shape of that task). Not resolvable from this data.
+    Next step: a 2x2 of tools on/off x --speculative-type auto/off on this model alone.
+  nemotron_summarize_format_miss: >-
+    quality.bullets=5, has_tldr=false. The content is correct; only the literal "TL;DR"
+    label is absent. The grader is strict here by design (it catches models that drift out
+    of a requested output contract), but this should not be read as a capability
+    regression from its earlier 3/3 without a second seed.
+  single_seed: >-
+    One sample per cell at temperature 1.0 (thinking profile). Deltas of a few percent are
+    within noise; the 10-21% shifts are well outside it, but the Nemotron format miss and
+    the Coder-30B anomaly are both single observations.
+  speculation_unpinned: >-
+    All six ran with studio's automatic speculative-decoding selection (no
+    --speculative-type pinned), so per-model speculation strategy is an uncontrolled
+    variable across rows. This matters most for the Coder-30B anomaly above.
