@@ -240,21 +240,14 @@ all_models:
     hf_repo: "unsloth/Qwen3.8-27B-GGUF"
     hf_file: "Qwen3.8-27B-UD-Q8_K_XL.gguf"
 
-  - name: "gemma-3-27b-it"
-    path: "unsloth/gemma-3-27b-it-GGUF/gemma-3-27b-it-UD-Q8_K_XL.gguf"
-    size_gb: 32
-    vram_gb: 36
-    parts: 1
-    test_strategy: "both"
-    use_case: "Prior-gen dense control vs the gemma-4 suite"
-    tps: "6.7 / 6.7 / 6.3"
-    quality: "3/3"
-    note: >-
-      Correct but 5.5x slower than gemma-4-26B-A4B at identical grades — no speed or quality
-      niche. Ships mmproj-F32.gguf (vision projector) which the gemma-4 GGUFs on disk lack;
-      that niche is UNTESTED by this text battery, not disproven.
-    hf_repo: "unsloth/gemma-3-27b-it-GGUF"
-    hf_file: "gemma-3-27b-it-UD-Q8_K_XL.gguf"
+  # gemma-3-27b-it (32 GB) deleted 2026-08-27 (Kal-approved, benchmarks confirmed banked
+  # first: graded records + transcripts in results/sweeps/2026-08-27-b10472-batch/, verdicts
+  # in UNSLOTH-DIRECTION.md — 3/3 at 6.7/6.7/6.3 t/s, no speed/quality niche vs
+  # gemma-4-26B-A4B). Its last rationale was the only mmproj vision projector on disk;
+  # designated successor for that niche: Muse-Glimmer-30B (meta-models, vision-native,
+  # unsloth GGUF + mmproj) queued for download same day. Dense-control role: gemma-4-31B.
+  # GLM-4.7-reap-218b (92 GB, THUDM copy) also deleted 2026-08-27 (Kal-approved): could not
+  # load single-node at this quant; pruning-axis-at-scale question deferred.
 
   - name: "gemma-4-31B-it"
     path: "unsloth/gemma-4-31B-it-GGUF/gemma-4-31B-it-UD-Q8_K_XL.gguf"

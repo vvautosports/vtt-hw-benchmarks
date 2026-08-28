@@ -57,6 +57,11 @@ Runbook lives in the "120GB ZBook" artifact (BIOS table, Ventoy steps, kernel ar
 ### E. Model-watch automation
 
 **Roster expansion queue lives in [#10](https://github.com/vvautosports/vtt-hw-benchmarks/issues/10)** (Qwen3.8-27B w/ MTP sidecar, Gemma 4 suite incl. 26B-A4B MoE, Nemotron-3.5-Lightning successor swap, MiniMax-M3 successor swap; MiniMax-H3 excluded — video-gen, not an LLM). Downloads gated on Kal per the doctrine below.
+
+Queue additions (Kal, 2026-08-27 evening):
+- **DeepSeek-V4-Flash-0731** at **UD-IQ3_XXS (~104 GB)** — Q4_K_XL (~155 GB) exceeds the ~122 GB ceiling, IQ3_XXS matches the Qwen3.8-Q4 footprint that loads fine. "Makes sense in this latest flash round."
+- **Muse-Glimmer-30B** (meta-models; unsloth GGUF + Q8 mmproj) — vision-native 30B; first modern contender for the vision/screenshot track; supersedes gemma-3-27b's mmproj niche (that model deleted same day, benchmarks banked).
+- **Ornith-1.5-9B** (GGUF updated 2026-08-24) — flagged for the **MI50 fleet** (Columbus/Cincinnati gfx906, pinned Vulkan stack): if Ornith-1.5-35B keeps earning its co-leader spot, the 9B is the family's natural small-card representative.
 Daily checks so new/updated models surface without manual trawling:
 - [ ] HF poll: new repos + updated UD quants in `unsloth/` org (HF API; also catches new quant variants of tracked models)
 - [ ] llama.cpp release tags + Unsloth changelog (day-zero support signals)
