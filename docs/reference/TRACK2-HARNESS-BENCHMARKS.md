@@ -73,6 +73,8 @@ work), but it gets its own table when it happens.
 
 **Grade fidelity is a first-class metric here** — the Nemotron channel-routing result proves servers can flip grades via template handling. Every server cell runs the graded batteries, not just throughput probes.
 
+**Vision-capable models add the receipt battery (decided 2026-08-29).** For engine cells serving a vision-capable model (currently gemma-4-26B-A4B-it UD-Q8_K_XL + mmproj-F16, VISION-VALIDATED 31/31 tuned; Muse-Glimmer-30B parked pending per-family config work), the graded batteries include the 5-receipt extraction battery — `scripts/sweeps/receipt_battery_gen.py` writes images + truth into the run dir, `grade_receipt()` in `scripts/utils/grade_sweep.py` grades 31 fields, gated by `scripts/testing/test_grade_receipt.py`. Same quant-parity spirit: the mmproj artifact is pinned alongside the GGUF, and an engine that cannot load the mmproj records `mmproj-load-failed` rather than dropping the row silently.
+
 ## Topology (decided)
 
 Co-located first (agents on Framework → localhost) for the whole main matrix; then **one remote config** (G1a → Framework over the Headscale mesh) on a subset to price the real devbox usage pattern.
