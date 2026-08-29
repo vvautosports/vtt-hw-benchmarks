@@ -115,3 +115,31 @@ Evidence base: vtt-hw-benchmarks `results/sweeps/2026-08-28-coresidency/` (throu
 heavy-pair rejection), `2026-08-28-coresidency-graded/` (18/18 correctness),
 `2026-08-28-parallel-rescue/` (routing rule), PERFORMANCE-SUMMARY.md § Tool-calling.
 Host decision: Framework (accepted tradeoff: bench sessions preempt the pair).
+
+---
+
+## Issue 4 — feat: Track 2 harness benchmarks — agent battery + serving matrix
+**REPO: vvc/vtt-hw-benchmarks**
+**Labels:** enhancement, priority:medium
+
+### Goal
+Benchmark the harnesses around the models, both axes: (2A) seven agent CLIs (Claude
+Code, Codex, OpenCode, Hermes, OpenClaw, Pi, DeepSeek dsh) on execution-graded
+micro-tasks against the same model+server; (2B) six serving stacks (unsloth studio,
+unsloth llama-server, mainline llama.cpp, vLLM, Ollama, LM Studio) under the existing
+graded batteries. Design approved by Kal 2026-08-28; full spec in
+`docs/reference/TRACK2-HARNESS-BENCHMARKS.md`.
+
+### Tasks
+- [ ] Build the 5 execution-graded fixture repos + per-fixture grade.sh (spec § task battery)
+- [ ] Build scripts/agents/agent_task_battery.py (fresh fixture copy, one-shot agent
+      launch, timeout, execution grading, server /metrics token delta)
+- [ ] Smoke: Claude Code x 5 tasks x Qwen3-Coder-30B, co-located on Framework
+- [ ] 7-agent sweep (35 cells), then widen models
+- [ ] Track 2B server matrix via existing batteries (incl. vLLM — quant-parity caveat in spec)
+- [ ] One remote config (G1a -> Framework over mesh) to price real devbox usage
+
+### Success Criteria
+- [ ] An agent-harness leaderboard with execution-graded pass rates + cost metrics
+- [ ] A serving-harness table with t/s AND grade fidelity per engine
+- [ ] Findings recorded in PERFORMANCE-SUMMARY.md with per-run manifests
