@@ -1,0 +1,31 @@
+# DeepSeek long-context needle probe — the graded half of the ctx ladder. Retrieval
+# HOLDS at every depth tested: 3/3 needles found, clean stops, at 2x the old 16384 pin.
+run_id: "2026-08-28-deepseek-needle"
+date: "2026-08-28"
+node: "kalman9-framework-01"
+backend: "unsloth-studio (unsloth run --max-seq-length 65536), fresh serve per cell"
+model: "DeepSeek-V4-Flash-0731 UD-IQ3_XXS"
+driver_script: "scripts/sweeps/deepseek_needle.py"
+launch_env: {UNSLOTH_DISABLE_UNIFIED_MEMORY: "1"}
+config: "greedy (temp 0, seed 42), reasoning_effort low, unique needle per cell (bleed guard), needle at ~50% depth"
+
+results:   # prompt_tokens are ACTUAL (the word-count estimator undershot the 8k/24k/48k targets)
+  - {cell: "8k",  prompt_tokens: 5851,  needle_found: true, wall_s: 48.7}
+  - {cell: "24k", prompt_tokens: 17401, needle_found: true, wall_s: 153.0}
+  - {cell: "48k", prompt_tokens: 34795, needle_found: true, wall_s: 344.6}
+
+verdict: >
+  Mid-document retrieval is clean at ~5.8k, ~17.4k and ~34.8k prompt tokens — 3/3, exact
+  code returned, finish=stop. Combined with the ctx ladder (loads/serves to 98304), the
+  16384 pin is fully retired: 65536 is safe to allocate and graded retrieval is proven to
+  ~35k. Prefill economics from wall time: ~110-130 t/s, i.e. a 32k prompt costs ~5
+  minutes before the first output token — long-context DeepSeek on this box is a
+  BATCH/quality tier, not interactive, consistent with its ~14 t/s decode.
+
+caveats:
+  - "Graded ceiling is ~35k tokens, not 65k — the top cell's filler estimator undershot.
+     Depths 35k-98k remain allocation-proven only."
+  - "timings absent from studio-proxied responses (prefill_tps null); prefill rate is
+     derived from wall minus a decode estimate, so treat 110-130 t/s as approximate."
+  - "One needle position (~50% depth), one seed per cell; a positional sweep (10%/90%)
+     would harden the claim if long-context becomes production-critical."

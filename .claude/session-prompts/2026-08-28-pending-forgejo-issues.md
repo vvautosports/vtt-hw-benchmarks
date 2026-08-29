@@ -71,3 +71,47 @@ evening. Killed cleanly; not reproduced since.
 ### Success Criteria
 - [ ] G1a batteries survive a wedged cell without losing the run
 - [ ] Wedge frequency data exists after the next few G1a sessions
+
+---
+
+## Issue 3 — feat: standing dual-model serve pair + role-named LiteLLM routes
+**REPO: vvc/vvt-devbox** (not hw-benchmarks — set OWNER/REPO by hand in /create-issue)
+**Labels:** enhancement, priority:medium
+
+### Goal
+Make the benchmark-validated dual-agent serving config a standing, addressable service:
+GLM-4.7-Flash (orchestrator) + Qwen3-Coder-30B (sub-agent) co-resident on the Framework
+box, reachable by ROLE via LiteLLM. Scope approved by Kal 2026-08-28: serve + routes
+only — no agent-loop code (that is omnigent/4-window-framework work with its own design).
+
+### Current State
+The Framework serves one model at a time via unsloth studio on :8888; model choice per
+task is manual. Benchmarks (vtt-hw-benchmarks, 2026-08-28) validated the pair
+co-resident: 74.3 GiB resident, ~48 GiB headroom, 18/18 graded cells correct across
+solo/sequential/concurrent, ~30 t/s each under worst-case contention (GLM −10%,
+Coder −32%). Direct llama-server (not studio) is the tested path — both models emit
+gradeable content on it (unlike Nemotron, see the reasoning_content issue).
+
+### Tasks
+- [ ] Launch script (or systemd units) for the pair: direct llama-server, GLM-4.7-Flash
+      UD-Q8_K_XL :8801 + Qwen3-Coder-30B UD-Q8_K_XL :8802, ctx 32768 each, `--jinja
+      -ngl -1 --flash-attn on --no-context-shift`, health-check loop (mirror
+      vtt-hw-benchmarks `scripts/sweeps/coresidency_test.py` launch block)
+- [ ] LiteLLM config: role-named routes `vvc-orchestrator` → :8801, `vvc-coder` → :8802
+- [ ] Encode the routing policy in the config comments/docs: parallel-tool-call turns
+      must never route to Nemotron-3.5 or gpt-oss-120b (defect is unrescuable —
+      hw-benchmarks `2026-08-28-parallel-rescue`)
+- [ ] Document coexistence with benchmarking: bench sessions kill llama-server; the pair
+      is preemptible, restart via the launch script
+- [ ] Smoke test from one consumer (Claude Code or OpenCode) hitting both routes
+
+### Success Criteria
+- [ ] Both routes answer chat completions through LiteLLM by role name
+- [ ] Pair survives a reboot / restarts with one command
+- [ ] Docs state the preemption rule and the no-parallel-fan-out policy
+
+### Context
+Evidence base: vtt-hw-benchmarks `results/sweeps/2026-08-28-coresidency/` (throughput +
+heavy-pair rejection), `2026-08-28-coresidency-graded/` (18/18 correctness),
+`2026-08-28-parallel-rescue/` (routing rule), PERFORMANCE-SUMMARY.md § Tool-calling.
+Host decision: Framework (accepted tradeoff: bench sessions preempt the pair).
