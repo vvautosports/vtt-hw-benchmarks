@@ -39,11 +39,13 @@ ssh -n framework 'setsid nohup python3 ~/roster_batch.py ~/spec.json ~/rundir > 
 | `fetch_2026_08_28.sh` | Same shape, 2026-08-28 targets (Muse-Glimmer vision anchor + DeepSeek-V4-Flash). |
 | `sweep_toolcall.py` | **Owns `run_tool_case()`** and the multi-turn tool loop — the Track 1 counterpart to `sweep_phase1.py`. Case definitions live in `toolcall_cases.json`. |
 | `toolcall_battery.py` | **Track 1 driver.** Fresh server per (entry, case); the healing ladder is expressed purely in spec `flags`. |
+| `receipt_battery_gen.py` | **Vision-track battery generator** (port of expense-agent `gen_battery.py`): writes the 5 receipt images + `receipt_truth.json` into the run dir, so truth travels with the run. Deterministic; needs Pillow. No serving driver yet — see the vision track section of UNSLOTH-DIRECTION.md. |
 
 Grading lives separately at [`../utils/grade_sweep.py`](../utils/grade_sweep.py) — analysis,
 not execution. Run it on your workstation against the harvested run directory. Its tool-call
-graders have a self-test at [`../testing/test_grade_toolcall.py`](../testing/test_grade_toolcall.py)
-that needs no inference host — run it before spending a matrix on graders that might be wrong.
+and receipt graders have self-tests at [`../testing/test_grade_toolcall.py`](../testing/test_grade_toolcall.py)
+and [`../testing/test_grade_receipt.py`](../testing/test_grade_receipt.py)
+that need no inference host — run them before spending a matrix on graders that might be wrong.
 
 ## Three tool flags, three different things
 

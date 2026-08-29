@@ -416,8 +416,53 @@ Both were already in workstream F's queue; Kal elevated them (2026-08-27).
 
 - Creative writing with hard constraints (form, length, banned-word) — constraint compliance is deterministically gradeable; aesthetic quality is not (needs judge-model channel, kept separate from deterministic grades per the metrics model).
 - Game generation (single-file playable HTML) — grade: parses, runs headless, passes smoke asserts. Execution-based grading infrastructure from workstream F.
-- Visual/spatial reasoning (text-form) — deterministic answers exist; true image input waits on the vision-projector question (gemma-3 mmproj niche, untested).
+- Visual/spatial reasoning (text-form) — deterministic answers exist. True image input no longer waits: the vision-projector question is answered (Muse mmproj smoke + the receipt-extraction battery — see the vision track section below).
 - Windows-vs-Linux stays an axis here (G1a stays Windows until its Windows datapoints are banked — standing decision).
+
+## Vision track — first measurement: receipt extraction (2026-08-27, G1a)
+
+Ported 2026-08-29 from **expense-agent** (`docs/model-comparison-2026-08-27.md`), the production consumer of this serving stack — closing the "port this battery into the vtt-hw-benchmarks vision track" item from that doc's refinement queue. Canonical data: [`results/sweeps/2026-08-27-receipt-battery-g1a/`](../../results/sweeps/2026-08-27-receipt-battery-g1a/) — manifest, round-2 raw JSON (round-1 raw was not retained; its tables survive in the manifest), and the battery images + truth verbatim.
+
+Run context: HP G1a (Windows, gfx1151), llama.cpp **b10639 + `UNSLOTH_DISABLE_UNIFIED_MEMORY=1`**, all models UD-Q8_K_XL plus their family's mmproj, **schema-locked JSON** (`response_format` json_schema) at temperature 0 through the studio API — the exact code path expense-agent production uses, run the evening before this repo's own [G1a serve-validation](../../results/sweeps/2026-08-28-g1a-validation/). Battery: 5 ground-truthed synthetic receipts, 31 gradeable fields, covering tip/tax split, dropoff-qualifier inference from addresses, multi-line hotel-folio tax summation, a flight on a second card, and a rotated+blurred+noisy parking stub (phone-photo robustness).
+
+### Round 1 — original prompt
+
+| model | fields | avg s/receipt | load s | errors |
+|---|---|---|---|---|
+| **gemma-4-26B-A4B-it** | **29/31** | **8.8** | 14.6 | 0 |
+| Qwen3.8-27B | 26/31 | 24.7 | 40.5 | 0 |
+| Nemotron-3-Nano-**Omni**-30B-A3B-Reasoning | 26/31 | 18.3 | 80.3 | 0 |
+| Muse-Glimmer-30B | 3/13 | 109.8 | 58.0 | 3 |
+
+Failure modes: gemma-4's two misses were pure judgment calls ("taxi" for an Uber receipt; entry-vs-exit date on the parking stub) — zero OCR/amount errors even on the degraded photo. Qwen3.8-27B systematically returns an empty-string merchant (4/5 receipts) with perfect amounts. Nemotron-Omni (note: the Omni variant, a **different model** from the deleted text-roster Nemotron-3-Nano) wobbles on category, reverses the qualifier, and sums only one night's hotel tax. Muse-Glimmer was not usable **as configured**: schema-violating nulls, 3/5 responses empty (JSON decode failure even on bare retry), ~110 s/receipt.
+
+### Round 2 — gemma-4 with two prompt rules added
+
+(Uber/Lyft brand = category; parking date = exit date, taxes summed.)
+
+| model | fields | avg s/receipt |
+|---|---|---|
+| **gemma-4-26B-A4B-it** | **31/31** | 12.9 |
+
+### Verdicts
+
+- **gemma-4-26B-A4B-it (UD-Q8_K_XL + mmproj-F16) is the working vision model** — most accurate, 2–3× faster per receipt than every alternative, fastest load, zero errors, and both round-1 misses eliminated by prompt rules now baked into expense-agent's `extract.py`. Combined with its 3/3 on this repo's text battery (where it is the efficiency pick), **one model now holds both the text-efficiency and vision-accuracy slots.** Caveat for Framework serves: the mmproj is validated in the G1a HF cache; the `/mnt/ai-models` gemma-4 copies were recorded 2026-08-27 as lacking one — pull it first.
+- **Muse-Glimmer-30B: split verdict, parked not disqualified.** Its vision *capability* is confirmed (the 2026-08-28 bars.png smoke: BF16 mmproj loads in 15.0s, 2/2 deterministic checks), but it **failed receipt extraction as configured** — the shape of the failure (empty responses, schema-violating nulls under json_schema locking) points at a chat-template × structured-output interaction, i.e. exactly the class of problem the per-family config registry exists for. **Queued: per-family config investigation** before any vision-quality verdict on it.
+- **MiMo-V2.5 disqualified on size, without download**: smallest sane quant ~192 GB against the ~122 GB single-node ceiling. Not a quality verdict; RPC-pool track only, if ever.
+- The synthetic battery bounds the clean-image case. A **real-photo battery** and a vision **quant ladder** (Q8 vs Q4 speed/accuracy per the Track 2 pattern) are the queued follow-ons.
+
+### Ops gotcha — stale vision-capability cache
+
+Studio's `/api/models/check-vision` endpoint serves a **stale capability cache**: it reported `false` for models whose mmproj was already on disk. **Trust `is_vision` in the `/api/inference/load` response instead**, and never gate a vision run on check-vision. Recorded in the run manifest; belongs beside the SIGTERM and `gtt_used_mib` entries in the harness-gotcha ledger.
+
+### Task-family port (landed with this section)
+
+The battery is now a proper `grade_sweep.py` task family, mirroring the toolcall conventions:
+
+- [`receipt_battery_gen.py`](../../scripts/sweeps/receipt_battery_gen.py) — deterministic generator (port of expense-agent `gen_battery.py`, seeded degrade pass) that writes the images + `receipt_truth.json` **into the run dir**, so truth travels with the run.
+- `grade_sweep.py` gains a `receipt` family (`rcpt01_diner` … `rcpt05_parking`): behavior-identical port of `model_compare.py`'s field grading (merchant fuzzy ≥ 0.7, date exact, amounts ± 0.01, category/card_last4/qualifier exact); unparseable JSON grades 0/N rather than `graded=False` because an empty answer is a model failure, not a harness gap. `--check` verified against the committed toolcall and text runs: zero records change.
+- [`test_grade_receipt.py`](../../scripts/testing/test_grade_receipt.py) — no-inference self-test (21 checks) that encodes the historical failure modes as fixtures and **nails the graded surface to exactly 31 fields**, keeping the 29/31 → 31/31 history comparable.
+- **Not yet built: the serving driver.** Running this battery from *this* repo needs an image-capable driver (fresh-server-per-task per the bleed protocol, `--disable-tools`) plus a decision on vendoring the extraction schema + system prompt (with the two round-2 rules) out of expense-agent's `extract.py`/`config.json`. Deliberately left for a session on the hardware — serving code written blind doesn't get committed here.
 
 ## References
 

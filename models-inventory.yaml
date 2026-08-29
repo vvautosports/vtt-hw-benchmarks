@@ -197,9 +197,20 @@ all_models:
     vram_gb: 30
     parts: 1
     test_strategy: "both"
-    use_case: "Efficient MoE — smallest footprint in the fast tier"
+    use_case: "Efficient MoE — smallest footprint in the fast tier; VISION-VALIDATED"
     tps: "36.6 / 36.8 / 35.0"
     quality: "3/3"
+    vision: >-
+      VALIDATED 2026-08-27 (G1a, b10639 + UNSLOTH_DISABLE_UNIFIED_MEMORY=1, mmproj-F16,
+      schema-locked JSON): 31/31 fields on the 5-receipt extraction battery with two prompt
+      rules; 29/31 untuned, both misses judgment calls — zero OCR/amount errors even on the
+      degraded photo. Most accurate AND 2-3x faster per receipt than every vision alternative
+      tested (8.8-12.9 s/receipt). One model now holds both the text-efficiency and
+      vision-accuracy slots. results/sweeps/2026-08-27-receipt-battery-g1a/.
+    mmproj: >-
+      mmproj-F16.gguf from the same HF repo (validated in the G1a HF cache). NOT confirmed
+      beside the Framework /mnt/ai-models copy — the 2026-08-27 retention note recorded the
+      gemma-4 GGUFs there as lacking one. Pull it before a Framework vision serve.
     hf_repo: "unsloth/gemma-4-26B-A4B-it-GGUF"
     hf_file: "gemma-4-26B-A4B-it-UD-Q8_K_XL.gguf"
 
@@ -248,6 +259,37 @@ all_models:
   # unsloth GGUF + mmproj) queued for download same day. Dense-control role: gemma-4-31B.
   # GLM-4.7-reap-218b (92 GB, THUDM copy) also deleted 2026-08-27 (Kal-approved): could not
   # load single-node at this quant; pruning-axis-at-scale question deferred.
+
+  - name: "Muse-Glimmer-30B"
+    path: "unsloth/Muse-Glimmer-30B-GGUF/Muse-Glimmer-30B-UD-Q8_K_XL.gguf"
+    size_gb: 30
+    vram_gb: 36
+    parts: 1
+    test_strategy: "server_only"
+    use_case: "VISION NICHE — designated successor to gemma-3-27b's mmproj slot"
+    tps: "7.81 / 8.03 / 7.42"
+    quality: "3/3 (text battery, 2026-08-28-dayone-deepseek-muse)"
+    mmproj: "mmproj-Muse-Glimmer-30B-BF16.gguf (3.6 GiB, same repo — the vision encoder is
+      deliberately unquantized; that is where vision quality lives)"
+    vision: >-
+      SPLIT VERDICT. Capability CONFIRMED: the BF16 mmproj loads (15.0s) and 2/2
+      deterministic checks pass on the bars.png smoke (2026-08-28-dayone-deepseek-muse,
+      Framework). But it FAILED receipt extraction as configured on the G1a
+      (2026-08-27-receipt-battery-g1a): 3/13 fields, 3/5 responses empty — JSON decode
+      failure even on bare retry — schema-violating nulls, ~110 s/receipt. Needs a
+      per-family config investigation (chat-template x schema-locked-JSON interaction)
+      before a fair vision-quality verdict; parked, NOT disqualified.
+    note: >-
+      Slowest roster model on text by a wide margin (~half GLM-4.7-Flash). Q8 chosen
+      deliberately as the vision quality anchor; Q4_K_XL (14.8 GiB) is the speed rung
+      if one is wanted.
+    hf_repo: "unsloth/Muse-Glimmer-30B-GGUF"
+    hf_file: "Muse-Glimmer-30B-UD-Q8_K_XL.gguf"
+
+  # MiMo-V2.5 (vision-track candidate) DISQUALIFIED on size 2026-08-27, without download:
+  # smallest sane quant is ~192 GB against the ~122 GB single-node ceiling. Not a quality
+  # verdict. Revisit only if the dual-machine RPC-pool track (MiniMax-M3 / Kimi-K3) proves
+  # out and has room for a vision passenger.
 
   - name: "gemma-4-31B-it"
     path: "unsloth/gemma-4-31B-it-GGUF/gemma-4-31B-it-UD-Q8_K_XL.gguf"

@@ -52,6 +52,16 @@ specs matched order-insensitively against the turn's calls (parallel cases), and
 pattern may be a LIST of patterns that must all match one arg -- used to assert several substrings
 inside one nested object/array argument.
 
+Receipt family (vision track): rcpt01_diner .. rcpt05_parking. CONTENT is the schema-locked
+JSON the server returned for one battery receipt image; it is graded field-by-field against
+<run_dir>/receipt_truth.json (written into the run dir by scripts/sweeps/receipt_battery_gen.py,
+so truth travels WITH the run like toolcall_cases.json does). Grading logic is a port of
+expense-agent scripts/model_compare.py grade() -- the grader behind the banked
+2026-08-27-receipt-battery-g1a run -- kept behavior-identical so future vtt vision runs stay
+comparable to it: merchant fuzzy-match >= 0.7, date exact, amounts +/- 0.01,
+category/card_last4/qualifier exact. Self-test (no inference host, no Pillow):
+scripts/testing/test_grade_receipt.py.
+
 Grading reads only the `=== CONTENT ===` section -- content-channel grading, which
 is what catches a model writing its real answer into the reasoning stream and
 leaving a summary in content. Execution-based grading (actually running generated
@@ -62,6 +72,7 @@ import json
 import os
 import re
 import sys
+from difflib import SequenceMatcher
 
 TEXT_TASKS = ("reasoning", "code", "summarize")
 TOOLCALL_TASKS = (
@@ -72,7 +83,11 @@ TOOLCALL_TASKS = (
     "tc_parallel", "tc_nested", "tc_union",
     "tc_distractor_p1", "tc_distractor_p3", "tc_ambiguous", "tc_coercion",
 )
-TASKS = TEXT_TASKS + TOOLCALL_TASKS
+RECEIPT_TASKS = (
+    # Vision track -- one task per battery receipt image (31 gradeable fields total).
+    "rcpt01_diner", "rcpt02_uber", "rcpt03_hotel", "rcpt04_flight", "rcpt05_parking",
+)
+TASKS = TEXT_TASKS + TOOLCALL_TASKS + RECEIPT_TASKS
 
 SECTION_RE = re.compile(r"(?m)^=== [A-Z]+ ===\n")
 
@@ -220,9 +235,63 @@ def grade_toolcall(task, path, cases):
     return q
 
 
-def grade(task, content, path=None, cases=None):
+def grade_receipt(task, content, truth_all):
+    """Deterministic receipt-extraction grading against the run dir's receipt_truth.json.
+
+    Behavior-identical port of expense-agent scripts/model_compare.py grade(). CONTENT is
+    the schema-locked JSON extraction for one receipt; a response that is not parseable JSON
+    grades 0/N rather than graded=False -- an empty or malformed answer is a model failure
+    (Muse-Glimmer's round-1 mode), not a harness gap.
+    """
+    if not truth_all or task not in truth_all:
+        return {"graded": False, "reason": "no_truth_definition"}
+    if content is None:
+        return {"graded": False}
+    truth = truth_all[task]
+    fields = ["merchant", "date", "total", "category"] + [
+        k for k in ("tax", "tip", "card_last4", "qualifier") if k in truth]
+    q = {"graded": True, "fields_total": len(fields)}
+
+    text = content.strip()
+    m = re.search(r"\{.*\}", text, re.S)  # tolerate fences/prose around the JSON
+    try:
+        rec = json.loads(m.group(0) if m else text)
+    except ValueError:
+        rec = None
+    q["json_ok"] = isinstance(rec, dict)
+    if not q["json_ok"]:
+        q.update(checks={}, fields_ok=0, correct=False)
+        return q
+
+    checks = {}
+    mv = (rec.get("merchant") or "").lower()
+    tv = truth["merchant"].lower()
+    checks["merchant"] = bool(mv) and (
+        tv in mv or mv in tv or SequenceMatcher(None, mv, tv).ratio() >= 0.7)
+    checks["date"] = rec.get("date") == truth["date"]
+    for amt in ("total", "tax", "tip"):
+        if amt in truth:
+            try:
+                checks[amt] = abs(float(rec.get(amt) or 0) - truth[amt]) <= 0.01
+            except (TypeError, ValueError):
+                checks[amt] = False
+    checks["category"] = rec.get("category") == truth["category"]
+    if "card_last4" in truth:
+        checks["card_last4"] = (rec.get("card_last4") or "") == truth["card_last4"]
+    if "qualifier" in truth:
+        checks["qualifier"] = rec.get("qualifier") == truth["qualifier"]
+
+    q["checks"] = checks
+    q["fields_ok"] = sum(checks.values())
+    q["correct"] = q["fields_ok"] == q["fields_total"]
+    return q
+
+
+def grade(task, content, path=None, cases=None, receipt_truth=None):
     if task in TOOLCALL_TASKS:
         return grade_toolcall(task, path, cases)
+    if task in RECEIPT_TASKS:
+        return grade_receipt(task, content, receipt_truth)
     if content is None:
         return {"graded": False}
     q = {"graded": True}
@@ -288,6 +357,12 @@ def main(argv):
     if os.path.exists(cases_path):
         cases = json.load(open(cases_path, encoding="utf-8")).get("cases")
 
+    # Receipt truth travels with the run for the same reason (receipt_battery_gen.py writes it).
+    receipt_truth = None
+    truth_path = os.path.join(run_dir, "receipt_truth.json")
+    if os.path.exists(truth_path):
+        receipt_truth = json.load(open(truth_path, encoding="utf-8"))
+
     if layout == "phase":
         survivors = set(range(len(records)))
     else:
@@ -311,7 +386,7 @@ def main(argv):
             path = os.path.join(
                 run_dir, "outputs", sub,
                 f"{task}--{r['profile']}--{r['effort']}.txt")
-            q = grade(task, content_of(path), path, cases)
+            q = grade(task, content_of(path), path, cases, receipt_truth)
             if q.get("graded"):
                 total += 1
                 passed += bool(q.get("correct"))

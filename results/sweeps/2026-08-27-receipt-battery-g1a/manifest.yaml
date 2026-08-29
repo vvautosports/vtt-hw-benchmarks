@@ -1,0 +1,81 @@
+# First VISION-track measurement — receipt extraction battery, ported from expense-agent.
+# This run was executed FROM the expense-agent repo (the production consumer of the serving
+# stack), not by this repo's sweep harness; it is banked here because it is the fleet's first
+# graded vision datapoint and it settles the vision-projector question left open when
+# gemma-3-27b was deleted. Foreign record format: results-gemma-tuned.json is
+# model_compare.py output, NOT grade_sweep JSONL — future vision runs use the receipt task
+# family added to grade_sweep.py alongside this import.
+run_id: "2026-08-27-receipt-battery-g1a"
+date: "2026-08-27"
+node: "hp-g1a-windows"
+hardware: "HP ZBook Ultra G1a — AMD Strix Halo (Radeon 8060S iGPU, gfx1151), Windows 11, 128 GB"
+backend: "unsloth-studio (llama.cpp b10639 ROCm gfx1151 Windows build)"
+api: "studio API, schema-locked JSON (response_format json_schema), temperature 0"
+launch_env:
+  UNSLOTH_DISABLE_UNIFIED_MEMORY: "1"   # the b10639 corruption fix, set for every serve
+
+battery: >-
+  5 ground-truthed synthetic receipts (battery/ — images + truth.json, verbatim copy of the
+  source battery): clean diner with tip/tax split, Uber ride requiring home-dropoff qualifier
+  inference from addresses, 2-night hotel folio requiring tax summation, flight on a second
+  card, and a rotated+blurred+noisy parking stub (phone-photo robustness). 31 gradeable
+  fields total. Deterministic generator: scripts/sweeps/receipt_battery_gen.py (port of
+  expense-agent scripts/gen_battery.py, seed 42 for the degrade pass).
+
+harness: >-
+  expense-agent scripts/model_compare.py — swaps each candidate into the studio serve and
+  extracts through the SAME code path production uses (extract.call_studio). Field grading:
+  merchant fuzzy-match >= 0.7, date exact, amounts +/- 0.01, category/card_last4/qualifier
+  exact. The grading logic is now also ported into this repo's grade_sweep.py receipt family.
+
+quant: "all models UD-Q8_K_XL (+ each family's mmproj for vision)"
+records: "results-gemma-tuned.json (round 2 raw data; round 1 raw JSON was not retained —
+  round 1 survives as the tables in the source doc and the summary below)"
+source_doc: "expense-agent docs/model-comparison-2026-08-27.md"
+
+# Round 1 — original prompt (fields correct / graded, avg secs/receipt, load secs, errors)
+round1:
+  - {model: "gemma-4-26B-A4B-it", fields: "29/31", avg_s: 8.8, load_s: 14.6, errors: 0}
+  - {model: "Qwen3.8-27B", fields: "26/31", avg_s: 24.7, load_s: 40.5, errors: 0}
+  - {model: "Nemotron-3-Nano-Omni-30B-A3B-Reasoning", fields: "26/31", avg_s: 18.3, load_s: 80.3, errors: 0}
+  - {model: "Muse-Glimmer-30B", fields: "3/13", avg_s: 109.8, load_s: 58.0, errors: 3}
+
+# Round 2 — gemma-4 with two prompt rules added (Uber/Lyft brand = category;
+# parking date = exit date, taxes summed). Raw data: results-gemma-tuned.json.
+round2:
+  - {model: "gemma-4-26B-A4B-it", fields: "31/31", avg_s: 12.9, load_s: 28.4, errors: 0}
+
+failure_modes:
+  gemma4: "round 1 misses were judgment calls only ('taxi' for an Uber receipt; entry-vs-exit
+    date on the parking stub) — zero OCR/amount errors even on the degraded photo. Both
+    eliminated by the two round-2 prompt rules, now baked into expense-agent extract.py."
+  qwen38_27b: "systematically returns empty-string merchant (4/5 receipts); amounts perfect. Slow."
+  nemotron_omni: "category wobble (taxi/transit), qualifier reversed (pickup vs dropoff),
+    summed only one night's hotel tax, entry-vs-exit date. NOTE: this is the OMNI variant
+    (NVIDIA-Nemotron-3-Nano-Omni-30B-A3B-Reasoning), a different model from the deleted
+    text-roster Nemotron-3-Nano-30B-A3B."
+  muse_glimmer: "not usable on this task AS CONFIGURED — schema-violating nulls, 3/5
+    responses empty (JSON decode failure even on bare retry), ~110 s/receipt. NOT a vision
+    verdict: the same model passed the Framework bars.png vision smoke the next day
+    (2026-08-28-dayone-deepseek-muse). Needs dedicated per-family config work (chat
+    template / json_schema interaction) before it can be judged fairly; parked."
+
+verdict: >-
+  unsloth/gemma-4-26B-A4B-it-GGUF (UD-Q8_K_XL + mmproj-F16) is the working vision model:
+  most accurate, 2-3x faster than every alternative, fastest load, zero errors, 31/31 after
+  two prompt rules — and independently 3/3 on this repo's text battery, where it is the
+  efficiency pick. One model now holds both the text-efficiency and vision-accuracy slots.
+
+ops_gotchas:
+  stale_vision_capability_cache: >-
+    Studio's /api/models/check-vision endpoint serves a STALE capability cache — it reported
+    vision=false for models whose mmproj was already on disk. Trust the is_vision field in
+    the /api/inference/load response instead; do not gate a vision run on check-vision.
+
+caveats:
+  synthetic_battery: "PIL-rendered receipts, one degraded. Real-photo battery is queued —
+    these results bound the clean-image case, not phone-photo reality."
+  round1_raw_lost: "only the round-2 (tuned) raw JSON was retained; round-1 per-receipt
+    checks are unrecoverable beyond the failure-mode notes above."
+  disqualified_on_size: "MiMo-V2.5 was evaluated as a vision candidate and disqualified
+    without download: smallest sane quant ~192 GB vs the ~122 GB single-node ceiling."
