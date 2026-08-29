@@ -1,0 +1,37 @@
+# Windows-vs-Linux A/B, framework (Linux) leg. The G1a (Windows) leg is
+# 2026-08-28-g1a-coresidency phase 1 (solo). Byte-identical everything else:
+# same model+quant (Nemotron-3.5 UD-Q8_K_XL), same llama-server build
+# (0.3.0-dev build 10639, commit 2a36554fc, Clang 23 — version-verified on both boxes),
+# same direct-llama-server launch flags, ctx 16384, thinking/low, seed 42, no speculation.
+run_id: "2026-08-28-ab-nemotron-framework"
+date: "2026-08-28"
+node: "kalman9-framework-01 (Linux, Framework Desktop)"
+counterpart: "hp-g1a-windows leg in results/sweeps/2026-08-28-g1a-coresidency (phase solo)"
+driver_script: "scripts/sweeps/ab_nemotron_framework.py"
+grading: "py scripts/utils/grade_sweep.py results/sweeps/2026-08-28-ab-nemotron-framework results --layout cfg"
+
+results:   # t/s wall, framework vs G1a, ratio
+  - {task: reasoning, framework: 48.38, g1a: 31.06, ratio: 1.56}
+  - {task: code,      framework: 47.19, g1a: 29.83, ratio: 1.58}
+  - {task: summarize, framework: 48.74, g1a: 31.74, ratio: 1.54}
+mean_ratio: 1.56
+
+verdict: >
+  Linux decodes 1.54-1.58x faster than Windows on identical silicon class, model, quant,
+  runtime build, flags and context — a tight, consistent ratio across all three tasks.
+  Secondary confirmation: the grade pattern is IDENTICAL on both boxes (reasoning pass;
+  code and summarize fail with the answer routed into reasoning_content) — the Nemotron
+  direct-llama-server channel-routing issue is a property of the serving path, not the OS
+  or the box.
+
+  Studio-path corollary: framework studio serves Nemotron at ~63 t/s vs 48.4 direct here —
+  studio's auto-speculation (ngram-mod) is worth ~+30% on this model; the G1a studio path
+  showed ~36 vs 30.9 direct, ~+16%.
+
+caveats:
+  - "OS is CONFOUNDED with platform power envelope: Framework Desktop vs HP ZBook laptop.
+     Both are Strix Halo / Radeon 8060S class, but TDP and memory configuration differ.
+     Separating OS from chassis needs the same box dual-booted — the planned G1a
+     dual-boot measurement (deliberately sequenced after Windows benchmarking)."
+  - "Single seed, one battery per leg; the ratio's tightness (1.54-1.58) is the evidence
+     of robustness, not the sample size."
