@@ -62,7 +62,14 @@ Same model + same client (the existing text + Tier 2 batteries — they're plain
 | Ollama | Framework | popular baseline, GGUF |
 | LM Studio server | G1a (:1234, already installed) | Windows-side comparison point |
 
-**Quant-parity constraint:** GGUF engines (studio/llama-server/mainline/Ollama/LM Studio) can share the exact UD-Q8_K_XL artifact. vLLM's native path is safetensors/FP8/AWQ; its GGUF support is partial. Record engine-native format per cell and treat vLLM rows as *engine+format* comparisons, not pure engine comparisons, unless a common GGUF actually loads. Never present cross-format t/s as an engine ranking without saying so.
+**Quant-parity rule (decided 2026-08-28): GGUF only, for now.** Every engine cell serves
+the exact same UD-Q8_K_XL GGUF artifact — that keeps every row a pure engine comparison.
+For vLLM this means its GGUF loader is the tested path: if the shared artifact loads,
+vLLM joins the matrix on equal footing; if it does not, the vLLM cell is recorded as
+`gguf-load-failed` and vLLM's engine-native formats (safetensors/FP8/AWQ) become a
+LATER, separately-labelled slice — never mixed into the GGUF ranking. Engine-native
+format benchmarking is deferred, not cancelled (it matters for the Phase-6 dual-node
+work), but it gets its own table when it happens.
 
 **Grade fidelity is a first-class metric here** — the Nemotron channel-routing result proves servers can flip grades via template handling. Every server cell runs the graded batteries, not just throughput probes.
 

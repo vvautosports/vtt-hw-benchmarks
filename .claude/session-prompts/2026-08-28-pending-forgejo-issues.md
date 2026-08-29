@@ -136,7 +136,9 @@ graded batteries. Design approved by Kal 2026-08-28; full spec in
       launch, timeout, execution grading, server /metrics token delta)
 - [ ] Smoke: Claude Code x 5 tasks x Qwen3-Coder-30B, co-located on Framework
 - [ ] 7-agent sweep (35 cells), then widen models
-- [ ] Track 2B server matrix via existing batteries (incl. vLLM — quant-parity caveat in spec)
+- [ ] Track 2B server matrix via existing batteries — GGUF-only rule: every engine
+      serves the same UD-Q8_K_XL artifact; vLLM via its GGUF loader (record
+      gguf-load-failed if it won't; engine-native formats are a later labelled slice)
 - [ ] One remote config (G1a -> Framework over mesh) to price real devbox usage
 
 ### Success Criteria
