@@ -1,0 +1,73 @@
+# Pending Forgejo issues — file when git.vvautosports.com recovers
+
+Written 2026-08-28 evening. Both the git smart-HTTP handler AND repo-scoped API routes
+hang (HTTP 000; `/api/v1/version` answers fine) — the CT 237 git-handler wedge, owned by
+the infra lane. When the forge is back: `/create-issue` with this file (Mode B), one
+issue per section, repo `vvc/vtt-hw-benchmarks`.
+
+---
+
+## Issue 1 — fix: Nemotron-3.5 answers land in reasoning_content on direct llama-server serving
+
+**Labels:** bug, priority:medium
+
+### Expected Behavior
+Serving NVIDIA-Nemotron-3.5-Lightning-30B-A3B via a directly-launched llama-server
+(`--jinja`, no studio proxy) returns the model's answer in `message.content`, as the
+studio path does.
+
+### Actual Behavior
+The entire answer is routed into `message.reasoning_content`; `content` is empty
+(content_chars=0). Any consumer reading the content channel gets nothing. Reproduced on
+BOTH boxes (framework Linux and HP G1a Windows), all phases including solo — a property
+of the direct serving path, not the box, OS, or contention.
+
+### Evidence
+- `results/sweeps/2026-08-28-g1a-coresidency/` — Nemotron grades 1/3 in all three phases
+  (code cell: content empty, full doctest answer in the reasoning section); caveat block
+  documents the diagnosis
+- `results/sweeps/2026-08-28-ab-nemotron-framework/` — identical grade pattern on Linux
+- Same-day studio-path control: `results/sweeps/2026-08-28-g1a-validation/` grades the
+  same model 3/3 text
+- The serve log hints the fix: "chat template supports preserving reasoning, consider
+  enabling it via --reasoning-preserve"
+
+### Tasks
+- [ ] Reproduce with `--reasoning-preserve` and/or `--chat-template-kwargs` variants on a
+      direct llama-server launch (framework, build 10639/2a36554fc)
+- [ ] Identify the minimal flag set that puts answers in `content`
+- [ ] Re-grade one 3-task battery cell set to confirm 3/3 on the direct path
+- [ ] Record the required flags in `docs/reference/SERVING-GOTCHAS-STRIX-HALO.md`
+
+### Success Criteria
+- [ ] Direct-llama-server Nemotron battery grades match the studio path (3/3 text)
+- [ ] Flags documented; MI50/gfx906 plan (which depends on direct llama-server) unblocked
+
+---
+
+## Issue 2 — chore: G1a llama-server wedge — request accepted, gen_tok_s=0 indefinitely
+
+**Labels:** bug, priority:low
+
+### What happened
+During the 2026-08-28 Nemotron TL;DR seed probe on the HP G1a (Windows), the seed-44
+serve wedged: `/health` ok, request accepted (`running: 1`), but `engine_stats` reported
+`gen_tok_s: 0.0` indefinitely; the client timed out after 30 minutes on a ~3-minute
+request. First wedge observed on this box — the 5th consecutive fresh server load of the
+evening. Killed cleanly; not reproduced since.
+
+### Evidence
+- `results/sweeps/2026-08-28-nemotron-tldr-seeds/manifest.yaml` (incident block) and
+  `serve-seed44.log` in the same run dir
+
+### Tasks
+- [ ] On recurrence: capture the spawned llama-server log
+      (`~/.unsloth/studio/logs/llama-server/`) before killing
+- [ ] Add a per-request watchdog to the G1a drivers (`g1a_validation.py`,
+      `g1a_coresidency.py`): timeout at ~3x expected wall, kill + record + continue —
+      the framework drivers' equivalent protection
+- [ ] Track frequency; if >1 in 20 loads, escalate to a dedicated repro run
+
+### Success Criteria
+- [ ] G1a batteries survive a wedged cell without losing the run
+- [ ] Wedge frequency data exists after the next few G1a sessions
