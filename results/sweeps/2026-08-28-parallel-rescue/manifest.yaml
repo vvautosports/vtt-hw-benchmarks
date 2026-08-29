@@ -1,0 +1,29 @@
+# Can the healing ladder rescue the 1-of-3 parallel-call defect? NO — 0/4.
+# Nemotron-3.5 and gpt-oss-120b each emit exactly one of the three required calls at the
+# healed AND full rungs, same as raw (2026-08-28-toolcall-tier2). Healing repairs
+# malformed call syntax and nudging retries an absent call; neither mechanism can create
+# calls the model never attempted, and no raw text-form calls were detected to heal.
+run_id: "2026-08-28-parallel-rescue"
+date: "2026-08-28"
+node: "kalman9-framework-01"
+backend: "unsloth-studio"
+isolation: "fresh-server-per-case (toolcall_battery.py --cases toolcall_cases_tier2.json --only tc_parallel)"
+launch_env: {UNSLOTH_DISABLE_UNIFIED_MEMORY: "1"}
+
+axis: cfg
+records: "results.jsonl"
+cases: "toolcall_cases.json"   # tier2 copy
+grading: "py scripts/utils/grade_sweep.py results/sweeps/2026-08-28-parallel-rescue results --layout cfg"
+
+results:   # tc_parallel, all four cells: n_calls=1, calls_matched=1, raw_toolcall_text=false
+  - {model: "NVIDIA-Nemotron-3.5-Lightning-30B-A3B", rung: healed, correct: false}
+  - {model: "NVIDIA-Nemotron-3.5-Lightning-30B-A3B", rung: full,   correct: false}
+  - {model: "gpt-oss-120b",                          rung: healed, correct: false}
+  - {model: "gpt-oss-120b",                          rung: full,   correct: false}
+
+verdict: >
+  The parallel-call defect is UNRESCUABLE by the serving stack: identical 1-of-3
+  behaviour across raw/healed/full for both affected models. The routing rule is
+  therefore HARD, not a config knob: agent stacks must never rely on parallel tool
+  calls in one turn behind Nemotron-3.5 or gpt-oss-120b — serialise, or route
+  fan-out turns to the Qwen/GLM band (all 3/3 at raw).
