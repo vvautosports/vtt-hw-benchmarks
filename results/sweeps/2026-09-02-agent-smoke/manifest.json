@@ -1,0 +1,24 @@
+{
+ "created_utc": "2026-09-02T22:39:16Z",
+ "host": "fedora",
+ "argv": [
+  "/home/kalman9/agent_task_battery.py",
+  "/home/kalman9/smoke_claude.json",
+  "/home/kalman9/agent-smoke-2026-09-02",
+  "--fixtures",
+  "/home/kalman9/fixtures",
+  "--timeout",
+  "600"
+ ],
+ "tasks": [
+  "config-sweep",
+  "feature-with-tests",
+  "fix-failing-test",
+  "implement-from-doctests",
+  "refactor-rename"
+ ],
+ "metrics_url": "http://127.0.0.1:52225/metrics",
+ "agents": [
+  "claude__smoke"
+ ]
+}

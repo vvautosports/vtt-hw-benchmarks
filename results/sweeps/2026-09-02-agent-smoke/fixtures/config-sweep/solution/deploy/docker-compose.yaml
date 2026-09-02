@@ -1,0 +1,7 @@
+services:
+  collector:
+    image: registry.local/telemetry/collector:1.9
+    ports:
+      - "9302:9302"
+    environment:
+      METRICS_PORT: "9302"

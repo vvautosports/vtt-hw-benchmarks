@@ -3,7 +3,12 @@
 
 Usage: python3 agent_task_battery.py <agents_spec.json> <rundir>
            [--fixtures DIR] [--only TASK,TASK] [--timeout S] [--grade-timeout S]
-           [--metrics-url URL]
+           [--metrics-url URL] [--no-preflight]
+
+Before any cells run, a tool-call preflight probe hits the studio Anthropic
+`/v1/messages` endpoint and aborts the run if no tool_use comes back — this
+catches a degraded/wedged serve in seconds instead of burning 900s cells (the
+2026-08-29 false 0/3, issue #12). `--no-preflight` skips it.
 
 Runs ON the inference host (agents co-located with the server), like the sweep
 drivers. It does NOT manage the server: serve the target model first (studio
@@ -76,6 +81,59 @@ def scrape_metrics(url):
             except ValueError:
                 pass
     return out or None
+
+
+def preflight_toolcall(base_url, key, model):
+    """Confirm the serving path executes tool calls before burning cells.
+
+    The 2026-08-29 smoke went 0/3 (900s timeouts, zero edits) because the box
+    was in a degraded state, not because the path was broken — a clean-serve
+    probe returned a proper tool_use in ~1s. This fails a run fast (seconds)
+    instead of hours when the endpoint is wedged. Returns (ok, detail)."""
+    payload = json.dumps({
+        "model": model, "max_tokens": 64,
+        "tools": [{"name": "write_file", "description": "Write a text file",
+                   "input_schema": {"type": "object",
+                                    "properties": {"path": {"type": "string"},
+                                                   "content": {"type": "string"}},
+                                    "required": ["path", "content"]}}],
+        "messages": [{"role": "user",
+                      "content": "Use write_file to create hello.txt containing: hi"}],
+    }).encode()
+    req = urllib.request.Request(base_url.rstrip("/") + "/v1/messages", data=payload,
+                                 method="POST")
+    req.add_header("content-type", "application/json")
+    req.add_header("anthropic-version", "2023-06-01")
+    if key:
+        req.add_header("x-api-key", key)
+        req.add_header("authorization", "Bearer " + key)
+    try:
+        with urllib.request.urlopen(req, timeout=60) as resp:
+            body = json.loads(resp.read().decode("utf-8", errors="replace"))
+    except Exception as e:
+        return False, f"probe request failed: {e}"
+    blocks = body.get("content", []) or []
+    if any(b.get("type") == "tool_use" for b in blocks):
+        return True, "tool_use returned"
+    return False, f"no tool_use (stop_reason={body.get('stop_reason')}, blocks={[b.get('type') for b in blocks]})"
+
+
+def discover_base_and_key():
+    """Studio base URL + api key from `unsloth start claude --no-launch` (never
+    logged). Returns (base_url, key, model) or (None, None, None)."""
+    try:
+        out = subprocess.run(["bash", "-c",
+                              "unsloth start claude --no-launch 2>/dev/null"],
+                             capture_output=True, text=True, timeout=60).stdout
+    except Exception:
+        return None, None, None
+    import re
+    base = re.search(r"ANTHROPIC_BASE_URL=(\S+)", out)
+    key = re.search(r"ANTHROPIC_AUTH_TOKEN=(sk-unsloth-[0-9a-f]+)", out)
+    model = re.search(r"ANTHROPIC_MODEL=(\S+)", out)
+    return (base.group(1) if base else None,
+            key.group(1) if key else None,
+            model.group(1) if model else None)
 
 
 def discover_metrics_url():
@@ -165,11 +223,14 @@ def main():
     timeout_s = 900
     grade_timeout_s = 300
     metrics_url = None
+    preflight = True
     args = []
     i = 0
     while i < len(argv):
         a = argv[i]
-        if a == "--fixtures":
+        if a == "--no-preflight":
+            preflight = False
+        elif a == "--fixtures":
             i += 1
             fixtures_dir = argv[i]
         elif a == "--only":
@@ -194,6 +255,20 @@ def main():
     spec = json.load(open(args[0], encoding="utf-8"))
     rundir = os.path.abspath(args[1])
     fixtures_dir = os.path.abspath(fixtures_dir)
+
+    if preflight:
+        base, key, model = discover_base_and_key()
+        if not base:
+            log("PREFLIGHT SKIPPED: could not resolve studio base/key "
+                "(pass --no-preflight to silence)")
+        else:
+            ok, detail = preflight_toolcall(base, key, model)
+            log(f"preflight tool-call probe: {'OK' if ok else 'FAIL'} — {detail}")
+            if not ok:
+                raise SystemExit(
+                    "ABORT: serving path does not execute tool calls — refusing "
+                    "to burn cells on a degraded serve (see issue #12). Fix the "
+                    "serve or pass --no-preflight to override.")
 
     tasks = sorted(
         d for d in os.listdir(fixtures_dir)

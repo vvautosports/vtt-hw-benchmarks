@@ -1,0 +1,7 @@
+services:
+  collector:
+    image: registry.local/telemetry/collector:1.9
+    ports:
+      - "8471:8471"
+    environment:
+      METRICS_PORT: "8471"
