@@ -1,0 +1,81 @@
+=== REASONING ===
+*   Truck A: arrives every 12 minutes.
+    *   Truck B: arrives every 18 minutes.
+    *   Truck C: arrives every 30 minutes.
+    *   Start time: 6:00 AM (all arrive together).
+    *   End time: 6:00 PM (inclusive).
+    *   Goal: Find the number of times all three arrive at the same moment between 6:00 AM and 6:00 PM.
+
+    *   The trucks arrive together when the time elapsed is a common multiple of their arrival intervals (12, 18, and 30 minutes).
+    *   The *first* time they arrive together after 6:00 AM is at the Least Common Multiple (LCM) of 12, 18, and 30.
+
+    *   $12 = 2^2 \times 3$
+    *   $18 = 2 \times 3^2$
+    *   $30 = 2 \times 3 \times 5$
+    *   $LCM(12, 18, 30) = 2^{\max(2, 1, 1)} \times 3^{\max(1, 2, 1)} \times 5^{\max(0, 0, 1)}$
+    *   $LCM = 2^2 \times 3^2 \times 5^1 = 4 \times 9 \times 5 = 180$ minutes.
+
+    *   180 minutes = 3 hours.
+
+    *   The trucks arrive together every 3 hours.
+    *   Start time: 6:00 AM.
+    *   End time: 6:00 PM.
+    *   Total duration: 12 hours (from 6:00 AM to 6:00 PM).
+
+    *   T0 = 6:00 AM
+    *   T1 = 6:00 AM + 3 hours = 9:00 AM
+    *   T2 = 9:00 AM + 3 hours = 12:00 PM
+    *   T3 = 12:00 PM + 3 hours = 3:00 PM
+    *   T4 = 3:00 PM + 3 hours = 6:00 PM
+
+    *   The question asks "Between 6:00 AM and 6:00 PM inclusive".
+    *   Count: 6:00 AM (1), 9:00 AM (2), 12:00 PM (3), 3:00 PM (4), 6:00 PM (5).
+
+    *   Truck A: 12, 24, 36, 48, 60, 72, 84, 96, 108, 120, 132, 144, 156, 168, **180**...
+    *   Truck B: 18, 36, 54, 72, 90, 108, 126, 144, 162, **180**...
+    *   Truck C: 30, 60, 90, 120, 150, **180**...
+    *   LCM is indeed 180.
+    *   Total time: 6:00 AM to 6:00 PM = 12 hours.
+    *   12 hours / 3 hours = 4 intervals.
+    *   Number of points = intervals + 1 = 4 + 1 = 5.
+
+    *   Show LCM calculation.
+    *   Convert LCM to hours.
+    *   Identify the intervals between simultaneous arrivals.
+    *   List the times or use the interval math.
+    *   Final answer.
+
+=== CONTENT ===
+To find how many times all three trucks arrive at the same moment between 6:00 AM and 6:00 PM inclusive, we need to determine the frequency at which their arrival times coincide.
+
+**1. Find the Least Common Multiple (LCM) of the arrival intervals:**
+The trucks arrive every 12, 18, and 30 minutes. They will all arrive at the same time at every common multiple of these three numbers. The first time they arrive together after the start is the Least Common Multiple.
+
+*   Prime factorization of 12: $2^2 \times 3$
+*   Prime factorization of 18: $2 \times 3^2$
+*   Prime factorization of 30: $2 \times 3 \times 5$
+
+The LCM is found by taking the highest power of each prime factor present:
+$LCM(12, 18, 30) = 2^2 \times 3^2 \times 5^1$
+$LCM = 4 \times 9 \times 5 = 180$ minutes.
+
+**2. Convert the LCM to hours:**
+$180 \text{ minutes} = \frac{180}{60} \text{ hours} = 3 \text{ hours}$.
+All three trucks arrive together every 3 hours.
+
+**3. Determine the total time period:**
+The time from 6:00 AM to 6:00 PM is exactly 12 hours.
+
+**4. Calculate the number of occurrences:**
+Since the trucks arrive together at the start (6:00 AM) and every 3 hours thereafter, we list the times:
+*   6:00 AM (Start)
+*   9:00 AM (6:00 AM + 3 hours)
+*   12:00 PM (9:00 AM + 3 hours)
+*   3:00 PM (12:00 PM + 3 hours)
+*   6:00 PM (3:00 PM + 3 hours)
+
+The question asks for the count "between 6:00 AM and 6:00 PM inclusive," so we include both the start and end times.
+
+Counting the occurrences: 6:00 AM, 9:00 AM, 12:00 PM, 3:00 PM, and 6:00 PM gives a total of 5 times.
+
+ANSWER: 5

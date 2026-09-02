@@ -1,0 +1,72 @@
+=== CONTENT ===
+```python
+def parse_ranges(s: str) -> list[int]:
+    """
+    Parses a string of ranges and individual numbers into a flat list of integers.
+    
+    Args:
+        s (str): A string like '1-3, 5, 7-9'.
+        
+    Returns:
+        list[int]: A list of all integers contained in the specified ranges.
+        
+    Raises:
+        ValueError: If a range is reversed (e.g., '9-7').
+        
+    Doctests:
+    >>> parse_ranges('1-3,5,7-9')
+    [1, 2, 3, 5, 7, 8, 9]
+    >>> parse_ranges(' 1 - 3 , 5 , 7 - 9 ')
+    [1, 2, 3, 5, 7, 8, 9]
+    >>> parse_ranges('  ')
+    []
+    >>> parse_ranges('')
+    []
+    >>> parse_ranges('10-12, 15')
+    [10, 11, 12, 15]
+    >>> parse_ranges('9-7')
+    Traceback (most recent call last):
+        ...
+    ValueError: Range start cannot be greater than range end.
+    """
+    # Handle empty or whitespace-only input
+    s = s.strip()
+    if not s:
+        return []
+
+    result = []
+    # Split by commas to get individual parts
+    parts = s.split(',')
+
+    for part in parts:
+        part = part.strip()
+        if not part:
+            continue
+            
+        if '-' in part:
+            # Handle range logic
+            try:
+                start_str, end_str = part.split('-')
+                start = int(start_str.strip())
+                end = int(end_str.strip())
+            except ValueError:
+                raise ValueError(f"Invalid range format: {part}")
+
+            if start > end:
+                raise ValueError("Range start cannot be greater than range end.")
+            
+            # Append every number in the range (inclusive)
+            result.extend(range(start, end + 1))
+        else:
+            # Handle individual number logic
+            try:
+                result.append(int(part))
+            except ValueError:
+                raise ValueError(f"Invalid number format: {part}")
+
+    return result
+
+if __name__ == "__main__":
+    import doctest
+    doctest.testmod()
+```

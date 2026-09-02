@@ -1,0 +1,147 @@
+[
+  {
+    "model": "unsloth/gemma-4-26B-A4B-it-GGUF",
+    "load_s": 28.4,
+    "receipts": {
+      "rcpt01_diner": {
+        "secs": 12.9,
+        "checks": {
+          "merchant": true,
+          "date": true,
+          "total": true,
+          "category": true,
+          "tax": true,
+          "tip": true,
+          "card_last4": true
+        },
+        "raw": {
+          "is_receipt": true,
+          "merchant": "THE TEST DINER",
+          "date": "2026-08-26",
+          "total": 42.17,
+          "currency": "USD",
+          "tax": 2.72,
+          "tip": 5.45,
+          "category": "dinner",
+          "qualifier": "none",
+          "card_last4": "4242",
+          "pickup_address": "",
+          "dropoff_address": "",
+          "confidence": "high",
+          "notes": ""
+        }
+      },
+      "rcpt02_uber": {
+        "secs": 13.6,
+        "checks": {
+          "merchant": true,
+          "date": true,
+          "total": true,
+          "category": true,
+          "tip": true,
+          "card_last4": true,
+          "qualifier": true
+        },
+        "raw": {
+          "is_receipt": true,
+          "merchant": "Uber",
+          "date": "2026-08-25",
+          "total": 23.84,
+          "currency": "USD",
+          "tax": 0,
+          "tip": 3.0,
+          "category": "uber",
+          "qualifier": "home",
+          "card_last4": "4242",
+          "pickup_address": "500 Innovation Way Suite 300, Columbus, OH 43215",
+          "dropoff_address": "4512 Maple Grove Ln, Columbus, OH 43221",
+          "confidence": "high",
+          "notes": ""
+        }
+      },
+      "rcpt03_hotel": {
+        "secs": 13.1,
+        "checks": {
+          "merchant": true,
+          "date": true,
+          "total": true,
+          "category": true,
+          "tax": true,
+          "card_last4": true
+        },
+        "raw": {
+          "is_receipt": true,
+          "merchant": "GRAND COLUMBUS HOTEL",
+          "date": "2026-08-24",
+          "total": 442.26,
+          "currency": "USD",
+          "tax": 64.26,
+          "tip": 0,
+          "category": "hotel",
+          "qualifier": "none",
+          "card_last4": "4242",
+          "pickup_address": "",
+          "dropoff_address": "",
+          "confidence": "high",
+          "notes": ""
+        }
+      },
+      "rcpt04_flight": {
+        "secs": 12.0,
+        "checks": {
+          "merchant": true,
+          "date": true,
+          "total": true,
+          "category": true,
+          "tax": true,
+          "card_last4": true
+        },
+        "raw": {
+          "is_receipt": true,
+          "merchant": "AMERICAN AIRLINES",
+          "date": "2026-08-20",
+          "total": 333.04,
+          "currency": "USD",
+          "tax": 43.44,
+          "tip": 0,
+          "category": "flight",
+          "qualifier": "none",
+          "card_last4": "9931",
+          "pickup_address": "",
+          "dropoff_address": "",
+          "confidence": "high",
+          "notes": ""
+        }
+      },
+      "rcpt05_parking": {
+        "secs": 12.8,
+        "checks": {
+          "merchant": true,
+          "date": true,
+          "total": true,
+          "category": true,
+          "card_last4": true
+        },
+        "raw": {
+          "is_receipt": true,
+          "merchant": "JOHN GLENN INTL AIRPORT",
+          "date": "2026-08-26",
+          "total": 36.0,
+          "currency": "USD",
+          "tax": 0,
+          "tip": 0,
+          "category": "parking",
+          "qualifier": "none",
+          "card_last4": "4242",
+          "pickup_address": "",
+          "dropoff_address": "",
+          "confidence": "high",
+          "notes": "Parking receipt for Long Term Lot B"
+        }
+      }
+    },
+    "fields_ok": 31,
+    "fields_total": 31,
+    "errors": 0
+  }
+]

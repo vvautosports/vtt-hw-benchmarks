@@ -1,0 +1,28 @@
+=== REASONING ===
+We need times from 0 to 12 hours inclusive where t is multiple of LCM(12,18,30) minutes. Compute LCM. Prime factors: 12=2^2*3, 18=2*3^2, 30=2*3*5. LCM =2^2*3^2*5=4*9*5=180 minutes = 3 hours. Arrivals together at t = 0, 180, 360, 540, 720 minutes? 12 hours = 720 minutes. Inclusive of both endpoints 0 and 720. Count multiples of 180 from 0 to 720 inclusive: 720/180 =4, plus the 0 gives 5? Actually multiples: 0,180,360,540,720 =5 times. But does 6:00 PM count? Yes inclusive. So answer 5.
+
+=== CONTENT ===
+The three trucks are together whenever the elapsed time (in minutes) is a common multiple of their return intervals:  
+
+- Truck A: every 12 min  
+- Truck B: every 18 min  
+- Truck C: every 30 min  
+
+The least common multiple (LCM) of 12, 18, and 30 is  
+
+\[
+\text{LCM}=2^{2}\cdot 3^{2}\cdot 5 = 180\text{ minutes}=3\text{ hours}.
+\]
+
+Thus the trucks all arrive together every 180 minutes.  
+From 6:00 AM to 6:00 PM is a 12‑hour span, i.e., 720 minutes.
+
+Number of times they coincide = number of multiples of 180 minutes from 0 to 720 inclusive:
+
+\[
+0,\;180,\;360,\;540,\;720 \quad\Longrightarrow\quad 5\text{ times}.
+\]
+
+Hence:
+
+**ANSWER: 5**

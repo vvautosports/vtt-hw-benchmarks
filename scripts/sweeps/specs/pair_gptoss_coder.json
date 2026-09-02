@@ -1,0 +1,14 @@
+[
+  {
+    "name": "gpt-oss-120b",
+    "role": "orchestrator (heavy)",
+    "port": 8801,
+    "path": "/mnt/ai-models/openai/gpt-oss-120b/gpt-oss-120b-F16.gguf"
+  },
+  {
+    "name": "Qwen3-Coder-30B-A3B-Instruct",
+    "role": "sub-agent",
+    "port": 8802,
+    "path": "/mnt/ai-models/unsloth/Qwen3-Coder-30B-A3B-Instruct-GGUF/Qwen3-Coder-30B-A3B-Instruct-UD-Q8_K_XL.gguf"
+  }
+]

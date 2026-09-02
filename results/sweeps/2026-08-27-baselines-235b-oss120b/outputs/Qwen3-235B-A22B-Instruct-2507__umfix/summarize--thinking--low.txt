@@ -1,0 +1,8 @@
+=== CONTENT ===
+- Speculative decoding speeds up autoregressive generation by using a draft mechanism (e.g., small model, n-gram lookup, or multi-token-prediction head) to propose tokens, which the target model verifies in a batch; accepted tokens retain target-model quality at lower cost, while rejections fall back to standard decoding, preserving output distribution.  
+- N-gram drafting excels in repetitive outputs (e.g., code) with high, low-cost acceptance; open-ended text sees lower acceptance, risking slowdown if the draft model is poorly matched.  
+- Multi-token-prediction (MTP) heads, trained alongside the target model, offer stable cross-domain acceptance by leveraging shared context, at a small compute overhead per step.  
+- For mixture-of-experts (MoE) models, speculative batching can negate efficiency gains: simultaneous verification of multiple positions may activate more experts, increasing memory bandwidth usage and raising the break-even acceptance rate for performance benefits.  
+- In server environments, speculation competes with KV-cache allocation across concurrent sequences; optimal performance requires jointly tuning speculation, slot count, and sampling rather than treating them independently, with evaluation based on real-world throughput.
+
+**TL;DR:** Speculative decoding can accelerate generation, but its effectiveness depends on the draft strategy, output structure, model architecture (especially MoE), and system-level trade-offs, requiring holistic tuning for real-world efficiency.

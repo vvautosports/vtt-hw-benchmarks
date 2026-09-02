@@ -1,0 +1,62 @@
+=== REASONING ===
+*   Task: Summarize the provided technical passage.
+    *   Constraint 1: Exactly 5 bullet points.
+    *   Constraint 2: Followed by a one-sentence TL;DR.
+    *   Constraint 3: Be faithful to the source (no external claims).
+
+    *   *Paragraph 1:* Explains speculative decoding (draft model proposes tokens, target model verifies in one pass). Result: large-model quality at near-draft-model cost. Rejections truncate. Methods: separate small model, n-gram lookup, or multi-token-prediction (MTP) heads.
+    *   *Paragraph 2:* Workload economics. Code/structured text (high acceptance with n-grams). Prose (lower acceptance). Poorly matched drafts can be slower due to wasted verification passes. MTP heads have stable acceptance rates across domains.
+    *   *Paragraph 3:* MoE models. MoE uses small subsets of experts (efficient for single tokens). Speculative verification batches positions, potentially routing to different experts, increasing memory bandwidth requirements. This raises the required acceptance rate for MoE to be profitable compared to dense models.
+    *   *Paragraph 4:* Server-side parallelism. Slot-based servers split KV-cache. More slots = higher throughput but lower per-stream speed. Speculation competes with slots for compute. Optimization requires joint tuning of speculative mode, slot count, and sampling settings.
+
+    *   *Point 1 (Mechanism):* Speculative decoding uses a cheap draft mechanism to propose tokens that a target model verifies in a single batched pass, maintaining the original distribution.
+    *   *Point 2 (Drafting methods):* Drafting techniques include separate small models, n-gram lookups, or multi-token-prediction (MTP) heads that predict future tokens from the target model's hidden state.
+    *   *Point 3 (Workload/Efficiency):* Efficiency depends on the workload; n-gram drafting excels with repetitive code/structure, while prose has lower acceptance, and MTP heads offer stable performance across domains.
+    *   *Point 4 (MoE impact):* For Mixture-of-Experts (MoE) models, speculative decoding requires a higher acceptance rate because batching multiple positions can increase expert weight memory demands on bandwidth-bound hardware.
+    *   *Point 5 (System tuning):* Effective server deployment requires joint configuration of speculative mode, slot counts, and sampling settings to balance throughput and per-stream speed.
+
+    *   *TL;DR:* Speculative decoding improves inference speed by using draft mechanisms to propose tokens, but its effectiveness varies based on drafting method, workload, model architecture (like MoE), and server-side configuration.
+
+    *   *Check constraints:*
+        *   Exactly 5 bullet points? Yes.
+        *   One-sentence TL;DR? Yes.
+        *   Faithful to source? Yes.
+        *   No added claims? Yes.
+
+    *   *Refining Point 1:* Speculative decoding uses a draft mechanism to propose tokens for a target model to verify in a single batched pass, ensuring outputs remain distributionally identical to standard decoding. (Better)
+    *   *Refining Point 2:* Common drafting methods include separate small models, n-gram lookups, or multi-token-prediction (MTP) heads that predict future tokens using the target model's hidden state. (Better)
+    *   *Refining Point 3:* Performance varies by workload, where n-gram drafting is efficient for repetitive structured text, while prose yields lower acceptance rates and MTP heads provide more stable performance. (Better)
+    *   *Refining Point 4:* In Mixture-of-Experts (MoE) models, the batching of speculative tokens can increase memory bandwidth demands by routing to different experts, necessitating a higher acceptance rate for profitability. (Better)
+    *   *Refining Point 5:* Optimizing server-side performance requires jointly tuning speculative modes, slot counts, and sampling settings rather than treating them as independent variables. (Better)
+
+    *   *Final TL;DR Check:* Speculative decoding accelerates inference through token proposals, but its benefits are influenced by drafting methods, workload types, MoE architectures, and server-side resource allocation.
+
+    1. Speculative decoding accelerates inference by using a draft mechanism to propose tokens that a target model verifies in a single batched pass, maintaining original output distributions.
+    2. Drafting methods include separate small models, n-gram lookups, or multi-token-prediction (MTP) heads that predict future tokens from the target model's hidden state.
+    3. Efficiency depends on the workload, as n-gram drafting works well for repetitive code, while MTP heads offer more stable acceptance rates across different domains like prose.
+    4. Mixture-of-Experts (MoE) models require higher acceptance rates for speculative decoding to be profitable because batching tokens can increase memory bandwidth usage by routing to multiple experts.
+    5. Server-side optimization requires treating speculative mode, slot counts, and sampling settings as a single joint configuration to manage competition for compute and KV-cache resources.
+
+    TL;DR: Speculative decoding's effectiveness is highly dependent on the drafting method used, the nature of the text, the model's architecture, and how server-side resources are configured.
+
+    *Self-Correction on TL;DR:* The prompt asks for a one-sentence TL;DR. The current one is good.
+
+    *Wait, let's double-check the "exactly 5 bullet points" rule.* Yes.
+
+    *Let's review the content for accuracy against the text.*
+    - "Accepted tokens land at large-model quality but near draft-model cost; a rejection truncates... outputs remain distributionally identical." -> Point 1 covers this.
+    - "The draft can be a separate small model, an n-gram lookup... or... multi-token-prediction (MTP) head" -> Point 2 covers this.
+    - "Code and structured text... n-gram drafting achieves high acceptance... Open-ended prose accepts fewer... MTP heads... acceptance rates tend to be stable" -> Point 3 covers this.
+    - "MoE... speculative verification batches several positions... each position may route to different experts, pulling more expert weights through memory... break-even acceptance rate is higher for MoE" -> Point 4 covers this.
+    - "Tuning therefore has to treat speculative mode, slot count, and sampling settings as one joint configuration" -> Point 5 covers this.
+
+    Everything looks solid.
+
+=== CONTENT ===
+* Speculative decoding accelerates inference by using a draft mechanism to propose tokens that a target model verifies in a single batched pass, ensuring outputs remain distributionally identical to standard decoding.
+* Drafting methods include utilizing separate small models, n-gram lookups, or multi-token-prediction (MTP) heads that predict future tokens using the target model's hidden state.
+* Efficiency varies by workload, as n-gram drafting is highly effective for repetitive code, while MTP heads provide more stable acceptance rates across different domains like open-ended prose.
+* In Mixture-of-Experts (MoE) models, the increased memory bandwidth required to route batched tokens to different experts means a higher acceptance rate is needed to make speculation profitable.
+* Optimizing server-side performance requires treating speculative mode, slot counts, and sampling settings as a single joint configuration to manage competition for compute and KV-cache resources.
+
+TL;DR: The effectiveness of speculative decoding depends on the drafting method, the specific workload, the model architecture, and the joint configuration of server-side resources.

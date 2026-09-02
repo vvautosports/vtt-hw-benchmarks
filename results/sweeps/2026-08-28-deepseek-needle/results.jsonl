@@ -1,0 +1,3 @@
+{"cell": "8k", "loaded": true, "needle_code": "ZK-4471-MOTH", "prompt_tokens": 5851, "completion_tokens": 76, "wall_s": 48.7, "prefill_tps": null, "tps_server": null, "finish_reason": "stop", "needle_found": true, "correct": true}
+{"cell": "24k", "loaded": true, "needle_code": "QX-9182-FERN", "prompt_tokens": 17401, "completion_tokens": 102, "wall_s": 153.0, "prefill_tps": null, "tps_server": null, "finish_reason": "stop", "needle_found": true, "correct": true}
+{"cell": "48k", "loaded": true, "needle_code": "RV-3356-DUSK", "prompt_tokens": 34795, "completion_tokens": 76, "wall_s": 344.6, "prefill_tps": null, "tps_server": null, "finish_reason": "stop", "needle_found": true, "correct": true}

@@ -1,0 +1,24 @@
+=== REASONING ===
+We need LCM of 12, 18, 30 = 180 minutes. So they meet every 180 minutes = 3 hours. From 6:00 AM to 6:00 PM inclusive is 12 hours, so times at 6:00, 9:00, 12:00, 3:00, 6:00 = 5 times.
+
+Let me verify LCM: 12 = 2^2·3, 18=2·3^2, 30=2·3·5 → LCM = 2^2·3^2·5 = 180. Yes.
+
+Count: 12*60/180 = 4 intervals, +1 inclusive endpoints = 5.
+
+
+=== CONTENT ===
+**Reasoning:**
+
+1. The three trucks are together again whenever the elapsed time is a common multiple of 12, 18, and 30 minutes — so I need the LCM.
+   - 12 = 2²·3
+   - 18 = 2·3²
+   - 30 = 2·3·5
+   - LCM = 2²·3²·5 = **180 minutes** (3 hours)
+
+2. The window from 6:00 AM to 6:00 PM is 12 hours = 720 minutes, and both endpoints are included.
+
+3. Meeting times: 0, 180, 360, 540, 720 minutes after 6:00 AM → 6:00 AM, 9:00 AM, 12:00 PM, 3:00 PM, 6:00 PM.
+
+4. Count = 720 / 180 + 1 = 4 + 1 = 5.
+
+ANSWER: 5

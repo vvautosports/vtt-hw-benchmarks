@@ -1,0 +1,53 @@
+=== REASONING ===
+We have three trucks that arrive at a warehouse together at 6:00 AM. They "return every ..." minutes? The wording: "Truck A returns every 12 minutes, truck B every 18 minutes, and truck C every 30 minutes." They all arrive at 6:00 AM together. Then they return (i.e., come back) at intervals: A every 12 min, B every 18 min, C every 30 min. We need to find how many times between 6:00 AM and 6:00 PM inclusive all three trucks arrive at the same moment.
+
+Essentially, we need the number of times t (in minutes after 6:00 AM) such that t is a multiple of 12, 18, and 30, and t is between 0 and (6:00 PM - 6:00 AM) = 12 hours = 720 minutes inclusive.
+
+So we need the least common multiple (LCM) of 12, 18, 30.
+
+Compute LCM(12, 18, 30).
+
+Factor: 12 = 2^2 * 3; 18 = 2 * 3^2; 30 = 2 * 3 * 5.
+
+LCM = 2^2 * 3^2 * 5 = 4 * 9 * 5 = 180.
+
+Thus they coincide every 180 minutes = 3 hours.
+
+Starting at 6:00 AM (t=0), the coincidences occur at t = 0, 180, 360, 540, 720 minutes.
+
+Now inclusive interval from 6:00 AM to 6:00 PM inclusive: 6:00 PM is exactly 12 hours later, t=720 minutes.
+
+So times: 6:00 AM, 9:00 AM, 12:00 PM, 3:00 PM, 6:00 PM. That's 5 times.
+
+But check: "Between 6:00 AM and 6:00 PM inclusive" includes both endpoints. So count = floor(720/180) + 1 = 4 + 1 = 5.
+
+Thus answer 5.
+
+We should show reasoning and then final line: ANSWER: 5.
+
+We need to output final count on its own line as 'ANSWER: <n>'.
+
+Thus produce final answer.
+
+=== CONTENT ===
+The three trucks start together at 6:00 AM. They will next all be at the warehouse at the same moment when the elapsed time is a common multiple of their return intervals: 12 min, 18 min, and 30 min.
+
+The least common multiple (LCM) of 12, 18, and 30 is:
+
+- \(12 = 2^2 \times 3\)
+- \(18 = 2 \times 3^2\)
+- \(30 = 2 \times 3 \times 5\)
+
+LCM = \(2^2 \times 3^2 \times 5 = 4 \times 9 \times 5 = 180\) minutes = 3 hours.
+
+From 6:00 AM to 6:00 PM inclusive is 12 hours = 720 minutes. The coincidences occur at every 180‑minute mark:
+
+- 0 min → 6:00 AM  
+- 180 min → 9:00 AM  
+- 360 min → 12:00 PM  
+- 540 min → 3:00 PM  
+- 720 min → 6:00 PM  
+
+Thus there are 5 moments when all three trucks arrive together.
+
+ANSWER: 5

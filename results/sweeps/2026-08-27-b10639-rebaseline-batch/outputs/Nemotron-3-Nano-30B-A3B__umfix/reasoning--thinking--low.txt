@@ -1,0 +1,63 @@
+=== REASONING ===
+We need to find number of times (including possibly at 6:00 AM?) between 6:00 AM and 6:00 PM inclusive (i.e., from 6:00 to 18:00). All three trucks arrive together at times that are common multiples of their intervals: 12, 18, and 30 minutes.
+
+Given they all arrive at 6:00 AM initially. Then they will align again at times that are multiples of LCM(12,18,30) minutes after 6:00 AM.
+
+Compute LCM of 12, 18, 30.
+
+Prime factorization:
+12 = 2^2 * 3
+18 = 2 * 3^2
+30 = 2 * 3 * 5
+
+LCM takes max powers: 2^2 * 3^2 * 5 = 4 * 9 * 5 = 180 minutes.
+
+Thus they align every 180 minutes (3 hours). Starting at 6:00 AM, they will next align at 9:00 AM, then 12:00 PM, then 3:00 PM, then 6:00 PM.
+
+Now the interval considered is inclusive of both endpoints: from 6:00 AM to 6:00 PM inclusive.
+
+Thus we count the number of alignment times in that interval inclusive.
+
+Times: 6:00 AM (t=0), 9:00 AM (t=180 min), 12:00 PM (t=360), 3:00 PM (t=540), 6:00 PM (t=720). That's 5 times.
+
+But wait: is 6:00 PM exactly 12 hours after 6:00 AM? 12 hours = 720 minutes. Since 720 is divisible by 180 (720/180 = 4), the times are 0, 180, 360, 540, 720. That's indeed 5 times (0 through 4 inclusive). So the count is 5.
+
+But check if the problem includes both endpoints inclusive. It says "Between 6:00 AM and 6:00 PM inclusive". That's inclusive of both. So yes, count includes both.
+
+Thus answer should be 5.
+
+Now we need to show reasoning, then final count on its own line as 'ANSWER: <n>'.
+
+Thus produce something like:
+
+Reasoning: ... final count: ANSWER: 5
+
+Make sure final count is on its own line, exactly "ANSWER: 5". The preceding reasoning can be in previous lines.
+
+Thus produce answer.
+
+
+=== CONTENT ===
+The three trucks will all be at the warehouse together whenever a time is a common multiple of their return intervals (12 min, 18 min, and 30 min).  
+
+- Prime factorisations:  
+  - 12 = \(2^2 \cdot 3\)  
+  - 18 = \(2 \cdot 3^2\)  
+  - 30 = \(2 \cdot 3 \cdot 5\)  
+
+- The least common multiple (LCM) takes the highest power of each prime:  
+  \[
+  \text{LCM}=2^2 \cdot 3^2 \cdot 5 = 4 \times 9 \times 5 = 180\text{ minutes}.
+  \]
+
+Thus the trucks synchronize every 180 minutes (3 hours). Starting at 6:00 AM, the synchronized times are:
+
+- 6:00 AM (0 min)  
+- 9:00 AM (180 min)  
+- 12:00 PM (360 min)  
+- 3:00 PM (540 min)  
+- 6:00 PM (720 min)
+
+The interval requested is from 6:00 AM to 6:00 PM **inclusive**, so all five moments are counted.
+
+ANSWER: 5

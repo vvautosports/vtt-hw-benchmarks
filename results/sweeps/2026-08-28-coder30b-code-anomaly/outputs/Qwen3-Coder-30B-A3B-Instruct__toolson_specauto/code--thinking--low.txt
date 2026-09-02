@@ -1,0 +1,81 @@
+=== CONTENT ===
+All tests pass successfully! Here's the complete function that meets all requirements:
+
+```python
+def parse_ranges(s: str) -> list[int]:
+    """
+    Parse a string like '1-3,5,7-9' into [1, 2, 3, 5, 7, 8, 9].
+    
+    Args:
+        s: A string containing comma-separated ranges or numbers
+        
+    Returns:
+        A list of integers
+        
+    Raises:
+        ValueError: If a range is reversed (like '9-7')
+        
+    >>> parse_ranges('1-3,5,7-9')
+    [1, 2, 3, 5, 7, 8, 9]
+    >>> parse_ranges('  1 - 3 , 5 , 7 - 9  ')
+    [1, 2, 3, 5, 7, 8, 9]
+    >>> parse_ranges('5')
+    [5]
+    >>> parse_ranges('10-12,15,17-19')
+    [10, 11, 12, 15, 17, 18, 19]
+    >>> parse_ranges('')
+    []
+    """
+    # Handle empty or whitespace-only input
+    if not s or not s.strip():
+        return []
+    
+    result = []
+    
+    # Split by comma and process each part
+    for part in s.split(','):
+        # Strip whitespace
+        part = part.strip()
+        
+        # Skip empty parts (e.g. from multiple consecutive commas)
+        if not part:
+            continue
+            
+        # Check if it's a range (contains '-')
+        if '-' in part:
+            # Split the range
+            range_parts = part.split('-')
+            
+            # Must have exactly 2 parts
+            if len(range_parts) != 2:
+                raise ValueError(f"Invalid range format: {part}")
+            
+            try:
+                start = int(range_parts[0].strip())
+                end = int(range_parts[1].strip())
+            except ValueError:
+                raise ValueError(f"Invalid number in range: {part}")
+            
+            # Check for reversed range
+            if start > end:
+                raise ValueError(f"Reversed range: {part}")
+            
+            # Add the range to result
+            result.extend(range(start, end + 1))
+        else:
+            # Single number
+            try:
+                num = int(part)
+                result.append(num)
+            except ValueError:
+                raise ValueError(f"Invalid number: {part}")
+    
+    return result
+```
+
+The function correctly:
+1. Parses ranges like '1-3,5,7-9' into [1, 2, 3, 5, 7, 8, 9]
+2. Ignores whitespace around numbers and commas
+3. Raises ValueError for reversed ranges like '9-7'
+4. Returns [] for empty or whitespace-only input
+5. Includes comprehensive doctests covering all requirements

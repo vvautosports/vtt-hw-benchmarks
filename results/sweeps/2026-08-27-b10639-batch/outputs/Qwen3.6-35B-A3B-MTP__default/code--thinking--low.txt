@@ -1,0 +1,22 @@
+=== REASONING ===
+All 8 doctests pass. The function handles all requirements: whitespace trimming, reversed range detection with ValueError, empty/whitespace input returning [], and various edge cases like single numbers and degenerate ranges (a==b).
+
+
+=== CONTENT ===
+The function is complete — all **8 doctests** pass. Here's a quick summary of what it covers:
+
+| # | Test case | Covers |
+|---|-----------|--------|
+| 1 | `'1-3,5,7-9'` | Core range + number expansion |
+| 2 | `'  1-3 , 5 , 7-9  '` | Whitespace tolerance |
+| 3 | `''` | Empty string → `[]` |
+| 4 | `'   '` | Whitespace-only → `[]` |
+| 5 | `'5'` | Single number |
+| 6 | `'12-12'` (in mix) | Degenerate range *a == b* |
+| 7 | `'9-7'` | Reversed range raises `ValueError` |
+| 8 | `'4,6-2'` | Raises on the bad part even when others are valid |
+
+Key implementation details:
+- **Split on `,`** first, then strip each token — this cleanly handles whitespace around commas and numbers alike.
+- **`split("-", 1)`** limits to one dash split, avoiding issues with negative numbers in edge cases (though negatives aren't required here).
+- A **clear `ValueError`** message identifies the offending range before any results are accumulated.

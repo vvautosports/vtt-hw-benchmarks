@@ -1,0 +1,141 @@
+=== REASONING ===
+Summarize the following technical passage as exactly 5 bullet points followed by a one-sentence TL;DR. Be faithful to source; do not add claims it does not make.
+
+We need exactly 5 bullet points followed by a one-sentence TL;DR.
+
+Be faithful. Do not add claims it does not make.
+
+We need summarize technical passage.
+
+Passage points:
+
+- Speculative decoding accelerates autoregressive inference by letting cheap draft mechanism propose several tokens which target model verifies in single batched forward pass.
+- Accepted tokens land at large-model quality but near draft-model cost; rejection truncates proposal and target model resumes from last accepted position, so outputs remain distributionally identical to standard decoding.
+- Draft can be separate small model, n-gram lookup over prompt and generation history, or newer designs - multi-token-prediction (MTP) head trained jointly with target model that predicts short window of future tokens from same hidden state.
+- Economics differ sharply by workload. Code and structured text repeat long spans, so n-gram drafting achieves high acceptance rates almost for free.
+- Open-ended prose accepts fewer speculative tokens, and poorly matched draft model can make generation slower than running target alone, because every rejected batch wastes full verification pass.
+- MTP heads sit in between: they add small amount memory and compute per step, but acceptance rates tend to be stable across domains because head sees exact context target sees.
+- Mixture-of-experts models complicate picture. MoE layer routes each token to small subset of experts, so active parameter count per token is fraction of total - which is why model with tens of billions parameters can decode quickly on integrated GPUs with unified memory.
+- But speculative verification batches several positions together, and each position may route to different experts, pulling more expert weights through memory per step.
+- On bandwidth-bound hardware this erodes batching advantage that makes speculation profitable, so break-even acceptance rate is higher for MoE targets than dense ones.
+- Server-side parallelism interacts with all of this. Slot-based servers split KV-cache budget across concurrent sequences; more slots raise aggregate throughput while lowering per-stream speed, and speculation competes with extra slots for same compute headroom.
+- Tuning therefore has to treat speculative mode, slot count, and sampling settings as one joint configuration rather than three independent knobs, and measure end-to-end tokens per second on representative tasks instead of trusting microbenchmarks.
+
+We need exactly 5 bullet points. Summarize.
+
+We must ensure bullet points are faithful. Probably each bullet can combine multiple ideas.
+
+Need exactly 5 bullet points followed by one-sentence TL;DR.
+
+Format: bullet points maybe using - or •. Ensure exactly 5 bullet points.
+
+Then TL;DR sentence.
+
+Make sure not add claims not in source. Avoid adding inference beyond source.
+
+We need ensure TL;DR is one sentence.
+
+Let's craft 5 bullet points:
+
+1. Speculative decoding uses cheap draft to propose multiple tokens verified in one batched target forward pass, keeping output distribution identical to standard decoding via acceptance or truncation to last accepted token.
+2. Draft mechanisms include a separate small model, n-gram lookup over prompt/history, or a jointly trained multi-token-prediction head that predicts a short future window from the same hidden state.
+3. Workload economics vary: n-gram drafting gets high acceptance almost for free on code/structured text with long repeats, while open-ended prose accepts fewer tokens and a poorly matched draft can be slower due to wasted verification passes; MTP heads add modest memory/compute per step with more stable cross-domain acceptance.
+4. Mixture-of-experts targets have low active parameters per token enabling fast decode, but speculative batching can pull different experts per position, increasing memory traffic on bandwidth-bound hardware and raising the break-even acceptance rate versus dense models.
+5. Server slot-based parallelism shares KV-cache and compute between concurrent sequences, so speculative mode competes with slot count and sampling settings; tuning requires joint configuration and end-to-end tokens per second measurement on representative tasks.
+
+Then TL;DR: one sentence.
+
+Possible TL;DR: Speculative decoding can speed inference when acceptance is high, but its benefit depends on draft choice, workload, model type, and server configuration.
+
+Must be one sentence.
+
+Ensure faithful. No extra claims.
+
+Check bullet count: 5.
+
+Potential issue: bullet 1 mentions output distribution identical. Source says outputs remain distributionally identical to standard decoding. Good.
+
+Bullet 2 includes draft mechanisms. Good.
+
+Bullet 3 includes economics. Might be too long but okay.
+
+Bullet 4 includes MoE.
+
+Bullet 5 includes server parallelism.
+
+Check no added claims: "keeping output distribution identical via acceptance or truncation" is source.
+
+"predicts a short future window from same hidden state" source says predicts short window of future tokens from same hidden state. Good.
+
+"high acceptance almost for free" source says achieves high acceptance rates almost for free. Good.
+
+"poorly matched draft can be slower due to wasted verification passes" source says can make generation slower... because every rejected batch wastes a full verification pass. Good.
+
+"MTP heads add modest memory/compute per step with more stable cross-domain acceptance" source says add small amount memory and compute per step, but acceptance rates tend to be stable across domains because head sees exact context target sees. Good.
+
+"Mixture-of-experts targets have low active parameters per token enabling fast decode" source says active parameter count per token is fraction of total - which is why model with tens of billions parameters can decode quickly on integrated GPUs with unified memory. Might be inference that low active enables fast decode, but source states that. Probably okay.
+
+"speculative batching can pull different experts per position, increasing memory traffic" source says each position may route to different experts, pulling more expert weights through memory per step. Good.
+
+"raising break-even acceptance rate versus dense models" source says break-even acceptance rate is higher for MoE targets than dense ones. Good.
+
+"Server slot-based parallelism shares KV-cache and compute..." source says slot-based servers split KV-cache budget across concurrent sequences; more slots raise aggregate throughput while lowering per-stream speed, and speculation competes with extra slots for same compute headroom. Good.
+
+"tuning requires joint configuration and end-to-end tokens per second measurement" source says tuning therefore has to treat speculative mode, slot count, and sampling settings as one joint configuration rather than three independent knobs, and measure end-to-end tokens per second on representative tasks instead of trusting microbenchmarks. Good.
+
+TL;DR sentence: Ensure one sentence.
+
+Potential TL;DR: Speculative decoding speeds inference only when high acceptance offsets verification cost, which varies with draft type, workload, MoE memory traffic, and server slot settings.
+
+That's one sentence.
+
+Make sure bullet points exactly 5. No extra bullet points. Possibly need blank line before TL;DR.
+
+Ensure formatting clear.
+
+Use hyphen bullet.
+
+Output should be exactly 5 bullet points followed by a one-sentence TL;DR.
+
+Make sure not to add extra bullet points like intro.
+
+We must be careful with punctuation.
+
+Let's produce final answer.
+
+Potential improvements: keep bullet points concise.
+
+Maybe use •.
+
+Ensure TL;DR label.
+
+Could be "TL;DR: ..." one sentence.
+
+Yes.
+
+Final output.
+
+Let's ensure no claims like "can speed inference" - source says accelerates. It's okay.
+
+Make sure faithful.
+
+Potentially remove "enabling fast decode" might be interpretive. Source says which is why model can decode quickly. So okay.
+
+I think good.
+
+Check for any added claim not in source: "cheap draft" source says cheap draft mechanism. Good.
+
+"keeping output distribution identical to standard decoding via acceptance or truncation to last accepted token." source says accepted tokens land... rejection truncates proposal and target model resumes from last accepted position, so outputs remain distributionally identical. Good.
+
+All good.
+
+Let's output.
+
+=== CONTENT ===
+- Speculative decoding uses a cheap draft mechanism to propose several tokens that the target model verifies in a single batched forward pass, with accepted tokens kept at large-model quality and rejected proposals truncated to the last accepted position so outputs remain distributionally identical to standard decoding.
+- Draft mechanisms can be a separate small model, an n-gram lookup over the prompt and generation history, or a multi-token-prediction head trained jointly with the target model that predicts a short window of future tokens from the same hidden state.
+- Workload economics vary: n-gram drafting achieves high acceptance rates almost for free on code and structured text with long repeats, open-ended prose accepts fewer speculative tokens and a poorly matched draft can be slower than target alone because rejected batches waste a full verification pass, while MTP heads add a small amount of memory and compute per step with acceptance rates that tend to be stable across domains.
+- Mixture-of-experts models have an active parameter count per token that is a fraction of the total, allowing fast decode, but speculative verification batches several positions that may route to different experts, pulling more expert weights through memory per step and eroding batching advantage on bandwidth-bound hardware, so the break-even acceptance rate is higher for MoE targets than for dense ones.
+- Slot-based servers split the KV-cache budget across concurrent sequences, raising aggregate throughput while lowering per-stream speed, and speculation competes with extra slots for the same compute headroom, so speculative mode, slot count and sampling settings must be treated as one joint configuration and measured by end-to-end tokens per second on representative tasks.
+
+TL;DR: Speculative decoding improves inference only when acceptance is high enough to offset verification cost, which depends on draft type, workload, MoE memory traffic and server slot configuration.

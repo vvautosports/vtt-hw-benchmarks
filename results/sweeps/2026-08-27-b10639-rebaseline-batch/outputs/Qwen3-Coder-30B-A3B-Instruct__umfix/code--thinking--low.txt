@@ -1,0 +1,72 @@
+=== CONTENT ===
+I've created a Python function `parse_ranges(s: str) -> list[int]` that meets all your requirements. The function correctly handles:
+
+1. Parsing ranges like '1-3,5,7-9' into [1, 2, 3, 5, 7, 8, 9]
+2. Ignoring whitespace around numbers and commas
+3. Raising ValueError for reversed ranges like '9-7' 
+4. Returning [] for empty or whitespace-only input
+
+The function includes comprehensive doctests covering all requirements. Here's the final implementation:
+
+```python
+def parse_ranges(s: str) -> list[int]:
+    """
+    Parse a string of comma-separated ranges into a list of integers.
+    
+    Args:
+        s: A string containing ranges separated by commas (e.g., '1-3,5,7-9')
+        
+    Returns:
+        A list of integers from the ranges
+        
+    Raises:
+        ValueError: If a range is reversed (start > end)
+        
+    Examples:
+        >>> parse_ranges('1-3,5,7-9')
+        [1, 2, 3, 5, 7, 8, 9]
+        >>> parse_ranges('  1 - 3 , 5 , 7 - 9  ')
+        [1, 2, 3, 5, 7, 8, 9]
+        >>> parse_ranges('10-15')
+        [10, 11, 12, 13, 14, 15]
+        >>> parse_ranges('5')
+        [5]
+        >>> parse_ranges('')
+        []
+        >>> parse_ranges('  ')
+        []
+        >>> parse_ranges('1-3,5-2')
+        Traceback (most recent call last):
+            ...
+        ValueError: Invalid range: 5-2 (start > end)
+    """
+    # Handle empty or whitespace-only input
+    if not s or not s.strip():
+        return []
+    
+    result = []
+    
+    # Split by comma and process each part
+    for part in s.split(','):
+        part = part.strip()
+        if not part:  # Skip empty parts after stripping
+            continue
+            
+        # Check if it's a range (contains '-')
+        if '-' in part:
+            start_str, end_str = part.split('-', 1)
+            start = int(start_str.strip())
+            end = int(end_str.strip())
+            
+            # Check for reversed range
+            if start > end:
+                raise ValueError(f"Invalid range: {part} (start > end)")
+            
+            # Add the range to result
+            result.extend(range(start, end + 1))
+        else:
+            # Single number
+            result.append(int(part.strip()))
+    
+    return result
+```

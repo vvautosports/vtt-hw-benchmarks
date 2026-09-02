@@ -1,0 +1,62 @@
+=== REASONING ===
+We are given: "Three delivery trucks all arrive at a warehouse together at 6:00 AM. Truck A returns every 12 minutes, truck B every 18 minutes, and truck C every 30 minutes. Between 6:00 AM and 6:00 PM inclusive, how many times do all three trucks arrive at the same moment? Show your reasoning, then state the final count on its own line as 'ANSWER: <n>'."
+
+We need to find the number of times from 6:00 AM to 6:00 PM inclusive that all three trucks arrive at the same moment.
+
+First, they all arrive together at 6:00 AM. Then they will arrive together again at the least common multiple (LCM) of their intervals. The intervals are 12 min, 18 min, 30 min. LCM of 12, 18, 30.
+
+Calculate LCM: 
+12 = 2^2 * 3
+18 = 2 * 3^2
+30 = 2 * 3 * 5
+LCM = 2^2 * 3^2 * 5 = 4 * 9 * 5 = 180 minutes.
+
+So they arrive together every 180 minutes (3 hours).
+
+Now we need the interval from 6:00 AM to 6:00 PM inclusive. Let's compute the total time span.
+
+6:00 AM to 6:00 PM is exactly 12 hours. But inclusive means we count both endpoints. At 6:00 AM they all arrive together. At 6:00 PM they will also have arrived together if the time is a multiple of 180 minutes from 6:00 AM.
+
+We need to count the number of times t where t is a multiple of 180 minutes, starting at 0 (6:00 AM) and ending at 12:00 PM? Wait 6:00 PM is 12 hours after 6:00 AM. 12 hours = 720 minutes.
+
+We have starting time 6:00 AM as the first arrival. The arrivals occur at times: 0, 180, 360, 540, 720 minutes after 6:00 AM. In terms of clock time: 6:00 AM, 9:00 AM, 12:00 PM, 3:00 PM, 6:00 PM.
+
+We need to count these inclusive from 6:00 AM to 6:00 PM. Let's list: 
+1. 6:00 AM (0 min)
+2. 6:00 AM + 180 = 9:00 AM
+3. 9:00 AM + 180 = 12:00 PM
+4. 12:00 PM + 180 = 3:00 PM
+5. 3:00 PM + 180 = 6:00 PM
+
+So the times are at 6:00, 9:00, 12:00, 3:00, 6:00 PM. That's 5 times.
+
+Check if inclusive includes 6:00 PM? "Between 6:00 AM and 6:00 PM inclusive" means the interval includes both start and end points. Since 6:00 PM is exactly 12 hours later, and 720 is a multiple of 180 (720/180 = 4), so it is included. So there are 5 times.
+
+Let's double-check: 
+Start at 6:00 AM. Then after 3 hours: 9:00 AM. After another 3 hours: 12:00 PM. After another 3 hours: 3:00 PM. After another 3 hours: 6:00 PM. So total 5 moments.
+
+We must "Show your reasoning, then state the final count on its own line as 'ANSWER: <n>'."
+
+Thus final answer: ANSWER: 5
+
+=== CONTENT ===
+The three trucks arrive together at 6:00 AM, and they will arrive together again at the least common multiple (LCM) of their return intervals: 12 minutes, 18 minutes, and 30 minutes.
+
+- Prime factorization:
+  - 12 = 2² × 3
+  - 18 = 2 × 3²
+  - 30 = 2 × 3 × 5
+- LCM = 2² × 3² × 5 = 4 × 9 × 5 = 180 minutes.
+
+Thus, all three trucks arrive together every 180 minutes (3 hours). The time period from 6:00 AM to 6:00 PM inclusive is exactly 12 hours, which equals 720 minutes. Dividing 720 by 180 gives 4 intervals. Adding the initial arrival at 6:00 AM, the arrival times are:
+
+- 6:00 AM (0 min)
+- 9:00 AM (180 min)
+- 12:00 PM (360 min)
+- 3:00 PM (540 min)
+- 6:00 PM (720 min)
+
+This yields a total of 5 times all three trucks arrive at the same moment.
+
+ANSWER: 5
+

@@ -1,0 +1,102 @@
+diff --git a/sku.py b/sku.py
+index 3cc4555..bd4deb4 100644
+--- a/sku.py
++++ b/sku.py
+@@ -20,3 +20,29 @@ def parse_sku(sku):
+     if size not in SIZES:
+         raise ValueError(f"unknown size: {size!r}")
+     return dept, int(item), size
++
++
++def build_sku(dept, item_number, size):
++    """Build a SKU string from components.
++
++    Args:
++        dept: Department code (e.g. 'HW', 'EL')
++        item_number: Item number (0-9999)
++        size: Size code (e.g. 'XS', 'S', 'M', 'L', 'XL')
++
++    Returns:
++        str: SKU in format '<DEPT>-<NNNN>-<SIZE>' with item number zero-padded to 4 digits
++
++    Raises:
++        ValueError: For unknown dept, unknown size, or item number outside 0..9999 range
++        TypeError: For non-integer item number
++    """
++    if dept not in DEPTS:
++        raise ValueError(f"unknown dept: {dept!r}")
++    if size not in SIZES:
++        raise ValueError(f"unknown size: {size!r}")
++    if not isinstance(item_number, int):
++        raise TypeError(f"item number must be an integer, got {type(item_number).__name__!r}")
++    if not (0 <= item_number <= 9999):
++        raise ValueError(f"item number out of range 0-9999: {item_number!r}")
++    return f"{dept}-{item_number:04d}-{size}"
+diff --git a/tests/test_build_sku.py b/tests/test_build_sku.py
+new file mode 100644
+index 0000000..451d8c4
+--- /dev/null
++++ b/tests/test_build_sku.py
+@@ -0,0 +1,61 @@
++import pytest
++
++from sku import build_sku, parse_sku
++
++
++def test_build_sku_happy_path():
++    """Test basic SKU building with valid inputs."""
++    assert build_sku("HW", 42, "XL") == "HW-0042-XL"
++    assert build_sku("EL", 1234, "M") == "EL-1234-M"
++    assert build_sku("GR", 0, "XS") == "GR-0000-XS"
++
++
++def test_build_sku_zero_padding():
++    """Test that item numbers are zero-padded to 4 digits."""
++    assert build_sku("HW", 1, "XL") == "HW-0001-XL"
++    assert build_sku("HW", 12, "XL") == "HW-0012-XL"
++    assert build_sku("HW", 123, "XL") == "HW-0123-XL"
++    assert build_sku("HW", 1234, "XL") == "HW-1234-XL"
++
++
++def test_build_sku_invalid_dept():
++    """Test that unknown departments raise ValueError."""
++    with pytest.raises(ValueError, match="unknown dept: 'XX'"):
++        build_sku("XX", 1234, "XL")
++
++
++def test_build_sku_invalid_size():
++    """Test that unknown sizes raise ValueError."""
++    with pytest.raises(ValueError, match="unknown size: 'XXL'"):
++        build_sku("HW", 1234, "XXL")
++
++
++def test_build_sku_invalid_item_number_range():
++    """Test that item numbers outside 0-9999 raise ValueError."""
++    with pytest.raises(ValueError, match="item number out of range 0-9999: -1"):
++        build_sku("HW", -1, "XL")
++
++    with pytest.raises(ValueError, match="item number out of range 0-9999: 10000"):
++        build_sku("HW", 10000, "XL")
++
++
++def test_build_sku_invalid_item_number_type():
++    """Test that non-integer item numbers raise TypeError."""
++    with pytest.raises(TypeError, match="item number must be an integer, got 'str'"):
++        build_sku("HW", "1234", "XL")
++
++    with pytest.raises(TypeError, match="item number must be an integer, got 'float'"):
++        build_sku("HW", 12.34, "XL")
++
++
++def test_build_sku_round_trip():
++    """Test that build_sku and parse_sku are inverses of each other."""
++    original_sku = "HW-0042-XL"
++    dept, item_number, size = parse_sku(original_sku)
++    rebuilt_sku = build_sku(dept, item_number, size)
++    assert rebuilt_sku == original_sku
++
++    original_sku = "GR-0007-S"
++    dept, item_number, size = parse_sku(original_sku)
++    rebuilt_sku = build_sku(dept, item_number, size)
++    assert rebuilt_sku == original_sku
+\ No newline at end of file

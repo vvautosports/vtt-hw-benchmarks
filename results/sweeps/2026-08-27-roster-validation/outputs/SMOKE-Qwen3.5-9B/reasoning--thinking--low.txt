@@ -1,0 +1,4 @@
+=== CONTENT ===
+No tool is needed for this problem. The reasoning is complete based on least common multiple calculations.
+
+ANSWER: 5

@@ -1,0 +1,5 @@
+# Telemetry collector — scrape target configuration.
+collector:
+  scrape_interval_s: 15
+  metrics_port: 9302
+  bind_address: 0.0.0.0

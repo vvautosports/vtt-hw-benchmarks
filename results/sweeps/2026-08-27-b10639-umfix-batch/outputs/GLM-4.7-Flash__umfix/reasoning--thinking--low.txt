@@ -1,0 +1,109 @@
+=== REASONING ===
+We have a problem about three delivery trucks arriving at a warehouse on a fixed schedule:
+- Truck A returns every 12 minutes
+- Truck B returns every 18 minutes
+- Truck C returns every 30 minutes
+
+All three trucks arrive together at 6:00 AM. We need to determine how many times in the interval from 6:00 AM to 6:00 PM inclusive do all three trucks arrive at the same moment.
+
+We must compute the least common multiple (LCM) of the three intervals (12, 18, 30) to find the time interval between simultaneous arrivals. Then we count how many such simultaneous arrivals occur in the given time range, including the starting time at 6:00 AM.
+
+Let's find the LCM:
+
+- Prime factorization:
+  - 12 = 2^2 * 3^1
+  - 18 = 2^1 * 3^2
+  - 30 = 2^1 * 3^1 * 3
+
+Wait, 30's prime factorization is 2^1 * 3^1 * 5^1.
+
+Now find LCM by taking the maximum exponent for each prime present:
+- For 2: max exponent is 2 (from 12)
+- For 3: max exponent is 2 (from 18)
+- For 5: max exponent is 1 (from 30)
+
+Thus LCM = 2^2 * 3^2 * 5^1 = 4 * 9 * 5 = 180 minutes = 3 hours.
+
+Thus the three trucks arrive together every 3 hours.
+
+Now count occurrences from 6:00 AM to 6:00 PM inclusive (both ends included).
+
+Let's list:
+- 6:00 AM (start)
+- 9:00 AM
+- 12:00 PM
+- 3:00 PM
+- 6:00 PM (end)
+
+That's 5 times.
+
+Therefore the final answer is 5.
+
+We can also reason mathematically:
+
+Given start time t0 = 6:00 AM, and LCM = 180 minutes.
+
+Times = t0 + k * 180 minutes for integer k.
+
+We want 6:00 AM ≤ t0 + k*180 ≤ 18:00 (6:00 PM in 24-hour notation)
+
+Let t0 = 0 minutes (relative to 6:00 AM). Then we need:
+
+0 ≤ 180*k ≤ 720
+
+Dividing by 180:
+
+0 ≤ k ≤ 4
+
+So k can be 0, 1, 2, 3, 4, giving 5 possibilities.
+
+Thus the answer is 5.
+
+Make sure it's inclusive: "Between 6:00 AM and 6:00 PM inclusive" includes both endpoints. So answer is 5.
+
+Thus final line: 'ANSWER: 5'.
+
+We should also present reasoning.
+
+Thus final answer is 5.
+
+Now provide the final formatted answer as requested: show reasoning, then state the final count on its own line as 'ANSWER: <n>'.
+
+=== CONTENT ===
+The three trucks all arrive together at 6:00 AM.  
+They each return on a fixed interval:
+
+- Truck A: every 12 min  
+- Truck B: every 18 min  
+- Truck C: every 30 min  
+
+The times when all three arrive together are the common multiples of 12, 18 and 30 minutes.  
+We need the least common multiple (LCM) of these three numbers.
+
+Prime factorizations:  
+- 12 = 2² × 3¹  
+- 18 = 2¹ × 3²  
+- 30 = 2¹ × 3¹ × 5¹  
+
+Take the highest power of each prime:  
+- 2² (from 12)  
+- 3² (from 18)  
+- 5¹ (from 30)  
+
+Thus LCM = 2² × 3² × 5¹ = 4 × 9 × 5 = **180 minutes = 3 hours**.
+
+So the trucks meet every 3 hours.
+
+From 6:00 AM up to and including 6:00 PM, the meeting times are:  
+
+| Meeting Number | Time |
+|----------------|------|
+| 0 | 6:00 AM |
+| 1 | 9:00 AM |
+| 2 | 12:00 PM |
+| 3 | 3:00 PM |
+| 4 | 6:00 PM |
+
+That's 5 times in total.
+
+**ANSWER: 5**

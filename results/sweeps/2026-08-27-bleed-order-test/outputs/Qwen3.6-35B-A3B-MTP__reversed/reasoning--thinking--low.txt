@@ -1,0 +1,25 @@
+=== REASONING ===
+The computation confirms my reasoning. Let me lay out the solution clearly.
+
+
+=== CONTENT ===
+**Reasoning:**
+
+1. **Find when all three trucks coincide.** All three arrive together whenever the elapsed time is a common multiple of 12, 18, and 30 minutes. The first such time (after the start) is their **LCM**.
+
+2. **Compute the LCM:**
+   - 12 = 2² × 3
+   - 18 = 2 × 3²
+   - 30 = 2 × 3 × 5
+   - LCM = 2² × 3² × 5 = **180 minutes = 3 hours**
+
+3. **List all coinciding arrivals between 6:00 AM and 6:00 PM (720 minutes):**
+   - 6:00 AM (elapsed 0 min) ✓ — initial departure/arrival together
+   - 9:00 AM (elapsed 180 min = 3 hrs) ✓
+   - 12:00 PM (elapsed 360 min = 6 hrs) ✓
+   - 3:00 PM (elapsed 540 min = 9 hrs) ✓
+   - 6:00 PM (elapsed 720 min = 12 hrs) ✓ — inclusive endpoint
+
+That gives us 5 moments where all three trucks arrive simultaneously.
+
+ANSWER: 5

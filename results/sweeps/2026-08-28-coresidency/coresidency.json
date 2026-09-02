@@ -1,0 +1,213 @@
+{
+  "ctx": 32768,
+  "phases": {
+    "solo": [
+      {
+        "task": "reasoning",
+        "wall_s": 59.4,
+        "prompt_tokens": 92,
+        "completion_tokens": 2029,
+        "tps_wall": 34.16,
+        "finish_reason": "stop",
+        "model": "GLM-4.7-Flash",
+        "role": "orchestrator"
+      },
+      {
+        "task": "code",
+        "wall_s": 90.2,
+        "prompt_tokens": 100,
+        "completion_tokens": 3059,
+        "tps_wall": 33.92,
+        "finish_reason": "stop",
+        "model": "GLM-4.7-Flash",
+        "role": "orchestrator"
+      },
+      {
+        "task": "summarize",
+        "wall_s": 61.2,
+        "prompt_tokens": 523,
+        "completion_tokens": 2063,
+        "tps_wall": 33.69,
+        "finish_reason": "stop",
+        "model": "GLM-4.7-Flash",
+        "role": "orchestrator"
+      },
+      {
+        "task": "reasoning",
+        "wall_s": 12.1,
+        "prompt_tokens": 101,
+        "completion_tokens": 522,
+        "tps_wall": 43.26,
+        "finish_reason": "stop",
+        "model": "Qwen3-Coder-30B-A3B-Instruct",
+        "role": "sub-agent"
+      },
+      {
+        "task": "code",
+        "wall_s": 15.4,
+        "prompt_tokens": 103,
+        "completion_tokens": 685,
+        "tps_wall": 44.38,
+        "finish_reason": "stop",
+        "model": "Qwen3-Coder-30B-A3B-Instruct",
+        "role": "sub-agent"
+      },
+      {
+        "task": "summarize",
+        "wall_s": 6.1,
+        "prompt_tokens": 527,
+        "completion_tokens": 251,
+        "tps_wall": 41.08,
+        "finish_reason": "stop",
+        "model": "Qwen3-Coder-30B-A3B-Instruct",
+        "role": "sub-agent"
+      }
+    ],
+    "coresident_sequential": [
+      {
+        "task": "reasoning",
+        "wall_s": 59.1,
+        "prompt_tokens": 92,
+        "completion_tokens": 2029,
+        "tps_wall": 34.32,
+        "finish_reason": "stop",
+        "model": "GLM-4.7-Flash",
+        "role": "orchestrator"
+      },
+      {
+        "task": "code",
+        "wall_s": 89.8,
+        "prompt_tokens": 100,
+        "completion_tokens": 3059,
+        "tps_wall": 34.05,
+        "finish_reason": "stop",
+        "model": "GLM-4.7-Flash",
+        "role": "orchestrator"
+      },
+      {
+        "task": "summarize",
+        "wall_s": 61.0,
+        "prompt_tokens": 523,
+        "completion_tokens": 2063,
+        "tps_wall": 33.81,
+        "finish_reason": "stop",
+        "model": "GLM-4.7-Flash",
+        "role": "orchestrator"
+      },
+      {
+        "task": "reasoning",
+        "wall_s": 12.1,
+        "prompt_tokens": 101,
+        "completion_tokens": 522,
+        "tps_wall": 43.04,
+        "finish_reason": "stop",
+        "model": "Qwen3-Coder-30B-A3B-Instruct",
+        "role": "sub-agent"
+      },
+      {
+        "task": "code",
+        "wall_s": 15.7,
+        "prompt_tokens": 103,
+        "completion_tokens": 685,
+        "tps_wall": 43.62,
+        "finish_reason": "stop",
+        "model": "Qwen3-Coder-30B-A3B-Instruct",
+        "role": "sub-agent"
+      },
+      {
+        "task": "summarize",
+        "wall_s": 6.3,
+        "prompt_tokens": 527,
+        "completion_tokens": 251,
+        "tps_wall": 39.92,
+        "finish_reason": "stop",
+        "model": "Qwen3-Coder-30B-A3B-Instruct",
+        "role": "sub-agent"
+      }
+    ],
+    "coresident_concurrent": [
+      {
+        "task": "reasoning",
+        "wall_s": 19.3,
+        "prompt_tokens": 101,
+        "completion_tokens": 567,
+        "tps_wall": 29.37,
+        "finish_reason": "stop",
+        "model": "Qwen3-Coder-30B-A3B-Instruct",
+        "role": "sub-agent"
+      },
+      {
+        "task": "code",
+        "wall_s": 23.5,
+        "prompt_tokens": 103,
+        "completion_tokens": 685,
+        "tps_wall": 29.12,
+        "finish_reason": "stop",
+        "model": "Qwen3-Coder-30B-A3B-Instruct",
+        "role": "sub-agent"
+      },
+      {
+        "task": "summarize",
+        "wall_s": 9.0,
+        "prompt_tokens": 527,
+        "completion_tokens": 260,
+        "tps_wall": 28.78,
+        "finish_reason": "stop",
+        "model": "Qwen3-Coder-30B-A3B-Instruct",
+        "role": "sub-agent"
+      },
+      {
+        "task": "reasoning",
+        "wall_s": 84.5,
+        "prompt_tokens": 92,
+        "completion_tokens": 2029,
+        "tps_wall": 24.0,
+        "finish_reason": "stop",
+        "model": "GLM-4.7-Flash",
+        "role": "orchestrator"
+      },
+      {
+        "task": "code",
+        "wall_s": 89.7,
+        "prompt_tokens": 100,
+        "completion_tokens": 3059,
+        "tps_wall": 34.1,
+        "finish_reason": "stop",
+        "model": "GLM-4.7-Flash",
+        "role": "orchestrator"
+      },
+      {
+        "task": "summarize",
+        "wall_s": 60.9,
+        "prompt_tokens": 523,
+        "completion_tokens": 2063,
+        "tps_wall": 33.88,
+        "finish_reason": "stop",
+        "model": "GLM-4.7-Flash",
+        "role": "orchestrator"
+      }
+    ]
+  },
+  "load_seconds": {
+    "GLM-4.7-Flash": 5.0,
+    "Qwen3-Coder-30B-A3B-Instruct": 20.0
+  },
+  "mem_before_gib": 2.1,
+  "mem_both_loaded_gib": 74.3,
+  "coresident": true,
+  "concurrent_wall_s": 235.1,
+  "summary": {
+    "GLM-4.7-Flash": {
+      "solo_tps": 33.92,
+      "coresident_tps": 34.06,
+      "concurrent_tps": 30.66,
+      "contention_pct": "-10.0%"
+    },
+    "Qwen3-Coder-30B-A3B-Instruct": {
+      "solo_tps": 42.91,
+      "coresident_tps": 42.19,
+      "concurrent_tps": 29.09,
+      "contention_pct": "-31.1%"
+    }
+  }
+}

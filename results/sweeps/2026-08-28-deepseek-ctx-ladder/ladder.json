@@ -1,0 +1,67 @@
+[
+  {
+    "ctx_requested": 24576,
+    "loaded": true,
+    "load_s": 50.6,
+    "ctx_spawned": 24576,
+    "mem_available_before_gib": 122.4,
+    "mem_available_after_gib": 23.2,
+    "completion": {
+      "wall_s": 1.4,
+      "content": ""
+    },
+    "serves": true
+  },
+  {
+    "ctx_requested": 32768,
+    "loaded": true,
+    "load_s": 50.5,
+    "ctx_spawned": 32768,
+    "mem_available_before_gib": 122.5,
+    "mem_available_after_gib": 22.8,
+    "completion": {
+      "wall_s": 1.4,
+      "content": ""
+    },
+    "serves": true
+  },
+  {
+    "ctx_requested": 49152,
+    "loaded": true,
+    "load_s": 50.5,
+    "ctx_spawned": 49152,
+    "mem_available_before_gib": 122.5,
+    "mem_available_after_gib": 22.3,
+    "completion": {
+      "wall_s": 1.4,
+      "content": ""
+    },
+    "serves": true
+  },
+  {
+    "ctx_requested": 65536,
+    "loaded": true,
+    "load_s": 50.5,
+    "ctx_spawned": 65536,
+    "mem_available_before_gib": 122.5,
+    "mem_available_after_gib": 21.8,
+    "completion": {
+      "wall_s": 1.4,
+      "content": ""
+    },
+    "serves": true
+  },
+  {
+    "ctx_requested": 98304,
+    "loaded": true,
+    "load_s": 50.5,
+    "ctx_spawned": 98304,
+    "mem_available_before_gib": 122.5,
+    "mem_available_after_gib": 20.9,
+    "completion": {
+      "wall_s": 1.4,
+      "content": ""
+    },
+    "serves": true
+  }
+]

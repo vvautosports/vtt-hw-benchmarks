@@ -1,0 +1,30 @@
+# Deep-chain rung 2: 100 sequential tool calls, raw rung, greedy. The 60-probe found no
+# limit for these five; this rung answers whether one exists anywhere near agent-relevant
+# depths. IT DOES NOT: 5/5 run the chain to 100/100 and report the token.
+run_id: "2026-08-28-deepchain100"
+date: "2026-08-28"
+node: "kalman9-framework-01"
+backend: "unsloth-studio"
+isolation: "fresh-server-per-case (toolcall_battery.py --cases toolcall_cases_deepchain100.json)"
+rung: "raw — --disable-tools --disable-tool-call-healing --disable-tool-call-nudging"
+launch_env: {UNSLOTH_DISABLE_UNIFIED_MEMORY: "1"}
+
+axis: cfg
+records: "results.jsonl"
+cases: "toolcall_cases.json"   # deepchain100 copy (target_depth 100, pass_depth 100)
+grading: "py scripts/utils/grade_sweep.py results/sweeps/2026-08-28-deepchain100 results --layout cfg"
+
+results:   # all: 101 turns, one call per turn, finish=stop, TOKEN reported
+  - {model: "Qwen3-Coder-30B-A3B-Instruct", depth: "100/100", completed: true}
+  - {model: "Qwen3-Coder-Next",             depth: "100/100", completed: true}
+  - {model: "NVIDIA-Nemotron-3.5-Lightning-30B-A3B", depth: "100/100", completed: true}
+  - {model: "Qwen3.8-Flash-Next",           depth: "100/100", completed: true}
+  - {model: "GLM-4.7-Flash",                depth: "100/100", completed: true}
+
+verdict: >
+  Chain depth is a NON-AXIS for this roster short of gpt-oss-120b. llama.cpp#19513
+  (premature EOS at ~10-20 calls) does not reproduce anywhere on this stack, and the only
+  breaking point found across 20/60/100-call probes is gpt-oss-120b's behavioural
+  abandonment at 31 (2026-08-28-deepchain-19513, all healing rungs — excluded here).
+  Five models sustaining 100 sequential calls with zero drift closes the axis; deeper
+  probes would spend hours to move an answer that no agent workload will reach.

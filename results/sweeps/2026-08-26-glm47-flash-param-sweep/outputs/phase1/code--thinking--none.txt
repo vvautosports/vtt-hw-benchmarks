@@ -1,0 +1,99 @@
+=== REASONING ===
+Perfect! All tests pass. The function handles:
+1. ✓ Basic ranges correctly
+2. ✓ Whitespace handling
+3. ✓ Multiple ranges
+4. ✓ Single numbers
+5. ✓ Empty/whitespace-only input
+6. ✓ Reversed ranges (raises ValueError)
+7. ✓ Invalid characters (raises ValueError)
+8. ✓ Consecutive commas (correctly ignores empty parts)
+
+The code is complete and working correctly. Let me create a clean, concise summary for the user.
+
+=== CONTENT ===
+Here's the complete solution with the `parse_ranges` function:
+
+```python
+def parse_ranges(s: str) -> list[int]:
+    """
+    Parse a string containing comma-separated number ranges (e.g., "1-3,5,7-9")
+    into a list of integers in ascending order.
+
+    Args:
+        s: A string containing number ranges separated by commas and/or spaces.
+
+    Returns:
+        A list of integers representing the expanded ranges.
+
+    Raises:
+        ValueError: If a range is reversed (e.g., "9-7") or contains invalid characters.
+
+    Examples:
+        >>> parse_ranges("1-3,5,7-9")
+        [1, 2, 3, 5, 7, 8, 9]
+        >>> parse_ranges(" 1 - 3 , 5 , 7 - 9 ")
+        [1, 2, 3, 5, 7, 8, 9]
+        >>> parse_ranges("5-10,12-15")
+        [5, 6, 7, 8, 9, 10, 12, 13, 14, 15]
+        >>> parse_ranges(" 1 , 3 , 5 ")
+        [1, 3, 5]
+        >>> parse_ranges("  ")
+        []
+    """
+    # Strip leading/trailing whitespace
+    s = s.strip()
+
+    # Return empty list for empty or whitespace-only input
+    if not s:
+        return []
+
+    result = []
+    # Split by commas, then strip whitespace from each part
+    for part in s.split(","):
+        part = part.strip()
+        if not part:
+            continue
+
+        # Check if the part is a range (contains "-")
+        if "-" in part:
+            # Split on the first hyphen only
+            parts = part.split("-", 1)
+            if len(parts) != 2:
+                raise ValueError(f'Invalid range format: "{part}"')
+
+            try:
+                start = int(parts[0].strip())
+                end = int(parts[1].strip())
+            except ValueError as e:
+                raise ValueError(f'Non-numeric value in range "{part}"') from e
+
+            # Check for reversed ranges
+            if start > end:
+                raise ValueError(f'Reversed range detected: "{part}" (start > end)')
+
+            # Add all numbers in the range
+            result.extend(range(start, end + 1))
+        else:
+            # Single number
+            try:
+                num = int(part)
+            except ValueError:
+                raise ValueError(f'Non-numeric value: "{part}"')
+            result.append(num)
+
+    return result
+
+
+if __name__ == "__main__":
+    import doctest
+    doctest.testmod()
+```
+
+The solution:
+
+✅ **Parses ranges correctly** - `'1-3,5,7-9'` → `[1, 2, 3, 5, 7, 8, 9]`  
+✅ **Handles whitespace** - `' 1 - 3 , 5 '` → `[1, 2, 3, 5]`  
+✅ **Empty input returns empty list** - `'  '` → `[]`  
+✅ **Reversed ranges raise ValueError** - `'9-7'` → `ValueError`  
+✅ **5 doctest examples** covering all requirements

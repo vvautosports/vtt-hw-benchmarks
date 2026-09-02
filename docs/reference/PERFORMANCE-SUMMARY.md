@@ -1,184 +1,93 @@
-# Performance Summary - GLM-4.7 Models
+# Performance Summary — VVC Local Model Roster
 
-**Date:** January 2026  
-**Context:** 65K tokens (optimal for interactive use)  
-**Backend:** Vulkan RADV, llama.cpp v7823
+**Date:** 2026-08-28 | **Hardware:** Framework Desktop (AMD Strix Halo, Radeon 8060S iGPU, 128GB UMA, GTT unlock active ≈122 GB usable) | **Serving:** Unsloth Studio (`unsloth run`, wraps llama-server)
 
----
+This is the current picture of "which local model should I point a task at." Full narrative, root-cause writeups, and every intermediate run live in [UNSLOTH-DIRECTION.md](UNSLOTH-DIRECTION.md); this doc is the fast-reference summary. Every number below is traceable to a `results/sweeps/*/manifest.yaml`. Rows marked ✅ were re-measured on 2026-08-28 under `--disable-tools` and supersede all earlier figures for those models.
 
-## Actual Test Results
-
-### Generation Speed (Tokens/Second)
-
-| Model | Quantization | Gen Speed | vs Flash-Q8 | vs Flash-BF16 | vs REAP-BF16 |
-|-------|-------------|-----------|-------------|---------------|--------------|
-| **GLM-4.7-Flash-REAP-Q8** | Q8 | **~40-42 t/s** | **+122% to +133%** 🔥 | **+344% to +367%** 🔥 | **+300% to +320%** 🔥 |
-| **GLM-4.7-Flash-Q8** | Q8 | **~18 t/s** | **Baseline** | **+100%** 🔥 | **+80%** 🔥 |
-| GLM-4.7-Flash-REAP-BF16 | BF16 | ~10 t/s | **-44%** | +11% | Baseline |
-| GLM-4.7-Flash-BF16 | BF16 | ~9 t/s | **-50%** | Baseline | -10% |
-
-**🎉 Surprise Finding:** Flash-REAP-Q8 is **FASTER** than Flash-Q8! (~2.2x faster generation)
-
-### Prompt Processing Speed (Tokens/Second)
-
-| Model | Quantization | Prompt Speed | vs Flash-Q8 | vs Flash-BF16 | vs REAP-BF16 |
-|-------|-------------|--------------|-------------|---------------|--------------|
-| **GLM-4.7-Flash-Q8** | Q8 | **~130 t/s** | **Baseline** | **+18%** | **+18%** |
-| GLM-4.7-Flash-REAP-Q8 | Q8 | ~37-105 t/s | -15% to -71% | -5% to -66% | -5% to -66% |
-| GLM-4.7-Flash-BF16 | BF16 | ~110 t/s | -15% | Baseline | 0% |
-| GLM-4.7-Flash-REAP-BF16 | BF16 | ~110 t/s | -15% | 0% | Baseline |
-
-**Note:** Flash-REAP-Q8 prompt speed is variable (37-105 t/s), likely due to REAP architecture overhead.
-
-### API Response Time (Total Latency)
-
-| Model | Quantization | Response Time | vs Flash-Q8 | vs Flash-BF16 | vs REAP-BF16 |
-|-------|-------------|---------------|-------------|---------------|--------------|
-| **GLM-4.7-Flash-Q8** | Q8 | **~0.27-0.36s** | **Baseline** | **-73% to -76%** 🔥 | **-67% to -76%** 🔥 |
-| **GLM-4.7-Flash-REAP-Q8** | Q8 | **~0.27-0.37s** | **+0% to +3%** | **-67% to -75%** 🔥 | **-67% to -75%** 🔥 |
-| GLM-4.7-Flash-BF16 | BF16 | ~1.1-1.5s | **+205% to +356%** | Baseline | +0% to +36% |
-| GLM-4.7-Flash-REAP-BF16 | BF16 | ~1.1-1.5s | **+205% to +356%** | +0% to +36% | Baseline |
-
-**Key Finding:** Flash-REAP-Q8 matches Flash-Q8 API response time despite faster generation (likely due to variable prompt processing).
-
-### Model Size
-
-| Model | Quantization | Size | vs Flash-Q8 | vs Flash-BF16 | vs REAP-BF16 |
-|-------|-------------|------|-------------|---------------|--------------|
-| **GLM-4.7-Flash-REAP-Q8** | Q8 | **26GB** | **-21%** 🔥 | **-54%** 🔥 | **-40%** 🔥 |
-| **GLM-4.7-Flash-Q8** | Q8 | **33GB** | **Baseline** | **-41%** | **-23%** |
-| GLM-4.7-Flash-REAP-BF16 | BF16 | 43GB | +30% | -23% | Baseline |
-| GLM-4.7-Flash-BF16 | BF16 | 56GB | +70% | Baseline | +30% |
-
-**Key Finding:** Flash-REAP-Q8 is the **smallest model** (26GB) - 21% smaller than Flash-Q8.
-
-### Memory Usage @ 65K Context
-
-| Model | Quantization | VRAM @ 65K | vs Flash-Q8 | vs Flash-BF16 | vs REAP-BF16 |
-|-------|-------------|------------|-------------|---------------|--------------|
-| **GLM-4.7-Flash-REAP-Q8** | Q8 | **~18GB** (est.) | **-14%** 🔥 | **-25%** 🔥 | **-25%** 🔥 |
-| **GLM-4.7-Flash-Q8** | Q8 | **~21GB** | **Baseline** | **-12%** | **-12%** |
-| GLM-4.7-Flash-REAP-BF16 | BF16 | ~24GB | +14% | 0% | Baseline |
-| GLM-4.7-Flash-BF16 | BF16 | ~24GB | +14% | 0% | Baseline |
-
-**Key Finding:** Flash-REAP-Q8 provides **best memory efficiency** (~18GB @ 65K).
+**Read the trust notes at the bottom before using these numbers to make a serving decision.** The tool-injection caveat is now CLEARED for the six ✅ rows; unmarked rows still carry it.
 
 ---
 
-## Key Percentage Differences
+## Roster leaderboard
 
-### Quantization Impact: Q8 vs BF16
+Battery: 3 fixed tasks (multi-step reasoning with a verifiable answer, code with doctest requirements, faithful 5-bullet summarization). Request config: `thinking` profile, `reasoning_effort: low`, seed 42, max_tokens 8192, unless noted. t/s is given as reasoning / code / summarize. All rows below are from the **cleanest available run** for that model — preferring isolated (fresh-server-per-task) or `umfix` (unified-memory-fix) runs over earlier contaminated ones. The "run" column tells you which.
 
-**Generation Speed:**
-- Flash-Q8 vs Flash-BF16: **+100% faster** (2x)
-- REAP-Q8 vs REAP-BF16: **+300% to +320% faster** (4x!)
+| Model | Size | Quant | t/s (reason/code/summ) | Quality | Run (source) |
+|---|---|---|---|---|---|
+| **Ornith-1.5-35B-A3B** ✅ | 35B-A3B | Q8_0 (non-UD) | **64.5 / 63.9 / 57.4** | 3/3 | [`2026-08-28-rebaseline-toolsoff`](../../results/sweeps/2026-08-28-rebaseline-toolsoff/manifest.yaml) |
+| **Nemotron-3.5-Lightning-30B-A3B** ✅ | 30B-A3B | UD-Q8_K_XL | **63.1 / 62.0 / 62.9** | 2/3 (summarize: missing literal "TL;DR" label, 5 correct bullets present — same format habit as Nemotron-3-Nano below) | [`2026-08-28-rebaseline-toolsoff`](../../results/sweeps/2026-08-28-rebaseline-toolsoff/manifest.yaml) |
+| **Qwen3.6-35B-A3B-MTP** ✅ | 35B-A3B | UD-Q8_K_XL | **61.3 / 62.3 / 61.9** | 3/3 | [`2026-08-28-rebaseline-toolsoff`](../../results/sweeps/2026-08-28-rebaseline-toolsoff/manifest.yaml) |
+| Qwen3-Coder-30B-A3B-Instruct ✅ | 30B-A3B | UD-Q8_K_XL | 43.7 / 43.6 / 40.3 | 3/3 | [`2026-08-28-rebaseline-toolsoff`](../../results/sweeps/2026-08-28-rebaseline-toolsoff/manifest.yaml) — **RESOLVED:** the old 74.5 was speculative decoding racing through ~3000 tokens of tool-injection boilerplate, not code speed. True clean figure is ~43.6, stable with speculation on or off ([A/B](../../results/sweeps/2026-08-28-coder30b-code-anomaly/manifest.yaml)) |
+| Qwen3-Coder-Next (isolated) | — | — | 27.9 / 42.2 / 25.7 | 2/3 (code fails — phantom-prior-turn defect, bleed-related) | [`2026-08-27-bleed-order-test`](../../results/sweeps/2026-08-27-bleed-order-test/manifest.yaml) |
+| gemma-4-26B-A4B-it | 26B-A4B MoE | UD-Q8_K_XL | 35.7 / 38.0 / 35.5 | 3/3 | [`2026-08-27-b10639-rebaseline-batch`](../../results/sweeps/2026-08-27-b10639-rebaseline-batch/manifest.yaml) |
+| gpt-oss-120b ✅ | 120B | F16 (native MXFP4 MoE) | 33.1 / 33.8 / 30.3 | 3/3 | [`2026-08-28-rebaseline-toolsoff`](../../results/sweeps/2026-08-28-rebaseline-toolsoff/manifest.yaml) — largest reasoning gain on the roster (+21%) |
+| GLM-4.7-Flash ✅ | — | UD-Q8_K_XL | 34.8 / 33.9 / 33.5 | 3/3 | [`2026-08-28-rebaseline-toolsoff`](../../results/sweeps/2026-08-28-rebaseline-toolsoff/manifest.yaml) — baseline control |
+| Nemotron-3-Nano-30B-A3B (umfix) | 30B-A3B | UD-Q8_K_XL | 39.5 / 45.3 / 41.3 | 2/3 (summarize near-miss: missing literal "TL;DR" label, substance fine) | [`2026-08-27-b10639-rebaseline-batch`](../../results/sweeps/2026-08-27-b10639-rebaseline-batch/manifest.yaml) |
+| MiniMax-M2.5 (UD-Q3, rebaseline) | — | UD-Q3_K_XL | 21.2 / 25.1 / 21.6 | 2/3 | [`2026-08-27-b10639-rebaseline-batch`](../../results/sweeps/2026-08-27-b10639-rebaseline-batch/manifest.yaml) — **caveat:** bleed-order-test showed this "pass" is flattered by leaked context; the isolated code result fails (capped, incoherent). Q3 copy is genuinely fragile |
+| **Qwen3.8-Flash-Next** (thinking/low) | 125B-A6B MoE | UD-Q4_K_XL | 15.6 / 22.3 / 17.1 | 3/3 | [`2026-08-27-b10639-umfix-batch`](../../results/sweeps/2026-08-27-b10639-umfix-batch/manifest.yaml) — first clean grades ever for this model; the earlier 204–225 t/s figures were garbage-generation artifacts of the unified-memory bug and should never be cited |
+| Qwen3.8-Flash-Next (instruct, fastest config) | 125B-A6B MoE | UD-Q4_K_XL | tokens 308/1384/351, wall 107s | 3/3 | [`2026-08-27-qwen38-settings-matrix`](../../results/sweeps/2026-08-27-qwen38-settings-matrix/manifest.yaml) |
+| **DeepSeek-V4-Flash-0731** | 97 GiB on disk | UD-IQ3_XXS (4 shards) | 14.4 / 14.9 / 13.1 | 3/3 | [`2026-08-28-dayone-deepseek-muse`](../../results/sweeps/2026-08-28-dayone-deepseek-muse/manifest.yaml) — **largest model ever served on this box.** The 16384 context pin is RETIRED: the [ctx ladder](../../results/sweeps/2026-08-28-deepseek-ctx-ladder/manifest.yaml) loads+serves every rung to 98304 (~21 GiB still free; MLA latent-KV ≈ 0.03 GiB/1k ctx) and the [needle probe](../../results/sweeps/2026-08-28-deepseek-needle/manifest.yaml) grades 3/3 mid-document retrieval to ~35k tokens. 65536 is the new setting. Prefill ~110–130 t/s → a 32k prompt costs ~5 min: batch tier, not interactive |
+| Muse-Glimmer-30B | 30B | UD-Q8_K_XL + mmproj BF16 | 7.8 / 8.0 / 7.4 | 3/3 text + **2/2 vision** | [`2026-08-28-dayone-deepseek-muse`](../../results/sweeps/2026-08-28-dayone-deepseek-muse/manifest.yaml) — vision confirmed working (mmproj loads in 15s, reads a generated 3-bar image correctly). Slowest on the roster; chosen as a quality anchor for the vision niche, not for speed |
+| Qwen3.8-27B | 27B | UD-Q8_K_XL | 13.5 / 13.5 / 13.2 | 3/3 | [`2026-08-27-roster-validation`](../../results/sweeps/2026-08-27-roster-validation/manifest.yaml) run2, `b10472` (not yet re-baselined on b10639) |
+| Qwen3-235B-A22B-Instruct-2507 | 235B-A22B MoE | UD-Q3_K_XL | 15.1 / 15.2 / 13.3 | 2/3 — **code cell resolved clean** under `--disable-tools`; summarize flipped 5→4 bullets (one-seed prompt-composition sensitivity, not a capability loss) | [`2026-08-27-toolsoff-rerun-ab`](../../results/sweeps/2026-08-27-toolsoff-rerun-ab/manifest.yaml) |
+| gemma-4-31B-it | 31B dense | UD-Q8_K_XL | 5.6 / 5.8 / 5.4 | 3/3 | [`2026-08-27-roster-validation`](../../results/sweeps/2026-08-27-roster-validation/manifest.yaml), `b10472` — dense control, ~6.5× slower than the A4B MoE of similar footprint |
+| MiniMax-M3 | — | — | cannot load | — | needs ~181 GB, box has ~122 GB usable — stays on disk for a future dual-machine RPC-pool test |
 
-**API Response Time:**
-- Flash-Q8 vs Flash-BF16: **-73% to -76% faster** (3-4x)
-- REAP-Q8 vs REAP-BF16: **-67% to -75% faster** (3-4x)
-
-**Model Size:**
-- Flash-Q8 vs Flash-BF16: **-41% smaller**
-- REAP-Q8 vs REAP-BF16: **-40% smaller**
-
-**Verdict:** Q8 provides **massive performance improvements** (2-4x faster generation) with minimal quality loss.
-
-### Architecture Impact: REAP vs Non-REAP
-
-**Generation Speed (Q8):**
-- REAP-Q8 vs Flash-Q8: **+122% to +133% faster** (2.2x faster!) 🎉
-
-**Generation Speed (BF16):**
-- REAP-BF16 vs Flash-BF16: **+11% faster** (slight improvement)
-
-**Model Size:**
-- REAP-Q8 vs Flash-Q8: **-21% smaller**
-- REAP-BF16 vs Flash-BF16: **-23% smaller**
-
-**Memory Efficiency:**
-- REAP-Q8 vs Flash-Q8: **-14% less VRAM**
-- REAP-BF16 vs Flash-BF16: **0% difference** (both ~24GB)
-
-**Verdict:** REAP architecture provides **significant benefits with Q8** - faster generation AND smaller size!
+**Note on runtimes:** all `umfix`/`rebaseline`/isolated rows above are on `b10639-mix-f6f92fe` with `UNSLOTH_DISABLE_UNIFIED_MEMORY=1` set (see [SERVING-GOTCHAS-STRIX-HALO.md](SERVING-GOTCHAS-STRIX-HALO.md)) — that is the current production config. Rows explicitly marked `b10472` predate the runtime upgrade and have not yet been re-run on the new stack; treat them as provisional until re-baselined.
 
 ---
 
-## Winner Summary
+## Which model for which job
 
-### 🏆 Fastest Generation: GLM-4.7-Flash-REAP-Q8
-- **40-42 t/s** generation (2.2x faster than Flash-Q8!)
-- Best for: High-throughput generation tasks
-
-### 🏆 Fastest API Response: GLM-4.7-Flash-Q8 (tied with REAP-Q8)
-- **~0.27-0.36s** response time
-- Best for: Interactive, real-time use
-
-### 🏆 Smallest Model: GLM-4.7-Flash-REAP-Q8
-- **26GB** model size
-- Best for: Storage-constrained systems
-
-### 🏆 Best Memory Efficiency: GLM-4.7-Flash-REAP-Q8
-- **~18GB @ 65K** context
-- Best for: Memory-constrained systems, large context needs
-
-### 🏆 Best Overall: GLM-4.7-Flash-REAP-Q8
-- Fastest generation (40-42 t/s)
-- Smallest model (26GB)
-- Best memory efficiency (~18GB @ 65K)
-- Fast API response (~0.27-0.37s)
-- **Recommended as new default!**
+- **Fast general workhorse:** **Ornith-1.5-35B-A3B (64.5/63.9/57.4, 3/3)** or **Nemotron-3.5-Lightning-30B-A3B (63.1/62.0/62.9)** — on clean numbers the top three are within 5% of each other, so pick on quality, not speed. Nemotron is the most uniform across tasks but drops the literal "TL;DR" label on the summarize contract (a Nemotron-family habit); Ornith is 3/3. (Do not add `--speculative-type off` — that was a workaround for an env-corruption bug that is now fixed; default flags are the best config.)
+- **Code generation:** **Qwen3-Coder-30B-A3B-Instruct**, 3/3 clean — but pick it for QUALITY, not speed. The old "code king" 74.5 t/s figure is [now explained](../../results/sweeps/2026-08-28-coder30b-code-anomaly/manifest.yaml): server-side tools inflated its code output ~4.3x (3009 vs 737 tokens) with repetitive tool-loop scaffolding, and n-gram speculation raced through it. Remove speculation and that 65.5 collapses to 40.7; remove the injected work and speculation buys nothing (43.61 vs 43.99). True clean code speed is ~43.6 t/s, and the three ~62 t/s models above beat it on every task.
+- **Long-context thinker / interrupt-driven agent:** **Qwen3.8-Flash-Next**, 125B-A6B MoE, 262K ctx claim. Use the `reasoning_effort` dial: `low` as the idle/default (15.6/22.3/17.1 t/s, tight token economy), `xhigh` when you need the most thorough answer (2.9× the cost of `low` for no grade gain on this battery, but the most doctests on code). `instruct` mode is the fastest config (107s battery wall) and still passes everything — use it for non-reasoning workloads.
+- **Memory-tight / fastest small MoE:** **gemma-4-26B-A4B-it** — 26GB footprint, ~36 t/s, 3/3, stable across both runtime versions and both GTT states tested. Best choice when the box is also running something else.
+- **Largest model that runs at all:** **DeepSeek-V4-Flash-0731** — 97 GiB of weights at ~14 t/s, 3/3, context pinned to 16384. A batch/quality tier, not an interactive one.
+- **Large-model anchor:** **gpt-oss-120b** — 120B-class, 30–34 t/s clean, 3/3, tight token economy. The "software maturity" reference point: most-optimized runtime path in the study, used to judge how much headroom newer/less-optimized architectures still have.
+- **Dead heat alternative to Nemotron/Coder-30B at the ~55 t/s tier:** Ornith-1.5-35B-A3B and Qwen3.6-35B-A3B-MTP — both 3/3 clean when isolated. Qwen3.6 needs a fresh server per task to stay reliable (see cross-request bleed note below); Ornith does not carry that caveat.
 
 ---
 
-## Recommendations
+## Tool-calling (Track 1)
 
-### For Claude Code / Interactive Use:
-**Use: GLM-4.7-Flash-REAP-Q8**
-- Fastest generation (40-42 t/s)
-- Fast API response (~0.27-0.37s)
-- Best memory efficiency
-- Smallest model size
+Deterministic client-tool passthrough battery, greedy (temp 0, seed 42), raw healing rung (`--disable-tools --disable-tool-call-healing --disable-tool-call-nudging`), fresh server per case. Graded on the server-parsed `tool_calls`, expectations travel with each run dir.
 
-### For Maximum Speed (If Memory Not Concern):
-**Use: GLM-4.7-Flash-Q8**
-- Slightly faster API response (more consistent)
-- Still very fast generation (18 t/s)
-- Slightly more memory (~21GB vs ~18GB)
+- **Tier 1** (single/distractor/refusal/chain/longchain-20): **saturated 90/90** across 6 models × 3 healing rungs — a floor, not a ranking. [`2026-08-28-toolcall-tier1`](../../results/sweeps/2026-08-28-toolcall-tier1/manifest.yaml)
+- **Tier 2** (parallel×3, nested, union, distractor@pos1/3, ambiguous, coercion): **ranks** — [`2026-08-28-toolcall-tier2`](../../results/sweeps/2026-08-28-toolcall-tier2/manifest.yaml)
 
-### For Batch Processing / Quality Critical:
-**Use: GLM-4.7-Flash-BF16 or REAP-BF16**
-- Lossless quality
-- Acceptable for non-interactive use
+| Tier 2 (7 cases, raw, greedy) | Score | Failure mode |
+|---|---|---|
+| Qwen3-Coder-30B / Coder-Next / Qwen3.8-Flash-Next / GLM-4.7-Flash | **7/7** | — |
+| Nemotron-3.5-Lightning-30B-A3B | 6/7 | **parallel-call serialisation**: reasoning plans 3 calls, emits 1. Reproduced identically on the HP G1a (different box, OS, build) → model trait |
+| gpt-oss-120b | 5/7 | same 1-of-3 parallel gap, plus **union collapse** (reasons "exact datetime", emits the enum branch, hides the datetime in a free-text field) |
 
----
+Also settled: **no distractor positional bias** at n=5 tools — all six pass with the correct tool at positions 1, 3, and 5. Deep-chain: every model but gpt-oss-120b survives 60 sequential calls (gpt-oss abandons at 31 on all rungs, [`2026-08-28-deepchain-19513`](../../results/sweeps/2026-08-28-deepchain-19513/manifest.yaml)); the 100-call probe is in flight.
 
-## Test Data
+**Agent-lane implication:** a sub-agent behind Nemotron-3.5 or gpt-oss-120b must not rely on parallel tool calls in one turn — serialize, or route parallel-fan-out work to the Qwen/GLM band.
 
-**Flash-REAP-Q8 (Tested 2026-01-24):**
-- Generation: 40.25, 42.42, 42.10 t/s (avg: ~41.6 t/s)
-- Prompt: 104.83, 36.62, 37.24 t/s (variable)
-- API Response: 0.27-0.37s
-- Model Size: 26GB
-
-**Flash-Q8 (Tested 2026-01-24):**
-- Generation: ~18 t/s
-- Prompt: ~130 t/s
-- API Response: 0.27-0.36s
-- Model Size: 33GB
-
-**Flash-BF16 (Tested 2026-01-24):**
-- Generation: ~9 t/s
-- Prompt: ~110 t/s
-- API Response: 1.1-1.5s
-- Model Size: 56GB
-
-**Flash-REAP-BF16 (Tested 2026-01-24):**
-- Generation: ~10 t/s
-- Prompt: ~110 t/s
-- API Response: 1.1-1.5s
-- Model Size: 43GB
+**HP G1a is now a trustworthy graded node** ([`2026-08-28-g1a-validation`](../../results/sweeps/2026-08-28-g1a-validation/manifest.yaml)): first Windows serve-verification of `UNSLOTH_DISABLE_UNIFIED_MEMORY=1` — Nemotron-3.5 Q8, 9/10 graded cells (the miss is the parallel trait above), ~33–36 t/s wall, 10/10 loads at a rock-steady 50.4s, no b10639 symptoms.
 
 ---
 
-**Last Updated:** 2026-01-24  
-**Status:** Complete - All models tested
+## Retired / demoted models
+
+| Model | Reason | Evidence |
+|---|---|---|
+| GLM-4.7-Flash-REAP-23B-A3B | No niche: smaller on disk but slower **and** worse on every axis measured against the full GLM-4.7-Flash champion (1/3 quality). Deleted 2026-08-27. | [`2026-08-27-b10472-batch`](../../results/sweeps/2026-08-27-b10472-batch/manifest.yaml) |
+| gemma-3-27b-it | No speed or quality niche — gemma-4-26B-A4B is 5.5× faster at identical (3/3) grades. **Deleted 2026-08-27** (benchmarks banked first); its `mmproj` vision niche passes to the queued Muse-Glimmer-30B, dense-control role to gemma-4-31B. | [`2026-08-27-b10472-batch`](../../results/sweeps/2026-08-27-b10472-batch/manifest.yaml) |
+| Qwen3-Coder-Next | Looked like a generational inversion vs Coder-30B on first measurement (0/2), but that run was confounded by a concurrent download **and** the unified-memory corruption bug. Rehabilitated to 3/3 in isolation — but its code task still fails under the cross-request state-bleed defect at 2/3, and it never beats Coder-30B's throughput. No promotion pending a bleed fix. | [`2026-08-27-b10472-batch`](../../results/sweeps/2026-08-27-b10472-batch/manifest.yaml), [`2026-08-27-bleed-order-test`](../../results/sweeps/2026-08-27-bleed-order-test/manifest.yaml) |
+| Nemotron-3-Nano-30B-A3B | Niche eroding, not yet formally retired (Kal's call pending). Its selling point was "runs correctly on default flags" while 3.5-Lightning needed a workaround — that workaround is now gone, so 3.5-Lightning runs default flags at 56 t/s, 3/3, strictly better. | [`2026-08-27-b10639-rebaseline-batch`](../../results/sweeps/2026-08-27-b10639-rebaseline-batch/manifest.yaml) |
+| MiniMax-M2.5 (UD-Q3_K_XL copy) | Indicted as fragile independent of the runtime bugs: first-request code runs to the 8192 cap with incoherent output, and its earlier "pass" was flattered by cross-request context bleed. Only UD-Q3 model in an otherwise Q8 field — indicts the quant copy, not necessarily the family. **Copy deleted 2026-08-27** (successor: MiniMax-M3 on disk, or a Q8 re-pull if the comparison is revived). | [`2026-08-27-bleed-order-test`](../../results/sweeps/2026-08-27-bleed-order-test/manifest.yaml) |
+| Qwen3.8-Flash-Next @ 204–225 t/s claim | Never a real number — those figures were the unified-memory corruption generating garbage tokens at high speed while never terminating (0/3, all capped). Superseded by the umfix batch (15.6–22.3 t/s, 3/3). Cite only the umfix figures. | [`2026-08-27-b10639-batch`](../../results/sweeps/2026-08-27-b10639-batch/manifest.yaml) (garbage run) vs [`2026-08-27-b10639-umfix-batch`](../../results/sweeps/2026-08-27-b10639-umfix-batch/manifest.yaml) (real run) |
+
+---
+
+## Trust notes
+
+- **Grades are deterministic content-channel checks** on a fixed 3-task battery (verifiable-answer reasoning, doctest-compliant code, structure-checked 5-bullet summary) — a programmatic grader, not a judge model. A "3/3" means the battery's specific checks passed, not a general quality claim. Grading reads the `content` channel a real API consumer would see, not a whole-transcript grep — this matters because some models leak answers into `reasoning_content` or fail on formatting alone (e.g. Nemotron-3-Nano's missing "TL;DR" label).
+- **Tools-injection caveat (quantified 2026-08-27 night; full re-baseline still queued):** `unsloth run` enables server-side tools (web search, code execution) by default. A full-corpus scan found 48 records with prompt_tokens in the 2,000–16,000 range where the battery prompt is ~100 tokens — evidence of injected tool-schema content or spontaneous tool invocation (confirmed on the Qwen3-235B code cell, which triggered a server-side code-execution loop and returned a non-answer). The [tools on/off A/B](../../results/sweeps/2026-08-27-toolsoff-rerun-ab/manifest.yaml) has since **measured the injection at ~1,200 tok/request** of schema plus tool loops, and the 235B code cell passes clean once tools are off. **Any t/s or token-economy comparison made before `--disable-tools` should still be treated with caution** — content-channel pass/fail grades are unaffected (they measure what the consumer actually received), but wall-clock and token-count comparisons may be measuring tool-loop overhead rather than raw generation. This affects, at minimum, the version-sweep code-cell token-bloat finding. A full champion re-baseline under `--disable-tools` remains queued.
+- **`--disable-tools` is *not* the tool-calling switch.** It governs server-side built-ins only. The client-tool passthrough (`tools:[...]` in a request) is a separate mechanism with its own two flags — `--enable/--disable-tool-call-healing` and `--enable/--disable-tool-call-nudging`, both **on** by default, both able to flatter a model by repairing or retrying a call it got wrong. See [SERVING-GOTCHAS-STRIX-HALO.md § (d)](SERVING-GOTCHAS-STRIX-HALO.md) before running or reading any tool-calling benchmark.
+- **Cross-request state bleed on `b10639`** (confirmed 2026-08-27, see [SERVING-GOTCHAS-STRIX-HALO.md](SERVING-GOTCHAS-STRIX-HALO.md)) means any multi-request server session can leak context between unrelated requests. All figures above from `rebaseline`/`umfix`/non-isolated batches carry this risk for models known to be sensitive to it (Qwen3.6-MTP, Qwen3-Coder-Next, MiniMax-M2.5); rows explicitly marked "isolated" are immune and should be preferred when available.
+- **Tool-calling now has its own data — do not infer it from the text grades (or vice versa).** See the Tool-calling (Track 1) section above: Tier 1 is a saturated floor, Tier 2 ranks. Notably the ranking DISAGREES with this leaderboard's ordering — Nemotron-3.5 is a top-3 text model but carries the parallel-call defect, and the mid-table Qwen coders are flawless at 7/7. Pick agents' models per-axis.
+- **Runtime build is an output-changing axis, not just a speed axis** — a same-model, same-quant, same-prompt comparison across `b10472` → `b10639` changed both token economy and instruction-following before the unified-memory fix was found. Always check which runtime build a number came from (recorded in each manifest) before comparing across rows from different dates.

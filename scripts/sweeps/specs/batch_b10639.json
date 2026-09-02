@@ -1,0 +1,11 @@
+[
+  {"name": "Qwen3.8-Flash-Next", "tag": "default",
+   "path": "/mnt/ai-models/unsloth/Qwen3.8-Flash-Next-GGUF/UD-Q4_K_XL/Qwen3.8-Flash-Next-UD-Q4_K_XL-00001-of-00004.gguf",
+   "flags": ""},
+  {"name": "Nemotron-3.5-Lightning-30B-A3B", "tag": "default",
+   "path": "/mnt/ai-models/unsloth/NVIDIA-Nemotron-3.5-Lightning-30B-A3B-GGUF/NVIDIA-Nemotron-3.5-Lightning-30B-A3B-UD-Q8_K_XL.gguf",
+   "flags": ""},
+  {"name": "Qwen3.6-35B-A3B-MTP", "tag": "default",
+   "path": "/mnt/ai-models/unsloth/Qwen3.6-35B-A3B-MTP-GGUF/Qwen3.6-35B-A3B-UD-Q8_K_XL.gguf",
+   "flags": ""}
+]

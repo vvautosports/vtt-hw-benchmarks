@@ -1,0 +1,67 @@
+=== REASONING ===
+*   Task: Summarize the technical passage.
+    *   Constraint 1: Exactly 5 bullet points.
+    *   Constraint 2: Followed by a one-sentence TL;DR.
+    *   Constraint 3: Be faithful to the source (no external claims/hallucinations).
+
+    *   *Paragraph 1:* Speculative decoding speeds up inference by using a cheap draft mechanism to propose tokens, which a target model verifies in one pass. It maintains the same output distribution as standard decoding. Draft methods include small models, n-gram lookups, or multi-token-prediction (MTP) heads.
+    *   *Paragraph 2:* Performance varies by workload. N-gram drafting works well for repetitive code/structured text. Prose has lower acceptance rates; a bad draft model can actually slow things down. MTP heads offer stable acceptance rates by using the same context as the target.
+    *   *Paragraph 3:* MoE models pose a challenge. While they are fast due to low active parameters, speculative verification batches multiple positions, potentially pulling more expert weights through memory. This can reduce the profit of speculation on bandwidth-bound hardware, meaning MoE models need higher acceptance rates to be efficient.
+    *   *Paragraph 4:* Server-side parallelism (slot-based servers) affects the trade-off. Speculation and slot counts compete for compute headroom. Tuning requires optimizing speculative mode, slot count, and sampling together as a joint configuration, measured by end-to-end tokens per second on real tasks.
+
+    *   *Point 1 (Mechanism):* Speculative decoding uses a draft mechanism to propose tokens that a target model verifies in a single batched pass, maintaining the same output distribution while reducing cost.
+    *   *Point 2 (Drafting Methods):* Drafting techniques range from small models and n-gram lookups to multi-token-prediction (MTP) heads, the latter of which provides stable acceptance rates by sharing context with the target model.
+    *   *Point 3 (Workload Impact):* Effectiveness depends on the workload; n-gram drafting excels in repetitive tasks like code, whereas open-ended prose may result in slower generation if the draft model is poorly matched.
+    *   *Point 4 (MoE Complications):* Mixture-of-experts (MoE) models require higher acceptance rates to be profitable because speculative verification batches multiple positions, which can increase memory bandwidth usage.
+    *   *Point 5 (System Tuning):* Optimal performance requires joint configuration of speculative mode, slot count, and sampling settings, as these elements compete for server-side compute resources.
+
+    *   *TL;DR:* Speculative decoding accelerates inference through various drafting methods, but its efficiency is highly dependent on workload type, model architecture (like MoE), and server-side resource allocation.
+
+    *   Exactly 5 bullet points? Yes.
+    *   One-sentence TL;DR? Yes.
+    *   Faithful to source? Yes.
+    *   No extra claims? Yes.
+
+    *   *Draft 1:*
+        *   Speculative decoding uses a cheap draft mechanism to propose tokens that a target model verifies in a single batched pass, preserving the original output distribution.
+        *   Drafting methods include small models, n-gram lookups, and multi-token-prediction (MTP) heads, which can offer stable performance by sharing context with the target.
+        *   The efficiency of drafting varies by workload, with n-gram methods performing well on repetitive code but potentially slowing down prose generation if acceptance rates are low.
+        *   In Mixture-of-Experts (MoE) models, speculative verification can increase memory bandwidth demands, necessitating higher acceptance rates to remain profitable.
+        *   System optimization requires treating speculative mode, slot count, and sampling settings as a single joint configuration to manage competition for compute headroom.
+
+    *   *TL;DR:* Speculative decoding improves inference speed through various drafting techniques, but its effectiveness is influenced by workload characteristics, MoE architectures, and server-side resource management.
+
+    *   "Speculative decoding accelerates autoregressive inference by letting a cheap draft mechanism propose several tokens which the target model then verifies in a single batched forward pass." -> Covered.
+    *   "Accepted tokens land at large-model quality but near draft-model cost; a rejection truncates the proposal... outputs remain distributionally identical..." -> Covered.
+    *   "The draft can be a separate small model, an n-gram lookup... or... a multi-token-prediction (MTP) head..." -> Covered.
+    *   "Code and structured text repeat long spans, so n-gram drafting achieves high acceptance rates... Open-ended prose accepts fewer speculative tokens, and a poorly matched draft model can make generation slower..." -> Covered.
+    *   "MTP heads... acceptance rates tend to be stable across domains..." -> Covered.
+    *   "MoE layer routes each token to a small subset of experts... But speculative verification batches several positions together... pulling more expert weights through memory... break-even acceptance rate is higher for MoE..." -> Covered.
+    *   "Slot-based servers split the KV-cache budget... speculation competes with extra slots... Tuning therefore has to treat speculative mode, slot count, and sampling settings as one joint configuration..." -> Covered.
+
+    *Wait, the TL;DR needs to be exactly one sentence.*
+
+    "Speculative decoding increases inference speed using various drafting methods, but its actual efficiency depends on the specific workload, the target model's architecture, and the server's resource configuration." (One sentence).
+
+    1. Speculative decoding uses a cheap draft mechanism to propose tokens for single-pass verification by a target model, maintaining the original output distribution while reducing cost.
+    2. Drafting methods include small models, n-gram lookups, and multi-token-prediction (MTP) heads, with MTP heads providing stable acceptance rates by sharing context with the target.
+    3. Effectiveness is workload-dependent, as n-gram drafting works well for repetitive code but may slow down prose generation if acceptance rates are low.
+    4. For Mixture-of-Experts (MoE) models, speculative verification can increase memory bandwidth usage, meaning a higher acceptance rate is required to achieve profitability.
+    5. Optimal system performance requires tuning speculative mode, slot count, and sampling settings as a joint configuration to manage competition for server-side compute resources.
+
+    TL;DR: Speculative decoding improves inference speed through various drafting techniques, but its efficiency is shaped by workload type, model architecture, and server-side resource allocation.
+
+    *Double check: "The draft can be a separate small model, an n-gram lookup over the prompt and generation history, or - in newer designs - a multi-token-prediction (MTP) head trained jointly with the target model that predicts a short window of future tokens from the same hidden state."* -> Covered in bullet 2.
+
+    *Double check: "Tuning therefore has to treat speculative mode, slot count, and sampling settings as one joint configuration rather than three independent knobs, and measure end-to-end tokens per second on representative tasks instead of trusting microbenchmarks."* -> Covered in bullet 5.
+
+    *Everything looks good.*
+
+=== CONTENT ===
+* Speculative decoding uses a cheap draft mechanism to propose tokens for single-pass verification by a target model, maintaining the original output distribution while reducing cost.
+* Drafting methods include small models, n-gram lookups, and multi-token-prediction (MTP) heads, with MTP heads providing stable acceptance rates by sharing context with the target.
+* Effectiveness is workload-dependent, as n-gram drafting works well for repetitive code but may slow down prose generation if acceptance rates are low.
+* For Mixture-of-Experts (MoE) models, speculative verification can increase memory bandwidth usage, meaning a higher acceptance rate is required to achieve profitability.
+* Optimal system performance requires tuning speculative mode, slot count, and sampling settings as a joint configuration to manage competition for server-side compute resources.
+
+TL;DR: Speculative decoding improves inference speed through various drafting techniques, but its efficiency is shaped by workload type, model architecture, and server-side resource allocation.

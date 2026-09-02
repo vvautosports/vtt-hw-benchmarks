@@ -1,0 +1,55 @@
+{
+  "version": 1,
+  "family": "toolcall",
+  "notes": [
+    "DEEP-CHAIN rung 2 of toolcall_cases_deepchain.json — tc_longchain only, target 100.",
+    "The 60-call probe (toolcall_cases_deepchain.json) found a real break but did not pin a",
+    "per-model ceiling for the models that survived it; this pushes the survivors to 100.",
+    "Run only the models that cleared 60 — gpt-oss-120b abandons the chain at 31 across every",
+    "healing rung, so it is excluded from the depth-100 spec (batch_deepchain100_raw.json).",
+    "Expectations travel with the run, so the 60 probe stays reproducible from its own run dir."
+  ],
+  "request_constants": {
+    "max_tokens": 2048,
+    "seed": 42,
+    "temperature": 0.0,
+    "top_p": 1.0,
+    "reasoning_effort": "low",
+    "enable_tools": false
+  },
+  "cases": {
+    "tc_longchain": {
+      "kind": "longchain",
+      "intent": "DEEP variant rung 2: 100 sequential calls. Finds the per-model breaking point above 60 for ggml-org/llama.cpp#19513. pass_depth == target so a clean pass means the full chain survived.",
+      "prompt": "Call step with n=0. It returns the next value of n. Keep calling step with the value it returns, one call at a time, until it returns done=true. Then report the token it gives you on its own line as 'TOKEN: <token>'. Do not skip ahead and do not guess the token.",
+      "max_turns": 110,
+      "target_depth": 100,
+      "pass_depth": 15,
+      "final_token": "ZEPHYR-7731",
+      "tools": [
+        {
+          "type": "function",
+          "function": {
+            "name": "step",
+            "description": "Advance the counter by one and return the next value of n.",
+            "parameters": {
+              "type": "object",
+              "properties": {
+                "n": {
+                  "type": "integer",
+                  "description": "Current value of n"
+                }
+              },
+              "required": ["n"]
+            }
+          }
+        }
+      ],
+      "expect": {
+        "pass_depth": 100,
+        "completion_match": "ZEPHYR-7731",
+        "max_prompt_tokens": 22000
+      }
+    }
+  }
+}

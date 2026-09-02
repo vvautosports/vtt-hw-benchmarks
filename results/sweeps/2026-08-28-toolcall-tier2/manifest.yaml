@@ -1,0 +1,56 @@
+# Track 1 Tier 2 — the discriminative tool-calling battery. Tier 1 saturated at 90/90;
+# these 7 cases (parallel calls, nested + union schemas, distractor rotation, ambiguity,
+# coercion) were built to rank what Tier 1 could only floor-test. THEY DO: 39/42, three bands.
+run_id: "2026-08-28-toolcall-tier2"
+date: "2026-08-28"
+node: "kalman9-framework-01"
+hardware: "AMD Strix Halo (Radeon 8060S iGPU), GTT unlock ACTIVE, ~122 GB usable"
+backend: "unsloth-studio"
+api: "/v1/chat/completions (client-tool passthrough — tools:[...] in the request)"
+isolation: "fresh-server-per-case (toolcall_battery.py --cases toolcall_cases_tier2.json)"
+
+request_constants:
+  seed: 42
+  max_tokens: 2048
+  temperature: 0.0        # greedy — pass/fail binary, BFCL-comparable
+  top_p: 1.0
+  profile: toolcall
+  reasoning_effort: low
+  enable_tools: false
+launch_env:
+  UNSLOTH_DISABLE_UNIFIED_MEMORY: "1"
+rung: "raw only — --disable-tools --disable-tool-call-healing --disable-tool-call-nudging"
+
+axis: cfg
+records: "results.jsonl"
+outputs: "outputs/<cfg>/<task>--toolcall--low.txt"
+cases: "toolcall_cases.json"   # tier2 copy — the grader reads expectations from HERE
+grading: "py scripts/utils/grade_sweep.py results/sweeps/2026-08-28-toolcall-tier2 results --layout cfg"
+driver_script: "scripts/sweeps/toolcall_battery.py"
+
+leaderboard:   # 7 cases, raw rung, greedy
+  - {model: "Qwen3-Coder-30B-A3B-Instruct", score: "7/7"}
+  - {model: "Qwen3-Coder-Next",             score: "7/7"}
+  - {model: "Qwen3.8-Flash-Next",           score: "7/7"}
+  - {model: "GLM-4.7-Flash",                score: "7/7"}
+  - {model: "NVIDIA-Nemotron-3.5-Lightning-30B-A3B", score: "6/7", failed: "tc_parallel (1 of 3 calls)"}
+  - {model: "gpt-oss-120b",                 score: "5/7", failed: "tc_parallel (1 of 3 calls), tc_union (enum collapse)"}
+
+findings:
+  parallel_serialisation_is_a_model_trait: >
+    Nemotron-3.5 and gpt-oss-120b each emit exactly ONE of the three required parallel
+    calls; both reasoning streams explicitly plan all three. Nemotron's 1-of-3 reproduces
+    IDENTICALLY on the HP G1a under Windows (2026-08-28-g1a-validation) — same failure on
+    a different box, OS and llama.cpp build, so this is the model, not the environment.
+    The four Qwen/GLM-family models emit 3/3.
+  union_collapse: >
+    gpt-oss-120b's tc_union transcript shows the model reasoning "Use when exact datetime"
+    then emitting when="afternoon" (the enum branch) and smuggling the datetime into the
+    free-text note field. Schema-following depth failure, not comprehension.
+  no_positional_bias_detected: >
+    All six models pass the distractor with the correct tool at positions 1, 3 (this run)
+    and 5 (Tier 1). The positional-bias hypothesis is answered: none at n=5 tools, greedy.
+  saturation_watch: >
+    4 of 6 models score 7/7 — the nested/union/coercion/ambiguous cells discriminate only
+    the bottom band. If a future roster needs finer ranking at the top, escalate: more
+    parallel calls with mixed tools, deeper nesting, unions between overlapping objects.

@@ -1,0 +1,12 @@
+=== REASONING ===
+The user wants a summary of the technical passage as exactly 5 bullet points followed by a one-sentence TL;DR. I need to be faithful to the source and not add claims it doesn't make. Let me carefully summarize each paragraph into 5 bullets plus a TL;DR.
+
+
+=== CONTENT ===
+- Speculative decoding uses a cheap draft mechanism (small model, n-gram lookup, or a jointly-trained multi-token-prediction head) to propose multiple tokens that the target model verifies in one batched forward pass, producing outputs distributionally identical to standard decoding.
+- N-gram drafting works best on code and structured text due to high acceptance rates at near-zero cost; open-ended prose accepts fewer tokens, and a poorly matched draft model can actually slow generation because each rejected batch wastes a full verification pass.
+- MTP heads occupy a middle ground: they add modest memory and compute per step but yield stable acceptance rates across domains since the head sees the exact context the target sees.
+- MoE models erode speculation's batching advantage on bandwidth-bound hardware because parallel verification positions may route to different experts, pulling more weights through memory per step and raising the break-even acceptance rate compared to dense targets.
+- Server-side tuning must treat speculative mode, slot count, and sampling settings as a single joint configuration—measured end-to-end on representative tasks—because speculation competes with additional slots for the same compute headroom.
+
+**TL;DR:** Speculative decoding is a powerful acceleration technique whose actual benefit depends heavily on workload type, draft mechanism, model architecture (dense vs. MoE), and server-level resource allocation, making holistic tuning essential rather than relying on microbenchmarks.

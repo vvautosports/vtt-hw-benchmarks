@@ -1,0 +1,76 @@
+# Qwen3.8-Flash-Next quant ladder — first rung of the Track-2 quant axis.
+# UD-Q4_K_XL (on disk) vs newly-downloaded UD-IQ4_XS and UD-Q2_K_XL.
+# Fresh server per (quant, task); battery constants unchanged.
+run_id: "2026-08-27-qwen38-quant-ladder"
+date: "2026-08-27"
+node: "kalman9-framework-01"
+hardware: "AMD Strix Halo (Radeon 8060S iGPU), GTT unlock ACTIVE, ~122 GB usable"
+backend: "unsloth-studio"
+runtime_build: "b10639-mix-f6f92fe"
+studio_version: "unsloth 2026.8.22"
+api: "/v1/chat/completions"
+model: "Qwen3.8-Flash-Next (125B-A6B MoE)"
+isolation: "fresh-server-per-task (qwen38_quant_ladder.py)"
+request_constants:
+  seed: 42
+  max_tokens: 8192
+  profile: thinking
+  reasoning_effort: low
+launch_env:
+  UNSLOTH_DISABLE_UNIFIED_MEMORY: "1"
+
+axis: cfg
+records: "results.jsonl"
+outputs: "outputs/<cfg>/<task>--thinking--low.txt"
+grading: "py scripts/utils/grade_sweep.py results/sweeps/2026-08-27-qwen38-quant-ladder results --layout cfg"
+
+# Vendor KLD context (unsloth model doc): Q4_K_XL 93.5% same-top / IQ4_XS 91.1% / Q2_K_XL 85.2%.
+rungs:
+  - cfg: "Qwen3.8-Flash-Next__UD-Q4_K_XL"
+    size_gb: 104
+    tps: "15.68 / 17.86 / 14.14"
+    tokens: "433 / 1095 / 344"
+    battery_wall_s: 113
+    quality: "3/3"
+  - cfg: "Qwen3.8-Flash-Next__UD-IQ4_XS"
+    size_gb: 94
+    tps: "16.49 / 19.56 / 15.16"
+    tokens: "566 / 5422 / 404"
+    battery_wall_s: 338
+    quality: "3/3"
+  - cfg: "Qwen3.8-Flash-Next__UD-Q2_K_XL"
+    size_gb: 79
+    tps: "19.99 / 24.73 / 20.30"
+    tokens: "1264 / 3440 / 1429"
+    battery_wall_s: 272
+    quality: "3/3"
+
+summary: >-
+  9/9 PASS — even UD-Q2_K_XL (85.2% KLD same-top) grades clean on the full battery. The
+  ladder's real finding is the economy inversion: per-token speed RISES down the ladder
+  (bandwidth-bound MoE: fewer active bytes per token — Q2 is +25-40% t/s over Q4) while
+  token counts BALLOON (reasoning 433->566->1264, summarize 344->404->1429), so Q4_K_XL
+  wins total wall-clock decisively (113s battery vs 272s at Q2). Quant degradation
+  manifests as verbosity before it manifests as wrong answers — token economy is the
+  sensitive metric, grades are the lagging one.
+
+verdicts:
+  serving_quant: "UD-Q4_K_XL stays the serving quant (best wall-clock, best KLD)."
+  memory_fallback: >-
+    UD-Q2_K_XL is a validated fallback when ~25 GB must be freed: still 3/3, still
+    usable, at ~2.4x the battery wall-clock.
+  iq4_xs: >-
+    No niche found on this battery: barely faster per-token than Q4, and its code cell
+    was the most verbose in the ladder — though see the caveat before treating that
+    verbosity as a quant property.
+
+caveats:
+  tools_not_disabled: >-
+    This ladder launched before the --disable-tools rule landed (same evening). Baseline
+    prompt inflation (~1400-2100 prompt_tokens) is present on all cells, and two code
+    cells show probable tool-loop legs (IQ4_XS code pt=6637, Q2 code pt=4477 vs Q4 code
+    pt=1442). Grades stand; WITHIN-ladder code-verbosity comparisons are soft. Re-run
+    under --disable-tools before citing the code column for quant-verbosity claims.
+  single_seed: "One seed, one battery — economy deltas are directional, not confidence-intervaled."
+
+driver_script: "qwen38_quant_ladder.py (Framework ~, via chain_v2.sh)"

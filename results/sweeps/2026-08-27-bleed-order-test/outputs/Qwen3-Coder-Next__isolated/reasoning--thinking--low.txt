@@ -1,0 +1,4 @@
+=== CONTENT ===
+The LCM of 12, 18, and 30 is 180 minutes (3 hours), so all three trucks arrive together every 3 hours. Starting from 6:00 AM, the meeting times are at 6:00 AM, 9:00 AM, 12:00 PM, 3:00 PM, and 6:00 PM, giving 5 times total.
+
+ANSWER: 5

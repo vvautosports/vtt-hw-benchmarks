@@ -1,0 +1,81 @@
+=== REASONING ===
+The user wants me to summarize the technical passage in exactly 5 bullet points followed by a one-sentence TL;DR. I need to be faithful to the source without adding claims it doesn't make.
+
+Let me break down the passage:
+
+1. First paragraph describes speculative decoding: a draft mechanism proposes tokens, target verifies in batch, accepted tokens get large-model quality at low cost, rejection truncates, outputs remain distributionally identical. Draft can be a separate small model, n-gram lookup, or MTP head.
+
+2. Second paragraph discusses economics: n-gram drafting works well for code/structured text with high acceptance rates; open-ended prose accepts fewer tokens; poorly matched draft can be slower; MTP heads add minimal memory/compute and have stable acceptance across domains.
+
+3. Third paragraph about Mixture-of-Experts: each token routes to subset of experts; speculation batches multiple positions which may route to different experts; on bandwidth-bound hardware this reduces batching advantage; higher break-even acceptance needed.
+
+4. Fourth paragraph about server-side parallelism: slot-based servers split KV-cache; more slots increase throughput but lower per-stream speed; speculation competes for compute headroom; tuning must treat speculation, slot count, and sampling as joint configuration; measure end-to-end tokens/sec not just microbenchmarks.
+
+Let me consolidate into 5 bullet points:
+
+1. Speculative decoding uses a draft mechanism to propose tokens that the target verifies in batch, achieving large-model quality at low cost while preserving distributional equivalence through rejection resumption.
+
+2. Draft implementations include separate small models, n-gram lookups (high acceptance for code/structured text), or MTP heads (moderate cost with stable acceptance across domains).
+
+3. Mixture-of-Experts models complicate speculative verification because each batched position may route to different experts, eroding the batching advantage on bandwidth-bound hardware and requiring higher acceptance rates for profitability.
+
+4. Server-side slot-based parallelism creates a trade-off where more slots increase aggregate throughput but lower per-stream speed, and speculative decoding competes with extra slots for compute headroom.
+
+5. Practical tuning must treat speculative mode, slot count, and sampling settings as a joint configuration, using end-to-end tokens-per-second measurements on representative tasks rather than isolated microbenchmarks.
+
+That's 5 bullet points. Now for a TL;DR:
+
+The draft mechanism verifies tokens in batch to gain quality at draft costs but faces challenges with MoE routing and server slot allocation, requiring joint configuration and end-to-end measurement to achieve optimal performance.
+
+Hmm, let me refine to capture the key idea: "Speculative decoding accelerates inference by verifying multiple tokens at draft cost, but its effectiveness depends on matching draft type to workload, managing MoE routing overhead, and jointly tuning with server slot configuration to ensure profitability."
+
+Let me double-check against the source:
+- First bullet: speculative decoding mechanism ✓
+- Second bullet: draft implementations and economics ✓
+- Third bullet: MoE complication ✓
+- Fourth bullet: server slot trade-offs ✓
+- Fifth bullet: tuning considerations ✓
+
+These are faithful to the source without adding claims.
+
+Let me make the bullets more concise and punchy while maintaining accuracy:
+
+1. Speculative decoding proposes tokens in a draft pass that the target verifies in batch, giving large-model quality at low cost while preserving output distribution through rejection and resumption.
+
+2. Draft methods vary in economics: n-grams excel for code/structured text, MTP heads offer stable acceptance across domains, and poorly matched drafts can slow generation below baseline performance.
+
+3. MoE models introduce verification overhead because speculative batching may route different positions to different experts, eroding the memory/compute advantage on bandwidth-bound hardware.
+
+4. Server slot allocation trades aggregate throughput against per-stream speed, and speculation competes with extra slots for compute headroom in slot-based systems.
+
+5. Optimal tuning requires viewing speculation mode, slot count, and sampling as a joint configuration, validated through end-to-end tokens-per-second measurements on representative tasks rather than isolated benchmarks.
+
+That looks good. Let me craft the TL;DR to be one sentence capturing the main idea: "Speculative decoding accelerates inference by batching token verification, but its profitability depends on matching draft type to workload, mitigating MoE routing overhead, and jointly tuning with server slot configuration based on end-to-end measurements."
+
+That's one sentence. Let me double-check:
+- Speculative decoding accelerates inference ✓
+- batching token verification ✓
+- profitability depends on ✓
+- matching draft type to workload ✓
+- mitigating MoE routing overhead ✓
+- jointly tuning with server slot configuration ✓
+- based on end-to-end measurements ✓
+
+This is faithful to the source without adding claims.
+
+Let me finalize.
+
+=== CONTENT ===
+**Bullet points:**
+
+- Speculative decoding uses a draft mechanism to propose tokens that the target model verifies in batch, achieving large-model quality at low cost while preserving output distribution through rejection truncation and resumption at the last accepted position.
+
+- Draft implementations vary in economics: n-gram lookups achieve high acceptance for code and structured text, MTP heads add minimal memory and compute with stable acceptance across domains, and poorly matched drafts can reduce overall throughput.
+
+- Mixture-of-Experts models complicate speculative verification because batching multiple positions may route them to different experts, eroding the memory/compute advantage on bandwidth-bound hardware and requiring a higher acceptance rate to remain profitable.
+
+- Server slot allocation trades aggregate throughput against per-stream speed, and speculative decoding competes with additional slots for compute headroom in slot-based server architectures.
+
+- Optimal tuning must treat speculative mode, slot count, and sampling settings as a joint configuration validated through end-to-end tokens-per-second measurements on representative tasks rather than relying on isolated microbenchmarks.
+
+**TL;DR:** Speculative decoding accelerates inference by batching token verification at draft cost, but its profitability depends on matching the draft type to workload, managing MoE routing overhead, and jointly tuning server slot configuration based on end-to-end performance.

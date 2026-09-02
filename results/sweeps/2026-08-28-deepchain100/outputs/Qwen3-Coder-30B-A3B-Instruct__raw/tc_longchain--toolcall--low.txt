@@ -1,0 +1,819 @@
+=== CONTENT ===
+--- turn 101 ---
+TOKEN: ZEPHYR-7731
+
+=== TOOLCALLS ===
+[
+ {
+  "name": "step",
+  "arguments": {
+   "n": 0
+  },
+  "arguments_raw": "{\"n\":0}",
+  "args_parsed": true
+ },
+ {
+  "name": "step",
+  "arguments": {
+   "n": 1
+  },
+  "arguments_raw": "{\"n\":1}",
+  "args_parsed": true
+ },
+ {
+  "name": "step",
+  "arguments": {
+   "n": 2
+  },
+  "arguments_raw": "{\"n\":2}",
+  "args_parsed": true
+ },
+ {
+  "name": "step",
+  "arguments": {
+   "n": 3
+  },
+  "arguments_raw": "{\"n\":3}",
+  "args_parsed": true
+ },
+ {
+  "name": "step",
+  "arguments": {
+   "n": 4
+  },
+  "arguments_raw": "{\"n\":4}",
+  "args_parsed": true
+ },
+ {
+  "name": "step",
+  "arguments": {
+   "n": 5
+  },
+  "arguments_raw": "{\"n\":5}",
+  "args_parsed": true
+ },
+ {
+  "name": "step",
+  "arguments": {
+   "n": 6
+  },
+  "arguments_raw": "{\"n\":6}",
+  "args_parsed": true
+ },
+ {
+  "name": "step",
+  "arguments": {
+   "n": 7
+  },
+  "arguments_raw": "{\"n\":7}",
+  "args_parsed": true
+ },
+ {
+  "name": "step",
+  "arguments": {
+   "n": 8
+  },
+  "arguments_raw": "{\"n\":8}",
+  "args_parsed": true
+ },
+ {
+  "name": "step",
+  "arguments": {
+   "n": 9
+  },
+  "arguments_raw": "{\"n\":9}",
+  "args_parsed": true
+ },
+ {
+  "name": "step",
+  "arguments": {
+   "n": 10
+  },
+  "arguments_raw": "{\"n\":10}",
+  "args_parsed": true
+ },
+ {
+  "name": "step",
+  "arguments": {
+   "n": 11
+  },
+  "arguments_raw": "{\"n\":11}",
+  "args_parsed": true
+ },
+ {
+  "name": "step",
+  "arguments": {
+   "n": 12
+  },
+  "arguments_raw": "{\"n\":12}",
+  "args_parsed": true
+ },
+ {
+  "name": "step",
+  "arguments": {
+   "n": 13
+  },
+  "arguments_raw": "{\"n\":13}",
+  "args_parsed": true
+ },
+ {
+  "name": "step",
+  "arguments": {
+   "n": 14
+  },
+  "arguments_raw": "{\"n\":14}",
+  "args_parsed": true
+ },
+ {
+  "name": "step",
+  "arguments": {
+   "n": 15
+  },
+  "arguments_raw": "{\"n\":15}",
+  "args_parsed": true
+ },
+ {
+  "name": "step",
+  "arguments": {
+   "n": 16
+  },
+  "arguments_raw": "{\"n\":16}",
+  "args_parsed": true
+ },
+ {
+  "name": "step",
+  "arguments": {
+   "n": 17
+  },
+  "arguments_raw": "{\"n\":17}",
+  "args_parsed": true
+ },
+ {
+  "name": "step",
+  "arguments": {
+   "n": 18
+  },
+  "arguments_raw": "{\"n\":18}",
+  "args_parsed": true
+ },
+ {
+  "name": "step",
+  "arguments": {
+   "n": 19
+  },
+  "arguments_raw": "{\"n\":19}",
+  "args_parsed": true
+ },
+ {
+  "name": "step",
+  "arguments": {
+   "n": 20
+  },
+  "arguments_raw": "{\"n\":20}",
+  "args_parsed": true
+ },
+ {
+  "name": "step",
+  "arguments": {
+   "n": 21
+  },
+  "arguments_raw": "{\"n\":21}",
+  "args_parsed": true
+ },
+ {
+  "name": "step",
+  "arguments": {
+   "n": 22
+  },
+  "arguments_raw": "{\"n\":22}",
+  "args_parsed": true
+ },
+ {
+  "name": "step",
+  "arguments": {
+   "n": 23
+  },
+  "arguments_raw": "{\"n\":23}",
+  "args_parsed": true
+ },
+ {
+  "name": "step",
+  "arguments": {
+   "n": 24
+  },
+  "arguments_raw": "{\"n\":24}",
+  "args_parsed": true
+ },
+ {
+  "name": "step",
+  "arguments": {
+   "n": 25
+  },
+  "arguments_raw": "{\"n\":25}",
+  "args_parsed": true
+ },
+ {
+  "name": "step",
+  "arguments": {
+   "n": 26
+  },
+  "arguments_raw": "{\"n\":26}",
+  "args_parsed": true
+ },
+ {
+  "name": "step",
+  "arguments": {
+   "n": 27
+  },
+  "arguments_raw": "{\"n\":27}",
+  "args_parsed": true
+ },
+ {
+  "name": "step",
+  "arguments": {
+   "n": 28
+  },
+  "arguments_raw": "{\"n\":28}",
+  "args_parsed": true
+ },
+ {
+  "name": "step",
+  "arguments": {
+   "n": 29
+  },
+  "arguments_raw": "{\"n\":29}",
+  "args_parsed": true
+ },
+ {
+  "name": "step",
+  "arguments": {
+   "n": 30
+  },
+  "arguments_raw": "{\"n\":30}",
+  "args_parsed": true
+ },
+ {
+  "name": "step",
+  "arguments": {
+   "n": 31
+  },
+  "arguments_raw": "{\"n\":31}",
+  "args_parsed": true
+ },
+ {
+  "name": "step",
+  "arguments": {
+   "n": 32
+  },
+  "arguments_raw": "{\"n\":32}",
+  "args_parsed": true
+ },
+ {
+  "name": "step",
+  "arguments": {
+   "n": 33
+  },
+  "arguments_raw": "{\"n\":33}",
+  "args_parsed": true
+ },
+ {
+  "name": "step",
+  "arguments": {
+   "n": 34
+  },
+  "arguments_raw": "{\"n\":34}",
+  "args_parsed": true
+ },
+ {
+  "name": "step",
+  "arguments": {
+   "n": 35
+  },
+  "arguments_raw": "{\"n\":35}",
+  "args_parsed": true
+ },
+ {
+  "name": "step",
+  "arguments": {
+   "n": 36
+  },
+  "arguments_raw": "{\"n\":36}",
+  "args_parsed": true
+ },
+ {
+  "name": "step",
+  "arguments": {
+   "n": 37
+  },
+  "arguments_raw": "{\"n\":37}",
+  "args_parsed": true
+ },
+ {
+  "name": "step",
+  "arguments": {
+   "n": 38
+  },
+  "arguments_raw": "{\"n\":38}",
+  "args_parsed": true
+ },
+ {
+  "name": "step",
+  "arguments": {
+   "n": 39
+  },
+  "arguments_raw": "{\"n\":39}",
+  "args_parsed": true
+ },
+ {
+  "name": "step",
+  "arguments": {
+   "n": 40
+  },
+  "arguments_raw": "{\"n\":40}",
+  "args_parsed": true
+ },
+ {
+  "name": "step",
+  "arguments": {
+   "n": 41
+  },
+  "arguments_raw": "{\"n\":41}",
+  "args_parsed": true
+ },
+ {
+  "name": "step",
+  "arguments": {
+   "n": 42
+  },
+  "arguments_raw": "{\"n\":42}",
+  "args_parsed": true
+ },
+ {
+  "name": "step",
+  "arguments": {
+   "n": 43
+  },
+  "arguments_raw": "{\"n\":43}",
+  "args_parsed": true
+ },
+ {
+  "name": "step",
+  "arguments": {
+   "n": 44
+  },
+  "arguments_raw": "{\"n\":44}",
+  "args_parsed": true
+ },
+ {
+  "name": "step",
+  "arguments": {
+   "n": 45
+  },
+  "arguments_raw": "{\"n\":45}",
+  "args_parsed": true
+ },
+ {
+  "name": "step",
+  "arguments": {
+   "n": 46
+  },
+  "arguments_raw": "{\"n\":46}",
+  "args_parsed": true
+ },
+ {
+  "name": "step",
+  "arguments": {
+   "n": 47
+  },
+  "arguments_raw": "{\"n\":47}",
+  "args_parsed": true
+ },
+ {
+  "name": "step",
+  "arguments": {
+   "n": 48
+  },
+  "arguments_raw": "{\"n\":48}",
+  "args_parsed": true
+ },
+ {
+  "name": "step",
+  "arguments": {
+   "n": 49
+  },
+  "arguments_raw": "{\"n\":49}",
+  "args_parsed": true
+ },
+ {
+  "name": "step",
+  "arguments": {
+   "n": 50
+  },
+  "arguments_raw": "{\"n\":50}",
+  "args_parsed": true
+ },
+ {
+  "name": "step",
+  "arguments": {
+   "n": 51
+  },
+  "arguments_raw": "{\"n\":51}",
+  "args_parsed": true
+ },
+ {
+  "name": "step",
+  "arguments": {
+   "n": 52
+  },
+  "arguments_raw": "{\"n\":52}",
+  "args_parsed": true
+ },
+ {
+  "name": "step",
+  "arguments": {
+   "n": 53
+  },
+  "arguments_raw": "{\"n\":53}",
+  "args_parsed": true
+ },
+ {
+  "name": "step",
+  "arguments": {
+   "n": 54
+  },
+  "arguments_raw": "{\"n\":54}",
+  "args_parsed": true
+ },
+ {
+  "name": "step",
+  "arguments": {
+   "n": 55
+  },
+  "arguments_raw": "{\"n\":55}",
+  "args_parsed": true
+ },
+ {
+  "name": "step",
+  "arguments": {
+   "n": 56
+  },
+  "arguments_raw": "{\"n\":56}",
+  "args_parsed": true
+ },
+ {
+  "name": "step",
+  "arguments": {
+   "n": 57
+  },
+  "arguments_raw": "{\"n\":57}",
+  "args_parsed": true
+ },
+ {
+  "name": "step",
+  "arguments": {
+   "n": 58
+  },
+  "arguments_raw": "{\"n\":58}",
+  "args_parsed": true
+ },
+ {
+  "name": "step",
+  "arguments": {
+   "n": 59
+  },
+  "arguments_raw": "{\"n\":59}",
+  "args_parsed": true
+ },
+ {
+  "name": "step",
+  "arguments": {
+   "n": 60
+  },
+  "arguments_raw": "{\"n\":60}",
+  "args_parsed": true
+ },
+ {
+  "name": "step",
+  "arguments": {
+   "n": 61
+  },
+  "arguments_raw": "{\"n\":61}",
+  "args_parsed": true
+ },
+ {
+  "name": "step",
+  "arguments": {
+   "n": 62
+  },
+  "arguments_raw": "{\"n\":62}",
+  "args_parsed": true
+ },
+ {
+  "name": "step",
+  "arguments": {
+   "n": 63
+  },
+  "arguments_raw": "{\"n\":63}",
+  "args_parsed": true
+ },
+ {
+  "name": "step",
+  "arguments": {
+   "n": 64
+  },
+  "arguments_raw": "{\"n\":64}",
+  "args_parsed": true
+ },
+ {
+  "name": "step",
+  "arguments": {
+   "n": 65
+  },
+  "arguments_raw": "{\"n\":65}",
+  "args_parsed": true
+ },
+ {
+  "name": "step",
+  "arguments": {
+   "n": 66
+  },
+  "arguments_raw": "{\"n\":66}",
+  "args_parsed": true
+ },
+ {
+  "name": "step",
+  "arguments": {
+   "n": 67
+  },
+  "arguments_raw": "{\"n\":67}",
+  "args_parsed": true
+ },
+ {
+  "name": "step",
+  "arguments": {
+   "n": 68
+  },
+  "arguments_raw": "{\"n\":68}",
+  "args_parsed": true
+ },
+ {
+  "name": "step",
+  "arguments": {
+   "n": 69
+  },
+  "arguments_raw": "{\"n\":69}",
+  "args_parsed": true
+ },
+ {
+  "name": "step",
+  "arguments": {
+   "n": 70
+  },
+  "arguments_raw": "{\"n\":70}",
+  "args_parsed": true
+ },
+ {
+  "name": "step",
+  "arguments": {
+   "n": 71
+  },
+  "arguments_raw": "{\"n\":71}",
+  "args_parsed": true
+ },
+ {
+  "name": "step",
+  "arguments": {
+   "n": 72
+  },
+  "arguments_raw": "{\"n\":72}",
+  "args_parsed": true
+ },
+ {
+  "name": "step",
+  "arguments": {
+   "n": 73
+  },
+  "arguments_raw": "{\"n\":73}",
+  "args_parsed": true
+ },
+ {
+  "name": "step",
+  "arguments": {
+   "n": 74
+  },
+  "arguments_raw": "{\"n\":74}",
+  "args_parsed": true
+ },
+ {
+  "name": "step",
+  "arguments": {
+   "n": 75
+  },
+  "arguments_raw": "{\"n\":75}",
+  "args_parsed": true
+ },
+ {
+  "name": "step",
+  "arguments": {
+   "n": 76
+  },
+  "arguments_raw": "{\"n\":76}",
+  "args_parsed": true
+ },
+ {
+  "name": "step",
+  "arguments": {
+   "n": 77
+  },
+  "arguments_raw": "{\"n\":77}",
+  "args_parsed": true
+ },
+ {
+  "name": "step",
+  "arguments": {
+   "n": 78
+  },
+  "arguments_raw": "{\"n\":78}",
+  "args_parsed": true
+ },
+ {
+  "name": "step",
+  "arguments": {
+   "n": 79
+  },
+  "arguments_raw": "{\"n\":79}",
+  "args_parsed": true
+ },
+ {
+  "name": "step",
+  "arguments": {
+   "n": 80
+  },
+  "arguments_raw": "{\"n\":80}",
+  "args_parsed": true
+ },
+ {
+  "name": "step",
+  "arguments": {
+   "n": 81
+  },
+  "arguments_raw": "{\"n\":81}",
+  "args_parsed": true
+ },
+ {
+  "name": "step",
+  "arguments": {
+   "n": 82
+  },
+  "arguments_raw": "{\"n\":82}",
+  "args_parsed": true
+ },
+ {
+  "name": "step",
+  "arguments": {
+   "n": 83
+  },
+  "arguments_raw": "{\"n\":83}",
+  "args_parsed": true
+ },
+ {
+  "name": "step",
+  "arguments": {
+   "n": 84
+  },
+  "arguments_raw": "{\"n\":84}",
+  "args_parsed": true
+ },
+ {
+  "name": "step",
+  "arguments": {
+   "n": 85
+  },
+  "arguments_raw": "{\"n\":85}",
+  "args_parsed": true
+ },
+ {
+  "name": "step",
+  "arguments": {
+   "n": 86
+  },
+  "arguments_raw": "{\"n\":86}",
+  "args_parsed": true
+ },
+ {
+  "name": "step",
+  "arguments": {
+   "n": 87
+  },
+  "arguments_raw": "{\"n\":87}",
+  "args_parsed": true
+ },
+ {
+  "name": "step",
+  "arguments": {
+   "n": 88
+  },
+  "arguments_raw": "{\"n\":88}",
+  "args_parsed": true
+ },
+ {
+  "name": "step",
+  "arguments": {
+   "n": 89
+  },
+  "arguments_raw": "{\"n\":89}",
+  "args_parsed": true
+ },
+ {
+  "name": "step",
+  "arguments": {
+   "n": 90
+  },
+  "arguments_raw": "{\"n\":90}",
+  "args_parsed": true
+ },
+ {
+  "name": "step",
+  "arguments": {
+   "n": 91
+  },
+  "arguments_raw": "{\"n\":91}",
+  "args_parsed": true
+ },
+ {
+  "name": "step",
+  "arguments": {
+   "n": 92
+  },
+  "arguments_raw": "{\"n\":92}",
+  "args_parsed": true
+ },
+ {
+  "name": "step",
+  "arguments": {
+   "n": 93
+  },
+  "arguments_raw": "{\"n\":93}",
+  "args_parsed": true
+ },
+ {
+  "name": "step",
+  "arguments": {
+   "n": 94
+  },
+  "arguments_raw": "{\"n\":94}",
+  "args_parsed": true
+ },
+ {
+  "name": "step",
+  "arguments": {
+   "n": 95
+  },
+  "arguments_raw": "{\"n\":95}",
+  "args_parsed": true
+ },
+ {
+  "name": "step",
+  "arguments": {
+   "n": 96
+  },
+  "arguments_raw": "{\"n\":96}",
+  "args_parsed": true
+ },
+ {
+  "name": "step",
+  "arguments": {
+   "n": 97
+  },
+  "arguments_raw": "{\"n\":97}",
+  "args_parsed": true
+ },
+ {
+  "name": "step",
+  "arguments": {
+   "n": 98
+  },
+  "arguments_raw": "{\"n\":98}",
+  "args_parsed": true
+ },
+ {
+  "name": "step",
+  "arguments": {
+   "n": 99
+  },
+  "arguments_raw": "{\"n\":99}",
+  "args_parsed": true
+ }
+]
+
+=== META ===
+{
+ "finish_reason": "stop",
+ "turns": 101,
+ "n_calls": 100,
+ "chain_depth_reached": 100,
+ "raw_toolcall_text_detected": false,
+ "args_parse_failures": 0,
+ "prompt_tokens": 353,
+ "case": "tc_longchain"
+}

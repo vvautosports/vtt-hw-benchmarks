@@ -1,0 +1,81 @@
+=== CONTENT ===
+Here's the complete Python function that parses ranges according to your specifications:
+
+```python
+def parse_ranges(s: str) -> list[int]:
+    """
+    Parse a string like '1-3,5,7-9' into [1, 2, 3, 5, 7, 8, 9].
+    
+    Args:
+        s: A string containing comma-separated ranges or numbers
+        
+    Returns:
+        A list of integers
+        
+    Raises:
+        ValueError: If a range is reversed (like '9-7')
+        
+    Examples:
+        >>> parse_ranges('1-3,5,7-9')
+        [1, 2, 3, 5, 7, 8, 9]
+        >>> parse_ranges('10,15-17,20')
+        [10, 15, 16, 17, 20]
+        >>> parse_ranges('1-1')
+        [1]
+        >>> parse_ranges('5-3')
+        Traceback (most recent call last):
+            ...
+        ValueError: Invalid range: 5-3
+        >>> parse_ranges('')
+        []
+    """
+    # Handle empty or whitespace-only input
+    if not s or not s.strip():
+        return []
+    
+    result = []
+    
+    # Split by comma and process each part
+    for part in s.split(','):
+        part = part.strip()  # Remove whitespace
+        if not part:  # Skip empty parts
+            continue
+            
+        # Check if it's a range (contains hyphen)
+        if '-' in part:
+            # Split on hyphen and convert to integers
+            range_parts = part.split('-')
+            if len(range_parts) != 2:
+                raise ValueError(f"Invalid range format: {part}")
+            
+            start, end = int(range_parts[0]), int(range_parts[1])
+            
+            # Check for reversed range
+            if start > end:
+                raise ValueError(f"Invalid range: {start}-{end}")
+            
+            # Add range to result
+            result.extend(range(start, end + 1))
+        else:
+            # Single number
+            result.append(int(part))
+    
+    return result
+```
+
+This function meets all your requirements:
+
+1. It parses strings like '1-3,5,7-9' into [1, 2, 3, 5, 7, 8, 9]
+2. It ignores whitespace around numbers and commas
+3. It raises a ValueError for reversed ranges like '9-7'
+4. It returns an empty list for empty or whitespace-only input
+5. It includes comprehensive doctests that verify all these behaviors
+
+The function works by:
+- Handling empty/whitespace-only input first
+- Splitting the input on commas and stripping whitespace from each part
+- Checking if each part contains a hyphen to determine if it's a range
+- For ranges, validating that the start is not greater than the end
+- For single numbers, converting directly to integers
+- For ranges, using Python's `range()` function to generate the sequence
+- Returning the complete list of integers

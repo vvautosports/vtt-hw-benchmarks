@@ -1,0 +1,8 @@
+=== CONTENT ===
+- Speculative decoding accelerates autoregressive inference by having a cheap draft mechanism propose multiple tokens, which the target model verifies in one batched pass; accepted tokens maintain large-model quality at near draft-model cost, and rejections preserve distributional identity with standard decoding.  
+- Draft mechanisms range from separate small models and n-gram lookups to multi-token-prediction (MTP) heads trained jointly with the target model, with n-gram drafting excelling on repetitive code/structured text and MTP heads offering stable acceptance rates across domains.  
+- MoE models reduce per-token active parameters but worsen the batching advantage of speculation because each position in a verification batch may route to different experts, increasing memory bandwidth demands and raising the break-even acceptance rate compared to dense models.  
+- Server-side slot-based parallelism trades per-stream speed for aggregate throughput, and speculation competes with additional slots for the same compute headroom, making optimization context-dependent.  
+- Optimal deployment requires joint tuning of speculative mode, slot count, and sampling settings, assessed via end-to-end tokens-per-second on representative tasks rather than microbenchmarks.
+
+**TL;DR**: Speculative decoding trades draft proposals and batched verification to speed up inference—but its profitability depends critically on workload structure (e.g., repetition), model architecture (e.g., MoE bandwidth costs), and server configuration, demanding holistic, task-specific tuning.

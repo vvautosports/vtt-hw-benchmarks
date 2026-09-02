@@ -1,0 +1,92 @@
+=== CONTENT ===
+```python
+def parse_ranges(s: str) -> list[int]:
+    """
+    Parse a string of ranges into a list of integers.
+    
+    Args:
+        s: A string containing ranges separated by commas, e.g., '1-3,5,7-9'
+        
+    Returns:
+        A list of integers representing all numbers in the ranges
+        
+    Raises:
+        ValueError: If a range is reversed (like '9-7')
+        
+    Examples:
+        >>> parse_ranges('1-3,5,7-9')
+        [1, 2, 3, 5, 7, 8, 9]
+        
+        >>> parse_ranges('  1 - 3 , 5 , 7 - 9  ')
+        [1, 2, 3, 5, 7, 8, 9]
+        
+        >>> parse_ranges('10-12,15,17-19')
+        [10, 11, 12, 15, 17, 18, 19]
+        
+        >>> parse_ranges('')
+        []
+        
+        >>> parse_ranges('  ')
+        []
+        
+        >>> parse_ranges('5-3')
+        Traceback (most recent call last):
+        ...
+        ValueError: Reversed range: 5-3
+    """
+    # Handle empty or whitespace-only input
+    if not s or not s.strip():
+        return []
+    
+    result = []
+    
+    # Split by comma and process each part
+    for part in s.split(','):
+        part = part.strip()
+        if not part:  # Skip empty parts
+            continue
+            
+        # Check if it's a range (contains '-')
+        if '-' in part:
+            try:
+                start_str, end_str = part.split('-')
+                start = int(start_str.strip())
+                end = int(end_str.strip())
+                
+                # Check for reversed range
+                if start > end:
+                    raise ValueError(f"Reversed range: {start}-{end}")
+                
+                # Add all numbers in the range
+                result.extend(range(start, end + 1))
+            except ValueError as e:
+                # Re-raise ValueError for invalid ranges
+                if "invalid literal" in str(e):
+                    raise ValueError(f"Invalid range format: {part}")
+                raise e
+        else:
+            # Single number
+            result.append(int(part.strip()))
+    
+    return result
+
+if __name__ == "__main__":
+    import doctest
+    doctest.testmod()
+```
+
+This function handles all the requirements:
+
+1. **Parses ranges correctly**: Converts '1-3,5,7-9' to [1, 2, 3, 5, 7, 8, 9]
+2. **Ignores whitespace**: Handles '  1 - 3 , 5 , 7 - 9  ' correctly
+3. **Raises ValueError for reversed ranges**: '5-3' raises ValueError with descriptive message
+4. **Returns empty list for empty/whitespace input**: '' and '  ' both return []
+5. **Handles single numbers**: '5' becomes [5]
+6. **Handles multiple ranges**: '1-3,5,7-9' works as expected
+
+The doctest block includes 6 examples that cover all requirements:
+- Basic range parsing
+- Whitespace handling
+- Multiple ranges with different patterns
+- Empty and whitespace-only input
+- Reversed range detection (with ValueError)

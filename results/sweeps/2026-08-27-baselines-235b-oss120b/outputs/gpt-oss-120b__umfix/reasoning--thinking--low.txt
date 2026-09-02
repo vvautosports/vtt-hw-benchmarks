@@ -1,0 +1,27 @@
+=== REASONING ===
+LCM 180 minutes = 3 hours. Starting at 6:00, they coincide at multiples of 180 minutes up to 12 hours (720 minutes). Count inclusive of start and end? They arrive together at 6:00 AM initial. Also at 6:00 PM? 6:00 PM is 12 hours later = 720 minutes, which is multiple of 180 (720/180=4). So times: 0,180,360,540,720 => 5 times.
+
+=== CONTENT ===
+The trucks meet whenever the elapsed time since 6:00 AM is a common multiple of their return intervals.  
+- Truck A: every 12 min  
+- Truck B: every 18 min  
+- Truck C: every 30 min  
+
+The least common multiple of 12, 18, 30 is  
+
+\[
+\text{lcm}(12,18,30)=180\text{ minutes}=3\text{ hours}.
+\]
+
+Thus the trucks all arrive together at 6:00 AM and then every 180 minutes thereafter.  
+
+From 6:00 AM to 6:00 PM inclusive is a 12‑hour span = 720 minutes.  
+The multiples of 180 minutes within this interval are:
+
+\[
+0,\;180,\;360,\;540,\;720\text{ minutes}.
+\]
+
+That gives **5** simultaneous arrivals (including the start and the end).
+
+**ANSWER: 5**

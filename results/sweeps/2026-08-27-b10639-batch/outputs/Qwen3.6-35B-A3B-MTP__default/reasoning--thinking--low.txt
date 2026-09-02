@@ -1,0 +1,27 @@
+=== REASONING ===
+The user already asked for the answer in a specific format with "ANSWER: <n>" on its own line. I provided that correctly. No tools are needed for this response since the math is already complete and verified.
+
+
+=== CONTENT ===
+**Step 1: Find when all three trucks coincide.**
+
+The LCM of their return intervals tells us how often they all arrive together:
+- 12 = 2² × 3
+- 18 = 2 × 3²
+- 30 = 2 × 3 × 5
+- **LCM = 2² × 3² × 5 = 180 minutes (3 hours)**
+
+So all three trucks arrive together every **3 hours**.
+
+**Step 2: Count occurrences from 6:00 AM to 6:00 PM (12 hours = 720 minutes).**
+
+The simultaneous arrivals happen at:
+1. **6:00 AM** — all start together ✓
+2. **9:00 AM** — 3 hours later ✓
+3. **12:00 PM** — 6 hours later ✓
+4. **3:00 PM** — 9 hours later ✓
+5. **6:00 PM** — 12 hours later (inclusive) ✓
+
+That's 5 arrivals total. We get `720 ÷ 180 = 4` full cycles after the start, plus the initial arrival at 6:00 AM.
+
+ANSWER: 5

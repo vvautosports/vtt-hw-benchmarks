@@ -1,0 +1,11 @@
+=== REASONING ===
+Need 5 bullet points and TL;DR sentence.
+
+=== CONTENT ===
+- Speculative decoding lets a cheap “draft” propose multiple tokens that the large target model checks in one batched forward pass, keeping output distribution identical to standard decoding.  
+- Draft mechanisms can be a separate small model, an n‑gram lookup, or a jointly‑trained multi‑token‑prediction (MTP) head that predicts a short token window from the same hidden state.  
+- Acceptance rates vary by workload: n‑gram drafting works well for repetitive code/structured text, performs poorly on open‑ended prose, while MTP heads give relatively stable acceptance across domains at modest extra cost.  
+- For mixture‑of‑experts (MoE) models, speculative batches may invoke different experts per token, increasing memory traffic and raising the break‑even acceptance rate compared to dense models.  
+- Server‑side parallelism (slot‑based KV‑cache sharing) couples speculative mode, slot count, and sampling settings, requiring joint tuning and end‑to‑end throughput measurement rather than isolated microbenchmarks.  
+
+**TL;DR:** Speculative decoding speeds up large language model inference by batching draft‑verified tokens, but its effectiveness depends on draft type, data domain, model architecture (dense vs MoE), and integrated server‑side parallelism settings.

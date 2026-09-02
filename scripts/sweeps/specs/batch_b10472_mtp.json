@@ -1,0 +1,8 @@
+[
+  {"name": "Qwen3.8-27B", "tag": "mtp",
+   "path": "/mnt/ai-models/unsloth/Qwen3.8-27B-GGUF/Qwen3.8-27B-UD-Q8_K_XL.gguf",
+   "flags": "--speculative-type mtp"},
+  {"name": "Qwen3.8-27B", "tag": "specoff",
+   "path": "/mnt/ai-models/unsloth/Qwen3.8-27B-GGUF/Qwen3.8-27B-UD-Q8_K_XL.gguf",
+   "flags": "--speculative-type off"}
+]

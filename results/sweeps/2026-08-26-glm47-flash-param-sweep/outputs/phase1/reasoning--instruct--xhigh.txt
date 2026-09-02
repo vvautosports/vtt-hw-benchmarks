@@ -1,0 +1,66 @@
+=== REASONING ===
+The problem is asking for the number of times between 6:00 AM and 6:00 PM (12 hours) that all three delivery trucks arrive at the same moment.
+
+Truck A returns every 12 minutes
+Truck B returns every 18 minutes
+Truck C returns every 30 minutes
+
+This is a classic least common multiple (LCM) problem. The trucks will all arrive together at times that are multiples of the LCM of their intervals.
+
+First, let's find the LCM of 12, 180, and 30.
+
+Actually wait, I think there might be a typo in the problem. Let me re-read it.
+
+"Truck A returns every 12 minutes, truck B every 18 minutes, and truck C every 30 minutes."
+
+I'll compute the LCM of 12, 18, and 30:
+
+- Prime factors:
+  - 12 = 2^2 × 3
+  - 18 = 2 × 3^2
+  - 30 = 2 × 3 × 5
+
+- LCM takes the highest power of each prime:
+  - LCM = 2^2 × 3^2 × 5 = 4 × 9 × 5 = 180 minutes
+
+So all three trucks arrive together every 180 minutes (3 hours).
+
+Now, between 6:00 AM and 6:00 PM inclusive, we need to find how many times they all arrive together.
+
+From 6:00 AM to 6:00 PM is a 12-hour period, which is 720 minutes.
+
+The times when all three trucks arrive together are:
+- 6:00 AM (time 0 minutes)
+- 9:00 AM (time 180 minutes)
+- 12:00 PM (time 360 minutes)
+- 3:00 PM (time 540 minutes)
+- 6:00 PM (time 720 minutes)
+
+So they all arrive together 5 times.
+
+Let me verify:
+- 0, 180, 360, 540, 720 are all ≤ 720
+- These are 5 values
+
+Answer: 5
+
+=== CONTENT ===
+The three trucks will all arrive at the same moment when their arrival intervals align. This occurs at multiples of the least common multiple (LCM) of their return times.
+
+**Finding the LCM of 12, 18, and 30:**
+- Prime factorization:
+  - 12 = 2² × 3
+  - 18 = 2 × 3²
+  - 30 = 2 × 3 × 5
+- LCM takes the highest power of each prime: 2² × 3² × 5 = **180 minutes (3 hours)**
+
+**Times all three arrive together from 6:00 AM to 6:00 PM:**
+- 6:00 AM (0 minutes)
+- 9:00 AM (180 minutes)
+- 12:00 PM (360 minutes)
+- 3:00 PM (540 minutes)
+- 6:00 PM (720 minutes)
+
+All five of these times fall within the 12-hour window.
+
+ANSWER: 5

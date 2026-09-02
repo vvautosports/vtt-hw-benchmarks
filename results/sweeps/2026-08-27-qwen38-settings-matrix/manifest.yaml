@@ -1,0 +1,65 @@
+# Qwen3.8-Flash-Next vendor-recommended settings matrix (unsloth model doc coverage):
+# the reasoning_effort ladder (doc default xhigh; only low had been graded) plus the
+# recommended Instruct (non-thinking) sampling profile. First run executed under the
+# post-bleed protocol: EVERY (config, task) cell on a fresh server as the sole request.
+run_id: "2026-08-27-qwen38-settings-matrix"
+date: "2026-08-27"
+node: "kalman9-framework-01"
+hardware: "AMD Strix Halo (Radeon 8060S iGPU), GTT unlock ACTIVE, ~122 GB usable"
+backend: "unsloth-studio"
+runtime_build: "b10639-mix-f6f92fe"
+studio_version: "unsloth 2026.8.22"
+api: "/v1/chat/completions"
+model: "Qwen3.8-Flash-Next UD-Q4_K_XL (4 shards, 104 GB)"
+isolation: "fresh server per task (2026-08-27-bleed-order-test protocol)"
+request_constants:
+  seed: 42
+  max_tokens: 8192
+launch_env:
+  UNSLOTH_DISABLE_UNIFIED_MEMORY: "1"
+
+axis: cfg
+records: "results.jsonl"
+outputs: "outputs/<cfg>/<task>--<profile>--<effort>.txt"
+grading: "py scripts/utils/grade_sweep.py results/sweeps/2026-08-27-qwen38-settings-matrix results --layout cfg"
+
+configs:
+  - cfg: "Qwen3.8-Flash-Next__low"      # thinking sampling (1.0/0.95/20), effort low
+    tokens: "433 / 1095 / 344"
+    wall_s: "27.6 / 61.1 / 24.3  (113s battery)"
+    quality: "3/3"
+  - cfg: "Qwen3.8-Flash-Next__medium"
+    tokens: "514 / 2335 / 390"
+    wall_s: "32.3 / 118.8 / 26.5  (178s battery)"
+    quality: "3/3"
+  - cfg: "Qwen3.8-Flash-Next__xhigh"    # the vendor DEFAULT
+    tokens: "553 / 5379 / 575"
+    wall_s: "34.3 / 254.3 / 36.2  (325s battery)"
+    quality: "3/3 (9 doctests on code — most thorough answer in the matrix)"
+  - cfg: "Qwen3.8-Flash-Next__instruct" # temp 0.7 / top_p 0.80 / top_k 20 / presence 1.5, effort none
+    tokens: "308 / 1384 / 351"
+    wall_s: "21.7 / 60.3 / 24.5  (107s battery — fastest config)"
+    quality: "3/3 (8 doctests)"
+
+summary: >-
+  12/12 PASS — every vendor-recommended configuration works. All four configs are
+  quality-equivalent on this battery, so the differentiator is pure token economy:
+  xhigh costs 2.9x low's wall-clock for no grade gain here (though it produces the most
+  thorough code), and the recommended instruct profile is the FASTEST config while still
+  passing everything, including reasoning. HF discussion #27's "over-thinks at medium+"
+  does not reproduce on the fixed runtime — even xhigh fits the 8192 budget comfortably
+  (max 5379 tok). The earlier at-any-effort non-termination was entirely the
+  unified-memory corruption.
+
+verdicts:
+  battery_default: "thinking/low stays the battery config (comparability with all prior runs)"
+  dual_agent: >-
+    The thinker-node design's 'idle at low, xhigh for interrupts' dial is validated:
+    xhigh terminates reliably and buys thoroughness at ~3x cost. Instruct mode is the
+    right call for non-reasoning workloads.
+  isolated_vs_sequential: >-
+    Isolated effort-low code = 1095 tok vs 3847 in the sequential umfix batch — even
+    Qwen3.8's earlier (passing) numbers were session-history-inflated. Reinforces the
+    fresh-server protocol.
+
+driver_script: "qwen38_settings_matrix.py (Framework ~)"

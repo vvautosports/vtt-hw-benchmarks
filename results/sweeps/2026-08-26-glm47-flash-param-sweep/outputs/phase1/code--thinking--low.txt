@@ -1,0 +1,173 @@
+=== REASONING ===
+The user wants me to write a Python function that parses a string containing numeric ranges like '1-3,5,7-9' into a list of integers [1, 2, 3, 5, 7, 8, 9]. 
+
+Requirements:
+1. Ignore whitespace around numbers and commas
+2. A reversed range like '9-7' should raise ValueError
+3. Empty or whitespace-only input should return an empty list
+4. Include a doctest block with at least 5 examples covering all requirements
+
+Let me write this function:
+
+```python
+def parse_ranges(s: str) -> list[int]:
+    """
+    Parse a string containing numeric ranges into a list of integers.
+    
+    Examples:
+    >>> parse_ranges('1-3,5,7-9')
+    [1, 2, 3, '5', '7', '8', '9']  # TODO: this isn't right
+    
+    # Wait, the examples need to be correct first.
+```
+
+Let me reconsider. The function should:
+- Take a string like '1-3,5,7-9'
+- Return [1, 2, 3, 5, 7, 8, 9]
+
+Wait, the return type is `list[int]` but the examples show string elements. That's a type hint error in the question. I'll ignore the type hint and return actual integers.
+
+Let me write the function:
+
+```python
+def parse_ranges(s: str) -> list[int]:
+    """
+    Parse a string containing numeric ranges into a list of integers.
+    
+    Examples:
+    >>> parse_ranges('1-3,5,7-9')
+    [1, 2, 3, 5, 7, 8, 9]
+    >>> parse_ranges(' 1 - 3 , 5 , 7 - 9 ')
+    [1, 2, 3, 5, 7, 8, 9]
+    >>> parse_ranges('9-7')
+    Traceback (most recent call last):
+        ...
+    ValueError: Invalid range: 9-7 (end before start)
+    >>> parse_ranges('')
+    []
+    >>> parse_ranges('   ')
+    []
+    >>> parse_ranges('2-5,10')
+    [2, 3, 4, 5, 10]
+    """
+    if not s or s.strip() == '':
+        return []
+    
+    result = []
+    # Split by commas, ignore empty parts
+    parts = [p.strip() for p in s.split(',')]
+    
+    for part in parts:
+        if '-' in part:
+            # Handle ranges
+            start_str, end_str = [x.strip() for x in part.split('-')]
+            try:
+                start = int(start_str)
+                end = int(end_str)
+            except ValueError as e:
+                raise ValueError(f"Invalid number in range: {part}") from e
+            
+            if end < start:
+                raise ValueError(f"Invalid range: {part} (end before start)")
+            
+            result.extend(range(start, end + 1))
+        else:
+            # Handle single numbers
+            try:
+                num = int(part)
+            except ValueError as e:
+                raise ValueError(f"Invalid number: {part}") from e
+            result.append(num)
+    
+    return result
+```
+
+This looks good. Let me verify the logic:
+1. Empty or whitespace-only input returns []
+2. Whitespace is trimmed around numbers and commas
+3. Reversed ranges raise ValueError
+4. Doctests cover various cases
+
+Let me test this mentally:
+- '1-3,5,7-9' -> splits into ['1-3', '5', '7-9']
+  - '1-3' -> 1, 2, 3
+  - '5' -> 5
+  - '7-9' -> 7, 8, 9
+  - Result: [1, 2, 3, 5, 7, 8, 9] ✓
+- ' 1 - 3 , 5 , 7 - 9 ' -> after stripping: ['1-3', '5', '7-9'] -> same result ✓
+- '9-7' -> raises ValueError ✓
+- '' -> returns [] ✓
+- '   ' -> after strip is '' -> returns [] ✓
+- '2-5,10' -> [2, 3, 4, 5, 10] ✓
+
+This looks correct. Let me write the final answer.
+
+=== CONTENT ===
+```python
+def parse_ranges(s: str) -> list[int]:
+    """
+    Parse a string containing numeric ranges into a list of integers.
+    
+    Examples:
+    >>> parse_ranges('1-3,5,7-9')
+    [1, 2, 3, 5, 7, 8, 9]
+    >>> parse_ranges(' 1 - 3 , 5 , 7 - 9 ')
+    [1, 2, 3, 5, 7, 8, 9]
+    >>> parse_ranges('9-7')
+    Traceback (most recent call last):
+        ...
+    ValueError: Invalid range: 9-7 (end before start)
+    >>> parse_ranges('')
+    []
+    >>> parse_ranges('   ')
+    []
+    >>> parse_ranges('2-5,10')
+    [2, 3, 4, 5, 10]
+    >>> parse_ranges('10,14-17,20,25')
+    [10, 14, 15, 16, 17, 20, 25]
+    """
+    # Return empty list for empty or whitespace-only input
+    if not s or s.strip() == '':
+        return []
+    
+    result = []
+    # Split by commas, stripping whitespace from each part
+    parts = [p.strip() for p in s.split(',')]
+    
+    for part in parts:
+        if '-' in part:
+            # Handle ranges: split on the hyphen and convert to integers
+            start_str, end_str = [x.strip() for x in part.split('-')]
+            try:
+                start = int(start_str)
+                end = int(end_str)
+            except ValueError as e:
+                raise ValueError(f"Invalid number in range: {part}") from e
+            
+            if end < start:
+                raise ValueError(f"Invalid range: {part} (end before start)")
+            
+            result.extend(range(start, end + 1))
+        else:
+            # Handle single numbers
+            try:
+                num = int(part)
+            except ValueError as e:
+                raise ValueError(f"Invalid number: {part}") from e
+            result.append(num)
+    
+    return result
+```
+
+This function:
+
+- **Handles whitespace**: Uses `strip()` on parts and individual elements to ignore leading/trailing whitespace around numbers and commas
+- **Validates ranges**: Checks if `end < start` and raises a `ValueError` for reversed ranges like `'9-7'`
+- **Empty input**: Returns `[]` for empty strings or whitespace-only input
+- **Doctests**: Includes 6 examples covering all requirements including edge cases like:
+  - Normal ranges: `'1-3,5,7-9'`
+  - Whitespace handling: `' 1 - 3 , 5 , 7 - 9 '`
+  - Reversed ranges: `'9-7'` (raises `ValueError`)
+  - Empty input: `''`
+  - Whitespace-only input: `'   '`
+  - Multiple ranges: `'2-5,10'`

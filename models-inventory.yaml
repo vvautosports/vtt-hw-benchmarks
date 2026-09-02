@@ -9,14 +9,17 @@ model_dir: "/mnt/ai-models"
 
 # Light mode: 1-2 small models for 16GB VRAM systems
 light_models:
+  # Reconciled 2026-08-26 (issue #8): on-disk copy is UD-Q8_K_XL, not F16
   - name: "GPT-OSS-20B"
-    path: "gpt-oss-20b-F16/gpt-oss-20b-F16.gguf"
+    path: "unsloth/gpt-oss-20b-GGUF/gpt-oss-20b-UD-Q8_K_XL.gguf"
     size_gb: 13
     vram_gb: 14
     use_case: "Speed champion - fits on 16GB GPU"
-    hf_repo: "unsloth/gpt-oss-20b-F16-GGUF"
-    hf_file: "gpt-oss-20b-F16.gguf"
+    hf_repo: "unsloth/gpt-oss-20b-GGUF"
+    hf_file: "gpt-oss-20b-UD-Q8_K_XL.gguf"
 
+  # DRIFT (2026-08-26, issue #8): not on Framework /mnt/ai-models — re-download
+  # on first light-mode run (small model, quick pull)
   - name: "Qwen3-8B-128K-Q8"
     path: "Qwen3-8B-128K-Q8/qwen3-8b-128k-q8_0.gguf"
     size_gb: 9
@@ -28,8 +31,9 @@ light_models:
 # Default 5 models for standard testing (requires 128GB RAM + large UMA)
 # GLM-4.7-Flash-Q8 first: single file, current champion, works with quick test
 default_models:
+  # Reconciled 2026-08-26 (issue #8): actual dir is unsloth/GLM-4.7-Flash-GGUF
   - name: "GLM-4.7-Flash-Q8"
-    path: "GLM-4.7-Flash-Q8/GLM-4.7-Flash-UD-Q8_K_XL.gguf"
+    path: "unsloth/GLM-4.7-Flash-GGUF/GLM-4.7-Flash-UD-Q8_K_XL.gguf"
     size_gb: 33
     vram_gb: 35
     parts: 1
@@ -38,45 +42,283 @@ default_models:
     hf_repo: "unsloth/GLM-4.7-Flash-GGUF"
     hf_file: "GLM-4.7-Flash-UD-Q8_K_XL.gguf"
 
-  - name: "DeepSeek-R1-Distill-Llama-70B"
-    path: "DeepSeek-R1-Distill-Llama-70B/DeepSeek-R1-Distill-Llama-70B-UD-Q8_K_XL-00001-of-00002.gguf"
-    size_gb: 76
-    vram_gb: 80
-    parts: 2
-    test_strategy: "server_only"  # Multi-part: requires llama-server, skip llama-bench
-    use_case: "Dense model comparison (reasoning champion)"
-    hf_repo: "unsloth/DeepSeek-R1-Distill-Llama-70B-GGUF"
-    hf_file: "DeepSeek-R1-Distill-Llama-70B-UD-Q8_K_XL-00001-of-00002.gguf"
+  # REMOVED 2026-08-26 (issue #8 reconcile): DeepSeek-R1-Distill-Llama-70B —
+  # not on Framework disk (gone in/before the 504GB cleanup). Dense-reasoning
+  # control role now covered by Apriel-1.5-15b-Thinker (retention table in
+  # UNSLOTH-DIRECTION.md); re-add with a fresh entry if a dense-70B control
+  # is needed again.
 
-  - name: "MiniMax-M2.1"
-    path: "MiniMax-M2.1/MiniMax-M2.1-UD-Q2_K_XL-00001-of-00002.gguf"
-    size_gb: 81
-    vram_gb: 85
-    parts: 2
-    test_strategy: "server_only"  # Multi-part: requires llama-server, skip llama-bench
-    use_case: "High priority testing (229B params, Unsloth quant validation)"
-    hf_repo: "unsloth/MiniMax-M2.1-GGUF"
-    hf_file: "MiniMax-M2.1-UD-Q2_K_XL-00001-of-00002.gguf"
+  # MiniMax-M2.1 deleted 2026-08-26 (retention policy: successor M2.5 on disk)
 
+  # MiniMax-M2.5 UD-Q3_K_XL (95 GB) deleted 2026-08-27 (Kal-approved cleanup for the
+  # Qwen3.8 quant ladder). Evidence: after the unified-memory fix it terminates, but the
+  # bleed-order test showed the Q3 copy is genuinely fragile — first-request code ran to
+  # the 8192 cap with incoherent output, and its earlier code "pass" was flattered by
+  # b10639 cross-request state bleed (2026-08-27-bleed-order-test). Designated successor:
+  # MiniMax-M3 on disk (family), or a UD-Q8 re-pull of M2.5 if the M2.5-vs-M3 comparison
+  # is ever revived.
+
+  - name: "Qwen3.8-Flash-Next"
+    # Day-one model (released 2026-08-26): 125B-A6B MoE, qwen4exp arch, 262K ctx.
+    # Thinker/driver candidate for the dual-agent architecture (UNSLOTH-DIRECTION.md).
+    #
+    # UPDATED 2026-08-27: was UD-Q3_K_XL (84 GB) living in the HF cache on the home
+    # partition. Upgraded to UD-Q4_K_XL on /mnt/ai-models. No UD-Q8 exists for this
+    # model, so Q4 is the top tier available and it is NOT Q8-comparable to the rest
+    # of the roster — do not rank it against Q8 entries on quality.
+    path: "unsloth/Qwen3.8-Flash-Next-GGUF/UD-Q4_K_XL/Qwen3.8-Flash-Next-UD-Q4_K_XL-00001-of-00004.gguf"
+    size_gb: 104
+    vram_gb: 112
+    parts: 4
+    test_strategy: "server_only"  # Multi-part (4 files): requires llama-server
+    use_case: "Thinker candidate — long-context MoE, reasoning_effort dial"
+    requires_runtime: "b10639+ (qwen4exp arch; b10472 cannot load it at all)"
+    tps: "204.7 / 224.7 / 217.0 — ALL capped at max_tokens"
+    quality: "0/3"
+    status: "LOADS BUT UNUSABLE — do not put in a rotation"
+    benchmarked: >-
+      2026-08-27 on b10639. The arch blocker IS lifted: it loads and generates, and at
+      204-225 t/s it is by far the fastest thing measured on this box (credible for a
+      125B-A6B MoE with ~6B active at Q4). But it never terminates — all three tasks ran to
+      the 8192-token cap, so those rates are not a ranking. Likely incomplete stop-token /
+      EOS handling in an architecture the fork carries as an OPEN, unmerged upstream PR
+      (ggml-org/llama.cpp#27742). Re-test when that PR merges upstream.
+    note: >-
+      The superseded UD-Q3_K_XL copy is still the sole occupant of ~/.cache/huggingface
+      (84 of that directory's 85 GB — everything else in there is 4 KB of metadata). It is
+      NOT redundant blobs. Once this Q4 copy is validated on b10639 the Q3 copy becomes a
+      clean retention-policy deletion with a designated successor; until then, purging that
+      cache deletes a model.
+    hf_repo: "unsloth/Qwen3.8-Flash-Next-GGUF"
+    hf_file: "UD-Q4_K_XL/Qwen3.8-Flash-Next-UD-Q4_K_XL-00001-of-00004.gguf"
+
+  # Reconciled 2026-08-26 (issue #8): actual dir is Qwen/qwen3-235b-a22b
   - name: "Qwen3-235B-A22B-Instruct"
-    path: "Qwen3-235B-A22B-Instruct/Qwen3-235B-A22B-Instruct-2507-UD-Q3_K_XL-00001-of-00003.gguf"
+    path: "Qwen/qwen3-235b-a22b/Qwen3-235B-A22B-Instruct-2507-UD-Q3_K_XL-00001-of-00003.gguf"
     size_gb: 98
     vram_gb: 105
     parts: 3
     test_strategy: "server_only"  # Multi-part (3 files): requires llama-server
     use_case: "Ultra-large model testing (235B params)"
+    baseline: "parameter-scaling / prev-gen large MoE (retention-policy control)"
     hf_repo: "unsloth/Qwen3-235B-A22B-Instruct-GGUF"
     hf_file: "Qwen3-235B-A22B-Instruct-2507-UD-Q3_K_XL-00001-of-00003.gguf"
 
+  # Reconciled 2026-08-26 (issue #8): on-disk copy is UD-Q8_K_XL, not F16
   - name: "GPT-OSS-20B"
-    path: "gpt-oss-20b-F16/gpt-oss-20b-F16.gguf"
+    path: "unsloth/gpt-oss-20b-GGUF/gpt-oss-20b-UD-Q8_K_XL.gguf"
     size_gb: 13
     vram_gb: 14
     parts: 1
     test_strategy: "both"  # Works with llama-bench (quick) and llama-server (comprehensive)
     use_case: "Speed champion (<2s responses)"
-    hf_repo: "unsloth/gpt-oss-20b-F16-GGUF"
-    hf_file: "gpt-oss-20b-F16.gguf"
+    baseline: "fully-optimized small MoE reference (software-maturity anchor)"
+    hf_repo: "unsloth/gpt-oss-20b-GGUF"
+    hf_file: "gpt-oss-20b-UD-Q8_K_XL.gguf"
+
+# All mode: the full benchmarked roster (2026-08-27).
+#
+# This section previously did not exist — `mode: "all"` above advertised 20 models
+# with nothing to enumerate them. Populated from measured results rather than
+# aspiration: every entry below carries its own numbers from results/sweeps/.
+#
+# `tps` is reasoning / code / summarize at thinking + reasoning_effort=low, seed 42,
+# on runtime b10472-mix-4b653db. `quality` is content-channel graders (see
+# scripts/utils/grade_sweep.py). Anything without numbers says why.
+#
+# NOT a retention queue. Kal's directive (2026-08-27): a legacy model is retired only
+# once there is evidence it holds no niche its successor cannot cover.
+all_models:
+  - name: "Qwen3.6-35B-A3B-MTP"
+    path: "unsloth/Qwen3.6-35B-A3B-MTP-GGUF/Qwen3.6-35B-A3B-UD-Q8_K_XL.gguf"
+    size_gb: 36
+    vram_gb: 40
+    parts: 1
+    test_strategy: "both"
+    use_case: "FASTEST validated model — native MTP head, +31-35% from speculation"
+    tps: "57.6 / 58.2 / 50.0"
+    quality: "3/3"
+    hf_repo: "unsloth/Qwen3.6-35B-A3B-MTP-GGUF"
+    hf_file: "Qwen3.6-35B-A3B-UD-Q8_K_XL.gguf"
+
+  - name: "Ornith-1.5-35B-A3B"
+    path: "ornith-ai/Ornith-1.5-35B-A3B-GGUF/Ornith-1.5-35B-Q8_0.gguf"
+    size_gb: 36
+    vram_gb: 40
+    parts: 1
+    test_strategy: "both"
+    use_case: "Statistical dead heat with Qwen3.6; most consistent across tasks"
+    tps: "54.6 / 58.5 / 52.1"
+    quality: "3/3"
+    note: "ornith-ai's own GGUF — NOT an unsloth UD quant; not like-for-like on quant quality"
+    hf_repo: "ornith-ai/Ornith-1.5-35B-A3B-GGUF"
+    hf_file: "Ornith-1.5-35B-Q8_0.gguf"
+
+  - name: "Nemotron-3.5-Lightning-30B-A3B"
+    path: "unsloth/NVIDIA-Nemotron-3.5-Lightning-30B-A3B-GGUF/NVIDIA-Nemotron-3.5-Lightning-30B-A3B-UD-Q8_K_XL.gguf"
+    size_gb: 36
+    vram_gb: 40
+    parts: 1
+    test_strategy: "server_only"
+    use_case: "Fast MoE — but see required_flags"
+    tps: "43.2 / 46.8 / 46.9"
+    quality: "3/3"
+    required_flags: "--speculative-type off"
+    note: >-
+      MUST be launched with --speculative-type off. Studio auto-selects draft-mtp for it and
+      that path returns HTTP 500s on long generations (b10472, post-reboot). Proven in
+      results/sweeps/2026-08-27-nemotron-retest/. Re-check after the b10639 upgrade.
+    hf_repo: "unsloth/NVIDIA-Nemotron-3.5-Lightning-30B-A3B-GGUF"
+    hf_file: "NVIDIA-Nemotron-3.5-Lightning-30B-A3B-UD-Q8_K_XL.gguf"
+
+  # Nemotron-3-Nano-30B-A3B (38 GB) deleted 2026-08-27 (Kal-approved cleanup). Its
+  # demonstrated niche — "runs correctly on DEFAULT flags while 3.5-Lightning needs
+  # --speculative-type off" — was eliminated by the unified-memory root cause: with the
+  # fix, 3.5-Lightning runs default flags 3/3 at ~56 t/s vs Nano's 39-45
+  # (2026-08-27-b10639-umfix-batch / -rebaseline-batch). Designated successor:
+  # NVIDIA-Nemotron-3.5-Lightning-30B-A3B on disk.
+
+  - name: "Qwen3-Coder-30B-A3B-Instruct"
+    path: "unsloth/Qwen3-Coder-30B-A3B-Instruct-GGUF/Qwen3-Coder-30B-A3B-Instruct-UD-Q8_K_XL.gguf"
+    size_gb: 34
+    vram_gb: 38
+    parts: 1
+    test_strategy: "both"
+    use_case: "CODE SPECIALIST — 73.3 t/s on the code task, highest figure in the study"
+    tps: "39.5 / 73.3 / 18.9"
+    quality: "2/3 (weak on summarization)"
+    note: "Beats its own successor Qwen3-Coder-Next outright. Strong niche — KEEP."
+    hf_repo: "unsloth/Qwen3-Coder-30B-A3B-Instruct-GGUF"
+    hf_file: "Qwen3-Coder-30B-A3B-Instruct-UD-Q8_K_XL.gguf"
+
+  - name: "gemma-4-26B-A4B-it"
+    path: "unsloth/gemma-4-26B-A4B-it-GGUF/gemma-4-26B-A4B-it-UD-Q8_K_XL.gguf"
+    size_gb: 26
+    vram_gb: 30
+    parts: 1
+    test_strategy: "both"
+    use_case: "Efficient MoE — smallest footprint in the fast tier; VISION-VALIDATED"
+    tps: "36.6 / 36.8 / 35.0"
+    quality: "3/3"
+    vision: >-
+      VALIDATED 2026-08-27 (G1a, b10639 + UNSLOTH_DISABLE_UNIFIED_MEMORY=1, mmproj-F16,
+      schema-locked JSON): 31/31 fields on the 5-receipt extraction battery with two prompt
+      rules; 29/31 untuned, both misses judgment calls — zero OCR/amount errors even on the
+      degraded photo. Most accurate AND 2-3x faster per receipt than every vision alternative
+      tested (8.8-12.9 s/receipt). One model now holds both the text-efficiency and
+      vision-accuracy slots. results/sweeps/2026-08-27-receipt-battery-g1a/.
+    mmproj: >-
+      mmproj-F16.gguf from the same HF repo (validated in the G1a HF cache). NOT confirmed
+      beside the Framework /mnt/ai-models copy — the 2026-08-27 retention note recorded the
+      gemma-4 GGUFs there as lacking one. Pull it before a Framework vision serve.
+    hf_repo: "unsloth/gemma-4-26B-A4B-it-GGUF"
+    hf_file: "gemma-4-26B-A4B-it-UD-Q8_K_XL.gguf"
+
+  # GLM-4.7-Flash-REAP-23B-A3B (26 GB) deleted 2026-08-27 (Kal-approved cleanup). No
+  # niche on any axis: slower than the full 33 GB champion AND 1/3 on quality (b10472
+  # batch). The pruning-axis datapoint is measured and recorded in UNSLOTH-DIRECTION.md;
+  # note the b10639 bleed finding means its multi-request grades carry the standard
+  # session-history caveat, but the speed deficit alone settles the niche question.
+  # Designated successor: GLM-4.7-Flash (full) on disk.
+
+  - name: "Qwen3-Coder-Next"
+    path: "unsloth/Qwen3-Coder-Next-GGUF/Qwen3-Coder-Next-UD-Q8_K_XL-00001-of-00003.gguf"
+    size_gb: 93
+    vram_gb: 100
+    parts: 3
+    test_strategy: "server_only"
+    use_case: "Presumed successor to Coder-30B — LOST to it on every axis"
+    tps: "18.2 / HTTP 500 / 28.6"
+    quality: "0/2"
+    note: >-
+      145 tokens on reasoning, a 500 on code, 8,238 tokens on a 5-bullet summary. CONFOUND:
+      the 500 landed while a 104 GiB download was running. Re-test on an idle box before
+      treating as settled. Used --spec-default, not MTP — unrelated to the Nemotron failure.
+    hf_repo: "unsloth/Qwen3-Coder-Next-GGUF"
+    hf_file: "Qwen3-Coder-Next-UD-Q8_K_XL-00001-of-00003.gguf"
+
+  - name: "Qwen3.8-27B"
+    path: "unsloth/Qwen3.8-27B-GGUF/Qwen3.8-27B-UD-Q8_K_XL.gguf"
+    size_gb: 30
+    vram_gb: 34
+    parts: 1
+    test_strategy: "both"
+    use_case: "Dense-ish VLM with a trained MTP head; no qwen4exp blocker at 27B"
+    tps: "13.5 / 13.5 / 13.2"
+    quality: "3/3"
+    mtp_sidecar: "MTP/mtp-Qwen3.8-27B-Q4_0.gguf (1.3 GB) — auto-discovered by studio when
+      launched with --speculative-type mtp; wired as --model-draft ... --spec-type draft-mtp"
+    hf_repo: "unsloth/Qwen3.8-27B-GGUF"
+    hf_file: "Qwen3.8-27B-UD-Q8_K_XL.gguf"
+
+  # gemma-3-27b-it (32 GB) deleted 2026-08-27 (Kal-approved, benchmarks confirmed banked
+  # first: graded records + transcripts in results/sweeps/2026-08-27-b10472-batch/, verdicts
+  # in UNSLOTH-DIRECTION.md — 3/3 at 6.7/6.7/6.3 t/s, no speed/quality niche vs
+  # gemma-4-26B-A4B). Its last rationale was the only mmproj vision projector on disk;
+  # designated successor for that niche: Muse-Glimmer-30B (meta-models, vision-native,
+  # unsloth GGUF + mmproj) queued for download same day. Dense-control role: gemma-4-31B.
+  # GLM-4.7-reap-218b (92 GB, THUDM copy) also deleted 2026-08-27 (Kal-approved): could not
+  # load single-node at this quant; pruning-axis-at-scale question deferred.
+
+  - name: "Muse-Glimmer-30B"
+    path: "unsloth/Muse-Glimmer-30B-GGUF/Muse-Glimmer-30B-UD-Q8_K_XL.gguf"
+    size_gb: 30
+    vram_gb: 36
+    parts: 1
+    test_strategy: "server_only"
+    use_case: "VISION NICHE — designated successor to gemma-3-27b's mmproj slot"
+    tps: "7.81 / 8.03 / 7.42"
+    quality: "3/3 (text battery, 2026-08-28-dayone-deepseek-muse)"
+    mmproj: "mmproj-Muse-Glimmer-30B-BF16.gguf (3.6 GiB, same repo — the vision encoder is
+      deliberately unquantized; that is where vision quality lives)"
+    vision: >-
+      SPLIT VERDICT. Capability CONFIRMED: the BF16 mmproj loads (15.0s) and 2/2
+      deterministic checks pass on the bars.png smoke (2026-08-28-dayone-deepseek-muse,
+      Framework). But it FAILED receipt extraction as configured on the G1a
+      (2026-08-27-receipt-battery-g1a): 3/13 fields, 3/5 responses empty — JSON decode
+      failure even on bare retry — schema-violating nulls, ~110 s/receipt. Needs a
+      per-family config investigation (chat-template x schema-locked-JSON interaction)
+      before a fair vision-quality verdict; parked, NOT disqualified.
+    note: >-
+      Slowest roster model on text by a wide margin (~half GLM-4.7-Flash). Q8 chosen
+      deliberately as the vision quality anchor; Q4_K_XL (14.8 GiB) is the speed rung
+      if one is wanted.
+    hf_repo: "unsloth/Muse-Glimmer-30B-GGUF"
+    hf_file: "Muse-Glimmer-30B-UD-Q8_K_XL.gguf"
+
+  # MiMo-V2.5 (vision-track candidate) DISQUALIFIED on size 2026-08-27, without download:
+  # smallest sane quant is ~192 GB against the ~122 GB single-node ceiling. Not a quality
+  # verdict. Revisit only if the dual-machine RPC-pool track (MiniMax-M3 / Kimi-K3) proves
+  # out and has room for a vision passenger.
+
+  - name: "gemma-4-31B-it"
+    path: "unsloth/gemma-4-31B-it-GGUF/gemma-4-31B-it-UD-Q8_K_XL.gguf"
+    size_gb: 33
+    vram_gb: 37
+    parts: 1
+    test_strategy: "both"
+    use_case: "DENSE CONTROL — deliberately slow reference for MoE speedup claims"
+    tps: "5.6 / 5.8 / 5.4"
+    quality: "3/3"
+    note: "~6.5x slower than the A4B MoE of similar footprint. That contrast is its job."
+    hf_repo: "unsloth/gemma-4-31B-it-GGUF"
+    hf_file: "gemma-4-31B-it-UD-Q8_K_XL.gguf"
+
+  - name: "MiniMax-M3"
+    path: "unsloth/MiniMax-M3-GGUF/UD-Q3_K_XL/MiniMax-M3-UD-Q3_K_XL-00001-of-00005.gguf"
+    size_gb: 182
+    vram_gb: 190
+    parts: 5
+    test_strategy: "server_only"
+    use_case: "RPC-POOL TRACK — cannot load on one node"
+    loaded: false
+    note: >-
+      Load fails in ~360ms: "needs about 181 GB but only about 122 GB of memory is
+      available". A capacity failure, NOT an architecture failure (the driver's
+      "arch unsupported or crash" label is a generic catch-all). KEEP per Kal 2026-08-27 —
+      reassigned to the dual-machine RPC-pool test with Kimi-K3.
+    hf_repo: "unsloth/MiniMax-M3-GGUF"
+    hf_file: "UD-Q3_K_XL/MiniMax-M3-UD-Q3_K_XL-00001-of-00005.gguf"
 
 # Context profiles for different testing scenarios
 context_profiles:

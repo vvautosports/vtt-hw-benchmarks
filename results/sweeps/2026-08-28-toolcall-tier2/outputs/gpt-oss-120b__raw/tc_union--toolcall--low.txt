@@ -1,0 +1,31 @@
+=== REASONING ===
+--- turn 1 ---
+We need to call set_reminder with note maybe default. Use when exact datetime.
+
+=== CONTENT ===
+
+
+=== TOOLCALLS ===
+[
+ {
+  "name": "set_reminder",
+  "arguments": {
+   "when": "afternoon",
+   "note": "Reminder for 2026-09-01 at 14:30"
+  },
+  "arguments_raw": "{\n  \"when\": \"afternoon\",\n  \"note\": \"Reminder for 2026-09-01 at 14:30\"\n}",
+  "args_parsed": true
+ }
+]
+
+=== META ===
+{
+ "finish_reason": "tool_calls",
+ "turns": 1,
+ "n_calls": 1,
+ "chain_depth_reached": 1,
+ "raw_toolcall_text_detected": false,
+ "args_parse_failures": 0,
+ "prompt_tokens": 178,
+ "case": "tc_union"
+}

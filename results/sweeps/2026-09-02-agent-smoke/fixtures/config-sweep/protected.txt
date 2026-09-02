@@ -1,0 +1,3 @@
+src/gateway.py
+archive/2025-field-capture.log
+CHANGELOG.md

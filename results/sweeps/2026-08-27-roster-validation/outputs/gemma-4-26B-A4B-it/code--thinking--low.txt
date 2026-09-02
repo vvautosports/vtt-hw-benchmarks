@@ -1,0 +1,281 @@
+=== REASONING ===
+The objective is to write a Python function `parse_ranges` that takes a string representing ranges (e.g., `1-3,5,7-9`) and converts it into a flat list of integers (e.g., `[1, 2, 3, 5, 7, 8, 9]`).
+
+    *   Input: `s: str`
+    *   Output: `list[int]`
+    *   Handling whitespace: Ignore whitespace around numbers and commas.
+    *   Reversed ranges: `9-7` should raise a `ValueError`.
+    *   Empty/Whitespace input: Return `[]`.
+    *   Format: `start-end` or single number `n`.
+    *   Doctest: At least 5 examples covering all specific requirements.
+
+    *   Check if the input is empty or contains only whitespace. If so, return `[]`.
+    *   Split the input string by commas (`,`) to get individual parts.
+    *   Iterate through each part:
+        *   Strip whitespace.
+        *   If the part contains a hyphen (`-`):
+            *   Split by `-`.
+            *   Convert both sides to integers.
+            *   Check if `start > end`. If so, raise `ValueError`.
+            *   Use `range(start, end + 1)` to get the numbers.
+            *   Extend the result list.
+        *   If the part does *not* contain a hyphen:
+            *   Convert to integer.
+            *   Append to the result list.
+    *   Return the result list.
+
+    *   *Case 1: Basic ranges and single numbers.* `parse_ranges('1-3,5,7-9')` -> `[1, 2, 3, 5, 7, 8, 9]`
+    *   *Case 2: Whitespace handling.* `parse_ranges(' 1 - 3 , 5 , 7 - 9 ')` -> `[1, 2, 3, 5, 7, 8, 9]`
+    *   *Case 3: Empty/Whitespace input.* `parse_ranges('  ')` -> `[]`
+    *   *Case 4: Reversed range (Error).* `parse_ranges('9-7')` -> Raises `ValueError`
+    *   *Case 5: Single numbers only.* `parse_ranges('1, 2, 3')` -> `[1, 2, 3]`
+    *   *Case 6: Single number range.* `parse_ranges('5-5')` -> `[5]` (Technically a valid range)
+
+    *   Splitting by `-` might be tricky if there are negative numbers. However, the prompt doesn't specify negative number support, and the example `1-3` implies standard positive integer ranges. I will stick to the standard interpretation of `start-end`.
+    *   Wait, what if the input is `1-3-5`? The prompt says "a string like '1-3,5,7-9'". It implies a standard `a-b` format. I'll assume the parts are either `x` or `x-y`.
+
+    *   `strip()` the parts.
+    *   `split(',')` first.
+    *   For each part, check if `'-' in part`.
+    *   If `'-' in part`:
+        *   `parts = part.split('-')`
+        *   If `len(parts) != 2`, it's an invalid format, but the prompt focuses on reversed ranges. I'll handle the `start > end` requirement.
+
+    ```python
+    def parse_ranges(s: str) -> list[int]:
+        """
+        Parses a string of comma-separated numbers and ranges into a list of integers.
+
+        >>> parse_ranges('1-3,5,7-9')
+        [1, 2, 3, 5, 7, 8, 9]
+        >>> parse_ranges(' 1 - 3 , 5 , 7 - 9 ')
+        [1, 2, 3, 5, 7, 8, 9]
+        >>> parse_ranges('  ')
+        []
+        >>> parse_ranges('1, 2, 3')
+        [1, 2, 3]
+        >>> parse_ranges('5-5')
+        [5]
+        >>> parse_ranges('9-7')
+        Traceback (most recent call last):
+            ...
+        ValueError: Reversed range: 9-7
+        """
+        s = s.strip()
+        if not s:
+            return []
+
+        result = []
+        parts = s.split(',')
+
+        for part in parts:
+            part = part.strip()
+            if not part:
+                continue
+
+            if '-' in part:
+                # Split by hyphen and handle potential extra spaces
+                bounds = part.split('-')
+                if len(bounds) != 2:
+                    # This case handles malformed input like '1-2-3'
+                    # Though not strictly required, it's good practice.
+                    # For this specific prompt, I'll focus on the reversed range.
+                    raise ValueError(f"Invalid range format: {part}")
+
+                try:
+                    start = int(bounds[0].strip())
+                    end = int(bounds[1].strip())
+                except ValueError:
+                    raise ValueError(f"Invalid number in range: {part}")
+
+                if start > end:
+                    raise ValueError(f"Reversed range: {start}-{end}")
+
+                result.extend(range(start, end + 1))
+            else:
+                try:
+                    result.append(int(part))
+                except ValueError:
+                    raise ValueError(f"Invalid number: {part}")
+
+        return result
+    ```
+
+    *   `1-3,5,7-9` -> `[1, 2, 3, 5, 7, 8, 9]` (Check)
+    *   Whitespace: ` 1 - 3 , 5 ` -> `[1, 2, 3, 5]` (Check)
+    *   Reversed: `9-7` -> `ValueError` (Check)
+    *   Empty/Whitespace: ` ` -> `[]` (Check)
+    *   Doctest requirements: 5 examples, cover all.
+        1. Basic (`1-3,5,7-9`)
+        2. Whitespace (` 1 - 2 , 4 `)
+        3. Empty (` `)
+        4. Reversed (`9-7`)
+        5. Single number (`5`)
+
+    *Wait*, the `try...except` block in the doctest for `ValueError` needs to be precise about the `Traceback`. The standard way is `Traceback (most recent call last):` followed by `...`.
+
+    One detail: `part.split('-')`. If the input is `1-3`, `bounds` is `['1', '3']`. If the input is ` 1 - 3 `, `bounds` is `[' 1 ', ' 3 ']`. `int()` handles surrounding whitespace automatically, so `int(' 1 ')` works. I don't *need* to strip the bounds inside the `int()` call, but it doesn't hurt.
+
+    Wait, what if the input is `1, , 3`? The code `if not part: continue` handles empty segments between commas.
+
+    Final Code Structure:
+    ```python
+    def parse_ranges(s: str) -> list[int]:
+        """
+        ...docstring...
+        """
+        # implementation
+    ```
+
+    Let's refine the doctest to be exactly as requested.
+
+    1. `parse_ranges('1-3,5,7-9')` -> `[1, 2, 3, 5, 7, 8, 9]`
+    2. `parse_ranges(' 1-3, 5, 7-9 ')` -> `[1, 2, 3, 5, 7, 8, 9]` (Whitespace)
+    3. `parse_ranges('')` -> `[]` (Empty)
+    4. `parse_ranges('  ')` -> `[]` (Whitespace only)
+    5. `parse_ranges('9-7')` -> `ValueError` (Reversed)
+
+    This covers all requirements.
+
+    ```python
+    def parse_ranges(s: str) -> list[int]:
+        """
+        Parses a string of comma-separated numbers and ranges into a list of integers.
+
+        >>> parse_ranges('1-3,5,7-9')
+        [1, 2, 3, 5, 7, 8, 9]
+        >>> parse_ranges(' 1 - 3 , 5 , 7 - 9 ')
+        [1, 2, 3, 5, 7, 8, 9]
+        >>> parse_ranges('')
+        []
+        >>> parse_ranges('   ')
+        []
+        >>> parse_ranges('9-7')
+        Traceback (most recent call last):
+            ...
+        ValueError: Reversed range: 9-7
+        """
+        s = s.strip()
+        if not s:
+            return []
+
+        result = []
+        # Split by commas to get individual components
+        parts = s.split(',')
+
+        for part in parts:
+            part = part.strip()
+            if not part:
+                continue
+
+            if '-' in part:
+                # Handle range format 'start-end'
+                bounds = part.split('-')
+                if len(bounds) != 2:
+                    raise ValueError(f"Invalid range format: '{part}'")
+
+                try:
+                    start = int(bounds[0].strip())
+                    end = int(bounds[1].strip())
+                except ValueError:
+                    raise ValueError(f"Non-integer found in range: '{part}'")
+
+                if start > end:
+                    raise ValueError(f"Reversed range: {start}-{end}")
+
+                result.extend(range(start, end + 1))
+            else:
+                # Handle single number format
+                try:
+                    result.append(int(part))
+                except ValueError:
+                    raise ValueError(f"Non-integer found: '{part}'")
+
+        return result
+
+    if __name__ == "__main__":
+        import doctest
+        doctest.testmod()
+    ```
+
+    Wait, if the user provides `1-3, , 5`, my code handles it via `if not part: continue`. This is good.
+    What if the user provides `-1-3`? The logic `'-' in part` would find the hyphen at the start. `part.split('-')` would result in `['', '1', '3']` (length 3) or `['', '1-3']`? Actually, `'-1-3'.split('-')` is `['', '1', '3']`. My code checks `len(bounds) != 2`, so it will raise a `ValueError`. Since the prompt implies standard positive ranges (example `1-3`), this is acceptable.
+
+    Final check of the prompt: "ignore whitespace around numbers and commas".
+    `int()` handles `int(" 5 ")`.
+    `part.strip()` handles `part = " 1-3 "`.
+    `bounds[0].strip()` handles `part = "1 - 3"`.
+    All requirements met.
+
+=== CONTENT ===
+```python
+def parse_ranges(s: str) -> list[int]:
+    """
+    Parses a string of comma-separated numbers and ranges into a list of integers.
+    Example input: '1-3,5,7-9' -> [1, 2, 3, 5, 7, 8, 9]
+
+    Requirements:
+    - Ignore whitespace around numbers and commas.
+    - A reversed range like '9-7' raises ValueError.
+    - Empty or whitespace-only input returns [].
+
+    >>> parse_ranges('1-3,5,7-9')
+    [1, 2, 3, 5, 7, 8, 9]
+    >>> parse_ranges(' 1 - 3 , 5 , 7 - 9 ')
+    [1, 2, 3, 5, 7, 8, 9]
+    >>> parse_ranges('')
+    []
+    >>> parse_ranges('   ')
+    []
+    >>> parse_ranges('9-7')
+    Traceback (most recent call last):
+        ...
+    ValueError: Reversed range: 9-7
+    """
+    # Handle empty or whitespace-only input
+    s = s.strip()
+    if not s:
+        return []
+
+    result = []
+    # Split by comma to isolate individual numbers or ranges
+    parts = s.split(',')
+
+    for part in parts:
+        part = part.strip()
+        if not part:
+            continue
+
+        if '-' in part:
+            # Handle range format 'start-end'
+            bounds = part.split('-')
+            
+            # Ensure there are exactly two parts for a valid range
+            if len(bounds) != 2:
+                raise ValueError(f"Invalid range format: '{part}'")
+
+            try:
+                start = int(bounds[0].strip())
+                end = int(bounds[1].strip())
+            except ValueError:
+                raise ValueError(f"Non-integer found in range: '{part}'")
+
+            # Check for reversed range requirement
+            if start > end:
+                raise ValueError(f"Reversed range: {start}-{end}")
+
+            # Extend result with the range of integers (inclusive)
+            result.extend(range(start, end + 1))
+        else:
+            # Handle single number format
+            try:
+                result.append(int(part))
+            except ValueError:
+                raise ValueError(f"Non-integer found: '{part}'")
+
+    return result
+
+if __name__ == "__main__":
+    import doctest
+    doctest.testmod()
+```

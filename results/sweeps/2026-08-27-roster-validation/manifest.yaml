@@ -1,0 +1,137 @@
+# Sweep run manifest — canonical record until MLflow Phase 2 (workstream D)
+# lands on MS-01, then backfilled by replaying the JSONLs. Every key below is
+# designed to map 1:1 onto MLflow params/tags; per-record JSONL fields map to
+# metrics.
+#
+# This run's axis is MODEL, not sampling params: config is pinned to the
+# 2026-08-26 param-sweep winner (thinking / effort=low) and the roster varies.
+run_id: "2026-08-27-roster-validation"
+date: "2026-08-27"                    # executed overnight 2026-08-26 -> 04:53 2026-08-27
+node: "kalman9-framework-01"          # Framework Desktop, Fedora, 128GB UMA
+hardware: "AMD Strix Halo (Radeon 8060S iGPU) — GTT state CHANGED MID-RUN, see runs:"
+backend: "unsloth-studio"             # unsloth run wrapping llama-server
+runtime_build: "b10472-mix-4b653db"   # unsloth/llama.cpp release (2026-08-18)
+runtime_build_reported: "0.1.1-dev (build 10472, commit 7a556b8f9)"  # binary's own --version
+api: "/v1/chat/completions"
+context_length: "per-model default selected by `unsloth run` (not pinned; see caveats)"
+request_constants:
+  seed: 42
+  max_tokens: 8192
+  profile: thinking                   # temperature 1.0, top_p 0.95, top_k 20
+  reasoning_effort: low               # the 2026-08-26 phase1 winner
+
+tasks:                                # identical battery to the param sweep
+  - reasoning: "LCM scheduling word problem, verifiable (ANSWER: 5)"
+  - code: "parse_ranges() with doctest + ValueError requirements"
+  - summarize: "5-bullet faithful summary of a fixed technical passage"
+
+# The driver executed the roster twice. Records are tagged `run` (1|2) and
+# `gtt_unlocked`; BOTH passes are kept deliberately — the delta between them is
+# the finding, not noise to average away.
+runs:
+  1:
+    records: "results.jsonl indexes 0-12"
+    gtt: "unlock NOT active (pre-reboot, 62GB ttm)"
+    note: "clean pass — all four loadable models completed all three tasks"
+  2:
+    records: "results.jsonl indexes 13-25"
+    gtt: "unlock ACTIVE (post-reboot, gttsize=131072 = 128GiB)"
+    note: "Nemotron regressed hard; every other model was flat or marginally faster"
+
+roster:
+  - model: "Qwen3.8-27B"
+    quant: "UD-Q8_K_XL"
+    gguf: "/mnt/ai-models/unsloth/Qwen3.8-27B-GGUF/Qwen3.8-27B-UD-Q8_K_XL.gguf"
+    size_gb: 30
+    result: "loaded both runs; ~13.4 t/s; 3/3 quality PASS (run2)"
+    note: "no qwen4exp blocker at 27B — that limitation is specific to Qwen3.8-Flash-Next"
+  - model: "gemma-4-26B-A4B-it"
+    quant: "UD-Q8_K_XL"
+    gguf: "/mnt/ai-models/unsloth/gemma-4-26B-A4B-it-GGUF/gemma-4-26B-A4B-it-UD-Q8_K_XL.gguf"
+    size_gb: 26
+    result: "loaded both runs; ~36.8 t/s; 3/3 quality PASS (run2)"
+    note: >-
+      VALIDATED LEADER — beats the GLM-4.7-Flash champion (~32 t/s) by ~+13% with clean
+      content-channel grades. Stable across both GTT states.
+  - model: "Nemotron-3.5-Lightning-30B-A3B"
+    quant: "UD-Q8_K_XL"
+    gguf: "/mnt/ai-models/unsloth/NVIDIA-Nemotron-3.5-Lightning-30B-A3B-GGUF/NVIDIA-Nemotron-3.5-Lightning-30B-A3B-UD-Q8_K_XL.gguf"
+    size_gb: 36
+    result: >-
+      run1 41.4/51.8/45.5 t/s, reasoning+code quality PASS. run2 HTTP 500 on reasoning and
+      code; summarize completed but at 24.8 t/s (-45%) AND failed quality (2 bullets, no
+      TL;DR).
+    note: >-
+      UNRESOLVED — title challenger on run1 numbers, but run2 is a different animal. See
+      caveats.nemotron_500s. Do not quote run1 as a result until the retest settles it.
+  - model: "gemma-4-31B-it"
+    quant: "UD-Q8_K_XL"
+    gguf: "/mnt/ai-models/unsloth/gemma-4-31B-it-GGUF/gemma-4-31B-it-UD-Q8_K_XL.gguf"
+    size_gb: 33
+    result: "loaded both runs; ~5.6 t/s; 3/3 quality PASS (run2)"
+    note: >-
+      dense control — ~6.5x slower than the A4B MoE of similar footprint, which is the point
+      of carrying it. Terse-output concern did NOT materialise: it passed all three graders
+      including the 5-bullet structure check.
+  - model: "MiniMax-M3"
+    quant: "UD-Q3_K_XL"
+    gguf: "/mnt/ai-models/unsloth/MiniMax-M3-GGUF/UD-Q3_K_XL/MiniMax-M3-UD-Q3_K_XL-00001-of-00005.gguf"
+    size_gb: 182                      # 5 shards
+    result: "LOAD FAILED both runs, ~360ms, before any llama-server subprocess started"
+    note: >-
+      KEEP (Kal, 2026-08-27) — reassigned to the dual-machine RPC-pool test with Kimi-K3.
+      NOT a deletion candidate. See caveats.minimax_m3_label.
+
+records: "results.jsonl"              # 26 records; `quality` merged by scripts/utils/grade_sweep.py
+outputs: "outputs/<model>/<task>--thinking--low.txt"
+grading: "py scripts/utils/grade_sweep.py results/sweeps/2026-08-27-roster-validation results --layout model"
+
+summary: >-
+  gemma-4-26B-A4B-it is the validated leader at ~36.8 t/s with 3/3 content-channel passes.
+  Nemotron-3.5-Lightning is faster still on run1 (41-52 t/s, 2/2 gradeable passes) but
+  unreliable on run2 — challenger, not champion, pending the retest.
+
+caveats:
+  transcript_trampling: >-
+    RECURRENCE of the bug already noted in the 2026-08-26 manifest. Both passes wrote to the
+    same outputs/<model>/<task>--thinking--low.txt path, so only the LAST pass that produced
+    output survives on disk. Provenance is therefore MIXED: run2's transcripts survive
+    everywhere EXCEPT Nemotron reasoning+code, where run2 errored without writing and run1's
+    files survive. grade_sweep.py --layout model encodes this — it grades only the last
+    non-error record per (model, task) and marks the others graded=False
+    reason=transcript_trampled. 12 records graded, 10 trampled, 11/12 correct. Speed fields
+    for trampled records remain valid; only their quality is unrecoverable. FIX for the next
+    roster run: include the run tag in the output path.
+  gtt_used_mib_is_broken: >-
+    The `gtt_used_mib` field reads 411-418 MiB for EVERY model in BOTH runs, against 26-36 GB
+    of resident weights. gtt_used() reads /sys/class/drm/card*/device/mem_info_gtt_used, which
+    is not representative on this unified-memory APU. Treat the field as unusable, and do not
+    cite it as evidence of GTT state — the authoritative source is
+    `grep gttsize /proc/cmdline`.
+  minimax_m3_label: >-
+    The driver logs "LOAD FAILED (arch unsupported or crash)" as a generic catch-all. The real
+    cause is neither: the studio backend reported "This model needs about 181 GB but only
+    about 122 GB of memory is available." A plain capacity failure. The architecture was never
+    the problem, and ~122 GB is the real usable ceiling on this box — lower than the nominal
+    128 GiB GTT.
+  nemotron_500s: >-
+    NOT a transient compiled-cache rebuild — "Removing unsloth compiled cache" appears exactly
+    once at process start in BOTH runs. The server never crashed: it returned 500s at request
+    time and then served the next task on the same PID. Two distinct failures: reasoning died
+    on "The model produced output that does not match the expected peg-native format" after
+    ~132s at gen_tok_s 0.0; code died on "The model stopped producing tokens mid-response"
+    (httpx.ReadTimeout) after ~174s. Nemotron is the ONLY model in the roster using the MTP
+    path — `unsloth run` auto-selected "--parallel 4 --spec-type draft-mtp
+    --spec-draft-n-max 2" at -c 1048576 — and the Qwen MTP documentation states -np > 1 is not
+    supported with MTP. Working hypothesis: the --parallel 4 + draft-mtp combination,
+    aggravated post-reboot by the changed memory reservation. Corroborated by run2's surviving
+    task being both 45% slower AND lower quality, i.e. degraded generation rather than a clean
+    failure. Retest matrix in 2026-08-27-nemotron-retest/.
+  context_not_pinned: >-
+    `unsloth run` auto-selects the context window per model (Nemotron got -c 1048576, GLM
+    baseline -c 202752). Cross-model t/s comparisons therefore carry an unpinned
+    KV-cache-footprint variable. Pin -c explicitly in the next roster run.
+
+driver_scripts: >-
+  overnight_run.py + sweep_phase1.py (Framework ~; commit copies pending, issue #8
+  harness-backend item). Grader now lives in-repo at scripts/utils/grade_sweep.py.

@@ -1,0 +1,205 @@
+# Track 1 Tier 1 — first tool-calling battery. Five deterministic cases x a three-rung
+# healing ladder x six models, fresh server per (model, rung, case): 90 graded cells.
+# This is a FLOOR test, and the whole roster clears it — see summary before quoting it.
+run_id: "2026-08-28-toolcall-tier1"
+date: "2026-08-28"
+node: "kalman9-framework-01"
+hardware: "AMD Strix Halo (Radeon 8060S iGPU), GTT unlock ACTIVE, ~122 GB usable"
+backend: "unsloth-studio"
+runtime_build: "b10639-mix-f6f92fe"
+studio_version: "unsloth 2026.8.22"
+api: "/v1/chat/completions (client-tool passthrough — tools:[...] in the request)"
+isolation: "fresh-server-per-case (toolcall_battery.py)"
+
+# Greedy, NOT the text battery's thinking profile. Tool calling is a pass/fail binary, so
+# at temp 1.0 with n=1 you cannot separate "model can't" from "unlucky sample". Greedy is
+# also what BFCL-style suites use, which is what makes a low score here comparable to a
+# vendor's published claim. Determinism confirmed empirically: prompt_tokens_total is
+# identical across all three rungs of every model.
+request_constants:
+  seed: 42
+  max_tokens: 2048
+  temperature: 0.0
+  top_p: 1.0
+  profile: toolcall
+  reasoning_effort: low
+  enable_tools: false          # per-request suppression of SERVER-SIDE built-ins
+launch_env:
+  UNSLOTH_DISABLE_UNIFIED_MEMORY: "1"
+
+axis: cfg
+records: "results.jsonl"
+outputs: "outputs/<cfg>/<task>--toolcall--low.txt"
+cases: "toolcall_cases.json"   # copied in by the driver; the grader reads expectations from HERE
+grading: "py scripts/utils/grade_sweep.py results/sweeps/2026-08-28-toolcall-tier1 results --layout cfg"
+summarize: "py scripts/utils/summarize_toolcall.py results/sweeps/2026-08-28-toolcall-tier1"
+driver_script: "scripts/sweeps/toolcall_battery.py"
+
+# All three rungs also carry --disable-tools. That flag governs SERVER-SIDE built-ins (web
+# search, code exec) and is a different mechanism from the client-tool passthrough under
+# test — leaving it on would reintroduce ~1200 tok/request of injection for no benefit.
+rungs:
+  - tag: raw
+    flags: "--disable-tools --disable-tool-call-healing --disable-tool-call-nudging"
+    measures: "native template conformance — what the model actually emits, unrescued"
+  - tag: healed
+    flags: "--disable-tools --enable-tool-call-healing --disable-tool-call-nudging"
+    measures: "parser rescue of text-form calls"
+  - tag: full
+    flags: "--disable-tools --enable-tool-call-healing --enable-tool-call-nudging"
+    measures: "production default — healing plus a one-shot nudge retry"
+
+cases_summary:
+  tc_single: "1 tool offered, prompt requires it. Grade: exactly 1 call, name + args match."
+  tc_distractor: "5 tools offered, 1 correct. Grade: exactly 1 call, correct tool, args match."
+  tc_refusal: "3 tools offered, none applicable. Grade: ZERO calls, answers directly."
+  tc_chain: "2 turns; canned result carries unguessable 4731. Grade: final content has 9462."
+  tc_longchain: "up to 20 sequential calls. Grade: depth >= 15 (llama.cpp#19513 regression)."
+
+entries:
+  - model: "Qwen3-Coder-30B-A3B-Instruct"
+    quant: "UD-Q8_K_XL"
+    role: "code king / coder-node candidate"
+    cells: "15/15 PASS (5 cases x 3 rungs)"
+    rungs_identical: true
+    wall_s: "1.2 / 2.0 / 0.8 / 1.5 / 15.0"
+    longchain: "depth 20/20, completed, 16998 cumulative prompt tokens"
+    note: "Fastest chain runner on the roster — 15.0 s for 20 sequential calls."
+
+  - model: "Qwen3-Coder-Next"
+    quant: "UD-Q8_K_XL"
+    role: "llama.cpp#19513 regression target"
+    cells: "15/15 PASS (5 cases x 3 rungs)"
+    rungs_identical: true
+    wall_s: "2.1 / 3.3 / 1.6 / 2.5 / 25.1"
+    longchain: "depth 20/20, completed, 16851 cumulative prompt tokens"
+    note: >-
+      The headline negative result. #19513 reports premature EOS after ~10-20 sequential
+      tool calls against exactly this family; it did NOT reproduce here at any rung. Chain
+      depth and the ~17k cumulative prompt-token growth confirm the calls were genuinely
+      sequential rather than short-circuited.
+
+  - model: "NVIDIA-Nemotron-3.5-Lightning-30B-A3B"
+    quant: "UD-Q8_K_XL"
+    role: "roster speed leader / thinker-node candidate"
+    cells: "15/15 PASS (5 cases x 3 rungs)"
+    rungs_identical: true
+    wall_s: "2.2 / 2.4 / 3.3 / 3.0 / 29.9"
+    longchain: "depth 20/20, completed, 17986 cumulative prompt tokens"
+    note: "Battery speed leader on the text battery, mid-pack on chained tool calls."
+
+  - model: "Qwen3.8-Flash-Next"
+    quant: "UD-Q4_K_XL"
+    role: "newest thinker candidate"
+    cells: "15/15 PASS (5 cases x 3 rungs)"
+    rungs_identical: true
+    wall_s: "4.9 / 7.4 / 4.2 / 9.7 / 59.6"
+    longchain: "depth 20/20, completed, 19098 cumulative prompt tokens"
+    note: >-
+      Correct everywhere but the slowest on every case — 59.6 s for the chain, 4x
+      Qwen3-Coder-30B. Consistent with its low text-battery t/s; capability is not the
+      constraint here, throughput is.
+
+  - model: "GLM-4.7-Flash"
+    quant: "UD-Q8_K_XL"
+    role: "baseline control"
+    cells: "15/15 PASS (5 cases x 3 rungs)"
+    rungs_identical: true
+    wall_s: "4.4 / 4.3 / 2.1 / 6.9 / 31.0"
+    longchain: "depth 20/20, completed, 10460 cumulative prompt tokens"
+    note: >-
+      Tightest context growth on the chain (10460 tokens vs 17-19k for the Qwens) — the
+      most token-efficient chain runner, which matters for long agentic sessions.
+
+  - model: "gpt-oss-120b"
+    quant: "F16 (native MXFP4 MoE weights)"
+    role: "large-model / software-maturity anchor"
+    cells: "15/15 PASS (5 cases x 3 rungs)"
+    rungs_identical: true
+    wall_s: "2.4 / 2.8 / 1.8 / 3.5 / 29.9"
+    longchain: "depth 20/20, completed, 12507 cumulative prompt tokens"
+    note: "A 120B-class model matching the 30Bs on tool-call latency and beating most on token economy."
+
+summary: >-
+  90/90 cells pass. Every model on the roster, at every rung, selects the right tool, fills
+  valid arguments, resists a 5-tool distractor set, declines to invent a call when no tool
+  fits, consumes a returned tool result, and sustains 20 sequential calls.
+
+  Read that as a FLOOR result, not a ranking. The gating question for the dual-agent
+  architecture — can these models drive tools at all? — is answered YES with no
+  reservations. But Tier 1 as specified has no discriminating power over this roster: it
+  cannot rank models because nothing fails. The only separation left in the data is
+  wall-clock and context growth (Qwen3-Coder-30B 15.0 s vs Qwen3.8-Flash-Next 59.6 s on the
+  chain; GLM-4.7-Flash 10.5k cumulative prompt tokens vs Qwen3.8-Flash-Next 19.1k), and
+  those are efficiency signals, not capability ones.
+
+  The second headline is negative: llama.cpp#19513 (premature EOS after ~10-20 sequential
+  tool calls) did NOT reproduce on any model, including Qwen3-Coder-Next, the family the
+  issue names. On b10639-mix with --jinja, 20-deep chains are clean across the board.
+
+  The healing ladder cost 3x the runs and separated nothing, because nothing needed
+  repair — every model emitted clean structured calls natively, so healing never engaged.
+  That is the expected outcome for well-behaved models and is NOT evidence the axis is
+  inert; the axis was demonstrated live independently (see caveats.axis_validation).
+
+verdicts:
+  roster_tool_capable: >-
+    YES, unanimously. All six models are viable tool drivers for Tier 2 scenario work.
+  tier1_discriminating: >-
+    NO. Saturated at 100%. Raising difficulty is required before Tier 1 can rank anything —
+    deeper chains (the 20-call bar was cleared by everyone, so find the actual breaking
+    point), parallel/multi-call turns, nested and union-typed argument schemas, ambiguous
+    tool selection, and adversarial arg coercion.
+  issue_19513_reproduces: >-
+    NO, not at depth 20 on b10639-mix. Retest if the runtime moves or if a longer chain
+    bar is adopted.
+  healing_rungs_worth_keeping: >-
+    Not for models that already pass at `raw`. Run `raw` alone by default and apply the
+    ladder surgically to any model that fails there — that is the only case where healing
+    can change a verdict.
+
+caveats:
+  tier1_saturation: >-
+    100% pass means this battery measures a floor, not a ranking. Do not quote "90/90" as
+    evidence one model is better at tool calling than another — it establishes only that
+    none of them fail these five cases.
+  single_seed: >-
+    One greedy sample per cell. Greedy removes the sampling-variance problem that
+    temperature 1.0 would introduce, but a single deterministic sample still cannot
+    estimate robustness to prompt paraphrase or tool-schema reordering. Positional bias in
+    tc_distractor (the correct tool is always last of five) is untested — rotate its
+    position before treating distractor resistance as established.
+  chain_depth_ceiling: >-
+    tc_longchain stops at 20 by construction (target_depth), so "depth 20/20" is a ceiling
+    hit, not a measured limit. Every model saturated it. The real breaking point is
+    unmeasured and needs a deeper bar to find.
+  rung_axis_inert_here: >-
+    All three rungs produced byte-identical verdicts for every model. That is expected when
+    models emit clean structured calls, but it means this run contains NO evidence about
+    healing or nudging behaviour. See axis_validation.
+  axis_validation: >-
+    The rung axis was verified live and separately by scripts/testing/probe_healing_axis.py
+    on 2026-08-28: at `raw` a [TOOL_CALLS] text block stayed literal text with
+    finish_reason=stop; at `full` it was promoted to a structured tool_calls with
+    finish_reason=tool_calls. The probe also found two of the healer's five signals are
+    UNREACHABLE through the content channel on this build — the server rewrites
+    `<tool_call>` to `< tool_call>` and `<function=` to `< function=`, inserting a space
+    its own matcher cannot see. Only [TOOL_CALLS] was demonstrably promotable.
+  unknown_flags_not_validated: >-
+    `unsloth run` silently accepts unknown flags (`--bogus-flag-xyz` loads normally). A
+    server starting successfully is NOT evidence that a flag was honoured — verify
+    behaviourally or in the source. The rung flags were confirmed by source read: they map
+    to UNSLOTH_DISABLE_TOOL_CALL_HEALING and UNSLOTH_TOOL_CALL_NUDGE, both value-tested
+    (== "1"), not presence-tested like UNSLOTH_DISABLE_UNIFIED_MEMORY.
+  prompt_token_ceilings_are_per_case: >-
+    Contamination detection uses a per-case ceiling (expect.max_prompt_tokens), because
+    prompt size scales with how many tool schemas a case offers — tc_distractor
+    legitimately costs ~775 tokens for its 5 schemas where tc_single costs ~340. An earlier
+    global 500-token threshold flagged all six distractor cells as contaminated on a clean
+    run. Observed values here are 153-776, all well under their ceilings; no cell in this
+    run is injection-suspect.
+  staged_execution: >-
+    Stage A (the two Qwen coder models) and Stage B (the other four) ran as separate driver
+    invocations and were merged into one results.jsonl before grading. cfg names are unique
+    per model+rung so no transcript collision is possible, and the merged file was graded in
+    a single pass.

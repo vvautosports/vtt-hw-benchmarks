@@ -1,0 +1,10 @@
+[
+  {"name": "Qwen3-235B-A22B-Instruct-2507", "tag": "umfix",
+   "path": "/mnt/ai-models/Qwen/qwen3-235b-a22b/Qwen3-235B-A22B-Instruct-2507-UD-Q3_K_XL-00001-of-00003.gguf",
+   "flags": "",
+   "env": {"UNSLOTH_DISABLE_UNIFIED_MEMORY": "1"}},
+  {"name": "gpt-oss-120b", "tag": "umfix",
+   "path": "/mnt/ai-models/openai/gpt-oss-120b/gpt-oss-120b-F16.gguf",
+   "flags": "",
+   "env": {"UNSLOTH_DISABLE_UNIFIED_MEMORY": "1"}}
+]

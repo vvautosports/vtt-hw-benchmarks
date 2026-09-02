@@ -1,0 +1,10 @@
+model=GLM-4.7-Flash-UD-Q8_K_XL
+build=version: 0.3.0-dev (build 10639, commit 2a36554fc)
+outdir=/home/kalman9/version-sweep-2026-08-27/b10639/outputs
+-> reasoning
+    {'wall_s': 28.6, 'completion_tokens': 908, 'tps_wall': 31.72}
+-> code
+    {'wall_s': 394.4, 'completion_tokens': 12339, 'tps_wall': 31.28}
+-> summarize
+    {'wall_s': 27.6, 'completion_tokens': 870, 'tps_wall': 31.57}
+BATTERY COMPLETE

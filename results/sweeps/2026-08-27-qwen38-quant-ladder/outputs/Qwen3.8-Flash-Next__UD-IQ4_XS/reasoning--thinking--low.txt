@@ -1,0 +1,17 @@
+=== REASONING ===
+The LCM is 180 minutes = 3 hours. So arrivals coincide at 6:00 AM, 9:00 AM, 12:00 PM, 3:00 PM, 6:00 PM = 5 times.
+
+
+=== CONTENT ===
+**Reasoning:**
+
+The trucks coincide whenever the elapsed time is a common multiple of 12, 18, and 30.
+
+- Prime factorizations: 12 = 2²·3, 18 = 2·3², 30 = 2·3·5
+- LCM = 2²·3²·5 = **180 minutes = 3 hours**
+
+So all three arrive together every 3 hours. The window from 6:00 AM to 6:00 PM is 12 hours = 720 minutes.
+
+Coincident arrivals occur at minute 0, 180, 360, 540, 720 — i.e., 6:00 AM, 9:00 AM, 12:00 PM, 3:00 PM, and 6:00 PM. Since both endpoints are included in the count, that's 720/180 + 1 = 5 moments (verified by direct enumeration above).
+
+ANSWER: 5

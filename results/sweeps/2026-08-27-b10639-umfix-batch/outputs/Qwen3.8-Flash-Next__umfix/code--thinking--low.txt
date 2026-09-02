@@ -1,0 +1,58 @@
+=== REASONING ===
+All 6 doctests pass. The function is complete and verified. Let me present the final code.
+
+Note on negative numbers: my `if '-' in part` check would misinterpret a negative number like '-5' as a range. That's an edge case not required by the prompt. I'll note it briefly as a known limitation rather than over-engineer, since handling negatives is ambiguous (is '1--3' valid?). Keeping to spec.
+
+
+=== CONTENT ===
+All 6 doctests pass. Here's the finished function:
+
+```python
+def parse_ranges(s: str) -> list[int]:
+    """Parse a range string like '1-3,5,7-9' into a flat list of ints.
+
+    A part is either a single number ('5') or an inclusive range ('1-3').
+    Whitespace around numbers and commas is ignored. Empty parts (from
+    trailing/double commas) are skipped.
+
+    Examples:
+        >>> parse_ranges('1-3,5,7-9')
+        [1, 2, 3, 5, 7, 8, 9]
+        >>> parse_ranges(' 1 - 3 , 5 ')          # whitespace is ignored
+        [1, 2, 3, 5]
+        >>> parse_ranges('')                      # empty input -> []
+        []
+        >>> parse_ranges('    ')                  # whitespace-only -> []
+        []
+        >>> parse_ranges('4')                     # single number
+        [4]
+        >>> parse_ranges('9-7')                   # reversed range raises
+        Traceback (most recent call last):
+            ...
+        ValueError: reversed range: 9-7
+    """
+    result = []
+    for part in s.split(','):
+        part = part.strip()
+        if not part:
+            continue
+        if '-' in part:
+            start_s, end_s = (p.strip() for p in part.split('-', 1))
+            start, end = int(start_s), int(end_s)
+            if start > end:
+                raise ValueError(f"reversed range: {part}")
+            result.extend(range(start, end + 1))
+        else:
+            result.append(int(part))
+    return result
+```
+
+**How it meets each requirement:**
+- **Whitespace ignored** — each comma-separated part and each side of a range is `.strip()`ed, so `' 1 - 3 , 5 '` works.
+- **Reversed range raises `ValueError`** — when `start > end`, e.g. `'9-7'`. Note that equal endpoints (`'3-3'`) are *not* reversed and yield `[3]`.
+- **Empty / whitespace-only → `[]`** — splitting gives empty parts which are skipped, so both `''` and `'   '` return `[]`.
+- **≥5 doctests** — 6 examples covering all requirements (verified passing).
+
+A couple of design notes worth flagging:
+- Malformed numbers like `'a-b'` will naturally raise `ValueError` from `int()` — a reasonable side effect, though you may want custom messages for those if input is untrusted.
+- This treats any `-` as a range separator, so **negative numbers aren't supported** (e.g. `'-5'`). If negative ranges matter to you, that's a small addition (split on a dedicated delimiter or detect sign), but it was outside the stated spec so I kept the logic simple.

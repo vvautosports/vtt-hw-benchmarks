@@ -1,0 +1,22 @@
+=== REASONING ===
+The user wants exactly 5 bullet points plus a one-sentence TL;DR. I need to be faithful and not add claims. The passage has 4 paragraphs; I need to distill into 5 bullets. Let me map:
+
+1. What speculative decoding is / how it works + guarantees (accepted at large-model quality, near draft cost; rejection truncates; distributionally identical outputs).
+2. Draft options: separate small model, n-gram lookup, MTP head trained jointly predicting a short window from same hidden state.
+3. Economics by workload: code/structured → n-gram high acceptance almost free; open-ended prose fewer accepted; poorly matched draft can be slower (rejected batch wastes full pass); MTP in between — small memory/compute per step, stable across domains because head sees exact context.
+4. MoE complication: routing means active params are a fraction of total → quick decode on iGPU with unified memory; but verification batches positions that route to different experts → more expert weights through memory per step; on bandwidth-bound hardware erodes batching advantage → higher break-even acceptance for MoE than dense.
+5. Server-side parallelism interaction: slot-based servers split KV-cache budget across concurrent sequences; more slots raise aggregate throughput but lower per-stream speed; speculation competes with extra slots for compute headroom; tuning must treat speculative mode, slot count, sampling as one joint configuration; measure end-to-end tokens/sec on representative tasks rather than microbenchmarks.
+
+TL;DR: Speculative decoding can cut cost at large-model quality, but its benefit depends on workload, target architecture (dense vs MoE), and how it's jointly configured with server parallelism—so it must be tuned and measured end to end rather than assumed universally helpful.
+
+Check I don't add claims. "cut cost" — source says "near draft-model cost," fine. Everything else is grounded. Let me write cleanly, 5 bullets + one-sentence TL;DR.
+
+
+=== CONTENT ===
+- **Mechanism & guarantee:** Speculative decoding lets a cheap draft mechanism propose several tokens that the target model verifies in a single batched forward pass; accepted tokens come out at large-model quality for near draft-model cost, and a rejection truncates the proposal with the target resuming from the last accepted position, keeping outputs distributionally identical to standard decoding.
+- **Draft options:** The draft can be a separate small model, an n-gram lookup over the prompt and generation history, or—per newer designs—a multi-token-prediction (MTP) head trained jointly with the target that predicts a short window of future tokens from the same hidden state.
+- **Workload economics differ:** Code and structured text repeat long spans so n-gram drafting reaches high acceptance rates almost for free; open-ended prose accepts fewer speculative tokens, and a poorly matched draft model can make generation slower than the target alone because each rejected batch wastes a full verification pass; MTP heads sit in between, adding small per-step memory/compute while tending toward stable cross-domain acceptance because the head sees the exact context the target sees.
+- **MoE complicates the picture:** Because an MoE layer routes each token to a small subset of experts, active per-token parameters are a fraction of the total—enabling fast decode of tens-of-billions-parameter models on integrated GPUs with unified memory—but speculative verification batches positions that may route to different experts, pulling more expert weights through memory per step; on bandwidth-bound hardware this erodes the batching advantage and raises MoE targets' break-even acceptance rate above dense ones'.
+- **Server-side interaction:** Slot-based servers split the KV-cache budget across concurrent sequences, so more slots raise aggregate throughput but lower per-stream speed, and speculation competes with extra slots for the same compute headroom; tuning must therefore treat speculative mode, slot count, and sampling settings as one joint configuration and measure end-to-end tokens per second on representative tasks rather than trusting microbenchmarks.
+
+**TL;DR:** Speculative decoding can match standard decoding's outputs at lower cost, but whether it actually pays off depends on the workload, on dense-versus-MoE target architecture, and on how speculative mode is jointly configured with server slot allocation—so it must be tuned and validated end to end rather than assumed universally beneficial.

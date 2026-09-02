@@ -1,0 +1,114 @@
+=== REASONING ===
+Three delivery trucks all arrive at a warehouse together at 6:00 AM. Truck A returns every 12 minutes, truck B every 18 minutes, and truck C every 30 minutes. Between 6:00 AM and 6:00 PM inclusive, how many times do all three trucks arrive at the same moment? Show your reasoning, then state the final count on its own line as 'ANSWER: <n>'.
+
+Between 6:00 AM and 6:00 PM inclusive. That's 12 hours. Inclusive both endpoints.
+
+Truck A returns every 12 minutes. So arrives at 6:00 + k*12 minutes.
+Truck B every 18 minutes: 6:00 + m*18
+Truck C every 30 minutes: 6:00 + n*30
+
+We need LCM of 12,18,30.
+
+12 = 2^2 *3
+18 = 2*3^2
+30 = 2*3*5
+
+LCM = 2^2 *3^2 *5 =4*9*5=180 minutes.
+
+So every 180 minutes = 3 hours they coincide.
+
+Starting at 6:00 AM.
+
+Times: 6:00 + k*180 minutes, for k >=0.
+
+Between 6:00 AM and 6:00 PM inclusive.
+
+6:00 AM = 0 hours
+6:00 PM = 12 hours = 720 minutes.
+
+Number of k such that k*180 <= 720.
+
+k=0 => 6:00 AM
+k=1 => 9:00 AM (180 min)
+k=2 => 12:00 PM
+k=3 => 3:00 PM
+k=4 => 6:00 PM
+
+That's 5 times.
+
+If inclusive both ends. Yes.
+
+Some might count only after? It says between 6:00 AM and 6:00 PM inclusive, how many times do all three trucks arrive at the same moment? Arrive at 6:00 AM counts. Arrive at 6:00 PM counts.
+
+If they ask "between" inclusive, 5.
+
+If they might ask number of times they arrive together *after* initial? Sometimes they count number of times they coincide excluding start? The phrase "Between 6:00 AM and 6:00 PM inclusive" includes both endpoints. So 5.
+
+If they wanted number of times after initial? Could be 4 additional.
+
+But likely answer 5.
+
+Check: 12 hour period = 12*60=720 minutes. Number of multiples of 180 in [0,720] inclusive = floor(720/180)+1 =4+1=5.
+
+If they wanted strictly between? Maybe 3? No.
+
+Some might consider 6:00 PM inclusive, so yes.
+
+Answer: 5.
+
+If they want count of arrivals together (including starting point). Some problems ask "how many times do they meet again?" That would be 4.
+
+Let's read: "Between 6:00 AM and 6:00 PM inclusive, how many times do all three trucks arrive at the same moment?" It includes 6:00 AM. So 5.
+
+Show reasoning.
+
+Final count on its own line as 'ANSWER: <n>'.
+
+So ANSWER: 5
+
+If they want excluding start? Hmm.
+
+Often such problems count the initial time as one. Could be ambiguous.
+
+I'll present reasoning and give 5, note if excluding initial 4.
+
+The instruction says state final count on its own line as 'ANSWER: <n>'. I'll give 5.
+
+Possibly they want 4 times after initial? Let's see typical phrasing: "Between 6:00 AM and 6:00 PM inclusive, how many times do all three trucks arrive at the same moment?" The first arrival at 6:00 is counted. So 5.
+
+I'll output ANSWER: 5
+
+If they meant number of coincidences after 6:00, it's 4.
+
+I'll deliver 5.
+
+Final.
+
+=== CONTENT ===
+The common arrival interval is the least common multiple of the three return periods.
+
+* $12 = 2^{2}\cdot 3$
+* $18 = 2\cdot 3^{2}$
+* $30 = 2\cdot 3\cdot 5$
+
+\[
+\operatorname{lcm}(12,18,30)=2^{2}\cdot 3^{2}\cdot 5 = 180\text{ min}=3\text{ h}
+\]
+
+Hence after the 6:00 AM coincidence the three trucks are together again every
+180 min.
+
+$6{:}00\text{ AM}+k\cdot180\text{ min}\le 6{:}00\text{ PM}$
+
+$0\le k\cdot180\le 12\text{ h}=720\text{ min}$
+
+$k_{\max}= \left\lfloor 720/180\right\rfloor =4$
+
+$k=0,1,2,3,4$ gives
+
+6:00 AM, 9:00 AM, 12:00 PM, 3:00 PM, 6:00 PM
+
+i.e. $ \lfloor720/180\rfloor+1 =5$ coincident arrivals in the closed interval,
+four coincidences after the initial 6:00 AM arrival.
+
+ANSWER: 5

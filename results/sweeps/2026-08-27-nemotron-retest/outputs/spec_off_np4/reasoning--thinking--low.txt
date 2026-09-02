@@ -1,0 +1,24 @@
+=== REASONING ===
+The count is 5. So answer: ANSWER: 5.
+
+=== CONTENT ===
+The three trucks start together at 6:00 AM. They will next all arrive together at the least common multiple (LCM) of their return intervals: 12 min, 18 min, and 30 min.
+
+- Prime factorizations:  
+  12 = 2² · 3  
+  18 = 2 · 3²  
+  30 = 2 · 3 · 5  
+
+- LCM = 2² · 3² · 5 = 4 · 9 · 5 = **180 minutes**.
+
+From 6:00 AM to 6:00 PM is 12 hours = 720 minutes. The times (in minutes after 6:00 AM) when all three coincide are the multiples of 180 within \([0, 720]\):
+
+- 0 min (6:00 AM)  
+- 180 min (9:00 AM)  
+- 360 min (12:00 PM)  
+- 540 min (3:00 PM)  
+- 720 min (6:00 PM)
+
+That gives 5 occurrences.
+
+ANSWER: 5

@@ -1,0 +1,14 @@
+[
+  {"name": "Qwen3-235B-A22B-Instruct-2507", "tag": "notools",
+   "path": "/mnt/ai-models/Qwen/qwen3-235b-a22b/Qwen3-235B-A22B-Instruct-2507-UD-Q3_K_XL-00001-of-00003.gguf",
+   "flags": "--disable-tools",
+   "env": {"UNSLOTH_DISABLE_UNIFIED_MEMORY": "1"}},
+  {"name": "GLM-4.7-Flash", "tag": "toolson-ab",
+   "path": "/mnt/ai-models/unsloth/GLM-4.7-Flash-GGUF/GLM-4.7-Flash-UD-Q8_K_XL.gguf",
+   "flags": "",
+   "env": {"UNSLOTH_DISABLE_UNIFIED_MEMORY": "1"}},
+  {"name": "GLM-4.7-Flash", "tag": "toolsoff-ab",
+   "path": "/mnt/ai-models/unsloth/GLM-4.7-Flash-GGUF/GLM-4.7-Flash-UD-Q8_K_XL.gguf",
+   "flags": "--disable-tools",
+   "env": {"UNSLOTH_DISABLE_UNIFIED_MEMORY": "1"}}
+]

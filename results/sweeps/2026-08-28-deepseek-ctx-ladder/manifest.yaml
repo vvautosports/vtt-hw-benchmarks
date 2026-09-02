@@ -1,0 +1,36 @@
+# DeepSeek-V4-Flash context ceiling ladder — the 16384 "load safety" pin was unnecessary.
+# Every rung 24576 -> 98304 loads AND serves; no ceiling found in the tested range.
+run_id: "2026-08-28-deepseek-ctx-ladder"
+date: "2026-08-28"
+node: "kalman9-framework-01"
+backend: "unsloth-studio (unsloth run --max-seq-length <ctx>), fresh serve per rung"
+model: "DeepSeek-V4-Flash-0731 UD-IQ3_XXS (97 GiB, 4 shards)"
+driver_script: "scripts/sweeps/deepseek_ctx_ladder.py"
+launch_env: {UNSLOTH_DISABLE_UNIFIED_MEMORY: "1"}
+
+ladder:   # spawned_c verified from the serve log's llama-server command line each rung
+  - {ctx: 24576, loaded: true, spawned_c: 24576, serves: true, mem_available_after_gib: 23.2}
+  - {ctx: 32768, loaded: true, spawned_c: 32768, serves: true, mem_available_after_gib: 22.8}
+  - {ctx: 49152, loaded: true, spawned_c: 49152, serves: true, mem_available_after_gib: 22.3}
+  - {ctx: 65536, loaded: true, spawned_c: 65536, serves: true, mem_available_after_gib: 21.8}
+  - {ctx: 98304, loaded: true, spawned_c: 98304, serves: true, mem_available_after_gib: 20.9}
+
+verdict: >
+  NO CEILING found up to 98304 — the day-one 16384 pin can be lifted. The decisive
+  observation is the memory profile: available RAM moves only 23.2 -> 20.9 GiB across a 4x
+  context increase (~0.03 GiB per 1k ctx). DeepSeek's MLA latent-KV compression makes
+  context nearly free in memory on this model — the "~25 GiB KV budget" arithmetic that
+  motivated the pin assumed conventional KV and was conservative by an order of magnitude.
+  New production setting: --max-seq-length 65536 is comfortably safe; 98304 loaded and
+  answered with ~21 GiB still available.
+
+caveats:
+  - "Round-trip proven, graded long-context generation NOT: the per-rung sanity completion
+     came back with empty content (reasoning model + max_tokens 16 — the thinking channel
+     consumed the budget). Each rung's server answered /v1/models, accepted the request and
+     returned cleanly, and every spawned -c was verified; but no cell here processed a long
+     prompt or was graded."
+  - "Allocating 98304 slots is not the same as PROCESSING a 98k-token prompt — prefill
+     time and quality at depth are unmeasured. A needle-at-depth or long-summarize probe is
+     the natural follow-up before relying on >32k in production."
+  - "Loads were a uniform ~50.5s (page cache warm after rung 1); cold load is minutes."

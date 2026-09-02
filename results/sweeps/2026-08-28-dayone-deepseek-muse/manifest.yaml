@@ -1,0 +1,89 @@
+# Day-one battery for the two models downloaded 2026-08-28. Both ran clean under
+# --disable-tools, so these are directly comparable to the same-day champion re-baseline.
+run_id: "2026-08-28-dayone-deepseek-muse"
+date: "2026-08-28"
+node: "kalman9-framework-01"
+hardware: "AMD Strix Halo (Radeon 8060S iGPU), GTT unlock ACTIVE, ~122 GB usable"
+backend: "unsloth-studio"
+runtime_build: "b10639-mix-f6f92fe"
+studio_version: "unsloth 2026.8.22"
+api: "/v1/chat/completions"
+isolation: "fresh-server-per-task (isolated_battery.py)"
+request_constants:
+  seed: 42
+  max_tokens: 8192
+  profile: thinking
+  reasoning_effort: low
+launch_env:
+  UNSLOTH_DISABLE_UNIFIED_MEMORY: "1"
+
+axis: cfg
+records: "results.jsonl"
+vision_smoke: "vision-smoke.json (image: bars.png, driver: scripts/testing/muse_vision_smoke.py)"
+outputs: "outputs/<cfg>/<task>--thinking--low.txt"
+grading: "py scripts/utils/grade_sweep.py results/sweeps/2026-08-28-dayone-deepseek-muse results --layout cfg"
+driver_script: "scripts/sweeps/isolated_battery.py"
+
+entries:
+  - cfg: "DeepSeek-V4-Flash-0731__dayone"
+    quant: "UD-IQ3_XXS (4 shards, 97.1 GiB on disk)"
+    role: "largest model ever run on this box"
+    flags: "--disable-tools --max-seq-length 16384"
+    tps: "14.38 / 14.92 / 13.09"
+    quality: "3/3 PASS"
+    note: >-
+      Loads and passes the full battery at ~13-15 t/s. Context was PINNED to 16384 rather
+      than left to studio's auto-selection: 97.1 GiB of weights against ~122 GiB usable
+      leaves roughly 25 GiB for KV, and an auto-selected large context could have pushed
+      the load over the edge unattended. The usable context ceiling is therefore unmeasured
+      — 16384 is a safe floor chosen for the run, not a limit of the model.
+
+  - cfg: "Muse-Glimmer-30B__dayone"
+    quant: "UD-Q8_K_XL (30.1 GiB) + mmproj BF16 (3.6 GiB)"
+    role: "vision / mmproj niche, replaces the deleted gemma-3-27b"
+    flags: "--disable-tools"
+    tps: "7.81 / 8.03 / 7.42"
+    quality: "3/3 PASS"
+    note: >-
+      TEXT ONLY. This battery exercises none of the vision path — the mmproj was downloaded
+      but never loaded, so the capability Muse was actually acquired for is still
+      unmeasured. Slowest model on the roster by a wide margin at ~7.4-8.0 t/s, roughly
+      half GLM-4.7-Flash. Q8 was chosen deliberately as a quality anchor for the vision
+      niche rather than for speed; a Q4_K_XL rung (14.8 GiB) would be the speed comparison
+      if one is wanted.
+
+summary: >-
+  6/6 cells pass. The headline is DeepSeek-V4-Flash-0731: 97.1 GiB of weights running clean
+  at ~14 t/s on a 128 GB unified-memory box, comfortably the largest model this fleet has
+  served. For scale, it is roughly 3x the size of GLM-4.7-Flash and runs at ~40% of its
+  speed — a reasonable trade for the capability class.
+
+  Muse-Glimmer passes on text, and its vision path was confirmed working the same day: the
+  BF16 mmproj loaded in 15.0s and the model read a generated 3-bar image correctly on both
+  deterministic checks (count and left-to-right colour order). That is a capability
+  confirmation on an easy image, not a vision quality benchmark.
+
+verdicts:
+  deepseek_viable: >-
+    YES at pinned 16384 context. Viable as a batch/quality tier, not an interactive one at
+    14 t/s. Context headroom is the open question, not capability.
+  muse_vision: >-
+    PASS, tested same day (2/2). scripts/testing/muse_vision_smoke.py loaded the BF16 mmproj
+    in 15.0s and Muse read a generated 3-bar image correctly: count "3" and left-to-right
+    order "red, green, blue", both deterministic checks, ~19s per image query at 192-196
+    prompt tokens. Muse is a working replacement for gemma-3-27b's vision niche.
+
+caveats:
+  deepseek_context_pinned: >-
+    --max-seq-length 16384 was set for load safety, so nothing here says what context
+    DeepSeek can actually hold on this hardware. Finding the real ceiling is a separate
+    experiment and the KV budget is tight (~25 GiB after weights).
+  muse_vision_scope: >-
+    The vision smoke (vision-smoke.json, bars.png) is a CAPABILITY check, not a quality
+    benchmark: solid colour bars on white are about the easiest possible visual input.
+    It proves the mmproj loads and the image path works end-to-end; it says nothing about
+    OCR, fine detail, charts or real photographs. Those need a harder image set.
+  no_prior_baseline: >-
+    Both models are new, so there is no before/after comparison — these are first
+    measurements, not re-baselines. They ARE directly comparable to the same-day
+    champion re-baseline, which ran the identical battery under --disable-tools.

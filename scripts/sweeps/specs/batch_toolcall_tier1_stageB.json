@@ -1,0 +1,110 @@
+[
+  {
+    "name": "NVIDIA-Nemotron-3.5-Lightning-30B-A3B",
+    "tag": "raw",
+    "path": "/mnt/ai-models/unsloth/NVIDIA-Nemotron-3.5-Lightning-30B-A3B-GGUF/NVIDIA-Nemotron-3.5-Lightning-30B-A3B-UD-Q8_K_XL.gguf",
+    "flags": "--disable-tools --disable-tool-call-healing --disable-tool-call-nudging",
+    "env": {
+      "UNSLOTH_DISABLE_UNIFIED_MEMORY": "1"
+    }
+  },
+  {
+    "name": "NVIDIA-Nemotron-3.5-Lightning-30B-A3B",
+    "tag": "healed",
+    "path": "/mnt/ai-models/unsloth/NVIDIA-Nemotron-3.5-Lightning-30B-A3B-GGUF/NVIDIA-Nemotron-3.5-Lightning-30B-A3B-UD-Q8_K_XL.gguf",
+    "flags": "--disable-tools --enable-tool-call-healing --disable-tool-call-nudging",
+    "env": {
+      "UNSLOTH_DISABLE_UNIFIED_MEMORY": "1"
+    }
+  },
+  {
+    "name": "NVIDIA-Nemotron-3.5-Lightning-30B-A3B",
+    "tag": "full",
+    "path": "/mnt/ai-models/unsloth/NVIDIA-Nemotron-3.5-Lightning-30B-A3B-GGUF/NVIDIA-Nemotron-3.5-Lightning-30B-A3B-UD-Q8_K_XL.gguf",
+    "flags": "--disable-tools --enable-tool-call-healing --enable-tool-call-nudging",
+    "env": {
+      "UNSLOTH_DISABLE_UNIFIED_MEMORY": "1"
+    }
+  },
+  {
+    "name": "Qwen3.8-Flash-Next",
+    "tag": "raw",
+    "path": "/mnt/ai-models/unsloth/Qwen3.8-Flash-Next-GGUF/UD-Q4_K_XL/Qwen3.8-Flash-Next-UD-Q4_K_XL-00001-of-00004.gguf",
+    "flags": "--disable-tools --disable-tool-call-healing --disable-tool-call-nudging",
+    "env": {
+      "UNSLOTH_DISABLE_UNIFIED_MEMORY": "1"
+    }
+  },
+  {
+    "name": "Qwen3.8-Flash-Next",
+    "tag": "healed",
+    "path": "/mnt/ai-models/unsloth/Qwen3.8-Flash-Next-GGUF/UD-Q4_K_XL/Qwen3.8-Flash-Next-UD-Q4_K_XL-00001-of-00004.gguf",
+    "flags": "--disable-tools --enable-tool-call-healing --disable-tool-call-nudging",
+    "env": {
+      "UNSLOTH_DISABLE_UNIFIED_MEMORY": "1"
+    }
+  },
+  {
+    "name": "Qwen3.8-Flash-Next",
+    "tag": "full",
+    "path": "/mnt/ai-models/unsloth/Qwen3.8-Flash-Next-GGUF/UD-Q4_K_XL/Qwen3.8-Flash-Next-UD-Q4_K_XL-00001-of-00004.gguf",
+    "flags": "--disable-tools --enable-tool-call-healing --enable-tool-call-nudging",
+    "env": {
+      "UNSLOTH_DISABLE_UNIFIED_MEMORY": "1"
+    }
+  },
+  {
+    "name": "GLM-4.7-Flash",
+    "tag": "raw",
+    "path": "/mnt/ai-models/unsloth/GLM-4.7-Flash-GGUF/GLM-4.7-Flash-UD-Q8_K_XL.gguf",
+    "flags": "--disable-tools --disable-tool-call-healing --disable-tool-call-nudging",
+    "env": {
+      "UNSLOTH_DISABLE_UNIFIED_MEMORY": "1"
+    }
+  },
+  {
+    "name": "GLM-4.7-Flash",
+    "tag": "healed",
+    "path": "/mnt/ai-models/unsloth/GLM-4.7-Flash-GGUF/GLM-4.7-Flash-UD-Q8_K_XL.gguf",
+    "flags": "--disable-tools --enable-tool-call-healing --disable-tool-call-nudging",
+    "env": {
+      "UNSLOTH_DISABLE_UNIFIED_MEMORY": "1"
+    }
+  },
+  {
+    "name": "GLM-4.7-Flash",
+    "tag": "full",
+    "path": "/mnt/ai-models/unsloth/GLM-4.7-Flash-GGUF/GLM-4.7-Flash-UD-Q8_K_XL.gguf",
+    "flags": "--disable-tools --enable-tool-call-healing --enable-tool-call-nudging",
+    "env": {
+      "UNSLOTH_DISABLE_UNIFIED_MEMORY": "1"
+    }
+  },
+  {
+    "name": "gpt-oss-120b",
+    "tag": "raw",
+    "path": "/mnt/ai-models/openai/gpt-oss-120b/gpt-oss-120b-F16.gguf",
+    "flags": "--disable-tools --disable-tool-call-healing --disable-tool-call-nudging",
+    "env": {
+      "UNSLOTH_DISABLE_UNIFIED_MEMORY": "1"
+    }
+  },
+  {
+    "name": "gpt-oss-120b",
+    "tag": "healed",
+    "path": "/mnt/ai-models/openai/gpt-oss-120b/gpt-oss-120b-F16.gguf",
+    "flags": "--disable-tools --enable-tool-call-healing --disable-tool-call-nudging",
+    "env": {
+      "UNSLOTH_DISABLE_UNIFIED_MEMORY": "1"
+    }
+  },
+  {
+    "name": "gpt-oss-120b",
+    "tag": "full",
+    "path": "/mnt/ai-models/openai/gpt-oss-120b/gpt-oss-120b-F16.gguf",
+    "flags": "--disable-tools --enable-tool-call-healing --enable-tool-call-nudging",
+    "env": {
+      "UNSLOTH_DISABLE_UNIFIED_MEMORY": "1"
+    }
+  }
+]

@@ -1,0 +1,22 @@
+=== REASONING ===
+The answer is already computed. No tool needed now.
+
+
+=== CONTENT ===
+My reasoning is complete and verified with code:
+
+**Step 1 — Find when all three coincide**
+All three trucks are together again only at times that are multiples of each individual interval — multiples of the LCM of 12, 18, and 30.
+
+- 12 = 2² · 3
+- 18 = 2 · 3²
+- 30 = 2 · 3 · 5
+
+**LCM(12, 18, 30) = 2² · 3² · 5 = 180 minutes = 3 hours**
+
+**Step 2 — Count within the window**
+6:00 AM to 6:00 PM inclusive = 720 minutes. Dividing by 180 gives 4 full intervals. Including the starting moment (6:00 AM, t = 0) and the inclusive endpoint (6:00 PM, t = 720), the arrivals coincide at:
+
+6:00 AM, 9:00 AM, 12:00 PM, 3:00 PM, 6:00 PM → **5 times**
+
+ANSWER: 5

@@ -1,0 +1,110 @@
+=== REASONING ===
+*   Truck A: arrives every 12 minutes.
+    *   Truck B: arrives every 18 minutes.
+    *   Truck C: arrives every 30 minutes.
+    *   Start time: 6:00 AM (all arrive together).
+    *   End time: 6:00 PM (inclusive).
+    *   Goal: Find the number of times all three arrive at the same moment between 6:00 AM and 6:00 PM.
+
+    *   The trucks arrive together when the time elapsed is a common multiple of their arrival intervals (12, 18, and 30 minutes).
+    *   The *first* time they arrive together after 6:00 AM is the Least Common Multiple (LCM) of 12, 18, and 30.
+
+    *   $12 = 2^2 \times 3^1$
+    *   $18 = 2^1 \times 3^2$
+    *   $30 = 2^1 \times 3^1 \times 5^1$
+    *   $\text{LCM}(12, 18, 30) = 2^{\max(2,1,1)} \times 3^{\max(1,2,1)} \times 5^{\max(0,0,1)}$
+    *   $\text{LCM} = 2^2 \times 3^2 \times 5^1 = 4 \times 9 \times 5 = 36 \times 5 = 180$ minutes.
+
+    *   The trucks arrive together every 180 minutes.
+    *   180 minutes = 3 hours.
+
+    *   Start: 6:00 AM.
+    *   End: 6:00 PM.
+    *   Total duration = 12 hours.
+
+    *   Occurrences (times):
+        1.  6:00 AM (t = 0 hours)
+        2.  6:00 AM + 3 hours = 9:00 AM (t = 3 hours)
+        3.  9:00 AM + 3 hours = 12:00 PM (t = 6 hours)
+        4.  12:00 PM + 3 hours = 3:00 PM (t = 9 hours)
+        5.  3:00 PM + 3 hours = 6:00 PM (t = 12 hours)
+
+    *   The period is "Between 6:00 AM and 6:00 PM inclusive".
+    *   List of arrivals: 6:00 AM, 9:00 AM, 12:00 PM, 3:00 PM, 6:00 PM.
+    *   Total count = 5.
+
+    *   Truck A (12m): 0, 12, 24, 36, 48, 60, 72, 84, 96, 108, 120, 132, 144, 156, 168, 180...
+    *   Truck B (18m): 0, 18, 36, 54, 72, 90, 108, 126, 144, 162, 180...
+    *   Truck C (30m): 0, 30, 60, 90, 120, 150, 180...
+    *   LCM is definitely 180.
+    *   12 hours / 3 hours = 4 intervals.
+    *   Number of points = intervals + 1 (since it's inclusive of start and end).
+    *   $4 + 1 = 5$.
+
+    *   LCM calculation: $12 = 2, 2, 3$; $18 = 2, 3, 3$; $30 = 2, 3, 5$.
+    *   LCM = $2 \times 2 \times 3 \times 3 \times 5 = 4 \times 9 \times 5 = 180$. Correct.
+    *   180 minutes = 3 hours. Correct.
+    *   Time range: 6 AM to 6 PM is 12 hours. Correct.
+    *   Occurrences: 0h, 3h, 6h, 9h, 12h. Total 5. Correct.
+
+    *   State the intervals.
+    *   Find the LCM.
+    *   Determine the interval of joint arrival.
+    *   Calculate the duration of the time frame.
+    *   Divide duration by the joint arrival interval and add 1 for the starting occurrence.
+
+    *   Truck A: 12 min
+    *   Truck B: 18 min
+    *   Truck C: 30 min
+    *   LCM(12, 18, 30):
+        *   12: 12, 24, 36, 48, 60, 72, 84, 96, 108, 120, 132, 144, 156, 168, 180
+        *   18: 18, 36, 54, 72, 90, 108, 126, 144, 162, 180
+        *   30: 30, 60, 90, 120, 150, 180
+    *   LCM is 180 mins (3 hours).
+    *   Time span: 6:00 AM to 6:00 PM = 12 hours.
+    *   Arrivals:
+        1. 6:00 AM
+        2. 9:00 AM
+        3. 12:00 PM
+        4. 3:00 PM
+        5. 6:00 PM
+    *   Total = 5.
+
+    Wait, let's double check "Between 6:00 AM and 6:00 PM inclusive".
+    Yes, 5.
+
+=== CONTENT ===
+To find out how many times all three trucks arrive at the same moment, we need to determine the frequency at which their arrival times coincide. This is found by calculating the Least Common Multiple (LCM) of their arrival intervals.
+
+**1. Find the LCM of the arrival intervals:**
+*   Truck A arrives every **12 minutes**.
+*   Truck B arrives every **18 minutes**.
+*   Truck C arrives every **30 minutes**.
+
+We can find the LCM using prime factorization:
+*   $12 = 2^2 \times 3^1$
+*   $18 = 2^1 \times 3^2$
+*   $30 = 2^1 \times 3^1 \times 5^1$
+
+The LCM is calculated by taking the highest power of each prime factor present in the numbers:
+*   $\text{LCM}(12, 18, 30) = 2^2 \times 3^2 \times 5^1$
+*   $\text{LCM} = 4 \times 9 \times 5 = 180 \text{ minutes}$
+
+**2. Convert the LCM to hours:**
+*   $180 \text{ minutes} \div 60 \text{ minutes/hour} = 3 \text{ hours}$
+
+All three trucks arrive together every 3 hours.
+
+**3. Determine the total time elapsed and the number of occurrences:**
+The timeframe is from 6:00 AM to 6:00 PM, which is a duration of **12 hours**.
+
+We list the times they arrive together starting from 6:00 AM:
+1.  **6:00 AM** (Start time)
+2.  6:00 AM + 3 hours = **9:00 AM**
+3.  9:00 AM + 3 hours = **12:00 PM**
+4.  12:00 PM + 3 hours = **3:00 PM**
+5.  3:00 PM + 3 hours = **6:00 PM** (End time, included because the range is "inclusive")
+
+Counting these occurrences, we find there are 5 times.
+
+ANSWER: 5

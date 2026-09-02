@@ -1,0 +1,12 @@
+=== REASONING ===
+The user wants a summary: exactly 5 bullet points followed by a one-sentence TL;DR, faithful to the source. Let me carefully distill the passage into 5 bullets covering: (1) what speculative decoding is and its correctness guarantee, (2) draft mechanisms, (3) economics by workload, (4) MoE complications, (5) server-side parallelism / joint tuning. Then a one-sentence TL;DR.
+
+
+=== CONTENT ===
+- Speculative decoding speeds up autoregressive inference by having a cheap draft propose multiple tokens that the target model verifies in one batched forward pass; rejections truncate the proposal and the target resumes from the last accepted token, keeping outputs distributionally identical to standard decoding.
+- Drafting mechanisms include a separate small model, an n-gram lookup over prompt and generation history, or a multi-token-prediction (MTP) head trained jointly with the target that predicts a short window of future tokens from the same hidden state.
+- Gains depend heavily on workload: code and structured text repeat long spans so n-gram drafting achieves high acceptance nearly for free, while open-ended prose accepts fewer tokens and a poorly matched draft model can actually slow generation below running the target alone.
+- MTP heads trade a small per-step memory and compute cost for acceptance rates that tend to stay stable across domains, because the head sees the exact context the target sees.
+- MoE targets raise the break-even acceptance rate because verification batches positions that may route to different experts, pulling more expert weights through bandwidth-bound memory and eroding speculation's advantage; slot-based servers add further coupling, so speculative mode, slot count, and sampling must be tuned as one joint configuration measured end-to-end.
+
+**TL;DR:** Speculative decoding offers exact-quality speedups whose real-world payoff hinges on matching the draft mechanism to the workload, accounting for MoE memory behavior, and jointly tuning it with server parallelism rather than treating each knob in isolation.

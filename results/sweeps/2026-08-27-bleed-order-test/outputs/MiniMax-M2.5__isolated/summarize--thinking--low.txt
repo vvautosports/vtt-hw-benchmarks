@@ -1,0 +1,29 @@
+=== REASONING ===
+The user is asking me to extract exactly 5 bullet points followed by exactly one sentence as a TL;DR from a technical document about speculative decoding. Let me carefully read and extract the key points.
+
+The text covers:
+1. Speculative decoding basics - draft model proposes tokens, target model verifies
+2. Draft approaches: small model, n-gram, MTP heads
+3. Performance varies by workload - code/structured text works well, prose less so
+4. Mixture of Experts (MoE) models complicate things due to expert routing in batches
+5. Server-side parallelism/slot-based servers need to be tuned together with speculation
+
+The most important takeaways seem to be:
+- Speculative decoding can speed up inference by having a draft model propose tokens verified in batch
+- Acceptance rates vary heavily by workload
+- MoE models are particularly challenging due to routing
+- Server parallelism/slot-based serving interacts with speculation
+
+Now let me craft exactly 5 bullet points and 1 sentence:
+
+
+=== CONTENT ===
+• Speculative decoding uses a small draft model to propose multiple tokens that a larger target model verifies in a single batch, accepting proposals when correct and falling back to normal generation when rejected.
+
+• N-gram and lookup-based drafts excel on repetitive code and structured text but underperform on open-ended prose where acceptance rates drop, sometimes slowing generation below baseline.
+
+• Multi-token prediction (MTP) heads sit between specialized draft models and full drafts, offering more stable acceptance rates across domains at the cost of small additional memory and compute overhead.
+
+• Mixture-of-experts models hurt speculative decoding economics on bandwidth-constrained hardware because batched verification pulls more expert weights into memory than single-token decoding, raising the break-even acceptance threshold.
+
+• Server slot-based parallelism forces speculation to be jointly tuned with concurrency and sampling settings, not optimized in isolation, since slots compete for the same compute budget.

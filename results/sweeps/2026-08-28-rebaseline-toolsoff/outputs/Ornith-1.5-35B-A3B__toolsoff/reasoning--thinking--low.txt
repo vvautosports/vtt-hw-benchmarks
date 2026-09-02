@@ -1,0 +1,64 @@
+=== REASONING ===
+The three trucks return at intervals of 12, 18, and 30 minutes. They all arrive together at times that are common multiples of these intervals.
+
+The LCM of 12, 18, and 30:
+- 12 = 2² × 3
+- 18 = 2 × 3²
+- 30 = 2 × 3 × 5
+
+LCM = 2² × 3² × 5 = 4 × 9 × 5 = 180 minutes.
+
+So all three trucks arrive together every 180 minutes = 3 hours.
+
+The time from 6:00 AM to 6:00 PM is 12 hours = 720 minutes.
+
+They all arrive together at: 6:00 AM (t=0), and then every 3 hours.
+
+Times: 
+- t = 0 → 6:00 AM
+- t = 180 → 9:00 AM
+- t = 360 → 12:00 PM (noon)
+- t = 540 → 3:00 PM
+- t = 720 → 6:00 PM
+
+That's 5 times.
+
+So the answer is 5.
+
+
+=== CONTENT ===
+## Setting Up the Problem
+
+All three trucks arrive together at times that are **common multiples** of their individual intervals (12, 18, and 30 minutes). I need to find when these coincide.
+
+## Finding the Least Common Multiple
+
+**Prime factorizations:**
+- 12 = 2² × 3
+- 18 = 2 × 3²
+- 30 = 2 × 3 × 5
+
+**LCM** = take the highest power of each prime:
+$$\text{LCM} = 2^2 \times 3^2 \times 5 = 4 \times 9 \times 5 = 180 \text{ minutes}$$
+
+So all three trucks arrive together **every 180 minutes (3 hours)**.
+
+## Counting the Coarrivals
+
+The total time window from 6:00 AM to 6:00 PM is **12 hours = 720 minutes**.
+
+The trucks coincide at every multiple of 180 minutes:
+
+| Time | Minutes since 6:00 AM |
+|------|----------------------|
+| 6:00 AM | 0 |
+| 9:00 AM | 180 |
+| 12:00 PM | 360 |
+| 3:00 PM | 540 |
+| 6:00 PM | 720 |
+
+Since 720 ÷ 180 = 4 exactly, the 6:00 PM arrival is included (the window is inclusive).
+
+Counting these: 6:00 AM, 9:00 AM, noon, 3:00 PM, and 6:00 PM — a total of 5 coincidences.
+
+ANSWER: 5

@@ -1,0 +1,43 @@
+{
+  "rcpt01_diner": {
+    "merchant": "THE TEST DINER",
+    "date": "2026-08-26",
+    "total": 42.17,
+    "tax": 2.72,
+    "tip": 5.45,
+    "category": "dinner",
+    "card_last4": "4242"
+  },
+  "rcpt02_uber": {
+    "merchant": "Uber",
+    "date": "2026-08-25",
+    "total": 23.84,
+    "tip": 3.0,
+    "category": "uber",
+    "card_last4": "4242",
+    "qualifier": "home"
+  },
+  "rcpt03_hotel": {
+    "merchant": "GRAND COLUMBUS HOTEL",
+    "date": "2026-08-24",
+    "total": 442.26,
+    "tax": 64.26,
+    "category": "hotel",
+    "card_last4": "4242"
+  },
+  "rcpt04_flight": {
+    "merchant": "AMERICAN AIRLINES",
+    "date": "2026-08-20",
+    "total": 333.04,
+    "tax": 43.44,
+    "category": "flight",
+    "card_last4": "9931"
+  },
+  "rcpt05_parking": {
+    "merchant": "JOHN GLENN INTL AIRPORT",
+    "date": "2026-08-26",
+    "total": 36.0,
+    "category": "parking",
+    "card_last4": "4242"
+  }
+}

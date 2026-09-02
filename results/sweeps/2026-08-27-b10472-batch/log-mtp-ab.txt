@@ -1,0 +1,14 @@
+[12:55:16] build=version: 0.1.1-dev (build 10472, commit 7a556b8f9)  entries=2
+[12:55:16] === Qwen3.8-27B__mtp  flags='--speculative-type mtp'
+[12:55:46] Qwen3.8-27B__mtp: loaded
+[12:56:36]   reasoning: tps=15.07 tok=754 err=None
+[13:06:31]   code: tps=12.12 tok=7207 err=None
+[13:07:52]   summarize: tps=10.9 tok=884 err=None
+[13:07:52] === Qwen3.8-27B__specoff  flags='--speculative-type off'
+[13:08:12] Qwen3.8-27B__specoff: loaded
+[13:10:42]   reasoning: tps=6.77 tok=1016 err=None
+[13:26:18]   code: tps=6.52 tok=6099 err=None
+[13:27:41]   summarize: tps=6.26 tok=517 err=None
+[13:27:41] restoring GLM baseline
+[13:28:11] baseline restored healthy=True
+[13:28:11] ROSTER BATCH COMPLETE

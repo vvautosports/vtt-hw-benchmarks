@@ -1,0 +1,156 @@
+# How deep can these models actually chain tool calls? The Tier 1 battery used a 20-call
+# bar that EVERY model saturated, so it measured a ceiling, not a limit. This pushes to 60.
+# Result: one model breaks — and not in the way llama.cpp#19513 describes.
+run_id: "2026-08-28-deepchain-19513"
+date: "2026-08-28"
+node: "kalman9-framework-01"
+hardware: "AMD Strix Halo (Radeon 8060S iGPU), GTT unlock ACTIVE, ~122 GB usable"
+backend: "unsloth-studio"
+runtime_build: "b10639-mix-f6f92fe"
+api: "/v1/chat/completions (client-tool passthrough)"
+isolation: "fresh-server-per-case (toolcall_battery.py)"
+request_constants:
+  seed: 42
+  max_tokens: 2048
+  temperature: 0.0
+  top_p: 1.0
+  reasoning_effort: low
+  enable_tools: false
+launch_env:
+  UNSLOTH_DISABLE_UNIFIED_MEMORY: "1"
+
+axis: cfg
+records: "results.jsonl"
+outputs: "outputs/<cfg>/<task>--toolcall--low.txt"
+cases: "toolcall_cases.json (deep-chain variant: target_depth 60, pass_depth 60)"
+grading: "py scripts/utils/grade_sweep.py results/sweeps/2026-08-28-deepchain-19513 results --layout cfg"
+driver_script: "scripts/sweeps/toolcall_battery.py --cases toolcall_cases_deepchain.json"
+
+# raw rung for the sweep (Tier 1 showed the ladder separated nothing, so running all three
+# across six models would have tripled cost for no information). The ladder was then applied
+# SURGICALLY to the one model that failed — which is the only place it could have mattered.
+rung: "raw for all six; gpt-oss-120b additionally re-run at healed and full (see ladder_followup)"
+
+# Pass bar is 60 here, not Tier 1's 15. For a breaking-point probe "pass" must mean
+# completing the chain; 15 was calibrated to the ~10-20 range #19513 reports. Expectations
+# travel with each run, so raising it here left the committed Tier 1 grades untouched
+# (verified: grade_sweep --check on 2026-08-28-toolcall-tier1 reports 0 changes).
+results:
+  - model: "Qwen3-Coder-30B-A3B-Instruct"
+    depth: "60/60"
+    wall_s: 46.0
+    correct: true
+    note: "Fastest deep chain on the roster."
+  - model: "Qwen3-Coder-Next"
+    depth: "60/60"
+    wall_s: 80.8
+    correct: true
+    note: "The family llama.cpp#19513 actually names. Clean at 3x the reported break depth."
+  - model: "NVIDIA-Nemotron-3.5-Lightning-30B-A3B"
+    depth: "60/60"
+    wall_s: 138.4
+    correct: true
+  - model: "Qwen3.8-Flash-Next"
+    depth: "60/60"
+    wall_s: 180.8
+    correct: true
+    note: "Slowest but complete."
+  - model: "GLM-4.7-Flash"
+    depth: "60/60"
+    wall_s: 75.3
+    correct: true
+  - model: "gpt-oss-120b"
+    depth: "31/60"
+    wall_s: 46.7
+    correct: false
+    completed: false
+    finish_reason: "stop"
+    note: >-
+      THE BREAK. Abandoned the chain at 31 calls and answered "TOKEN: 31". The real token
+      (ZEPHYR-7731) is only returned by the tool once the counter reaches 60, so the model
+      never saw it — it FABRICATED a plausible-looking answer from the last value it had.
+
+summary: >-
+  5 of 6 models sustain 60 sequential tool calls cleanly. The Tier 1 battery's 20-call bar
+  was far too shallow to separate anything: it was a ceiling everyone hit, not a limit.
+
+  gpt-oss-120b breaks at 31 — and the failure mode is NOT what llama.cpp#19513 describes.
+  #19513 is premature EOS: the server stops emitting tool calls and the chain dies. What
+  happened here is an instruction-following failure that FABRICATES: the model stopped
+  calling the tool, invented "TOKEN: 31" from the last counter value it had seen, and
+  returned finish_reason=stop as though it had completed the errand.
+
+  That distinction matters more than the depth number. A premature-EOS bug fails loudly and
+  an orchestrator can retry it. A model that quietly abandons a loop and fabricates a
+  completion is far more dangerous in an agentic setting, because nothing downstream can
+  tell the difference between that and a real answer without independently knowing the
+  expected result.
+
+  Also worth noting: the two families #19513 actually names — Qwen3-Coder-Next and a GLM —
+  are both clean here at 3x the reported break depth.
+
+ladder_followup:
+  question: "Can healing or nudging rescue an abandoned chain?"
+  answer: "NO. All three rungs terminate at exactly depth 31."
+  results:
+    - cfg: "gpt-oss-120b__raw"
+      depth: "31/60"
+    - cfg: "gpt-oss-120b__healed"
+      depth: "31/60"
+    - cfg: "gpt-oss-120b__full"
+      depth: "31/60"
+  reasoning: >-
+    Expected on inspection of the mechanism, and worth stating so the negative result is not
+    read as the flags being broken. Healing promotes TEXT-FORM tool calls into structured
+    ones, and nudging retries only "when the model emitted a tool signal that healing could
+    not repair". gpt-oss-120b emitted neither: it produced a clean, well-formed final
+    assistant message. There is nothing malformed to repair and no tool signal to nudge, so
+    both layers correctly stay out of the way.
+  implication: >-
+    The rung ladder addresses MALFORMED CALLS, not ABANDONED CHAINS. Those are different
+    failure classes and the ladder only covers one. An orchestrator needs its own
+    completion check; no server-side flag substitutes for it.
+  reproducibility: >-
+    Three independent servers, three fresh loads, all terminating at exactly 31 with
+    identical prompt_tokens (195). Under greedy sampling this is deterministic behaviour,
+    not a sampling artifact — which makes the single-seed caveat much weaker for THIS
+    finding than for the throughput numbers elsewhere in the corpus.
+
+verdicts:
+  issue_19513_reproduces: >-
+    NO, still not, on any model at 60 calls including the families the issue names. On
+    b10639-mix with --jinja this runtime appears not to carry that defect.
+  deep_chain_capable: >-
+    Qwen3-Coder-30B, Qwen3-Coder-Next, Nemotron-3.5, Qwen3.8-Flash-Next and GLM-4.7-Flash
+    all sustain 60 chained calls. Their real ceilings are still unmeasured — 60 was again
+    a bar everyone but one model cleared.
+  gpt_oss_120b_agentic_risk: >-
+    Do NOT use gpt-oss-120b as a long-chain orchestrator without an independent completion
+    check. It abandons chains at depth 31 and fabricates a terminal answer rather than
+    failing, reproducibly across all three healing rungs. This does not affect its
+    text-battery standing (3/3) or its shallow tool-calling results (15/15 in Tier 1) — it
+    only appears past ~30 chained calls, which is why the Tier 1 bar missed it entirely.
+    Note this is the model whose speed and token economy made it the leading ORCHESTRATOR
+    candidate on the morning's co-residency numbers; that recommendation is now qualified.
+  tier1_bar_too_shallow: >-
+    CONFIRMED. 20 calls found nothing; 60 found a real and consequential defect. Any future
+    tool-calling battery should push depth until something breaks rather than asserting a
+    fixed bar.
+
+caveats:
+  single_seed: >-
+    One greedy sample per model for the five that passed, so their 60/60 is a single
+    observation. The gpt-oss-120b break is NOT: it was reproduced three times on three
+    fresh servers, terminating at exactly 31 each time. Treat the break as solid and the
+    clean 60/60 results as provisional — that is the opposite of the usual asymmetry in
+    this corpus and is worth noting when quoting either.
+  depth_60_also_a_ceiling: >-
+    Five models hit exactly 60/60, which is the target, not their limit. This run raises the
+    known-good floor from 20 to 60; it does not find those models' actual breaking points.
+  fabrication_not_generalised: >-
+    The fabrication was observed on ONE task shape (a counter loop with a terminal secret).
+    Whether gpt-oss-120b fabricates on other long-chain shapes, or whether other models do
+    so at their own breaking points, is untested.
+  ladder_cannot_help_here: >-
+    RESOLVED — see ladder_followup above. Healing and nudging make NO difference to this
+    failure class, so the raw-rung-only sweep design cost nothing.

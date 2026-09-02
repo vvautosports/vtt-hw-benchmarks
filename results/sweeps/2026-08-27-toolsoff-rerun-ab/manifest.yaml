@@ -1,0 +1,51 @@
+# Final run of 2026-08-27: (a) Qwen3-235B code-cell re-run with --disable-tools,
+# (b) GLM-4.7-Flash tools-on vs tools-off A/B to quantify the server-side tool
+# injection found the same evening. Fresh server per (cfg, task).
+run_id: "2026-08-27-toolsoff-rerun-ab"
+date: "2026-08-27"
+node: "kalman9-framework-01"
+backend: "unsloth-studio"
+runtime_build: "b10639-mix-f6f92fe"
+isolation: "fresh-server-per-task (isolated_battery.py)"
+request_constants: {seed: 42, max_tokens: 8192, profile: thinking, reasoning_effort: low}
+launch_env: {UNSLOTH_DISABLE_UNIFIED_MEMORY: "1"}
+
+axis: cfg
+records: "results.jsonl"
+grading: "py scripts/utils/grade_sweep.py results/sweeps/2026-08-27-toolsoff-rerun-ab results --layout cfg"
+
+entries:
+  - cfg: "Qwen3-235B-A22B-Instruct-2507__notools"
+    flags: "--disable-tools"
+    tps: "15.14 / 15.22 / 13.31"
+    quality: "2/3 — code now PASSES (7 doctests, 570 tok, prompt 103); summarize 4 bullets (was 5 in the tools-on run)"
+    verdict: >-
+      Code capability confirmed clean — the baseline run's invalid cell is resolved.
+      The summarize flip (5 bullets tools-on -> 4 bullets tools-off, same seed) shows
+      grade-level sensitivity to prompt composition on a one-seed battery. Net: capable
+      baseline anchor at 13-15 t/s; not a roster contender.
+  - cfg: "GLM-4.7-Flash__toolson-ab"
+    tps: "31.91 / 37.78 / 31.46"
+    quality: "3/3"
+  - cfg: "GLM-4.7-Flash__toolsoff-ab"
+    flags: "--disable-tools"
+    tps: "34.73 / 33.82 / 33.44"
+    quality: "3/3"
+
+findings:
+  injection_quantified: >-
+    TRUE battery prompt sizes (tools off): 92 / 100 / 523 tokens. Tools on: 1295 / 5058 /
+    1726 — i.e. a ~1200-token tool-schema injection on EVERY request, plus a ~5K multi-leg
+    tool loop on the code task even for GLM (which still graded 3/3 through it). This is
+    the constant that inflated prompt_tokens across the whole 2026-08-2{6,7} corpus.
+  grades_robust_economy_not: >-
+    GLM grades identical both ways; token economy differs cell-by-cell in BOTH directions
+    (code 4430 on vs 7837 off; summarize 1215 vs 1822) — single-seed trajectory noise
+    once prompt composition changes. Confirms the standing rule: grades are robust to the
+    injection, token-economy/t/s comparisons are only valid within a matched tools config.
+  speed_gap_partly_closes: >-
+    GLM tools-off t/s (34.7/33.8/33.4) sits closer to the b10472-era figures than the
+    tools-on umfix numbers did — part of the earlier "residual -7% code t/s vs b10472"
+    was the injection, not the runtime.
+
+driver_script: "isolated_battery.py + batch_toolsoff_rerun_ab.json (Framework ~)"

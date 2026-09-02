@@ -1,0 +1,30 @@
+=== REASONING ===
+--- turn 1 ---
+We need to call get_flight_status.
+
+=== CONTENT ===
+
+
+=== TOOLCALLS ===
+[
+ {
+  "name": "get_flight_status",
+  "arguments": {
+   "flight_no": "UA448"
+  },
+  "arguments_raw": "{\n  \"flight_no\": \"UA448\"\n}",
+  "args_parsed": true
+ }
+]
+
+=== META ===
+{
+ "finish_reason": "tool_calls",
+ "turns": 1,
+ "n_calls": 1,
+ "chain_depth_reached": 1,
+ "raw_toolcall_text_detected": false,
+ "args_parse_failures": 0,
+ "prompt_tokens": 194,
+ "case": "tc_ambiguous"
+}

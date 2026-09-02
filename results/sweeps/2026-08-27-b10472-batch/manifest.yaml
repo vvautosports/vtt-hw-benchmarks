@@ -1,0 +1,181 @@
+# Phase-2 candidates + generational control arm, all on the OLD runtime (b10472)
+# so they sit in the same frame as 2026-08-27-roster-validation. Run before the
+# b10639 upgrade deliberately: anything measured after it is not comparable.
+#
+# The "generational" entries are NOT deletion candidates. Kal's directive
+# (2026-08-27): a legacy model is retired only once there is empirical evidence
+# it holds no niche its successor cannot cover. This run is that evidence.
+run_id: "2026-08-27-b10472-batch"
+date: "2026-08-27"
+node: "kalman9-framework-01"
+hardware: "AMD Strix Halo (Radeon 8060S iGPU), GTT unlock ACTIVE (gttsize=131072), ~122 GB usable"
+backend: "unsloth-studio"
+runtime_build: "b10472-mix-4b653db"
+runtime_build_reported: "0.1.1-dev (build 10472, commit 7a556b8f9)"
+api: "/v1/chat/completions"
+request_constants:
+  seed: 42
+  max_tokens: 8192
+  profile: thinking
+  reasoning_effort: low
+
+axis: cfg                             # "<model>__<tag>"; each cfg gets its own outputs/ dir
+records: "results.jsonl"
+outputs: "outputs/<cfg>/<task>--thinking--low.txt"
+grading: "py scripts/utils/grade_sweep.py results/sweeps/2026-08-27-b10472-batch results --layout cfg"
+
+# t/s given as reasoning / code / summarize; quality as content-channel pass-fail
+# in the same order. "capped" = finish_reason=length (hit max_tokens).
+entries:
+  - cfg: "Qwen3.6-35B-A3B-MTP__default"
+    role: "phase-2 candidate (issue #10)"
+    quant: "UD-Q8_K_XL"
+    size_gb: 36
+    tps: "57.55 / 58.23 / 50.04"
+    quality: "pass / pass / pass"
+    note: >-
+      FASTEST VALIDATED MODEL. Default flags auto-select --spec-type draft-mtp (native MTP
+      head baked into the single GGUF, no sidecar) and it works cleanly — the direct
+      counter-example to Nemotron-3.5's MTP breakage on the same build.
+  - cfg: "Qwen3.6-35B-A3B-MTP__specoff"
+    role: "MTP ablation for the entry above"
+    tps: "43.81 / 43.09 / 41.63"
+    quality: "pass / pass / FAIL (653 tok, structure)"
+    note: >-
+      MTP is worth +31% to +35% on this model. See caveats.mtp_is_not_output_invariant —
+      turning MTP off did not merely slow it down, it changed the outputs.
+  - cfg: "Ornith-1.5-35B-A3B__default"
+    role: "phase-2 candidate (issue #10)"
+    quant: "Q8_0 (ornith-ai's own GGUF — NOT an unsloth UD quant)"
+    size_gb: 36
+    tps: "54.55 / 58.53 / 52.11"
+    quality: "pass / pass / pass"
+    note: >-
+      Statistical dead heat with Qwen3.6 and the most consistent across tasks. Caveat: off
+      the UD ladder, so quant quality is not comparable like-for-like with the Q8_K_XL field.
+  - cfg: "Nemotron-3-Nano-30B-A3B__default"
+    role: "generational control vs Nemotron-3.5-Lightning"
+    quant: "UD-Q8_K_XL"
+    size_gb: 38
+    tps: "39.71 / 41.74 / 40.53"
+    quality: "pass / pass / pass"
+    note: >-
+      3.5-Lightning is +9% to +16% faster (43.2/46.8/46.9, also 3/3) — a real but modest
+      generational gain. Nano's compensating niche: it runs correctly on DEFAULT flags,
+      whereas 3.5 must be launched with --speculative-type off or it returns 500s. Nano is
+      the safer of the two to hand to an unattended harness today.
+  - cfg: "gemma-3-27b-it__default"
+    role: "generational control vs the gemma-4 suite"
+    quant: "UD-Q8_K_XL"
+    size_gb: 32
+    tps: "6.65 / 6.74 / 6.34"
+    quality: "pass / pass / pass"
+    note: >-
+      gemma-4-26B-A4B-it is 5.5x faster at identical quality (3/3). No speed or quality niche.
+      One non-battery niche does exist and this battery cannot see it: gemma-3-27b ships an
+      mmproj-F32.gguf (vision projector) that the gemma-4 GGUFs on disk do not.
+  - cfg: "GLM-4.7-Flash-REAP-23B-A3B__default"
+    role: "pruned-variant control vs the GLM-4.7-Flash champion"
+    quant: "UD-Q8_K_XL"
+    size_gb: 26
+    tps: "30.59 / 31.27 / 24.29"
+    quality: "FAIL / FAIL / pass"
+    note: >-
+      The REAP-pruned 23B is SLOWER than the full 33G champion (32.34/38.64/33.28, 3/3 pass)
+      and fails two of three graders, including a 10,562-token code answer against the
+      champion's 6,169. Smaller on disk, worse on every axis measured. No niche found.
+  - cfg: "Qwen3-Coder-30B-A3B-Instruct__default"
+    role: "generational control vs Qwen3-Coder-Next"
+    quant: "UD-Q8_K_XL"
+    size_gb: 34
+    tps: "39.51 / 73.27 / 18.86"
+    quality: "pass / pass / FAIL (568 tok, structure)"
+    note: >-
+      73.27 t/s on the code task is the HIGHEST single figure in the entire study, with a
+      passing code grade. Weak on summarization (18.86 t/s, structure fail). A genuine
+      specialist profile — strong niche, and it beats its own successor outright (below).
+  - cfg: "Qwen3-Coder-Next__default"
+    role: "the presumed successor to Coder-30B"
+    quant: "UD-Q8_K_XL (3 shards)"
+    size_gb: 93
+    tps: "18.15 / HTTP 500 / 28.64"
+    quality: "FAIL / error / FAIL"
+    note: >-
+      GENERATIONAL INVERSION: the newer, 2.7x larger model loses to its predecessor on every
+      axis. 145 tokens on reasoning (no answer), a 500 on code, and 8,238 tokens on a
+      five-bullet summary. Used --spec-default, NOT MTP, so this is unrelated to the Nemotron
+      failure. CONFOUND: the 500 landed while the 104 GiB Qwen3.8-Flash-Next download was
+      still running, so memory/IO pressure is not excluded — re-test on an idle box before
+      treating this as settled.
+  - cfg: "MiniMax-M2.5__default"
+    role: "generational control vs MiniMax-M3"
+    quant: "UD-Q3_K_XL (4 shards)"
+    size_gb: 95
+    tps: "71.78 / 15.56 / 35.77  (ALL capped)"
+    quality: "FAIL / FAIL / FAIL"
+    note: >-
+      Loaded fine (so ~95 GB is within the ~122 GB ceiling), then hit the 8192-token cap on
+      ALL THREE tasks — it never terminates. The 71.78 t/s reasoning figure is the fastest
+      raw rate recorded anywhere in this study and is meaningless: it is a runaway generation.
+      CONFOUND: this is the only UD-Q3_K_XL model in an otherwise Q8 field, so the honest
+      conclusion is "the copy on disk is unusable for this battery", NOT "the model is bad".
+      Its intended comparison against M3 remains blocked — M3 cannot load on one node.
+
+  # --- Qwen3.8-27B speculation three-way (issue #10: "test MTP sidecar") ---
+  # Third leg is the roster run's default config: 13.53 / 13.52 / 13.16, 3/3
+  # (results/sweeps/2026-08-27-roster-validation/, run2).
+  - cfg: "Qwen3.8-27B__mtp"
+    role: "MTP SIDECAR TEST — the open checkbox on issue #10"
+    quant: "UD-Q8_K_XL + MTP/mtp-Qwen3.8-27B-Q4_0.gguf (1.3 GB sidecar)"
+    tps: "15.07 / 12.12 / 10.90"
+    quality: "pass / pass / pass"
+    note: >-
+      SIDECAR MECHANICS ANSWERED. The flag was previously unverified — the repo README
+      documents a trained MTP head but no CLI invocation. Empirically: studio AUTO-DISCOVERS
+      the sidecar from the model directory's MTP/ subfolder when launched with
+      `--speculative-type mtp`, and wires it as
+      `--model-draft /mnt/ai-models/unsloth/Qwen3.8-27B-GGUF/MTP/mtp-Qwen3.8-27B-Q4_0.gguf
+      --spec-type draft-mtp --spec-draft-n-max 2`. No manual -md path needed.
+      This is an EXTERNAL sidecar, unlike Qwen3.6 and Nemotron-3.5 whose MTP heads are baked
+      into the main GGUF.
+  - cfg: "Qwen3.8-27B__specoff"
+    role: "no-speculation floor for the three-way above"
+    tps: "6.77 / 6.52 / 6.26"
+    quality: "pass / pass / pass"
+    note: >-
+      Speculation is worth roughly 2x on this model (code 6.52 -> 13.52 t/s with the studio
+      default). But the MTP sidecar does NOT beat that default overall: +11% on reasoning,
+      -10% on code, -17% on summarize. All three configs grade 3/3, so this is a pure speed
+      question. RECOMMENDATION: keep studio's default; the sidecar is validated as working
+      but is not worth switching to. Contrast Qwen3.6, where MTP is worth +31-35%.
+
+summary: >-
+  Two new leaders, both clean 3/3: Qwen3.6-35B-A3B-MTP (57.6/58.2/50.0) and Ornith-1.5-35B
+  (54.6/58.5/52.1). Both beat the GLM-4.7-Flash champion by ~+50% and the previous roster
+  leader gemma-4-26B-A4B-it by ~+50%. Of the generational controls, exactly one legacy model
+  demonstrated a niche its successor cannot cover: Qwen3-Coder-30B-A3B-Instruct, which beats
+  Qwen3-Coder-Next outright.
+
+caveats:
+  mtp_is_not_output_invariant: >-
+    The Metrics model in UNSLOTH-DIRECTION.md classifies speculative type as an
+    OUTPUT-INVARIANT axis, on the strength of the 2026-08-26 phase-2 finding that same-seed
+    runs across spec modes produced byte-identical outputs on GLM-4.7-Flash. That does NOT
+    generalise to native-MTP models. Qwen3.6-35B-A3B-MTP produced materially different
+    outputs with MTP on vs off — 2947 vs 4432 tokens on reasoning, 764 vs 653 on summarize —
+    and the summarize grade flipped from pass to fail. Consequence: for a model with a native
+    MTP head, speculative type is an OUTPUT-CHANGING axis and must be graded, not measured on
+    speed alone. GLM has no native head, which is why the original finding held there.
+  quant_tiers_are_not_uniform: >-
+    MiniMax-M2.5 is UD-Q3_K_XL and Ornith is a non-UD Q8_0; everything else is UD-Q8_K_XL.
+    Speed comparisons across different quant tiers are not like-for-like and quality
+    comparisons even less so.
+  download_contention: >-
+    The 104 GiB Qwen3.8-Flash-Next download ran concurrently for the first ~8 entries. Disk
+    and page-cache pressure may have affected load times and the Qwen3-Coder-Next 500.
+  context_not_pinned: >-
+    `unsloth run` still auto-selects the context window per model (Coder-Next got -c 262144,
+    Nemotron -c 1048576, GLM -c 202752). Cross-model t/s carries an unpinned KV-footprint
+    variable. Pin -c explicitly in the next batch.
+
+driver_script: "roster_batch.py + batch_b10472.json (Framework ~; commit copies pending, issue #8)"

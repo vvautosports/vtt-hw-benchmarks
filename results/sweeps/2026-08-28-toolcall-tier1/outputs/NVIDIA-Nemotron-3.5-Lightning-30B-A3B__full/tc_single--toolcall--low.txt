@@ -1,0 +1,31 @@
+=== REASONING ===
+--- turn 1 ---
+We need to get current temperature in Denver. Use get_weather function with city "Denver". Unit optional; default maybe c? The function expects unit optional; we can omit or specify "c". We'll call function.
+
+=== CONTENT ===
+
+
+=== TOOLCALLS ===
+[
+ {
+  "name": "get_weather",
+  "arguments": {
+   "city": "Denver",
+   "unit": "c"
+  },
+  "arguments_raw": "{\"city\":\"Denver\",\"unit\":\"c\"}",
+  "args_parsed": true
+ }
+]
+
+=== META ===
+{
+ "finish_reason": "tool_calls",
+ "turns": 1,
+ "n_calls": 1,
+ "chain_depth_reached": 1,
+ "raw_toolcall_text_detected": false,
+ "args_parse_failures": 0,
+ "prompt_tokens": 334,
+ "case": "tc_single"
+}

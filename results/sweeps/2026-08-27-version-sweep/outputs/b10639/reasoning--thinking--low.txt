@@ -1,0 +1,76 @@
+=== REASONING ===
+We have a problem about three delivery trucks arriving at a warehouse on a fixed schedule:
+- Truck A returns every 12 minutes
+- Truck B returns every 18 minutes
+- Truck C returns every 30 minutes
+
+All three trucks arrive together at 6:00 AM. We need to determine how many times, between 6:00 AM and 6:00 PM inclusive (i.e., from 6:00 to 18:00 on the same day), they all arrive at the same moment.
+
+This is a classic "LCM problem". The times when all three arrive together are at intervals equal to the least common multiple (LCM) of their individual intervals.
+
+First, find the LCM of 12, 18, and 30.
+
+Let's compute:
+- Prime factors:
+  - 12 = 2^2 × 3^1
+  - 18 = 2^1 × 3^2
+  - 30 = 2^1 × 3^1 × 5^1
+- LCM takes the highest power of each prime: 2^2, 3^2, 5^1
+  - LCM = 4 × 9 × 5 = 180 minutes = 3 hours.
+
+So the three trucks will all arrive together every 180 minutes (3 hours).
+
+Now, we count the number of times they all arrive together from 6:00 AM to 6:00 PM inclusive.
+
+The times (in minutes after 6:00 AM) when they coincide:
+- 0 (6:00 AM)
+- 180 (9:00 AM)
+- 360 (12:00 PM/Noon)
+- 540 (3:00 PM)
+- 720 (6:0 PM)
+
+Let's verify: 720 minutes = 12 hours after 6:00 AM is 6:00 PM. So the list includes 0, 180, 360, 540, 720 minutes.
+
+Thus there are 5 times when they all arrive at the same moment.
+
+Answer is 5.
+
+Let's double-check by enumerating the times: At 6:00, 9:00, 12:00, 3:00, 6:00 PM.
+
+Alternatively, we can solve: The total time interval is 12 hours = 12*60 = 720 minutes. The interval between coincidences is 180 minutes. The number of multiples of 180 within [0, 720] inclusive is floor(720/180) + 1 = 4 + 1 = 5.
+
+Thus answer: 5.
+
+We should show reasoning step by step as requested.
+
+=== CONTENT ===
+The three trucks arrive together when the amount of time since 6:00 AM is a common multiple of 12, 18, and 30 minutes.  
+The smallest such interval is the **least common multiple** (LCM).
+
+**Find the LCM of 12, 18, and 30:**
+- 12 = 2² × 3  
+- 18 = 2 × 3²  
+- 30 = 2 × 3 × 5  
+
+Take the highest power of each prime:
+- 2 → 2² (from 12)
+- 3 → 3² (from 18)
+- 5 → 5¹ (from 30)
+
+LCM = 2² × 3² × 5 = 4 × 9 × 5 = **180 minutes = 3 hours**.
+
+Thus all three trucks meet every 180 minutes.
+
+**Count the meetings from 6:00 AM to 6:00 PM inclusive:**
+- Total time span = 12 hours = 12 × 60 = **720 minutes**.
+- Number of 180‑minute intervals in 720 minutes = 720 ÷ 180 = 4.
+- Including the starting moment at 6:00 AM, we have 4 + 1 = **5 meetings**.
+
+The meeting times are:
+- 6:00 AM (0 min)
+- 9:00 AM (180 min)
+- 12:00 PM (360 min)
+- 3:00 PM (540 min)
+- 6:00 PM (720 min)
+
+**ANSWER: 5**

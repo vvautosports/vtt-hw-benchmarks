@@ -1,0 +1,106 @@
+# Why did Qwen3-Coder-30B's code t/s go DOWN (74.5 -> 43.6) when --disable-tools raised
+# every other number on the roster? A 2x2 of tools on/off x speculation auto/off.
+# Answer: the 74.5 was real throughput on GARBAGE WORK.
+run_id: "2026-08-28-coder30b-code-anomaly"
+date: "2026-08-28"
+node: "kalman9-framework-01"
+hardware: "AMD Strix Halo (Radeon 8060S iGPU), GTT unlock ACTIVE, ~122 GB usable"
+backend: "unsloth-studio"
+runtime_build: "b10639-mix-f6f92fe"
+api: "/v1/chat/completions"
+isolation: "fresh-server-per-task (isolated_battery.py)"
+model: "Qwen3-Coder-30B-A3B-Instruct, UD-Q8_K_XL"
+request_constants:
+  seed: 42
+  max_tokens: 8192
+  profile: thinking
+  reasoning_effort: low
+launch_env:
+  UNSLOTH_DISABLE_UNIFIED_MEMORY: "1"
+
+axis: cfg
+records: "results.jsonl"
+outputs: "outputs/<cfg>/<task>--thinking--low.txt"
+grading: "py scripts/utils/grade_sweep.py results/sweeps/2026-08-28-coder30b-code-anomaly results --layout cfg"
+driver_script: "scripts/sweeps/isolated_battery.py"
+
+# t/s | completion_tokens | prompt_tokens, per task
+matrix:
+  - cfg: "toolson_specauto"
+    flags: ""
+    reasoning: "40.29 | 1769 tok | ptok 3327"
+    code: "65.50 | 3009 tok | ptok 4324"
+    summarize: "33.19 | 277 tok | ptok 1833"
+    note: "Reproduces the old inflated regime. This is the config that produced 74.5."
+  - cfg: "toolsoff_specauto"
+    flags: "--disable-tools"
+    reasoning: "43.77 | 522 tok | ptok 101"
+    code: "43.61 | 737 tok | ptok 103"
+    summarize: "41.11 | 326 tok | ptok 527"
+    note: "Today's clean re-baseline regime. Reproduces 43.6 exactly."
+  - cfg: "toolson_specoff"
+    flags: "--speculative-type off"
+    reasoning: "40.61 | 3425 tok | ptok 4881"
+    code: "40.68 | 3264 tok | ptok 4370"
+    summarize: "33.30 | 277 tok | ptok 1833"
+    note: "THE DECISIVE CELL. Same injected work, speculation removed: code collapses 65.5 -> 40.7."
+  - cfg: "toolsoff_specoff"
+    flags: "--disable-tools --speculative-type off"
+    reasoning: "43.80 | 522 tok | ptok 101"
+    code: "43.99 | 728 tok | ptok 103"
+    summarize: "40.60 | 284 tok | ptok 527"
+    note: "Clean work, speculation removed. Identical to specauto — speculation buys nothing here."
+
+summary: >-
+  12/12 cells pass. The explanation is in the TOKEN COUNTS, not the t/s.
+
+  Server-side tools inflate the code task's OUTPUT by ~4.3x: 3009-3264 completion tokens
+  with tools on versus 728-737 with them off. (Prompt tokens tell the same story: 4324 vs
+  103.) That extra output is tool-loop scaffolding — long, highly repetitive, structured
+  text, which is precisely the shape n-gram speculative drafting accelerates best.
+
+  So the famous 74.5 t/s "code king" figure was REAL THROUGHPUT ON GARBAGE WORK: the model
+  was racing through thousands of tokens of injected boilerplate that no consumer wanted,
+  and speculation made it race faster.
+
+  Two controls prove it rather than merely suggesting it:
+
+  1. Hold the injected work, remove speculation (toolson_specoff): code falls 65.5 -> 40.68,
+     a 38% drop. The speed was speculation-dependent.
+  2. Hold speculation, remove the injected work (toolsoff_specauto vs toolsoff_specoff):
+     43.61 vs 43.99, a 0.9% difference. On genuine ~730-token code output, speculation
+     contributes essentially NOTHING.
+
+  Note the effect is task-specific: with tools on, speculation helps code enormously (+61%)
+  but does nothing for reasoning (40.29 vs 40.61) or summarize (33.19 vs 33.30). Only the
+  code task's tool loop generated enough repetitive text for drafting to exploit.
+
+verdicts:
+  anomaly_resolved: >-
+    YES. 74.5 was an artifact of speculative decoding accelerating tool-injection
+    boilerplate. It was never a measure of code-generation speed.
+  true_code_speed: >-
+    ~43.6-44.0 t/s, stable with speculation on or off. Use 43.6 (the clean re-baseline).
+  code_king_title: >-
+    RETIRED on speed grounds. Qwen3-Coder-30B is beaten on raw clean throughput by
+    Ornith-1.5 (63.9), Nemotron-3.5 (62.0) and Qwen3.6-35B-MTP (62.3) on the code task.
+    It keeps a 3/3 quality record; choose it for code on quality, not throughput.
+  corpus_wide_implication: >-
+    IMPORTANT. Any pre---disable-tools t/s figure is inflated in proportion to how much
+    tool boilerplate that model emitted AND how well speculation drafted it. The
+    distortion is therefore uneven across models and tasks, not a constant offset — it
+    cannot be corrected by scaling. Every such number must be re-measured, not adjusted.
+
+caveats:
+  single_seed: >-
+    One sample per cell. The headline effects (65.5 vs 40.68; 4.3x token inflation) are far
+    outside plausible noise; the small ones (43.61 vs 43.99) are within it and are reported
+    as "no difference", which is the claim being made.
+  speculation_type_unspecified: >-
+    "auto" is studio's own selection, not a pinned strategy — the run does not record WHICH
+    speculative mode was chosen (n-gram is the likely one given the text shape, but that is
+    inference, not measurement). Pinning --speculative-type ngram explicitly would confirm
+    the mechanism.
+  quality_unaffected: >-
+    All 12 cells pass. Tool injection changed throughput and token economy, never
+    correctness, which is consistent with every earlier finding on this axis.

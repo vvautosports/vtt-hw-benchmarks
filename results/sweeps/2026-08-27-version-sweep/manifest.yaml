@@ -1,0 +1,87 @@
+# llama.cpp-version sweep — issue #8, workstream C.
+# Same model, same quant, same prompts, same seed; ONLY the runtime build moves.
+# This is the control that makes day-zero optimization curves measurable: without
+# it, a model tested on a newer build cannot be compared to one tested on an older.
+run_id: "2026-08-27-version-sweep"
+date: "2026-08-27"
+node: "kalman9-framework-01"
+hardware: "AMD Strix Halo (Radeon 8060S iGPU), GTT unlock ACTIVE (gttsize=131072)"
+backend: "unsloth-studio"
+model: "GLM-4.7-Flash"                # the standing champion — the natural control subject
+quant: "UD-Q8_K_XL"
+model_path: "/mnt/ai-models/unsloth/GLM-4.7-Flash-GGUF/GLM-4.7-Flash-UD-Q8_K_XL.gguf"
+context_length: 202752
+api: "/v1/chat/completions"
+request_constants:
+  seed: 42
+  max_tokens: 8192
+  profile: thinking
+  reasoning_effort: low
+server_config: "studio defaults (--spec-default --parallel 4)"
+
+axis: runtime_build                   # records are tagged `build_tag`
+
+builds:
+  b10472:
+    release: "b10472-mix-4b653db (2026-08-18)"
+    reported: "0.1.1-dev (build 10472, commit 7a556b8f9)"
+    captured: "2026-08-27 ~11:47 local, before the upgrade"
+    results:
+      reasoning: "32.34 t/s, 2128 tok, PASS"
+      code: "38.64 t/s, 6169 tok, PASS"
+      summarize: "33.28 t/s, 1905 tok, PASS"
+  b10639:
+    release: "b10639-mix-f6f92fe (2026-08-27 04:40 UTC)"
+    reported: "0.3.0-dev (build 10639, commit 2a36554fc)"
+    studio_version: "unsloth 2026.8.22 (was 2026.8.21)"
+    captured: "2026-08-27 ~13:47 local, immediately after `unsloth studio update`"
+    why: >-
+      Carries two upstream PRs the fork cherry-picks ahead of merge ("mix"):
+      ggml-org/llama.cpp#27742 qwen4exp (Qwen3.8-Flash-Next) and #27754 GLM-5-Next
+      (GLM-5.3-Flash). Both are still open upstream. Upgrading unblocks the long-standing
+      qwen4exp blocker; capturing the b10472 control first is what keeps the roster numbers
+      comparable across the change.
+    results:
+      reasoning: "31.72 t/s, 908 tok, 28.6s wall, PASS"
+      code: "31.28 t/s, 12339 tok, 394.4s wall, PASS"
+      summarize: "31.57 t/s, 870 tok, 27.6s wall, **FAIL** (0 bullets)"
+    side_effect: >-
+      whisper.cpp dictation is now UNAVAILABLE. The installer reports: "no compatible
+      prebuilt (installed llama.cpp b10639-mix-f6f92fe; whisper requires
+      b10472-mix-4b653db)". Curated whisper.cpp dictation stays broken until upstream
+      publishes paired releases in llama.cpp-then-whisper.cpp order. Browser and
+      Transformers dictation are unaffected.
+
+findings: >-
+  The upgrade is a MIXED result for the champion, and it would have been invisible without
+  the control.
+
+  Throughput: b10639 is slower on all three tasks — reasoning -1.9%, summarize -5.1%, and
+  code -19.0% (38.64 -> 31.28 t/s). The code figure is the interesting one: on b10472 code
+  was the FASTEST task at 38.64 t/s, because speculation pays best on structured text (the
+  2026-08-26 phase-2 run measured +69% on code from speculation). On b10639 all three tasks
+  land within 31.3-31.7 t/s — a flat profile that looks exactly like speculation no longer
+  helping. Worth an explicit spec-type sweep on the new build before concluding.
+
+  Token economy moved in BOTH directions, and it dominates wall-clock: reasoning fell 2128
+  -> 908 tokens (65.8s -> 28.6s wall, a 2.3x end-to-end WIN despite the lower t/s) while
+  code rose 6169 -> 12339 tokens (159.7s -> 394.4s, a 2.5x end-to-end LOSS). Ranking builds
+  on t/s alone would have missed both.
+
+  Quality: summarize REGRESSED from pass to fail. b10472 produced the requested five bullet
+  points; b10639 returned a prose paragraph with a TL;DR and no bullets of any style — so
+  this is an instruction-following regression, not a grader artifact (verified by reading
+  the transcript). Same model, same quant, same seed, same prompt: only the runtime moved.
+
+  Consequence for the metrics model: runtime build is an OUTPUT-CHANGING axis and must be
+  quality-graded, not measured on speed alone.
+
+records: "results.jsonl"
+outputs: "outputs/<build_tag>/<task>--thinking--low.txt"
+grading: "py scripts/utils/grade_sweep.py results/sweeps/2026-08-27-version-sweep results --layout build_tag"
+
+notes: >-
+  Per-task rates differ substantially within a single build (code 38.6 vs reasoning 32.3 t/s),
+  so compare build-to-build PER TASK, never on a single averaged number. Token counts are
+  recorded alongside because a build that changes generation length changes wall-clock without
+  changing throughput.

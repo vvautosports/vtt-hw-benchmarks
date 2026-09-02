@@ -1,0 +1,65 @@
+=== REASONING ===
+Everything passes: 6/6 doctests, clear errors. Final answer including the code and notes. File parse_ranges.py has already been created for the user.
+
+
+=== CONTENT ===
+All 6 doctests pass (`failed=0, attempted=6`) and error messages are clean. The function is saved as `parse_ranges.py`:
+
+```python
+def parse_ranges(s: str) -> list[int]:
+    """Parse a comma-separated string of ints and inclusive ranges.
+
+    Whitespace around numbers, hyphens, and commas is ignored. A segment
+    like '7-9' expands to every integer in [7, 9]; a reversed range such
+    as '9-7' raises ValueError. Empty or whitespace-only input returns [].
+
+    >>> parse_ranges('1-3,5,7-9')
+    [1, 2, 3, 5, 7, 8, 9]
+    >>> parse_ranges(' 1 - 3 , 5 ')
+    [1, 2, 3, 5]
+    >>> parse_ranges('4')
+    [4]
+    >>> parse_ranges('')
+    []
+    >>> parse_ranges('   ')
+    []
+    >>> parse_ranges('9-7')
+    Traceback (most recent call last):
+        ...
+    ValueError: reversed range '9-7': 9 > 7
+    """
+    if not s.strip():
+        return []
+
+    result: list[int] = []
+    for part in s.split(','):
+        part = part.strip()
+        if not part:
+            raise ValueError(f"empty segment in range string {s!r}")
+
+        bounds = [int(tok) for tok in part.split('-')]
+        if len(bounds) > 2:
+            raise ValueError(f"invalid segment {part!r}")
+        if len(bounds) == 1:
+            result.append(bounds[0])
+        else:
+            start, end = bounds
+            if start > end:
+                raise ValueError(f"reversed range {part!r}: {start} > {end}")
+            result.extend(range(start, end + 1))
+
+    return result
+
+
+if __name__ == "__main__":
+    import doctest
+    doctest.testmod()
+```
+
+**Design notes**
+
+- **Whitespace:** each comma-separated part is `strip()`ped, and `int()` tolerates surrounding spaces on the numbers themselves — so `' 1 - 3 '` works (tabs/newlines too).
+- **Reversed ranges:** detected explicitly with `start > end` and raised as `ValueError`; a degenerate range like `'5-5'` correctly yields `[5]`.
+- **Empty input:** handled by the initial `if not s.strip()`, covering both `''` and whitespace-only strings.
+- **Malformed input** (not specified, but kept consistent): non-numbers (`'abc'`), dangling bounds (`'1-'`), double separators (`'1,,2'`), and chains (`'1-2-3'`) all raise `ValueError` with clear messages — I verified each on Python 3.13.
+- The doctest traceback uses a bare `...` for the stack body; I confirmed this matches under the **default** doctest checker (no `ELLIPSIS`/`IGNORE_EXCEPTION_DETAIL` flags needed) and that all 6 examples pass via both `python -m doctest parse_ranges.py` and `doctest.testmod()`.

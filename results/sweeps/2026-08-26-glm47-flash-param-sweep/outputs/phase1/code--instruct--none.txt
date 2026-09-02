@@ -1,0 +1,51 @@
+=== REASONING ===
+The user asked me to write a Python function parse_ranges(s: str) -> list[int] with specific requirements and include a doctest block with at least 5 examples. I've created the complete solution with:
+
+1. The parse_ranges function that:
+   - Parses strings like '1-3,5,7-9' into [1, 2, 3, 5, 7, 8, 9]
+   - Ignores whitespace around numbers and commas
+   - Raises ValueError for reversed ranges like '9-7'
+   - Returns [] for empty or whitespace-only input
+
+2. A comprehensive doctest block with 7 examples covering:
+   - Basic range parsing
+   - Whitespace handling
+   - Empty string input
+   - Whitespace-only input
+   - Single range
+   - Multiple ranges
+   - Single number
+
+3. All tests pass successfully
+
+I've provided the complete solution in parse_ranges.py and created a summary document explaining the implementation, how to run it, and the test results.
+
+The user should now have everything they need to use this function. Let me provide a final summary of what was delivered.
+
+=== CONTENT ===
+Perfect! I've created a complete solution for the `parse_ranges` function with all the required features and comprehensive doctests.
+
+## What's Included
+
+### File: `parse_ranges.py`
+A fully functional Python function that:
+- ✅ Parses strings like `'1-3,5,7-9'` → `[1, 2, 3, 5, 7, 8, 9]`
+- ✅ Ignores whitespace around numbers and commas
+- ✅ Raises `ValueError` for reversed ranges (e.g., `'9-7'`)
+- ✅ Returns `[]` for empty or whitespace-only input
+
+### Doctest Block with 7 Examples:
+1. **Basic range parsing**: `'1-3,5,7-9'` → `[1, 2, 3, 5, 7, 8, 9]`
+2. **Whitespace handling**: `' 1 - 3 , 5 , 7 - 9 '` → `[1, 2, 3, 5, 7, 8, 9]`
+3. **Empty string**: `''` → `[]`
+4. **Whitespace-only**: `'   '` → `[]`
+5. **Single range**: `'10-12'` → `[10, 11, 12]`
+6. **Multiple ranges**: `'1-3,6-8'` → `[1, 2, 3, 6, 7, 8]`
+7. **Single number**: `'5'` → `[5]`
+
+### How to Run:
+```bash
+python parse_ranges.py -v
+```
+
+All 7 doctests pass successfully! The implementation includes proper error handling with clear error messages for invalid inputs.

@@ -1,0 +1,33 @@
+# Nemotron-3.5 summarize TL;DR-label probe — is the missing literal "TL;DR" a fixed
+# template/family artifact or sampling luck? ANSWER: sampling-dependent. Same box, same
+# studio path, same config (thinking/low, max_tokens 8192): seed 42 emits the label,
+# seed 43 does not (5 correct bullets both times).
+run_id: "2026-08-28-nemotron-tldr-seeds"
+date: "2026-08-28"
+node: "hp-g1a-windows"
+backend: "unsloth-studio (unsloth run), fresh server per seed"
+model: "NVIDIA-Nemotron-3.5-Lightning-30B-A3B-UD-Q8_K_XL"
+driver: "one-off probe (scratchpad), reusing g1a_validation.py launch/post"
+
+seeds:
+  - {seed: 42, has_tldr: true,  bullets: 5, correct: true,  source: "2026-08-28-g1a-validation (same day, same config)"}
+  - {seed: 43, has_tldr: false, bullets: 5, correct: false, wall_s: 180.8}
+  - {seed: 44, result: "NO DATA — server wedge (see below)"}
+  - {seed: 45, result: "not run (probe aborted at the wedge)"}
+
+verdict: >
+  The TL;DR-label omission is SAMPLING-DEPENDENT, not deterministic: pass at seed 42 and
+  fail at seed 43 under identical serving. This matches the framework picture (toolsoff
+  rebaseline fail at seed 42 there — different prompt-composition context) and reframes
+  the "Nemotron family habit" as a high-frequency formatting instability rather than a
+  hard template defect: the model knows the contract and drops the label stochastically.
+  Substance (5 correct bullets) never varied. Frequency estimation would need many seeds;
+  the binary question is settled.
+
+incident:
+  g1a_server_wedge: >
+    The seed-44 request wedged: server healthy, request accepted (running=1), but
+    gen_tok_s=0.0 indefinitely — the client timed out after 30 min on a request that
+    should take ~3 min. First wedge observed on the G1a, on the 5th consecutive fresh
+    server load of the evening. Killed cleanly. WATCH ITEM: if it recurs, the G1a needs
+    the same per-request watchdog treatment the framework drivers already have.

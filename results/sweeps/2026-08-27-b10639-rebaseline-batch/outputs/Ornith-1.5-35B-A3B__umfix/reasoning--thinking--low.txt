@@ -1,0 +1,51 @@
+=== REASONING ===
+LCM of 12, 18, 30.
+
+12 = 2^2·3
+18 = 2·3^2
+30 = 2·3·5
+
+LCM = 2^2·3^2·5 = 4·9·5 = 180 minutes.
+
+So all three coincide every 180 minutes = 3 hours.
+
+Between 6:00 AM and 6:00 PM inclusive = 12 hours = 720 minutes.
+
+Times at 0, 180, 360, 540, 720 = 5 times.
+
+ANSWER: 5
+
+
+=== CONTENT ===
+## Reasoning
+
+**When do all three trucks coincide?**
+
+They all arrive together at 6:00 AM (t = 0). The next time all three arrive at the same moment is at the least common multiple (LCM) of their return intervals.
+
+Decompose each interval into prime factors:
+- 12 = 2² · 3
+- 18 = 2 · 3²
+- 30 = 2 · 3 · 5
+
+**LCM(12, 18, 30)** = take the highest power of each prime:
+$$2^2 \cdot 3^2 \cdot 5 = 4 \cdot 9 \cdot 5 = 180 \text{ minutes}$$
+
+So all three trucks arrive together every **180 minutes = 3 hours**.
+
+**Count the coincidences within the window**
+
+The window is 6:00 AM to 6:00 PM inclusive = 12 hours = **720 minutes**.
+
+The trucks meet at times:
+- t = 0 min → 6:00 AM
+- t = 180 min → 9:00 AM
+- t = 360 min → 12:00 PM (noon)
+- t = 540 min → 3:00 PM
+- t = 720 min → 6:00 PM
+
+All of these fall within (and at the endpoints of) the window. That's the sequence 0, 180, 360, 540, 720.
+
+To verify the count: number of meetings = ⌊720 / 180⌋ + 1 = 4 + 1 = 5 (the +1 includes the starting moment at 6:00 AM).
+
+ANSWER: 5

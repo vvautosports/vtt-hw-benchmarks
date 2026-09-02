@@ -1,0 +1,71 @@
+=== REASONING ===
+We are given: "Three delivery trucks all arrive at a warehouse together at 6:00 AM. Truck A returns every 12 minutes, truck B every 18 minutes, and truck C every 30 minutes. Between 6:00 AM and 6:00 PM inclusive, how many times do all three trucks arrive at the same moment? Show your reasoning, then state the final count on its own line as 'ANSWER: <n>'."
+
+We need to find the number of times from 6:00 AM to 6:00 PM inclusive that all three trucks arrive at the same moment.
+
+First, they all arrive together at 6:00 AM. Then they will arrive together again at the least common multiple (LCM) of their intervals. The intervals: 12 minutes, 18 minutes, 30 minutes.
+
+Find LCM(12, 18, 30).
+
+12 = 2^2 * 3
+18 = 2 * 3^2
+30 = 2 * 3 * 5
+
+LCM = 2^2 * 3^2 * 5 = 4 * 9 * 5 = 180 minutes.
+
+So all three arrive together every 180 minutes (3 hours).
+
+Now the time interval: from 6:00 AM to 6:00 PM inclusive.
+
+6:00 AM to 6:00 PM is exactly 12 hours. 12 hours = 12 * 60 = 720 minutes.
+
+We need to count the number of times (including both start and end) that the arrival occurs.
+
+Start at 6:00 AM: time 0 minutes.
+Then every 180 minutes: 180, 360, 540, 720 minutes.
+
+Check: 720 minutes = 12 hours exactly, which is 6:00 PM inclusive? The problem says "between 6:00 AM and 6:00 PM inclusive". Inclusive means both endpoints are included. So 6:00 PM is included.
+
+So the times are at minutes: 0, 180, 360, 540, 720. That's 5 times.
+
+But let's verify: 6:00 AM (0 min), 9:00 AM (180 min), 12:00 PM (360 min), 3:00 PM (540 min), 6:00 PM (720 min). All are within the interval inclusive.
+
+So count = 5.
+
+But we need to be careful: "Between 6:00 AM and 6:00 PM inclusive" - sometimes "between" might be interpreted as exclusive, but it explicitly says "inclusive". So include both ends.
+
+Thus the answer is 5.
+
+Check: 720 / 180 = 4 intervals, so number of events = 4 + 1 = 5.
+
+Thus answer: 5.
+
+Now format: "ANSWER: <5>" but the instructions say: "Show your reasoning, then state the final count on its own line as 'ANSWER: <n>'." So I'll output reasoning, then a separate line with ANSWER: 5.
+
+=== CONTENT ===
+All three trucks arrive together at 6:00 AM. After that, they will all arrive together again at the least common multiple (LCM) of their individual return intervals.
+
+- Truck A: every 12 minutes
+- Truck B: every 18 minutes
+- Truck C: every 30 minutes
+
+Prime factorizations:
+- 12 = 2² × 3
+- 18 = 2 × 3²
+- 30 = 2 × 3 × 5
+
+LCM = 2² × 3² × 5 = 4 × 9 × 5 = 180 minutes (3 hours).
+
+The time interval from 6:00 AM to 6:00 PM inclusive is 12 hours = 720 minutes.
+
+The moments all three arrive together are at multiples of 180 minutes starting from 0:
+- 0 min (6:00 AM)
+- 180 min (9:00 AM)
+- 360 min (12:00 PM)
+- 540 min (3:00 PM)
+- 720 min (6:00 PM)
+
+Since both endpoints are included, there are 5 instances.
+
+ANSWER: 5
+

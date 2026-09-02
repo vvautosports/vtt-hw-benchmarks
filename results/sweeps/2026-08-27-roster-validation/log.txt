@@ -1,0 +1,73 @@
+[23:02:50] SMOKE run start; cmdline GTT args active: False
+[23:02:51] smoke download rc=0 ok=True
+[23:03:11] SMOKE-Qwen3.5-9B: loaded (gtt_used=328MiB), running battery
+[23:03:29]   reasoning: wall=18.5 tok=583 err=None
+[23:04:13]   code: wall=43.2 tok=1853 err=None
+[23:04:24]   summarize: wall=11.0 tok=367 err=None
+[23:04:24] restoring GLM baseline serve
+[23:04:46] baseline restored healthy=True
+[23:04:46] OVERNIGHT RUN COMPLETE
+[00:41:28] overnight run start; cmdline GTT args active: False
+[00:41:28] download unsloth/Qwen3.8-27B-GGUF (Qwen3.8-27B-UD-Q8_K_XL.gguf) -> /mnt/ai-models/unsloth/Qwen3.8-27B-GGUF
+[00:46:06] staged Qwen3.8-27B: /mnt/ai-models/unsloth/Qwen3.8-27B-GGUF/Qwen3.8-27B-UD-Q8_K_XL.gguf
+[00:46:06] download unsloth/gemma-4-26B-A4B-it-GGUF (*UD-Q8_K_XL*.gguf) -> /mnt/ai-models/unsloth/gemma-4-26B-A4B-it-GGUF
+[00:54:00] staged gemma-4-26B-A4B-it: /mnt/ai-models/unsloth/gemma-4-26B-A4B-it-GGUF/gemma-4-26B-A4B-it-UD-Q8_K_XL.gguf
+[00:54:00] download unsloth/NVIDIA-Nemotron-3.5-Lightning-30B-A3B-GGUF (NVIDIA-Nemotron-3.5-Lightning-30B-A3B-UD-Q8_K_XL.gguf) -> /mnt/ai-models/unsloth/NVIDIA-Nemotron-3.5-Lightning-30B-A3B-GGUF
+[01:04:42] staged Nemotron-3.5-Lightning-30B-A3B: /mnt/ai-models/unsloth/NVIDIA-Nemotron-3.5-Lightning-30B-A3B-GGUF/NVIDIA-Nemotron-3.5-Lightning-30B-A3B-UD-Q8_K_XL.gguf
+[01:04:42] download unsloth/gemma-4-31B-it-GGUF (*UD-Q8_K_XL*.gguf) -> /mnt/ai-models/unsloth/gemma-4-31B-it-GGUF
+[01:09:58] staged gemma-4-31B-it: /mnt/ai-models/unsloth/gemma-4-31B-it-GGUF/gemma-4-31B-it-UD-Q8_K_XL.gguf
+[01:09:58] download unsloth/MiniMax-M3-GGUF (UD-Q3_K_XL/*) -> /mnt/ai-models/unsloth/MiniMax-M3-GGUF
+[02:05:28] staged MiniMax-M3: /mnt/ai-models/unsloth/MiniMax-M3-GGUF/UD-Q3_K_XL/MiniMax-M3-UD-Q3_K_XL-00001-of-00005.gguf
+[02:05:28] downloads done: 5/5 staged
+[02:06:08] Qwen3.8-27B: loaded (gtt_used=330MiB), running battery
+[02:07:05]   reasoning: wall=56.5 tok=754 err=None
+[02:13:19]   code: wall=374.4 tok=4716 err=None
+[02:14:27]   summarize: wall=68.0 tok=884 err=None
+[02:14:58] gemma-4-26B-A4B-it: loaded (gtt_used=330MiB), running battery
+[02:15:52]   reasoning: wall=54.2 tok=1951 err=None
+[02:17:21]   code: wall=88.8 tok=3205 err=None
+[02:18:09]   summarize: wall=47.4 tok=1628 err=None
+[02:18:41] Nemotron-3.5-Lightning-30B-A3B: loaded (gtt_used=345MiB), running battery
+[02:19:04]   reasoning: wall=23.2 tok=960 err=None
+[02:21:21]   code: wall=136.7 tok=7085 err=None
+[02:21:47]   summarize: wall=25.7 tok=1169 err=None
+[02:22:27] gemma-4-31B-it: loaded (gtt_used=330MiB), running battery
+[02:24:00]   reasoning: wall=92.6 tok=513 err=None
+[02:25:44]   code: wall=103.9 tok=600 err=None
+[02:26:23]   summarize: wall=39.2 tok=211 err=None
+[02:41:34] MiniMax-M3: LOAD FAILED (arch unsupported or crash)
+[02:41:34] restoring GLM baseline serve
+[02:41:54] baseline restored healthy=True
+[02:41:54] OVERNIGHT RUN COMPLETE
+[04:13:07] overnight run start; cmdline GTT args active: True
+[04:13:07] download unsloth/Qwen3.8-27B-GGUF (Qwen3.8-27B-UD-Q8_K_XL.gguf) -> /mnt/ai-models/unsloth/Qwen3.8-27B-GGUF
+[04:13:08] staged Qwen3.8-27B: /mnt/ai-models/unsloth/Qwen3.8-27B-GGUF/Qwen3.8-27B-UD-Q8_K_XL.gguf
+[04:13:08] download unsloth/gemma-4-26B-A4B-it-GGUF (*UD-Q8_K_XL*.gguf) -> /mnt/ai-models/unsloth/gemma-4-26B-A4B-it-GGUF
+[04:13:08] staged gemma-4-26B-A4B-it: /mnt/ai-models/unsloth/gemma-4-26B-A4B-it-GGUF/gemma-4-26B-A4B-it-UD-Q8_K_XL.gguf
+[04:13:08] download unsloth/NVIDIA-Nemotron-3.5-Lightning-30B-A3B-GGUF (NVIDIA-Nemotron-3.5-Lightning-30B-A3B-UD-Q8_K_XL.gguf) -> /mnt/ai-models/unsloth/NVIDIA-Nemotron-3.5-Lightning-30B-A3B-GGUF
+[04:13:08] staged Nemotron-3.5-Lightning-30B-A3B: /mnt/ai-models/unsloth/NVIDIA-Nemotron-3.5-Lightning-30B-A3B-GGUF/NVIDIA-Nemotron-3.5-Lightning-30B-A3B-UD-Q8_K_XL.gguf
+[04:13:08] download unsloth/gemma-4-31B-it-GGUF (*UD-Q8_K_XL*.gguf) -> /mnt/ai-models/unsloth/gemma-4-31B-it-GGUF
+[04:13:09] staged gemma-4-31B-it: /mnt/ai-models/unsloth/gemma-4-31B-it-GGUF/gemma-4-31B-it-UD-Q8_K_XL.gguf
+[04:13:09] download unsloth/MiniMax-M3-GGUF (UD-Q3_K_XL/*) -> /mnt/ai-models/unsloth/MiniMax-M3-GGUF
+[04:13:09] staged MiniMax-M3: /mnt/ai-models/unsloth/MiniMax-M3-GGUF/UD-Q3_K_XL/MiniMax-M3-UD-Q3_K_XL-00001-of-00005.gguf
+[04:13:09] downloads done: 5/5 staged
+[04:13:29] Qwen3.8-27B: loaded (gtt_used=198MiB), running battery
+[04:14:25]   reasoning: wall=55.7 tok=754 err=None
+[04:22:07]   code: wall=461.7 tok=6244 err=None
+[04:23:14]   summarize: wall=67.2 tok=884 err=None
+[04:23:44] gemma-4-26B-A4B-it: loaded (gtt_used=190MiB), running battery
+[04:24:38]   reasoning: wall=53.3 tok=1951 err=None
+[04:26:05]   code: wall=87.1 tok=3205 err=None
+[04:26:51]   summarize: wall=46.6 tok=1628 err=None
+[04:27:22] Nemotron-3.5-Lightning-30B-A3B: loaded (gtt_used=221MiB), running battery
+[04:29:34]   reasoning: wall=132.6 tok=None err=<HTTPError 500: 'Internal Server Error'>
+[04:32:28]   code: wall=174.2 tok=None err=<HTTPError 500: 'Internal Server Error'>
+[04:33:09]   summarize: wall=40.6 tok=1008 err=None
+[04:33:42] gemma-4-31B-it: loaded (gtt_used=190MiB), running battery
+[04:35:16]   reasoning: wall=94.4 tok=526 err=None
+[04:36:57]   code: wall=101.2 tok=584 err=None
+[04:37:34]   summarize: wall=36.8 tok=198 err=None
+[04:52:45] MiniMax-M3: LOAD FAILED (arch unsupported or crash)
+[04:52:45] restoring GLM baseline serve
+[04:53:15] baseline restored healthy=True
+[04:53:15] OVERNIGHT RUN COMPLETE

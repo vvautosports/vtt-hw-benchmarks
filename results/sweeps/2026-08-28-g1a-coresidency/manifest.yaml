@@ -1,0 +1,46 @@
+# HP G1a light-pair co-residency — the first co-residency run graded for CORRECTNESS,
+# not just throughput. Answers: does one Windows Strix Halo box hosting two models keep
+# its answers right under memory pressure and concurrent load? YES.
+run_id: "2026-08-28-g1a-coresidency"
+date: "2026-08-28"
+node: "hp-g1a-windows"
+hardware: "HP ZBook Ultra G1a — AMD Strix Halo (Radeon 8060S iGPU), Windows 11, ~96 GB visible"
+backend: "llama-server.exe driven DIRECTLY (studio ROCm gfx1151 build), ports 8801/8802"
+driver_script: "scripts/sweeps/g1a_coresidency.py"
+ctx: 16384
+
+pair:   # plan's GLM+Coder pair not in this box's HF cache; same architectural question, local models
+  - {model: "NVIDIA-Nemotron-3.5-Lightning-30B-A3B UD-Q8_K_XL", gib: 36.0, role: orchestrator, port: 8801}
+  - {model: "gemma-4-26B-A4B-it UD-Q8_K_XL", gib: 25.7, role: sub-agent, port: 8802}
+
+axis: cfg    # <phase>__<model>; 3 phases x 2 models x 3 text tasks = 18 graded cells
+records: "results.jsonl"
+grading: "py scripts/utils/grade_sweep.py results/sweeps/2026-08-28-g1a-coresidency results --layout cfg"
+
+throughput:   # mean t/s wall over the 3-task battery
+  NVIDIA-Nemotron-3.5-Lightning-30B-A3B: {solo: 30.88, coresident_sequential: 30.82, concurrent: 19.23, contention: "-37.6%"}
+  gemma-4-26B-A4B-it:                    {solo: 35.04, coresident_sequential: 28.09, concurrent: 22.67, contention: "-19.3%"}
+load_seconds: {nemotron: 10.5, gemma: 30.6}   # OS file cache warm — cold loads are ~50s (see g1a-validation)
+
+verdict:
+  coresident: true
+  correctness_survives_contention: true
+  summary: >
+    Both models healthy together (61.7 GiB weights, ctx 16384 each). The grade pattern is
+    IDENTICAL across solo, coresident-sequential and concurrent phases for both models —
+    co-residency and concurrency flipped zero grades. gemma-4-26B: 3/3 in all three phases.
+    Under full concurrent load both models still decode at 19-23 t/s.
+
+caveats:
+  - >
+    Nemotron grades 1/3 in ALL THREE phases here (incl. solo) — a SERVING-PATH artifact,
+    not a contention or model effect: under direct llama-server --jinja its code answer
+    lands entirely in reasoning_content (content_chars=0), where the studio proxy path
+    graded the same model 3/3 text this same day (2026-08-28-g1a-validation). The
+    summarize miss is its known missing-TL;DR-label habit. Content-channel grading is
+    working as designed: a real consumer of the direct endpoint WOULD receive empty
+    content. Direct-llama-server serving of Nemotron needs template/reasoning-parse flags
+    (e.g. --reasoning-preserve / template kwargs) before it is production-usable.
+  - "Windows mem_used telemetry undercounts mmap'd weights (25.5 -> 59.1 GiB reported for
+     61.7 GiB of weights + KV); health + graded inference is the real evidence."
+  - "Single seed per cell; throughput deltas are one battery long, not steady-state."

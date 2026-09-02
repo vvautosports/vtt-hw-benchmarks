@@ -1,0 +1,590 @@
+=== REASONING ===
+We need to write a Python function parse_ranges(s: str) -> list[int] that parses a string like '1-3,5,7-9' into [1, 2, 3, 5, 7, 8, 9]. Requirements: ignore whitespace around numbers and commas; a reversed range like '9-7' raises ValueError; empty or whitespace-only input returns []. Include a doctest block with at least 5 examples covering all requirements.
+
+We need to implement the function. The input string contains ranges separated by commas. Each range can be either a single number (like '5') or a range like '1-3' meaning from start to end inclusive. Whitespace around numbers and commas should be ignored. So we need to strip whitespace and split on commas, but careful: whitespace might be inside like "1 - 3". The spec says ignore whitespace around numbers and commas. So effectively, we can split on commas, and then for each segment, strip whitespace, and parse it. If it matches a pattern like "a-b" where a and b are integers (maybe with whitespace around), then it's a range. If just a number, it's a single integer.
+
+We need to raise ValueError if a range like '9-7' (start > end). Also, if the string is empty or whitespace-only, return empty list.
+
+We also need to consider if there are multiple ranges like "1-2,3-4" etc.
+
+Implement accordingly.
+
+Edge cases: maybe "1-3, 5, 7 - 9" with spaces around dash? The dash is not surrounded by whitespace? Actually, the spec says ignore whitespace around numbers and commas. It doesn't specify that dash cannot have spaces around it? But it says ignore whitespace around numbers and commas. So if there is whitespace around the dash, the dash itself would be part of the numbers? Actually, a dash is not a number or comma, so whitespace around dash may not be ignored. But typical parsing would treat "1 - 3" as containing spaces around dash, so we would split the segment into parts, but we need to interpret correctly. Probably we should handle that by stripping whitespace from the whole segment, then maybe using split('-') and stripping each part. However, if there is extra dash, that would be invalid. Also, we could treat it as a range only if after stripping, the segment contains exactly one dash and two parts. So if there are spaces around dash, after stripping, we split on '-' and get two parts, each stripped. That would still parse correctly.
+
+So algorithm:
+
+- Strip the input string.
+- If s is empty or only whitespace after stripping? Actually, we need to ignore whitespace around numbers and commas, but if the whole string is whitespace, it's considered empty input, return [].
+- Split the string by commas. But we need to ignore commas that might be surrounded by whitespace? Actually, if we split on commas, the commas themselves are delimiters, and there could be whitespace around them. For example, "1-3, 5,7-9" -> splitting on ',' yields ["1-3", " 5", "7-9"]. Then for each part, we can strip whitespace. So that works.
+
+Better: s.split(',') but note that commas with spaces will create parts that may have leading/trailing spaces. We can then strip each part.
+
+Alternatively, we could use regex to find ranges and numbers.
+
+But simple method works.
+
+For each part:
+
+- Strip whitespace. If after stripping it's empty, that would indicate two commas in a row? That is invalid? The spec doesn't explicitly say. Probably it's safe to ignore? But maybe it's invalid input; we could treat as empty and skip? But it's better to treat it as invalid? The requirement only mentions empty or whitespace-only input returns []. It doesn't specify behavior for empty parts from consecutive commas. Usually such input would be considered invalid and might raise ValueError. But not explicitly required. For simplicity, we can skip empty parts? However, the spec says parse_ranges(s) that parses a string like '1-3,5,7-9'. It doesn't define behavior for malformed input. Possibly we can just treat it as empty and ignore? But it's ambiguous. In typical use, if someone inputs "1-3,,5", that would be weird. But we could raise ValueError or just skip. To be safe, we could assume valid input, but doctest may not test that. However, the requirements say: "ignore whitespace around numbers and commas". It doesn't say to ignore empty segments. So if we have "1-3,," it's effectively two commas with nothing between. That's probably an error. But we can decide to treat it as an empty list? Actually, maybe the simplest is to treat an empty part after stripping as valid (meaning an empty range) and we skip it? But an empty range doesn't make sense. So it's better to raise ValueError. But the problem doesn't explicitly ask for that. However, for robustness, I'd raise ValueError if a part after stripping is empty. But then the doctest would need to cover? Not required. I'd include a check.
+
+Let's examine similar problems: Usually in such range parsing, if there's a stray comma, it's considered invalid. But it's not mentioned. I'd follow the principle: the input should be well-formed; we can assume that. For our implementation, we can skip empty parts, but it might produce unexpected output. I think it's better to treat empty part as invalid and raise ValueError. However, the requirement only says "a reversed range like '9-7' raises ValueError". It doesn't say that malformed input raises ValueError. So maybe it's not required. To be safe, we can just ignore empty parts; but if there's an empty part, it means two commas in a row. Could be considered as no range, and we skip. That might be acceptable. But then the behavior for whitespace only returns [] is explicit. So for empty string or whitespace only, returns []. For other empty strings (like empty segments), it's not defined. I'd lean to skip them, because that's more forgiving. However, we should consider if we need to raise ValueError for something else: e.g., if the part cannot be parsed as a number or range, raise ValueError. That is implicit.
+
+Thus, for each part:
+
+- stripped = part.strip()
+- if not stripped: continue? But then if there are multiple commas, we ignore them? That might be okay, but if there is something like "1-3,," it would be parsed as [1,2,3] ignoring the trailing empty. That seems plausible. But we need to decide.
+
+Better to check the problem's expected behavior: it says "ignore whitespace around numbers and commas". That suggests that the string may have extra whitespace, but the structure is numbers or ranges separated by commas. It does not say anything about empty segments. In many parsing tasks, consecutive delimiters are treated as empty tokens, and ignoring them is common. For example, Python's csv module would treat them as empty strings. But here, it's not specified. I'd lean to skip them to keep the function simple and not raise errors for trivial extra commas.
+
+But there is also possibility of a dash in the middle of a number? That would be invalid anyway.
+
+Thus, implement: split on ',', for each token, strip whitespace. If token is empty, continue. Then parse.
+
+Parsing: if '-' in token:
+
+   - split on '-', but note that there could be multiple dashes? Only first dash? Actually, if there are multiple dashes, that's invalid; but we can treat as invalid and raise ValueError.
+
+   - left, right = token.split('-', 1) after stripping? Actually, better: after stripping, we split on '-' maxsplit=1 to get two parts. Then strip each part.
+
+   - if left is empty or right is empty: that would mean "1-" or "-3", which is invalid. Raise ValueError.
+
+   - try to convert left and right to int. If conversion fails, raise ValueError (e.g., "abc").
+
+   - if left_int > right_int: raise ValueError.
+
+   - extend result with range(left_int, right_int+1).
+
+Else:
+
+   - try to convert token to int; if fails, raise ValueError.
+
+   - append int.
+
+Return result.
+
+Now, we also need to handle whitespace around numbers and commas. Our stripping method handles that.
+
+Edge case: token like "1-3 " after strip becomes "1-3". Good. " 1-3 " becomes "1-3". "1 -3"? If there is space before dash, after stripping the token we get "1 -3". Then we split on '-', we get ["1 ", "3"]? Actually, "1 -3".split('-',1) yields ['1 ', '3']. Then we strip each part: left.strip() -> "1", right.strip() -> "3". Works.
+
+Similarly, "1- 3" yields ["1", " 3"] -> after stripping, "1" and "3".
+
+So good.
+
+Now, need to include doctest block with at least 5 examples covering all requirements.
+
+Examples should include:
+
+1. Simple: '1-3,5,7-9' -> [1,2,3,5,7,8,9]
+2. Whitespace handling: '1-3, 5 ,7-9' -> same.
+3. Reversed range raising ValueError: '9-7' should raise ValueError.
+4. Empty or whitespace input: '' -> [] and maybe '   ' -> [].
+5. Single number: '42' -> [42] or something.
+6. Another with spaces: ' 1-2 - 3' but careful: that has spaces around dash, but also spaces between dash? Actually, that string: '1-2 - 3' would be: token "1-2 - 3" after splitting on commas? There's no comma, so it's one token. Then it contains a dash but also spaces. After stripping, "1-2 - 3". This has two dashes? Actually "1-2 - 3" contains '-' after 2 and another '-', and a space. It might be ambiguous. But if we parse with split on '-', maxsplit=1, we get ["1-2 ", "3"]? That's not correct. Actually, the token "1-2 - 3" would be considered invalid because it has more than one dash, or maybe the range should be parsed as "1-2" and then "- 3"? That is not a valid range. So such input should probably raise ValueError. But the requirement says ignore whitespace around numbers and commas, not dashes. So if there is extra dash, it's invalid. So it's okay to raise ValueError.
+
+But we need an example that demonstrates whitespace handling: something like '1-3, 5, 7-9' works.
+
+Also, maybe an example with multiple spaces: '  1 - 2 ,  3 ' -> [1,2,3].
+
+So I'll create doctests:
+
+>>> parse_ranges('1-3,5,7-9')
+[1, 2, 3, 5, 7, 8, 9]
+>>> parse_ranges(' 1-3, 5 , 7-9 ')
+[1, 2, 3, 5, 7, 8, 9]
+>>> parse_ranges('')
+[]
+>>> parse_ranges('   ')
+[]
+>>> parse_ranges('42')
+[42]
+>>> parse_ranges('1,2,3')
+[1,2,3]
+>>> parse_ranges('10-12,14')
+[10,11,12,14]
+>>> parse_ranges('1-3,5,7-9') # test same as first, but okay.
+
+Also, need to include a test that raises ValueError:
+
+>>> parse_ranges('9-7')
+Traceback (most recent call last):
+    ...
+ValueError: Invalid range: 9-7 (or something). We need to define the exact error message. It doesn't specify the message, so we can raise ValueError with a generic message. But doctest expects exact output. The traceback includes the line and the message. We can just check that ValueError is raised. But the doctest pattern for exception: 
+>>> parse_ranges('9-7')
+Traceback (most recent call last):
+    ...
+ValueError: ... (any message is okay, because the ellipsis matches any message). In doctest, we can use ... to match the ValueError line, ignoring the message. That's acceptable. Or we can specify a specific message. The requirement says "raises ValueError", doesn't specify the message. So we can raise ValueError("Invalid range") and the doctest can capture that. But doctest would then require the exact message. To be flexible, we can use ellipsis. So we can write:
+
+>>> parse_ranges('9-7')
+Traceback (most recent call last):
+    ...
+ValueError
+
+But better to include the message in the error. However, in many assignments, they want a specific error message? Not given. I'll just raise ValueError("Invalid range: ...") but in doctest we can use ellipsis to allow any message. Actually, doctest does not match the entire traceback line; it uses ellipsis to skip parts. So:
+
+>>> parse_ranges('9-7')
+Traceback (most recent call last):
+    ...
+ValueError: Invalid range: 9-7
+
+But if we raise a different message, it won't match. But the problem says "raises ValueError", no message. So we can raise ValueError with no arguments, which gives "ValueError" without message. Then doctest: 
+>>> parse_ranges('9-7')
+Traceback (most recent call last):
+    ...
+ValueError
+
+That would match. However, the traceback line "ValueError" would appear; but if we raise with a message, the line would be "ValueError: something". That would cause the doctest to fail if not matching. So to be safe, I'll raise ValueError() with no arguments. Or I can raise ValueError("Invalid range: 9-7") and then in doctest we can write "ValueError: ..." using ellipsis after colon. Actually, doctest allows the message part to be omitted with ellipsis. For example:
+
+>>> parse_ranges('9-7')
+Traceback (most recent call last):
+    ...
+ValueError
+
+That's the simplest.
+
+We'll include that.
+
+Also, need to cover other requirements: ignore whitespace around numbers and commas; empty or whitespace-only input returns []; reversed range raises ValueError.
+
+We'll have at least 5 examples covering all. So I'll provide:
+
+Example 1: basic parsing.
+Example 2: whitespace.
+Example 3: reversed range.
+Example 4: empty string.
+Example 5: single number.
+
+That's 5. Additional examples are fine.
+
+Now, implement function.
+
+Edge Cases:
+
+- Input may have multiple ranges, including empty ranges due to double commas. We'll skip empty tokens. But if we skip, we might not detect invalid input. That's fine.
+
+- What about numbers with leading zeros? That's okay; int conversion will handle.
+
+- What about negative numbers? The problem says numbers, but not explicitly positive. It says "numbers" in the description, but the examples are positive. It might be allowed? The spec doesn't forbid negative. But parsing " -1-3" would be tricky. Since it's not required, we can allow it but be careful about whitespace. However, our current approach would treat '-' as delimiter, so "-1-3" would be token "-1-3", which would have two dashes. That might be parsed as range? But if we split on '-', we would get left and right. For "-1-3", splitting on '-' gives ["", "1", "3"]? Actually, with maxsplit=1, we get ["", "1-3"]? That's messy. Probably we should not support negative numbers unless explicitly required. Since not required, we can either support them by allowing optional leading minus sign in left and right parts. But the problem statement doesn't mention negative numbers; typical range parsers are for positive integers. I'll keep it simple and assume non-negative integers. But to be safe, we could allow negative numbers by allowing a leading '-' in the parts. However, then the dash delimiter is ambiguous because negative sign would be a dash too. But we split on dash only if the dash is a delimiter between two numbers. If a number starts with a minus sign, then the dash would be part of the number. For example, "-1-3" would be interpreted as a range from -1 to 3? But that contains two dashes, so it's ambiguous. Usually, such a string would be invalid because it has two dashes. So we should treat only cases where after stripping, there is exactly one dash, and both sides are numeric (could be negative). But if a side starts with '-', that's part of the number. However, then the dash is used both as a sign and delimiter? That's not allowed because if there is a dash at the start of a part, it's part of the number. But the delimiter dash appears between two parts. So for "-1-3", the first part is "-1" which starts with '-', but the dash between parts is also '-', so the string has two dashes in a row. So it's ambiguous which is sign and which is delimiter. So typical parsing for ranges would not allow negative numbers unless specified. Since it's not required, I'll assume non-negative integers. The examples are all positive. So we can treat any part that starts with '-' as invalid? But it's fine; it would raise ValueError when converting to int because '-' at start is not allowed for int conversion? Actually, int("-1") works, so we could allow it. But we need to be careful: if we have a part like "-1", it's a single number (negative). That's allowed? The problem didn't say positive only. So it might be acceptable. However, then the delimiter dash must be used only as a separator. So in a range, the two parts must be numbers, which could be negative. For example, "-3-1" would be a range from -3 to 1, that's fine. But we need to differentiate between a dash that is a minus sign and a dash that is a delimiter. In our parsing, we first check if there is a dash in the token. If there is exactly one dash, we split on it. But if the token is "-3-1", there are two dashes. So it wouldn't be considered a range because there's more than one dash. So that would be considered a single token with two dashes, which we would treat as invalid (maybe because it's not a single number). So it's fine: if the user wants a negative number, they would just write "-3" as a single number, not as part of a range. So ranges will not contain negative numbers because the dash is only used as delimiter. So we can safely parse only non-negative numbers. But if a number like " -3 " appears, after stripping it becomes "-3", which is a single number (negative). That's fine because there's no dash delimiter. So our parsing would treat it as a single number. So we can allow negative numbers as single values, but not as part of ranges (since that would require two dashes). So it's okay.
+
+Thus, we can convert each part to int without checking sign.
+
+Now, we need to ensure that the dash is the only special character; if the part contains anything else (like letters), it will raise ValueError when converting.
+
+Implementation details:
+
+We'll define the function and include docstring.
+
+We'll also include the doctest in a triple-quoted string and use the doctest module.
+
+Make sure to import re? Not needed.
+
+Let's write the code.
+
+Potential pitfalls:
+
+- If we skip empty parts, then "1-3,," will produce [1,2,3]. That might be considered acceptable. But we might want to raise ValueError if there are multiple commas. However, not required.
+
+- We need to consider input like "1-3,5,7-9" with spaces: we'll split on comma, strip each part.
+
+- We'll need to handle the case where a part is just whitespace? Already stripped, so empty.
+
+Now, write code.
+
+Pseudo:
+
+def parse_ranges(s: str) -> list[int]:
+    s = s.strip()
+    if not s:
+        return []
+    result = []
+    parts = s.split(',')
+    for part in parts:
+        part = part.strip()
+        if not part:
+            continue  # skip empty parts (e.g., double commas)
+        if '-' in part:
+            # split on first dash only
+            left, right = part.split('-', 1)
+            left = left.strip()
+            right = right.strip()
+            if not left or not right:
+                raise ValueError(f"Invalid range: {part}")
+            try:
+                start = int(left)
+                end = int(right)
+            except ValueError:
+                raise ValueError(f"Invalid number in range: {part}")
+            if start > end:
+                raise ValueError(f"Invalid range: {start} > {end}")
+            result.extend(range(start, end+1))
+        else:
+            try:
+                num = int(part)
+                result.append(num)
+            except ValueError:
+                raise ValueError(f"Invalid number: {part}")
+    return result
+
+Now, we need to include doctests. We'll put them in the docstring.
+
+We need at least 5 examples covering all requirements. So we'll include:
+
+1. Basic parsing: parse_ranges('1-3,5,7-9') -> [1,2,3,5,7,8,9]
+2. Whitespace: parse_ranges(' 1-3, 5 ,7-9 ') -> same
+3. Reversed range: parse_ranges('9-7') should raise ValueError
+4. Empty input: parse_ranges('') -> []
+5. Single number: parse_ranges('42') -> [42]
+
+That's 5.
+
+Optionally, we can include another empty input: parse_ranges('   ') -> [].
+
+But 5 is minimum.
+
+We'll include them with proper traceback.
+
+Now, we need to ensure that the doctest runs correctly. We'll add:
+
+if __name__ == "__main__":
+    import doctest
+    doctest.testmod()
+
+But the problem says "Include a doctest block with at least 5 examples covering all requirements." So we just need to include the block in the code, not necessarily run it. But it's typical to include the doctest module and run it for testing.
+
+I'll include the doctest block in the function docstring, and then add a main guard.
+
+Now, let's think about potential pitfalls: The reversed range raises ValueError. Our code will raise ValueError with appropriate message. Doctest expects that ValueError is raised. Since we raise with a message, we need to match the exact message in the doctest. If we use ellipsis, we can match the exception line only, not the message. So:
+
+>>> parse_ranges('9-7')
+Traceback (most recent call last):
+    ...
+ValueError: Invalid range: 9 > 7
+
+But the message we wrote is "Invalid range: 9 > 7". That's fine.
+
+But we could also raise ValueError without message, and then the traceback line would be "ValueError". That would also work.
+
+However, we need to be consistent. I'll raise ValueError with a descriptive message.
+
+Now, consider the case where a part contains both a dash and spaces: "1 - 3". Our code: part.split('-',1) -> ['1 ', ' 3']; after stripping, left='1', right='3'. Works. Good.
+
+Now, what about a part like "1-3 " after strip, no trailing spaces, fine.
+
+Now, consider "1-3-5". That has two dashes. Our code will treat as range? Because '-' in part, split on first dash, get left='1', right='3-5'. Then left.strip() = '1', right.strip()='3-5'. Then int(right) will fail because '3-5' is not an integer. So ValueError is raised. That's acceptable.
+
+Now, consider "1-3," trailing comma: parts = ["1-3", ""] after split. The second part is empty, we skip. That yields [1,2,3]. Is that desirable? Possibly. Not specified.
+
+Now, what about "1-3,5," -> [1,2,3,5]. Acceptable.
+
+Now, what about "1-3,,5" -> parts = ["1-3", "", "5"]; skip empty, result [1,2,3,5]. Acceptable.
+
+Now, what about whitespace only? We already handle: after strip, s empty, return [].
+
+Now, need to ensure that we handle cases where there is no comma but multiple ranges? That's not allowed because ranges are separated by commas. So "1-3 5" would be considered as a single token "1-3 5", which contains a dash and a space. Our parser would treat as range: split on '-', get left='1', right='3 5', then int(right) fails. So ValueError. That's acceptable.
+
+Thus, the function is robust.
+
+Now, we must write the final answer with the code.
+
+We'll produce a clean, well-commented function.
+
+Now, we need to output only the code? The instruction says "Write a Python function parse_ranges(s: str) -> list[int] that parses ... Include a doctest block with at least 5 examples covering all requirements." So we should output the complete code, including the function definition and the doctest block. Usually, we put the doctest in the docstring.
+
+Thus, final answer: Provide the code.
+
+Let's write it.
+
+We'll include the function with type hint.
+
+Add docstring with doctests.
+
+Then maybe if __name__ == "__main__": doctest.testmod()
+
+Now, write the code.
+
+We need to ensure that the doctest examples are correct. Let's test mentally.
+
+Example 1:
+
+>>> parse_ranges('1-3,5,7-9')
+[1, 2, 3, 5, 7, 8, 9]
+
+Works.
+
+Example 2:
+
+>>> parse_ranges(' 1-3, 5 ,7-9 ')
+[1, 2, 3, 5, 7, 8, 9]
+
+Works.
+
+Example 3:
+
+>>> parse_ranges('9-7')
+Traceback (most recent call last):
+    ...
+ValueError: Invalid range: 9 > 7
+
+Our code raises exactly that? It says "Invalid range: 9 > 7". But the message format: we used f"Invalid range: {start} > {end}". For start=9, end=7, so message "Invalid range: 9 > 7". So doctest would see that.
+
+But note: The doctest expects the traceback line to have the exact error message. Since we used ellipsis on the ValueError line, it will match any ValueError. However, the traceback includes the line "ValueError: Invalid range: 9 > 7". The ellipsis will match the "... ValueError: ..." pattern? Actually, the doctest syntax:
+
+Traceback (most recent call last):
+    ...
+ValueError
+
+This expects the line "ValueError" exactly, without message. But if the traceback line is "ValueError: Invalid range: 9 > 7", then the match fails because the line does not start with "ValueError" exactly? Actually, the doctest pattern "ValueError" matches only that exact line, ignoring any text after. But the traceback line contains "ValueError: ...". So it would not match because the line is "ValueError: Invalid range: 9 > 7", not "ValueError". So we need to use ellipsis after the ValueError line to allow message.
+
+Common pattern:
+
+>>> parse_ranges('9-7')
+Traceback (most recent call last):
+    ...
+ValueError
+
+This would match any line starting with "ValueError" if the ellipsis is before? Actually, doctest's ellipsis matches any substring. So "..." matches "ValueError: Invalid range: 9 > 7"? The pattern is:
+
+Traceback (most recent call last):
+    ...
+ValueError
+
+Here, after the "Traceback..." line, there is a blank line? Actually, the format is:
+
+Traceback (most recent call last):
+    ...   (this line is skipped by ellipsis)
+ValueError
+
+The line "ValueError" is expected exactly. So if the traceback line is "ValueError: ...", then the doctest fails. So we need to modify the doctest to include the ellipsis after ValueError to allow the message. Actually, typical doctest for exception:
+
+>>> parse_ranges('9-7')
+Traceback (most recent call last):
+    ...
+ValueError: ...
+
+But the spec says "raises ValueError", not message. So we can do:
+
+>>> parse_ranges('9-7')
+Traceback (most recent call last):
+    ...
+ValueError
+
+But if we want the message to be flexible, we can use ellipsis on the error line:
+
+>>> parse_ranges('9-7')
+Traceback (most recent call last):
+    ...
+ValueError: ...
+
+This will match any line starting with "ValueError:" and any message. That's acceptable. So I'll use:
+
+>>> parse_ranges('9-7')
+Traceback (most recent call last):
+    ...
+ValueError: ...
+
+But the ellipsis after colon matches any message.
+
+Alternatively, we can just not include a message, and do:
+
+>>> parse_ranges('9-7')
+Traceback (most recent call last):
+    ...
+ValueError
+
+And ensure that our code raises ValueError without arguments. That might be simpler. Let's check: raising ValueError() gives no message. The traceback line is "ValueError". So that matches.
+
+I think it's cleaner to raise ValueError() with no arguments. Because the requirement doesn't specify a message. So I'll raise ValueError. I'll modify code:
+
+if start > end:
+    raise ValueError
+
+That's fine.
+
+Then doctest:
+
+>>> parse_ranges('9-7')
+Traceback (most recent call last):
+    ...
+ValueError
+
+That matches.
+
+I'll adopt that.
+
+Now, for other errors like invalid number, we can also raise ValueError. But doctest doesn't cover those. So fine.
+
+Now, for the reversed range, we'll raise ValueError without message.
+
+Now, for empty input, we return [].
+
+Now, ensure we treat whitespace-only: s.strip() gives empty string, return [].
+
+Now, include the doctest examples as described.
+
+Now, write the final code.
+
+Potential improvements: Use list comprehension or generator but okay.
+
+Now, I'll produce final answer.
+
+But before final, consider if there are any hidden pitfalls: For input like "1-3,5,7-9", after splitting we get parts, some may be empty, we skip. That's fine.
+
+Now, also need to consider that the dash may be part of a negative number if it appears as a single token, but if there is a dash, we treat as range delimiter. That's correct.
+
+Now, final code:
+
+```python
+def parse_ranges(s: str) -> list[int]:
+    """
+    Parse a string of comma-separated ranges into a list of integers.
+
+    A range is specified as 'start-end' inclusive. Whitespace around numbers,
+    commas, and dashes is ignored. A reversed range (e.g., '9-7') raises ValueError.
+    Empty or whitespace-only input returns an empty list.
+
+    Examples:
+    >>> parse_ranges('1-3,5,7-9')
+    [1, 2, 3, 5, 7, 8, 9]
+    >>> parse_ranges(' 1-3, 5 ,7-9 ')
+    [1, 2, 3, 5, 7, 8, 9]
+    >>> parse_ranges('9-7')
+    Traceback (most recent call last):
+        ...
+    ValueError
+    >>> parse_ranges('')
+    []
+    >>> parse_ranges('42')
+    [42]
+    """
+    s = s.strip()
+    if not s:
+        return []
+
+    result = []
+    parts = s.split(',')
+    for part in parts:
+        part = part.strip()
+        if not part:
+            continue  # skip empty segments (e.g., trailing/extra commas)
+        if '-' in part:
+            # Split only on the first dash to allow spaces around it
+            left, right = part.split('-', 1)
+            left = left.strip()
+            right = right.strip()
+            if not left or not right:
+                raise ValueError(f"Invalid range: {part}")
+            try:
+                start = int(left)
+                end = int(right)
+            except ValueError:
+                raise ValueError(f"Invalid number in range: {part}")
+            if start > end:
+                raise ValueError
+            result.extend(range(start, end + 1))
+        else:
+            try:
+                num = int(part)
+                result.append(num)
+            except ValueError:
+                raise ValueError(f"Invalid number: {part}")
+    return result
+
+
+if __name__ == "__main__":
+    import doctest
+    doctest.testmod()
+```
+
+Check that for reversed range we raise ValueError without arguments. Good.
+
+Now, we might want to add a doctest for empty whitespace: parse_ranges('   ') -> []. I included empty string. But to be safe, we can add another example: parse_ranges('   ') returns []. That would be a sixth example, but minimum is five, so it's fine. We could add it but not required. I'll keep as is.
+
+But note: the requirement says "empty or whitespace-only input returns []". I included empty string example. I should also include whitespace-only to be thorough. However, the example parse_ranges('') returns [] covers empty. But they said empty or whitespace-only. So to cover both, we might want an example with spaces. I'll add:
+
+>>> parse_ranges('   ')
+[]
+
+That's an extra, but it's fine. Actually, it's a good idea to include both to satisfy the requirement completely. Since the requirement says "empty or whitespace-only input returns []", we can show both. I'll add it as a separate example after empty string. But do we have space? I'll add it.
+
+So the doctest block will have:
+
+>>> parse_ranges('   ')
+[]
+
+I'll include it. But the instruction says at least 5 examples covering all requirements. Adding one more is fine.
+
+Thus, final code includes that.
+
+Now, consider the case where we have "1-3,5,7-9" with spaces between numbers? Already done.
+
+Now, ensure that the doctest will run correctly: The doctest module will run and if any fails, it will output. The code is correct.
+
+Now, final answer: Provide the code as above.
+
+We need to output in the final channel.
+
+=== CONTENT ===
+```python
+def parse_ranges(s: str) -> list[int]:
+    """
+    Parse a string of comma-separated ranges into a list of integers.
+
+    A range is specified as 'start-end' inclusive. Whitespace around numbers,
+    commas, and dashes is ignored. A reversed range (e.g., '9-7') raises ValueError.
+    Empty or whitespace-only input returns an empty list.
+
+    Examples:
+    >>> parse_ranges('1-3,5,7-9')
+    [1, 2, 3, 5, 7, 8, 9]
+    >>> parse_ranges(' 1-3, 5 ,7-9 ')
+    [1, 2, 3, 5, 7, 8, 9]
+    >>> parse_ranges('9-7')
+    Traceback (most recent call last):
+        ...
+    ValueError
+    >>> parse_ranges('')
+    []
+    >>> parse_ranges('   ')
+    []
+    >>> parse_ranges('42')
+    [42]
+    """
+    s = s.strip()
+    if not s:
+        return []
+
+    result = []
+    parts = s.split(',')
+    for part in parts:
+        part = part.strip()
+        if not part:
+            continue  # skip empty segments (e.g., trailing/extra commas)
+
+        if '-' in part:
+            # Split only on the first dash to allow spaces around it
+            left, right = part.split('-', 1)
+            left = left.strip()
+            right = right.strip()
+            if not left or not right:
+                raise ValueError(f"Invalid range: {part}")
+            try:
+                start = int(left)
+                end = int(right)
+            except ValueError:
+                raise ValueError(f"Invalid number in range: {part}")
+            if start > end:
+                raise ValueError  # reversed range
+            result.extend(range(start, end + 1))
+        else:
+            try:
+                num = int(part)
+                result.append(num)
+            except ValueError:
+                raise ValueError(f"Invalid number: {part}")
+
+    return result
+
+
+if __name__ == "__main__":
+    import doctest
+    doctest.testmod()
+```

@@ -1,0 +1,74 @@
+=== REASONING ===
+Everything works fine. Next, I'll present the final answer: complete function code, a brief explanation of how the requirements are met, and how to run the doctest. Keep it concise.
+
+
+=== CONTENT ===
+Verified — all doctests pass and edge cases behave as specified. Here's the function:
+
+```python
+def parse_ranges(s: str) -> list[int]:
+    """Parse a compact range string like '1-3,5,7-9' into [1, 2, 3, 5, 7, 8, 9].
+
+    Whitespace around numbers and commas is ignored. A reversed range such as
+    '9-7' raises ``ValueError``. Empty or whitespace-only input returns ``[]``.
+
+    >>> parse_ranges('1-3,5,7-9')
+    [1, 2, 3, 5, 7, 8, 9]
+    >>> parse_ranges(' 1 , 2 - 4 , 6 ')
+    [1, 2, 3, 4, 6]
+    >>> parse_ranges('9-7')
+    Traceback (most recent call last):
+        ...
+    ValueError: reversed range '9-7'
+    >>> parse_ranges('')
+    []
+    >>> parse_ranges('   ')
+    []
+    >>> parse_ranges('3-3,5')
+    [3, 5]
+
+    :param s: The range string to parse.
+    :returns: Every integer described by ``s``, in order of appearance.
+    :raises ValueError: If a range is reversed (start > end) or a segment is
+        not a valid number/range literal.
+    """
+    if not s.strip():
+        return []
+
+    result: list[int] = []
+    for segment in s.split(','):
+        part = segment.strip()
+        if not part:  # e.g. empty segment from a stray comma; nothing to add
+            continue
+
+        if '-' in part[1:]:  # range literal (a leading '-' may be a sign)
+            start_s, _, end_s = part.partition('-')
+            try:
+                start, end = int(start_s), int(end_s)
+            except ValueError as exc:
+                raise ValueError(f"invalid range literal {part!r}") from exc
+            if start > end:
+                raise ValueError(f"reversed range '{start}-{end}'")
+            result.extend(range(start, end + 1))
+        else:  # single integer, possibly negative
+            try:
+                value = int(part)
+            except ValueError as exc:
+                raise ValueError(f"invalid number {part!r}") from exc
+            result.append(value)
+
+    return result
+```
+
+How each requirement is covered:
+
+- **Whitespace**: every comma-separated segment is `strip()`-ed, so `' 1 , 2 - 4 '` works; verified by doctest #2.
+- **Reversed range**: after parsing both endpoints, `start > end` raises `ValueError` with a message naming the offending range (`'3-3'` is *not* reversed and just yields `[3]`).
+- **Empty / whitespace-only input**: early `if not s.strip(): return []` guard.
+- **Doctests**: 6 examples covering every requirement, including a bare-`...` traceback for the exception case — this pattern is built into doctest for exceptions, so it doesn't depend on Python version-specific traceback formatting (confirmed by running `python -m doctest parse_ranges.py`).
+
+A couple of deliberate design choices:
+- The range check looks for `'-' in part[1:]` rather than a leading hyphen, so standalone negative numbers like `'-5'` are parsed as integers instead of being misread as ranges.
+- Garbage input (`'a-b'`) raises `ValueError` with a clear message rather than an opaque int-parse error.
+
+Run the doctests with `python -m doctest parse_ranges.py` (add `-v` for verbose output) or, if using pytest, `pytest --doctest-modules`.

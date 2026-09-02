@@ -1,0 +1,28 @@
+=== CONTENT ===
+
+
+=== TOOLCALLS ===
+[
+ {
+  "name": "convert_currency",
+  "arguments": {
+   "amount": 1500,
+   "from_currency": "USD",
+   "to_currency": "EUR"
+  },
+  "arguments_raw": "{\"amount\":1500,\"from_currency\":\"USD\",\"to_currency\":\"EUR\"}",
+  "args_parsed": true
+ }
+]
+
+=== META ===
+{
+ "finish_reason": "tool_calls",
+ "turns": 1,
+ "n_calls": 1,
+ "chain_depth_reached": 1,
+ "raw_toolcall_text_detected": false,
+ "args_parse_failures": 0,
+ "prompt_tokens": 394,
+ "case": "tc_coercion"
+}

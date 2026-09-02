@@ -1,0 +1,26 @@
+=== REASONING ===
+The user wants a summary of the passage as exactly 5 bullet points followed by a one-sentence TL;DR. I need to be faithful to the source and not add claims it doesn't make. Let me distill the key points from each paragraph.
+
+Paragraph 1: What speculative decoding is — draft proposes tokens, target verifies in one pass, outputs are distributionally identical, three drafting methods (small model, n-gram, MTP head).
+
+Paragraph 2: Economics vary by workload — code/structured text great with n-gram, prose worse, bad draft model can slow things down, MTP heads stable across domains.
+
+Paragraph 3: MoE complications — verification batches hit more experts, higher break-even acceptance rate on bandwidth-bound hardware.
+
+Paragraph 4: Server-side parallelism — slots compete with speculation for compute headroom, tune jointly and measure end-to-end.
+
+Let me produce exactly 5 bullets covering these themes, then a TL;DR.
+
+
+=== CONTENT ===
+- Speculative decoding uses a cheap draft (small model, n-gram lookup, or multi-token-prediction head) to propose multiple tokens verified in one target-model forward pass; rejections simply resume from the last accepted token, keeping outputs distributionally identical to standard decoding.
+
+- Workload determines economics: code and structured text yield high acceptance rates with nearly free n-gram drafting, while open-ended prose accepts fewer tokens and a poorly matched draft model can make generation slower than running the target alone due to wasted verification passes.
+
+- MTP heads offer a middle ground — modest memory/compute overhead per step but stable acceptance across domains because they see exactly the same context as the target model.
+
+- MoE models raise the break-even acceptance rate on bandwidth-bound hardware because speculative verification activates different experts at each batched position, pulling more weights through memory and eroding the batching advantage that makes speculation profitable.
+
+- Because speculative mode competes with additional slots for the same compute headroom in slot-based serving, tuning must treat speculation, slot count, and sampling settings as a joint configuration evaluated on end-to-end tokens per second rather than microbenchmarks.
+
+**TL;DR:** Speculative decoding accelerates inference without changing output quality, but its real-world gains depend heavily on workload type, draft mechanism, model architecture (dense vs. MoE), and server concurrency settings, all of which must be tuned together against end-to-end throughput.

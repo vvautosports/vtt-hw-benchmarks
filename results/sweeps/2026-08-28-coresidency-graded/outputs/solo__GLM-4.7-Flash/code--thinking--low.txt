@@ -1,0 +1,161 @@
+=== REASONING ===
+We need to write a Python function parse_ranges(s: str) -> list[int] that parses a string like '1-3,5,7-9' into [1, 2, 3, 5, 7, 8, 9]. Requirements: ignore whitespace around numbers and commas; a reversed range like '9-7' raises ValueError; empty or whitespace-only input returns []. Include a doctest block with at least 5 examples covering all requirements.
+
+We need to implement the function. The input string contains ranges separated by commas. Each range can be either a single number (like '5') or a hyphen-separated range (like '1-3'). Whitespace should be ignored around numbers and commas. So we can split by commas, strip each part, ignore empty parts (maybe after stripping? but if there are multiple commas with nothing between? Possibly treat as empty? The requirement doesn't specify multiple consecutive commas. But we can treat them as producing an empty token? Typically we can handle by splitting and then ignore empty tokens. But we should follow typical behavior: after stripping, if token is empty, maybe ignore. But not specified; we could assume valid input without such cases. However for robustness, we can ignore empty tokens. But the doctest examples likely won't include that.
+
+We need to handle reversed ranges: if start > end, raise ValueError.
+
+Empty or whitespace-only input returns [].
+
+We need to write doctest block with at least 5 examples.
+
+Examples: 
+1. '1-3,5,7-9' => [1,2,3,5,7,8,9]
+2. ' 1-3,5,7-9 ' (with whitespace around) => [1,2,3,5,7,8,9]
+3. '9-7' => ValueError
+4. '' => []
+5. '   ' => []
+6. maybe something like '1-2,4-6' => [1,2,4,5,6]
+7. '5' => [5]
+
+We'll write the function accordingly.
+
+Implementation steps:
+- If s.strip() is empty: return []
+- Split s by commas: parts = s.split(',')
+- For each part in parts:
+    - stripped = part.strip()
+    - If stripped == '': maybe continue? But to avoid errors, we can skip if empty.
+    - Check if '-' in stripped:
+        - split at '-' into two numbers: left, right = stripped.split('-')
+        - left = int(left.strip())
+        - right = int(right.strip())
+        - if left > right: raise ValueError
+        - extend result with list(range(left, right+1))
+    - else:
+        - num = int(stripped)
+        - result.append(num)
+- Return result.
+
+Edge cases: what about negative numbers? The requirement doesn't forbid. But typical parsing of ranges might include negative numbers. However the examples are positive. But we can handle any integer, negative or positive. However note: if we have a hyphen, splitting by '-' might break if there are negative numbers? For example '-1-3'? That would be ambiguous: should be interpreted as range from -1 to 3? But the string '-1-3' after splitting by hyphen yields two strings: '-1' and '3', which int('-1') = -1, fine. But if there is a hyphen inside a negative number like '--1-3'? Not relevant. So splitting on the first hyphen? Actually the range could have negative numbers like '-1-3' which is valid. But we need to consider that splitting on '-' would incorrectly treat '-1-3' as having two parts: '-1' and '3'. That's correct because the range separator is a hyphen. So it's fine. However if the range is like '1--3'? That would be weird. But we can assume valid input.
+
+We also need to consider that hyphens could appear as part of numbers if we allow negative? But the range separator is a hyphen. So if we have a number like '1-3' it's clear. But if we have a negative number like '-1-3', splitting yields '-1' and '3', that's okay because '-' is at start, not between digits. So we need to decide how to handle when there is a hyphen in a number that is negative: e.g., ' -1 -3' after stripping: '-1' and '-3'? That would be a range from -1 to -3, which is reversed, raising ValueError. That might be intended. But could there be a range from -3 to -1? That would be '-3--1'? That would split into '-3' and '-1', which works fine. So splitting on the hyphen works for negative numbers because the hyphen is part of the number's sign, not the range separator. But careful: if we have a number like '-1-3', it's a range from -1 to 3. That's correct. If we have a number like '1--3', that would be ambiguous: maybe a range from 1 to -3? That's not typical but possible? However the spec likely expects that hyphen is only used for ranges. So we can assume that hyphen separates the two numbers in a range, and numbers can be negative? The spec says "numbers", not necessarily positive. I'd include negative numbers if they appear, but the test examples might not include them. But we must ensure that if there's a reversed range, we raise ValueError. For negative numbers, reversed means start > end.
+
+But there is a subtlety: splitting on hyphen might treat the hyphen as range separator even if it's part of a negative number? Actually if we have a single number that is negative, it would have a hyphen in it, so splitting would produce more than two parts? For example, if we have a single token '-1', and we check if '-' in it, we would split it into two parts: '' and '1', which would cause an error because we can't convert '' to int. So that's a problem: Our logic for distinguishing a single number from a range is flawed if we allow negative numbers, because a negative number contains a hyphen. So we need a better approach: The range is indicated by a hyphen that is not part of a sign? But how to differentiate between a single negative number and a range like '-1-3'? The latter clearly has two numbers separated by a hyphen. The former is just a single number with a sign. So we need to decide: If the token contains exactly one hyphen, then it's a range. But a negative number like '-1' also contains exactly one hyphen. So we cannot differentiate. However typical parsing of ranges expects that hyphens are used only for ranges, and negative numbers are not expected. The requirement doesn't forbid negative numbers, but typical coding challenges about parse ranges expect only non-negative integers. The examples show only positive. So we can assume non-negative integers, thus hyphen only appears as range separator. That simplifies: we can safely split on hyphen if token contains '-'.
+
+But to be safe, we could treat the token as a range if after stripping, it contains a hyphen and splitting by hyphen yields two non-empty strings that can be converted to int. If only one part after splitting, then it's a single number (maybe negative, but then it would be just a sign? Actually if it's a negative number, it would be like '-1', splitting yields two strings: '' and '1'. That would be empty string, which we can detect and treat as single number? But we would need to handle that. But then we could decide that a single hyphen at the beginning indicates a negative number? That might be too complicated. I think it's safer to assume non-negative integers as per typical examples. The spec says "numbers", not "positive integers". But I'd still implement as: if '-' in token, then we split, and if both parts are empty or one empty? But we can just attempt to convert both parts; if one part fails, treat as single number? But then the token might be something like '--1'? Not likely. I'll keep it simple: if '-' in token, split, strip each, convert to int. If either conversion fails, maybe raise ValueError? But the spec says only reversed range raises ValueError. So if token is '-1', it contains a hyphen, so we'd treat as range, but left = '', right='1', int('') fails. So we need to ensure our token doesn't have such malformed input. Since we can assume valid input (as per typical usage), we can assume that if hyphen present, it's a range with two numbers. So we can rely on that.
+
+Alternatively, we can use a regex to find all numbers and hyphens, but splitting is fine.
+
+So the function:
+
+def parse_ranges(s: str) -> list[int]:
+    if not s.strip():
+        return []
+    result = []
+    parts = s.split(',')
+    for part in parts:
+        part = part.strip()
+        if not part:
+            continue  # skip empty parts, e.g., from multiple commas
+        if '-' in part:
+            left_str, right_str = part.split('-', 1)  # split only on first hyphen to allow negative numbers if needed
+            left = int(left_str.strip())
+            right = int(right_str.strip())
+            if left > right:
+                raise ValueError("Reversed range")
+            result.extend(range(left, right+1))
+        else:
+            num = int(part.strip())
+            result.append(num)
+    return result
+
+Note: we used split with maxsplit=1 to allow negative numbers? Actually if part is '-1-3', split with maxsplit=1 yields left='-1', right='3', which is correct. If part is '1--3', it yields left='1', right='-3', which is a range from 1 to -3 (reversed, raises ValueError). That's okay. If part is '--1-3', left='--1', right='3' and int('--1') fails. But again we assume valid.
+
+Now, write doctests. We need at least 5 examples covering all requirements. Let's craft:
+
+- parse_ranges('1-3,5,7-9') -> [1,2,3,5,7,8,9]
+- parse_ranges(' 1-3,5,7-9 ') -> [1,2,3,5,7,8,9] (whitespace)
+- parse_ranges('') -> []
+- parse_ranges('   ') -> []
+- parse_ranges('9-7') -> ValueError (doctest can check with >>> parse_ranges('9-7') ... and then we expect to see an exception: we can write: >>> parse_ranges('9-7') Traceback (most recent call last): ... ValueError: ... but we need to capture the specific error? The requirement says raises ValueError; we can just test that it raises. So in doctest we can have: >>> parse_ranges('9-7') Traceback (most recent call last): ... ValueError: ... but we need to match the string exactly? We can just write the expected exception line, and the ... will match any ValueError. That's fine.
+
+Alternatively, we can use a try/except in doctest, but it's simpler to write the traceback.
+
+- parse_ranges('5') -> [5] (single number)
+- parse_ranges('1-2,4-6') -> [1,2,4,5,6] (two ranges)
+- parse_ranges('10,20-30') -> [10,20,21,22,23,24,25,26,27,28,29,30]
+
+But at least 5. We'll include a few.
+
+Also, note: The function signature is parse_ranges(s: str) -> list[int]. We need to include type hint.
+
+We'll put the function and the doctest under if __name__ == "__main__": import doctest; doctest.testmod().
+
+Now, ensure that the function raises ValueError with appropriate message? The requirement doesn't specify message; just raises ValueError. So we can raise ValueError without message or with a message like "Invalid range". We'll raise ValueError("Reversed range").
+
+Now, produce final answer.
+
+But the user wants "Write a Python function parse_ranges(s: str) -> list[int] ..." So we should output the code.
+
+Let's produce final answer.
+
+=== CONTENT ===
+```python
+from typing import List
+
+def parse_ranges(s: str) -> List[int]:
+    """
+    Parse a string containing ranges separated by commas.
+
+    Whitespace around numbers and commas is ignored. A single number is treated
+    as a range of length one. A range in the form "start-end" expands to all
+    integers from start to end inclusive. If start > end, a ValueError is raised.
+    Empty or whitespace-only strings return an empty list.
+
+    Examples:
+    >>> parse_ranges('1-3,5,7-9')
+    [1, 2, 3, 5, 7, 8, 9]
+    >>> parse_ranges(' 1-3,5,7-9 ')
+    [1, 2, 3, 5, 7, 8, 9]
+    >>> parse_ranges('9-7')
+    Traceback (most recent call last):
+        ...
+    ValueError: Reversed range
+    >>> parse_ranges('')
+    []
+    >>> parse_ranges('   ')
+    []
+    >>> parse_ranges('5')
+    [5]
+    >>> parse_ranges('1-2,4-6')
+    [1, 2, 4, 5, 6]
+    """
+    if not s.strip():
+        return []
+
+    result = []
+    for part in s.split(','):
+        part = part.strip()
+        if not part:
+            continue  # skip empty parts (e.g., from consecutive commas)
+
+        if '-' in part:
+            # Split only on the first hyphen to allow negative numbers if needed
+            left_str, right_str = part.split('-', 1)
+            left = int(left_str.strip())
+            right = int(right_str.strip())
+            if left > right:
+                raise ValueError("Reversed range")
+            result.extend(range(left, right + 1))
+        else:
+            num = int(part.strip())
+            result.append(num)
+
+    return result
+
+if __name__ == "__main__":
+    import doctest
+    doctest.testmod()
+```
+

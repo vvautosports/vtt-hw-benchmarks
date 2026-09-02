@@ -1,0 +1,77 @@
+# Discriminating test for the cross-request state-bleed hypothesis raised by
+# 2026-08-27-b10639-rebaseline-batch. Two variants per affected model:
+#   reversed  — one server, battery in reversed order (summarize -> code -> reasoning)
+#   isolated  — fresh server before EVERY task, task runs as the sole request
+# If failures track request order/history rather than task, the runtime leaks state.
+run_id: "2026-08-27-bleed-order-test"
+date: "2026-08-27"
+node: "kalman9-framework-01"
+hardware: "AMD Strix Halo (Radeon 8060S iGPU), GTT unlock ACTIVE, ~122 GB usable"
+backend: "unsloth-studio"
+runtime_build: "b10639-mix-f6f92fe"
+studio_version: "unsloth 2026.8.22"
+api: "/v1/chat/completions"
+request_constants:
+  seed: 42
+  max_tokens: 8192
+  profile: thinking
+  reasoning_effort: low
+launch_env:
+  UNSLOTH_DISABLE_UNIFIED_MEMORY: "1"
+
+axis: cfg
+records: "results.jsonl"   # records carry request_index (position within the server session)
+outputs: "outputs/<cfg>/<task>--thinking--low.txt"
+grading: "py scripts/utils/grade_sweep.py results/sweeps/2026-08-27-bleed-order-test results --layout cfg"
+
+# Verdict matrix (forward = 2026-08-27-b10639-rebaseline-batch / -umfix-batch):
+#
+#   model / task            forward           reversed          isolated
+#   Qwen3.6-MTP code        FAIL (req2)       FAIL (req2)       PASS (6 doctests)
+#   Coder-Next code         FAIL (req2)       PASS (req2)       PASS (6 doctests)
+#   MiniMax summarize       FAIL (topic bleed) FAIL (no TL;DR)  FAIL (no TL;DR)
+#   MiniMax code            PASS (req2)       PASS (req2)       FAIL (capped 8192, incoherent)
+
+findings:
+  bleed_confirmed: >-
+    CROSS-REQUEST STATE BLEED ON b10639 IS CONFIRMED. Both Qwen-family code
+    "regressions" dissolve in isolation: Qwen3.6-MTP and Qwen3-Coder-Next are 3/3
+    with a fresh server per task. Qwen3.6's code task fails at request 2 in BOTH
+    orders (any predecessor triggers it); Coder-Next's failed only after the
+    reasoning request (predecessor-specific). The phantom-prior-turn shape is the
+    model rationalizing leaked context as conversation history.
+  b10639_verdict_revised: >-
+    The "one genuine b10639 regression" (Qwen3.6 code) is NOT a model/template
+    regression — it is the bleed. b10639 + env fix's single remaining defect IS the
+    cross-request bleed itself.
+  minimax_genuinely_fragile: >-
+    MiniMax-M2.5 UD-Q3_K_XL has real, bleed-independent problems: as a FIRST request
+    the code task runs to the 8192 cap with incoherent output (fake tags, drifts into
+    HTML diffs), and summarize misses the literal TL;DR label in clean context. Its
+    rebaseline code "pass" was flattered by leaked context. This indicts the Q3 copy,
+    consistent with the original 'only Q3 quant in a Q8 field' caveat.
+  determinism_check: >-
+    Same seed + same position reproduces token counts exactly across variants
+    (reasoning-first: 698/1274/907 tok identical to forward runs; summarize-first 381,
+    735, 368 identical between reversed and isolated). Position in the server session
+    is the hidden variable; the harness itself is sound.
+  suspected_mechanism: >-
+    Untested but pointed: the serve runs --parallel 4 --kv-unified
+    --slot-save-path .../llama-slots. Slot save/restore plus LRU slot selection with
+    prompt-prefix reuse is exactly the machinery that could resurrect prior-request KV
+    into a new request on a buggy build. A build carrying unmerged PRs changed KV-cell
+    tracking; not isolated further here.
+  b10472_not_exonerated: >-
+    The b10472 batches ran multi-request sessions and graded mostly clean, which is
+    weak evidence the bleed is b10639-specific — but no order test was run on b10472.
+    The pinned standalone (~/llama-runtimes/b10472-mix-4b653db) makes that test cheap
+    if it matters.
+
+protocol_consequence: >-
+  On b10639, multi-request grading sessions are CONTAMINATED. Until the bleed is fixed
+  upstream: (a) isolated (fresh server per task) is ground truth for model quality;
+  (b) any batch that reuses a server must be read as measuring "model + session
+  history", not the model; (c) production multi-request serving on this build carries
+  the same risk — weigh against b10472 standalone for anything stateful-sensitive.
+
+driver_script: "bleed_order_test.py (Framework ~)"

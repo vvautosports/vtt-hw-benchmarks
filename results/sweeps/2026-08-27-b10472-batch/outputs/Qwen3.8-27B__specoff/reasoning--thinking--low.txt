@@ -1,0 +1,28 @@
+=== REASONING ===
+Verified. The LCM is 180 minutes (3 hours), and the simultaneous arrivals are at 0, 180, 360, 540, and 720 minutes from 6 AM, which corresponds to 6:00, 9:00, 12:00, 15:00, and 18:00. That's 5 times total.
+
+
+=== CONTENT ===
+**Reasoning:**
+
+All three trucks arrive together only at times that are common multiples of their return intervals — i.e., every lcm(12, 18, 30) minutes.
+
+- 12 = 2² · 3
+- 18 = 2 · 3²
+- 30 = 2 · 3 · 5
+
+LCM = 2² · 3² · 5 = **180 minutes** (3 hours).
+
+Counting from 6:00 AM (time 0) to 6:00 PM (720 minutes inclusive), the simultaneous arrivals occur at minute offsets:
+
+| Offset | Time of day |
+|---|---|
+| 0 | 6:00 AM |
+| 180 | 9:00 AM |
+| 360 | 12:00 PM |
+| 540 | 3:00 PM |
+| 720 | 6:00 PM |
+
+Since both endpoints are included ("inclusive"), that's 5 simultaneous arrivals total. (Verified with code: offsets [0, 180, 360, 540, 720], count = 5.)
+
+ANSWER: 5
