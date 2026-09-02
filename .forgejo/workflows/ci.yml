@@ -1,0 +1,46 @@
+name: ci
+
+# PR gate — replaces the old GitHub-only CI (shellcheck + markdownlint via
+# third-party actions, one with continue-on-error). Ports the same checks to
+# hermetic apt/npm here, drops the continue-on-error so markdown issues
+# actually fail the build, and adds yaml lint for the benchmark config files.
+# No Python deps (torch/mlflow etc.) are installed here — this repo has no
+# .py files to import-check; heavy inference deps stay out of CI entirely.
+# Mesh runner CT 238, kanjoh conventions: hermetic apt/npm toolchain,
+# full-URL SHA-pinned `uses:`, single job so branch protection needs one
+# context: "ci / test (pull_request)".
+
+on:
+  pull_request:
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: docker
+    steps:
+      - name: Install toolchain (shellcheck, yamllint, markdownlint)
+        run: |
+          apt-get update -qq
+          DEBIAN_FRONTEND=noninteractive apt-get install -y -qq --no-install-recommends \
+            shellcheck yamllint
+          npm install -g --silent markdownlint-cli
+
+      - uses: https://github.com/actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0  # v7.0.0
+
+      - name: Shellcheck (severity error)
+        run: |
+          set -euo pipefail
+          find . -name '*.sh' -type f \
+            -not -path './.git/*' -not -path './node_modules/*' -print0 \
+            | xargs -0 -r shellcheck --severity=error
+
+      - name: Markdown lint
+        run: markdownlint --config .markdownlint.json '**/*.md' --ignore node_modules
+
+      - name: YAML lint
+        run: |
+          yamllint -d "{extends: relaxed, rules: {line-length: disable}}" --strict \
+            benchmark-config.yaml models-inventory.yaml .github/workflows/ .forgejo/workflows/
