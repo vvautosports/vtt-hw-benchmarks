@@ -23,6 +23,7 @@ This appears to be the same class of report as HF discussion unsloth/Qwen3.8-Fla
    `POST /completion {"prompt": "Counting: one, two, three,", "n_predict": 60, "temperature": 0.0}`
 3. Output: `////////////////////////////////////////////////////////////` (pure slash spam).
    Chat-mode symptoms of the same corruption: reasoning never closes at any budget (tested to 32768 tokens), `enable_thinking:false` yields slash spam from token 1.
+<!-- markdownlint-disable-next-line MD038 -->
 4. Relaunch with `UNSLOTH_DISABLE_UNIFIED_MEMORY=1 unsloth run ...` — same probe returns ` four, five, six, seven, eight, nine, ten.` and chat mode terminates normally (653-token thinking answer, correct result).
 
 ## Subtle-corruption datapoint (why this matters beyond one model)
