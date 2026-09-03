@@ -29,8 +29,8 @@ Three principles → three VVC commitments:
 
 | Principle | What Databricks names | VVC commitment |
 |---|---|---|
-| **Open formats** | Delta Lake / Apache Iceberg on Parquet | **Delta**, written by **delta-rs** (no Spark). Iceberg/UniForm deferred (§8). |
-| **Open engines** | Spark, DuckDB, Trino, PyIceberg — one copy of data, many readers | **DuckDB (+ delta extension)** and **Polars** as readers. Spark is *not* part of the definition, only of the demo stack. |
+| **Open formats** | Delta Lake / Apache Iceberg on Parquet | **Delta** on MinIO. delta-rs writes the benchmark lane; Spark writes racestream. Iceberg/UniForm deferred (§8). |
+| **Open engines** | Spark, DuckDB, Trino, PyIceberg — one copy of data, many readers | **DuckDB (+ delta extension)** and **Polars** as readers for benchmark evidence. **Spark** is the near-term target engine for the racestream / raceedge pipelines (Kal, 2026-09-03), so the lake must be Spark-readable from day one (Delta on S3 already is). |
 | **Unified governance** | One catalog (Unity Catalog) for ACLs, lineage, audit | **Unity Catalog OSS** as the catalog of record for tables, volumes and models. |
 
 Plus the two AI-layer projects the post calls out: **MLflow** (lifecycle: experiments,
@@ -39,8 +39,10 @@ tracing, evaluation, registry) and **open-weight models** served by an OSS runti
 
 The demo repo is a *pattern source, not a parts list*: we borrow per-service compose files,
 `.claude/` lifecycle skills + `AGENTS.md`, bronze/silver/gold prefixes on one bucket, and
-scheduled compaction. We do **not** adopt Spark Connect, Kafka, Airflow, SeaweedFS or the
-Iceberg-primary choice (see §8, "What we will not build").
+scheduled compaction. Two of its services are in scope on Kal's direction (2026-09-03):
+**Spark** (near-term engine for racestream/raceedge) and **Airflow** (evaluate early — a
+CI runner is not an orchestrator, see §8). We do **not** adopt Kafka, SeaweedFS or the
+Iceberg-primary choice.
 
 ---
 
@@ -201,11 +203,20 @@ needs a user-simulator LLM (cost). These never mix into the bespoke ranking.
 
 ---
 
-## 8. What we will NOT build (and deferred decisions)
+## 8. Scope decisions (Kal, 2026-09-03)
 
-- **No Spark / Spark Connect, no Kafka, no Airflow, no SeaweedFS.** They are the demo
-  stack's choices, not the definition's. Cron + Forgejo Actions orchestrate; batch evidence has
-  no streaming need.
+- **Spark is in scope, near term, for racestream / raceedge.** Those pipelines move toward
+  Spark as much as possible; the benchmark-evidence lane keeps delta-rs + DuckDB because it is
+  small and batch, but every table it writes must be readable by Spark (Delta on S3, UC as the
+  catalog — both already are). Spark Connect + UC's Delta/Iceberg REST endpoints are the
+  integration points to plan for; a Spark node placement (MS-01 vs Cincinnati) is an infra decision.
+- **Orchestration is a real layer, not a runner.** Forgejo Actions runners execute jobs; they
+  do not schedule DAGs, retry with backoff, track lineage, or backfill. **Evaluate Airflow early**
+  (the demo stack runs Airflow 3.x for compaction/snapshot expiry): candidates to orchestrate are
+  benchmark backfills, nightly battery runs, lake compaction/vacuum, and racestream ingest.
+  Decide Airflow vs Temporal vs cron on an explicit spike, before the medallion work grows DAGs by hand.
+- **Infra version bumps come before any medallion or table work** (§10 order).
+- **No Kafka, no SeaweedFS.** Batch evidence has no streaming need yet; MinIO is the S3 layer.
 - **No Iceberg-primary, no UniForm now.** delta-rs does not write UniForm metadata and every
   reader we have speaks Delta. Revisit only if an external consumer needs Iceberg REST; UC
   0.4+ already exposes an Iceberg REST endpoint if that day comes.
@@ -233,13 +244,26 @@ needs a user-simulator LLM (cost). These never mix into the bespoke ranking.
 
 ## 10. Build order (each piece lands behind this doc)
 
-1. **Identity + schemas** — `model_key`, manifest schema, silver union schema (doc + `scripts/utils/validate_manifest.py`). Unblocks everything else.
-2. **`vvc-evidence` writer** (hwbench #6) — `log_sweep.py`: one sweep dir → MLflow parent/child runs + LoggedModel + bronze append. Run from WSL/devcontainer against the mesh IPs; box runners stay stdlib-only. Backfill the committed dirs.
-3. **Live wiring** — call the writer from `roster_batch.py` and `agent_task_battery.py` post-run hooks (env-gated on `MLFLOW_TRACKING_URI`); first live consumer = the serving-config A/B and the parallelism matrix.
-4. **Registry** — pointer-model registration + slot aliases in the MLflow registry; UC mirror smoke recorded on infra #201.
-5. **Gold** — DuckDB views: utility score (#11), per-axis leaderboards, frontier cross-ref; summary generator.
-6. **Infra bumps** — MLflow ≥ 3.6, UC ≥ 0.4; then OTel bridge and the MLflow MCP for Claude Code.
-7. **Community lane** — inspect_ai (native MLflow) first, EvalScope second (#15), Aider polyglot as the first agentic community benchmark.
+1. **Infra bumps first** (vvt-infrastructure) — MLflow 3.4 → ≥ 3.6 (3.12 line), UC 0.3 → ≥ 0.4;
+   record the UC-vending-vs-MinIO outcome on infra #201. Kal's call 2026-09-03: bumps before any
+   medallion or table work.
+2. **Orchestration spike** (vvt-infrastructure) — Airflow vs Temporal vs cron for backfills,
+   nightly batteries, compaction, racestream ingest. Output: a decision + one running DAG.
+3. **Spark landing plan** (racestream / raceedge repos + infra) — where Spark runs, Spark Connect
+   endpoint, UC as its catalog; the lake's Delta tables stay the shared contract.
+4. **Identity + schemas** (hwbench) — `model_key`, manifest schema, silver union schema
+   (doc + `scripts/utils/validate_manifest.py`).
+5. **`vvc-evidence` writer** (hwbench #6) — `log_sweep.py`: one sweep dir → MLflow parent/child
+   runs + LoggedModel + bronze append. Run from WSL/devcontainer against the mesh IPs; box runners
+   stay stdlib-only. Backfill the committed dirs.
+6. **Live wiring** — post-run hooks in `roster_batch.py` and `agent_task_battery.py`
+   (env-gated on `MLFLOW_TRACKING_URI`); first consumers = serving-config A/B, parallelism matrix.
+7. **Registry** — pointer-model registration + slot aliases in the MLflow registry; UC mirror.
+8. **Gold** — DuckDB (and Spark, for racestream) views: utility score (#11), per-axis
+   leaderboards, frontier cross-ref; summary generator.
+9. **OTel bridge + MLflow MCP** for Claude Code (needs step 1).
+10. **Community lane** — inspect_ai (native MLflow) first, EvalScope second (#15), Aider polyglot
+    as the first agentic community benchmark.
 
 ---
 
@@ -248,4 +272,6 @@ needs a user-simulator LLM (cost). These never mix into the bespoke ranking.
 - Confirm **Delta + delta-rs + DuckDB** as the format/engine commitment (vs Iceberg-first like the demo stack).
 - Confirm the **split-registry** stance (MLflow aliases, UC names) rather than waiting for UC OSS aliases.
 - Confirm the **community lane starts with inspect_ai** (native MLflow) rather than EvalScope, with #15 amended accordingly.
-- Whether the MLflow/UC version bumps go into infra now (small compose change, own PR) or wait for the writer to exist.
+- ~~Whether the MLflow/UC version bumps go into infra now~~ — **decided 2026-09-03: now, before medallion/table work.**
+- Orchestrator choice (Airflow / Temporal / cron) and what it orchestrates first.
+- Where Spark runs for racestream/raceedge, and whether the benchmark lane ever moves off delta-rs.
