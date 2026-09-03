@@ -21,11 +21,11 @@ jobs:
   test:
     runs-on: docker
     steps:
-      - name: Install toolchain (shellcheck, yamllint, markdownlint)
+      - name: Install toolchain (shellcheck, yamllint, markdownlint, pytest)
         run: |
           apt-get update -qq
           DEBIAN_FRONTEND=noninteractive apt-get install -y -qq --no-install-recommends \
-            shellcheck yamllint
+            shellcheck yamllint python3 python3-pytest
           npm install -g --silent markdownlint-cli
 
       - uses: https://github.com/actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0  # v7.0.0
@@ -44,3 +44,14 @@ jobs:
         run: |
           yamllint -d "{extends: relaxed, rules: {line-length: disable}}" --strict \
             benchmark-config.yaml models-inventory.yaml .github/workflows/ .forgejo/workflows/
+
+      # Track 2A graders and fixtures are pure-python + bash and need no
+      # inference host, so they are cheap to gate here. Previously they were
+      # run by hand only, which is how config-sweep shipped with a decoy file
+      # that .gitignore had silently swallowed.
+      - name: Fixture and grader gates
+        run: |
+          set -euo pipefail
+          python3 scripts/testing/test_fixtures.py
+          python3 scripts/testing/test_grade_toolcall.py
+          python3 scripts/testing/test_grade_receipt.py
