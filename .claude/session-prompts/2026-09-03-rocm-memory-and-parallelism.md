@@ -1,6 +1,6 @@
 # Session Continuation Prompt
 **Generated:** 2026-09-03
-**Ending state:** Track 2A blocked on a ROCm/host memory pathology, isolated and characterized
+**Ending state:** Track 2A blocked; root cause narrowed to ZERO PREFIX CACHE REUSE (see BREAKTHROUGH)
 **Starting state:** finish the unified-memory A/B, then MLflow wiring, then AI-server parallelism
 
 ---
@@ -296,3 +296,110 @@ It is kernel/driver memory, not application memory: no process owns it, GTT is z
    against 926 generated means the agent reprocesses its whole context every turn — which
    would also be what drives the per-request slab allocation. Fix the caching and the leak
    rate may drop below the point where it matters.
+
+---
+
+## BREAKTHROUGH (2026-09-03 ~11:35) — ZERO PREFIX CACHE REUSE. Start here.
+
+This is very likely the primary bug, and the memory leak may be downstream of it.
+
+### Evidence
+From the llama-server child log (`~/.unsloth/studio/logs/llama-server/llama-*.log`):
+
+```
+task 1150 | prompt processing, n_tokens = 16384, progress = 0.63, t = 22.24 s / 736.63 t/s
+task 1150 | prompt processing, n_tokens = 20480, progress = 0.79, t = 30.65 s / 668.28 t/s
+task 1150 | prompt processing, n_tokens = 26035, progress = 0.94, t = 40.10 s / 612.84 t/s
+task 1150 | stop processing: n_tokens = 26035, truncated = 0
+```
+
+`progress` climbing from 0 to 1 means the slot reprocesses the **ENTIRE context every
+turn**. With working prefix reuse, progress would start near 1.0 and only the new tokens
+would be processed.
+
+Arithmetic checks out exactly: ~26k context reprocessed per turn at ~650 t/s = ~40 s/turn;
+~15 turns in a 600 s cell = ~147k prompt tokens. That is precisely the measured ptok, and
+it means **the cell spends 100% of its budget on prompt processing** and only emits ~900
+tokens.
+
+**Prompt processing speed (~650 t/s) is FINE.** Nothing is slow. The box is doing roughly
+15x more work than necessary.
+
+### Why it is probably happening
+`unsloth_cli/commands/start.py::_claude_local_env` sets, among others:
+
+```python
+"CLAUDE_CODE_DISABLE_EXPERIMENTAL_BETAS": "1",
+...
+env["CLAUDE_CODE_AUTO_COMPACT_WINDOW"] = str(int(window))   # 65536 here
+env["CLAUDE_AUTOCOMPACT_PCT_OVERRIDE"] = "90"               # compacts at ~59k
+```
+
+Anthropic prompt caching is a **beta** (`cache_control`). With experimental betas disabled,
+Claude Code will not emit cache directives. Separately, llama.cpp only reuses a slot prefix
+when the request carries `cache_prompt` (and `--cache-reuse` governs partial reuse), so if
+the studio's Anthropic proxy does not set it, every request is a cold prompt.
+
+Also note the earlier incident log line "a 2.3 GiB prompt-cache eviction" — consistent with
+cache thrash rather than reuse.
+
+### Tests, cheapest first (all need only ONE cell)
+1. Check whether the studio proxy sends `cache_prompt` to llama.cpp. If not, that is the
+   bug. Look for the proxy's request construction in
+   `studio/backend/core/inference/` (the `anthropic` proxy path).
+2. Launch the serve with llama.cpp `--cache-reuse` set (and confirm `cache_prompt`
+   defaults) and re-run one cell. Watch whether `progress` starts near 1.0 and ptok
+   collapses.
+3. Unset `CLAUDE_CODE_DISABLE_EXPERIMENTAL_BETAS` for the agent env and re-run one cell.
+4. Cross-check with a non-Claude agent (pi/opencode are installed) on the same serve — if
+   they show prefix reuse, the fault is Claude-Code-side.
+
+### Why this reorders everything
+If each turn stops reprocessing 26k tokens, the cell does ~15x less prompt work, which
+plausibly also collapses the per-request allocation growth that produces the ~30 GB slab.
+**Fix caching first, then re-measure memory.** Do not spend more time on slab forensics
+until this is settled.
+
+### THE CONCRETE FIX CANDIDATE: `--cache-ram` is defaulting to 8 GB
+
+`llama-server --help`:
+
+```
+-cram, --cache-ram N   set the maximum cache size in MiB
+                       (default: 8192, -1 = no limit, 0 = disable)
+                       (env: LLAMA_ARG_CACHE_RAM)
+```
+
+Unsloth's own source confirms we never set it —
+`studio/backend/core/inference/llama_cpp.py:5764`:
+
+```python
+"""--cache-ram (MiB) the last load asked for; None means the default 8192."""
+```
+
+It is `None` on every serve we launched, and `--cache-ram` appears nowhere on the child
+cmdline. So the prompt cache is capped at **8 GB** while the agent's KV state for a ~26k
+context on a 30B model grows past it. The cache evicts, and the next turn reprocesses from
+scratch — exactly the `progress = 0 -> 1` pattern in the child log, and exactly the
+"2.3 GiB prompt-cache eviction" line from the original 2026-09-02 incident.
+
+**It is settable by env var, so no `unsloth run` passthrough is needed:**
+
+```bash
+setsid nohup env UNSLOTH_DISABLE_UNIFIED_MEMORY=1 LLAMA_ARG_CACHE_RAM=32768 \
+  unsloth run --model ... --max-seq-length 65536 --parallel 1 -H 0.0.0.0 -p 8888 ...
+```
+
+Start with an explicit large value (e.g. 32768 MiB) rather than `-1`. Unlimited cache on a
+box that is already memory-fragile could trade one failure mode for another, and we want to
+watch what the cache actually costs.
+
+**Expected signature if this is the bug:** in the child log, `prompt processing` lines
+should start at `progress` near 1.0 instead of climbing from 0; ptok per cell should fall
+from ~147k to roughly the size of the final context; wall tok/s should rise sharply; and the
+slab growth should shrink because far fewer buffers are allocated per cell.
+
+Note the interaction flagged in the help text: `--cache-idle-slots ... using unified KV
+(default: enabled, requires cache-ram)`. Worth reading before tuning.
+
+**This is the single highest-value thing to try next, and it is one line and one cell.**
