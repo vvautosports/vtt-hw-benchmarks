@@ -1,7 +1,7 @@
 # Session Continuation Prompt
 **Generated:** 2026-09-03
 **Ending state:** Track 2A blocked; root cause narrowed to ZERO PREFIX CACHE REUSE (see BREAKTHROUGH)
-**Starting state:** finish the unified-memory A/B, then MLflow wiring, then AI-server parallelism
+**Starting state:** test LLAMA_ARG_CACHE_RAM (one env var, one cell), then MLflow wiring, then AI-server parallelism
 
 ---
 
@@ -37,19 +37,23 @@ ping -n 2 100.64.0.39
 
 ---
 
-## THE HEADLINE: three wrong theories, then the real one
+## THE HEADLINE: four wrong theories, then the real one
 
-Track 2A cannot produce valid cells right now. Not because of the harness — because a single
-agent cell consumes ~68 GB of host memory on the Framework and OOMs the box. The path to that
-conclusion matters, because **three earlier explanations were wrong and are recorded in issue
-#12 and in run CAVEATS files**. Do not trust those without re-reading this.
+Track 2A cannot produce valid cells. **The current best explanation is that every agent turn
+reprocesses its entire context (zero prefix cache reuse), most likely because llama.cpp's
+`--cache-ram` defaults to 8 GB and we never set it.** The memory blowup appears to be a
+downstream symptom. Full evidence in the BREAKTHROUGH section at the bottom — read that first.
+
+Four earlier explanations were WRONG and are still recorded in issue #12 and in older run
+CAVEATS files. Do not trust those without reading this table.
 
 | # | Theory | Verdict |
 |---|--------|---------|
-| 1 | "Auto ctx 202752 x --parallel 4 is the memory bomb" (issue #12 as written) | **WRONG.** Pinned `-c 65536 --parallel 1`, verified on the live child, still OOMed. |
-| 2 | "Unreclaimable kernel slab leaks and ratchets across runs; reboot per battery" | **WRONG.** It all released on unload: SUnreclaim 31.7 GB -> 0.58 GB, GTT 39.3 -> 0.0 GB, box back to 3 GB used / 120 GB free after idling. |
-| 3 | "Stale orphan serves stacking is the whole problem" | **PARTLY RIGHT — fixes the baseline only.** Real and now fixed, but growth persists with exactly one clean serve. |
-| 4 | **Per-cell host memory growth in the ROCm/HSA path** | **CURRENT, characterized below.** |
+| 1 | "Auto ctx 202752 x --parallel 4 is the memory bomb" (issue #12 as written) | **WRONG.** Pinned `-c 65536 --parallel 1`, verified on the live child, still exhausted the box. |
+| 2 | "Unreclaimable slab leaks and ratchets; reboot per battery" | **HALF RIGHT.** It does NOT leak forever (drains over hours), but it DOES ratchet within a session: 32 GB was still held with zero children, GTT at 0.0 and no process above 158 MB RSS. |
+| 3 | "Stale orphan serves stacking is the whole problem" | **PARTLY RIGHT — fixes the baseline only.** Real, and now fixed by `serve_pinned.sh`, but growth persists with exactly one clean serve. |
+| 4 | "`UNSLOTH_DISABLE_UNIFIED_MEMORY=1` causes it" | **WRONG.** A/B'd: flag removed was slightly WORSE (36.3 GB peak vs 30.7). Exonerated. |
+| 5 | **Zero prefix cache reuse; `--cache-ram` default of 8 GB forces evict-and-reprocess every turn** | **CURRENT. Test this first — it is one env var and one cell.** |
 
 ### The orphan trap (real, fixed, keep the fix)
 A studio parent can keep **LISTENING on 8888 after its model is gone**. A new `unsloth run`
