@@ -407,3 +407,28 @@ Note the interaction flagged in the help text: `--cache-idle-slots ... using uni
 (default: enabled, requires cache-ram)`. Worth reading before tuning.
 
 **This is the single highest-value thing to try next, and it is one line and one cell.**
+
+---
+
+## MEASURED DRAIN RATE (2026-09-03 14:43) — no reboot required
+
+The box recovered on its own. `uptime` confirms **no reboot happened** (up 22:14, continuous
+with the morning's 18:59 reading), yet after ~3h15m idle:
+
+| metric | 11:28 (post-run) | 14:43 (idle) |
+|---|---|---|
+| SUnreclaim | 30.6 GB | **0.55 GB** |
+| available | 68 GB | **121 GB** |
+| gtt_used | 0.0 GB | 0.2 GB |
+| llama children | 0 | 0 |
+
+So the slab drains passively in roughly **three hours of idle** — a reboot is faster but
+never necessary. This also confirms it is not a permanent leak.
+
+**Practical scheduling rule:** back-to-back agentic cells are what fail. Either fix the
+cache-reuse bug (see BREAKTHROUGH) or space runs ~3h apart. `serve_pinned.sh`'s >90 GB
+guard enforces this automatically — if it refuses, wait or reboot; never lower it.
+
+**Box state at handoff: CLEAN and READY** — 121 GB available, 0.55 GB slab, zero llama
+children, nothing listening on 8888. Perfect starting condition for the
+`LLAMA_ARG_CACHE_RAM` test.
