@@ -45,6 +45,37 @@ def overlay(src, dst):
         shutil.copytree(src, dst, dirs_exist_ok=True)
 
 
+def check_tracked():
+    """Every file under tasks/fixtures/ must be tracked by git.
+
+    A decoy swallowed by .gitignore keeps passing on the author's machine while
+    being absent from every clean checkout, so the grader dies on a missing path
+    instead of grading. That is exactly how config-sweep's
+    archive/2025-field-capture.log was lost to the generic *.log rule. Catch the
+    cause here rather than the symptom in a grader stack trace.
+    """
+    try:
+        out = subprocess.run(["git", "ls-files", "-z", "tasks/fixtures"],
+                             cwd=REPO, capture_output=True, text=True,
+                             timeout=60, check=True).stdout
+    except (OSError, subprocess.SubprocessError):
+        # A git worktree checked out from Windows stores an absolute C:/ path in
+        # .git, which git inside WSL cannot resolve. CI runs a plain Linux
+        # checkout and does exercise this; the protected.txt existence check
+        # below is the portable guard that runs everywhere.
+        print("  skip git unavailable here — tracked-file check not run")
+        return
+    tracked = {p for p in out.split("\0") if p}
+    on_disk = set()
+    for root, dirs, files in os.walk(FIXTURES):
+        dirs[:] = [d for d in dirs if d != "__pycache__"]
+        for name in files:
+            rel = os.path.relpath(os.path.join(root, name), REPO)
+            on_disk.add(rel.replace(os.sep, "/"))
+    untracked = sorted(on_disk - tracked)
+    ok("all fixture files tracked by git", not untracked, str(untracked))
+
+
 def main():
     tasks = sorted(
         d for d in os.listdir(FIXTURES)
@@ -53,11 +84,28 @@ def main():
     if len(tasks) != 5:
         print(f"WARNING: expected 5 fixtures, found {len(tasks)}: {tasks}")
 
+    print("repo hygiene:")
+    check_tracked()
+
     for task in tasks:
         fixture_dir = os.path.join(FIXTURES, task)
         print(f"{task}:")
         ok(f"{task}: prompt.md present",
            os.path.exists(os.path.join(fixture_dir, "prompt.md")))
+
+        # Every protected path must actually exist in fixture/. A decoy listed
+        # here but missing on disk makes the grader raise instead of grade, and
+        # no amount of correct agent work can pass the task.
+        protected = os.path.join(fixture_dir, "protected.txt")
+        missing = []
+        if os.path.exists(protected):
+            with open(protected, encoding="utf-8") as fh:
+                for line in fh:
+                    rel = line.strip()
+                    if rel and not rel.startswith("#") and not os.path.exists(
+                            os.path.join(fixture_dir, "fixture", rel)):
+                        missing.append(rel)
+        ok(f"{task}: protected paths exist in fixture/", not missing, str(missing))
 
         with tempfile.TemporaryDirectory() as tmp:
             scratch = os.path.join(tmp, "pristine")

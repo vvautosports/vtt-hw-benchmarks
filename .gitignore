@@ -42,3 +42,10 @@ Thumbs.db
 # Temporary files
 *.tmp
 *.temp
+
+# Fixture trees are test DATA, not build output. Decoy files may use any
+# extension, so the generic patterns above (*.log, *.tmp, ...) must not reach
+# them — a swallowed decoy makes the fixture unsolvable in a clean checkout
+# while still passing on the author's machine. Keep this rule last: git honors
+# the last matching pattern.
+!tasks/fixtures/**
