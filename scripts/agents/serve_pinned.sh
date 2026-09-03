@@ -33,8 +33,12 @@ AVAIL=$(free -g | awk "/^Mem:/{print \$7}")
 echo "[serve] clean baseline: ${AVAIL}GB available, $(count_children) children"
 if [ "$AVAIL" -lt 90 ]; then echo "[serve] FATAL: only ${AVAIL}GB available, expected >90 on a clean box"; exit 1; fi
 
-echo "[serve] launching pinned (-c 65536 --parallel 1)"
-setsid nohup env UNSLOTH_DISABLE_UNIFIED_MEMORY=1 unsloth run \
+# Prompt-cache size. llama.cpp --cache-ram defaults to 8192 MiB and the studio
+# never sets it; the ~26k-token agent KV state then evicts every turn and the
+# whole context is reprocessed (147k ptok/cell, 1.54 tok/s). 32 GiB keeps it.
+CACHE_RAM="${LLAMA_ARG_CACHE_RAM:-32768}"
+echo "[serve] launching pinned (-c 65536 --parallel 1, LLAMA_ARG_CACHE_RAM=${CACHE_RAM} MiB)"
+setsid nohup env UNSLOTH_DISABLE_UNIFIED_MEMORY=1 LLAMA_ARG_CACHE_RAM="$CACHE_RAM" unsloth run \
   --model "$MODEL" --max-seq-length 65536 --parallel 1 \
   -H 0.0.0.0 -p 8888 > "$HOME/unsloth-serve.log" 2>&1 < /dev/null &
 disown
