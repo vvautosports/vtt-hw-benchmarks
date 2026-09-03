@@ -1,0 +1,7 @@
+Unsloth ready at http://127.0.0.1:8888 · model Qwen3-Coder-30B-A3B-Instruct-UD-Q8_K_XL
+⚠ claude.ai connectors are disabled because ANTHROPIC_API_KEY or another auth source is set and takes precedence over your claude.ai login · Unset it to load your organization's connectors
+[claude-code:unrecognized_model] {"model":"Qwen3-Coder-30B-A3B-Instruct-UD-Q8_K_XL","query_source":"sdk"}
+API Error: 503 No GGUF model loaded. Load a GGUF model first. Or enable Model auto-switch (Settings > API) to load a requested model automatically. This is a server-side issue, usually temporary — try again in a moment. If it persists, check your inference gateway (127.0.0.1:8888).
+The agent exited with code 1.
+Unsloth Studio is still running at http://127.0.0.1:8888.
+Stop it with: unsloth studio stop

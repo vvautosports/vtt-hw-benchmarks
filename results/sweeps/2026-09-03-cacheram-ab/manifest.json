@@ -1,0 +1,22 @@
+{
+ "created_utc": "2026-09-03T21:41:16Z",
+ "host": "fedora",
+ "argv": [
+  "/home/kalman9/agent_task_battery.py",
+  "/home/kalman9/smoke_claude.json",
+  "/home/kalman9/ab-cacheram-2026-09-03/run",
+  "--fixtures",
+  "/home/kalman9/fixtures",
+  "--only",
+  "config-sweep",
+  "--timeout",
+  "600"
+ ],
+ "tasks": [
+  "config-sweep"
+ ],
+ "metrics_url": "http://127.0.0.1:50709/metrics",
+ "agents": [
+  "claude__smoke"
+ ]
+}

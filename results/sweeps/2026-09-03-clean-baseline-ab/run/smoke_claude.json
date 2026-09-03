@@ -1,0 +1,4 @@
+[
+  {"name": "claude", "tag": "smoke",
+   "cmd": ["unsloth", "start", "claude", "--yolo", "-p", "{prompt}"]}
+]

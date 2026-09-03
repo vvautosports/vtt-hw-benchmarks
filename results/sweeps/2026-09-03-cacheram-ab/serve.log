@@ -1,0 +1,7 @@
+[serve] tearing down any existing serve
+[serve] clean baseline: 121GB available, 0 children
+[serve] launching pinned (-c 65536 --parallel 1, LLAMA_ARG_CACHE_RAM=32768 MiB)
+[serve] waiting for REAL residency (unsloth start claude --no-launch)
+[serve] model RESIDENT after 20s
+[serve] parents=1 children=1 avail=80GB
+[serve] OK

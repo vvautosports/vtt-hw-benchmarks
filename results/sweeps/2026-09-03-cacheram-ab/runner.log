@@ -1,0 +1,5 @@
+[15:41:15] preflight tool-call probe: OK — tool_use returned
+[15:41:16] metrics endpoint: http://127.0.0.1:50709/metrics
+[15:41:16] === claude__smoke
+[15:51:17]   config-sweep: passed=False wall=600.1s agent_exit=None timeout=True protected=ok ptok=124420.0 gtok=980.0
+[15:51:17] AGENT TASK BATTERY COMPLETE
