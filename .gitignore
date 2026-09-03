@@ -42,3 +42,8 @@ Thumbs.db
 # Temporary files
 *.tmp
 *.temp
+
+# Curated experiment records under results/sweeps/ include memory and runner logs.
+# The generic *.log rule above would silently drop them — the same way it swallowed
+# the config-sweep fixture decoy (PR #17). Keep this after *.log so it wins.
+!results/sweeps/**/*.log
