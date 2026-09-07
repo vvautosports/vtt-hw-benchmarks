@@ -1,0 +1,432 @@
+{
+  "version": 1,
+  "family": "toolcall",
+  "notes": [
+    "Track 1 TIER 2 -- discriminative tool-calling battery. Tier 1 (toolcall_cases.json)",
+    "saturated at 90/90, so it is a floor and cannot rank models. These cases add pressure",
+    "along axes Tier 1 never exercised: several independent calls in one turn, nested and",
+    "union-typed argument schemas, the correct tool rotated OUT of the last position, tool",
+    "selection that turns on a single prompt constraint, and argument coercion from words.",
+    "",
+    "Run with: toolcall_battery.py <spec> <rundir> --cases toolcall_cases_tier2.json",
+    "The driver copies this file into the run dir, so grading is self-contained and an edit",
+    "here can never re-grade a committed run. Same standing rules as Tier 1: --disable-tools",
+    "at launch, enable_tools:false per request, temperature 0 (greedy pass/fail), raw healing",
+    "rung by default -- apply the ladder only where a model fails at raw.",
+    "",
+    "GRADER FORMS this battery relies on (see grade_sweep.grade_toolcall):",
+    "  expect.calls   -- list of {name, args_match}; each must match a DISTINCT actual call,",
+    "                    order-insensitive. Used by tc_parallel.",
+    "  args_match [ ] -- a pattern VALUE may be a list; all patterns must match the one arg.",
+    "                    Used to assert several substrings inside a nested object/array arg.",
+    "",
+    "PROMPT-TOKEN CEILINGS are per case (expect.max_prompt_tokens), ~2x the clean baseline,",
+    "so a distractor case's five schemas are not flagged as injection while a real server-side",
+    "tools-back-on event (2000-16000 tokens) still trips the flag.",
+    "",
+    "UNVALIDATED-AGAINST-LIVE-SERVER: authored offline (both inference boxes were occupied).",
+    "The JSON round-trips through the grader's synthetic fixtures in test_grade_toolcall.py,",
+    "but the prompt wordings have not yet been confirmed to elicit the intended calls from a",
+    "real model. First live run should sanity-check that at least one strong model passes each",
+    "case before the scores are read as a ranking."
+  ],
+  "request_constants": {
+    "max_tokens": 2048,
+    "seed": 42,
+    "temperature": 0.0,
+    "top_p": 1.0,
+    "reasoning_effort": "low",
+    "enable_tools": false
+  },
+  "cases": {
+    "tc_parallel": {
+      "kind": "single",
+      "intent": "Three independent calls in ONE turn. Catches models that can only emit a single tool_call per assistant message, or that serialise what should be parallel. Graded order-insensitively so call ordering is not penalised.",
+      "prompt": "Get the current temperature in Denver, Boston, and Seattle. Call the weather tool once for each city in this turn; do not guess and do not wait between calls.",
+      "tools": [
+        {
+          "type": "function",
+          "function": {
+            "name": "get_weather",
+            "description": "Get the current weather for a city.",
+            "parameters": {
+              "type": "object",
+              "properties": {
+                "city": { "type": "string", "description": "City name" },
+                "unit": { "type": "string", "enum": ["c", "f"], "description": "Temperature unit" }
+              },
+              "required": ["city"]
+            }
+          }
+        }
+      ],
+      "expect": {
+        "n_calls": 3,
+        "calls": [
+          { "name": "get_weather", "args_match": { "city": "(?i)denver" } },
+          { "name": "get_weather", "args_match": { "city": "(?i)boston" } },
+          { "name": "get_weather", "args_match": { "city": "(?i)seattle" } }
+        ],
+        "max_prompt_tokens": 900
+      }
+    },
+    "tc_nested": {
+      "kind": "single",
+      "intent": "One call whose arguments are a nested object plus an array of objects. Catches models that flatten structure or drop line-items. args_match uses list-of-patterns to assert both SKUs and the customer inside the serialised argument.",
+      "prompt": "Place an order for customer Ada Lovelace (tier: gold): 2 units of SKU AX-19 and 5 units of SKU BX-7, with rush shipping. Use the order tool.",
+      "tools": [
+        {
+          "type": "function",
+          "function": {
+            "name": "create_order",
+            "description": "Create a customer order with one or more line items.",
+            "parameters": {
+              "type": "object",
+              "properties": {
+                "customer": {
+                  "type": "object",
+                  "description": "Customer placing the order",
+                  "properties": {
+                    "name": { "type": "string" },
+                    "tier": { "type": "string", "enum": ["standard", "gold", "platinum"] }
+                  },
+                  "required": ["name"]
+                },
+                "items": {
+                  "type": "array",
+                  "description": "Line items",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "sku": { "type": "string" },
+                      "qty": { "type": "integer" }
+                    },
+                    "required": ["sku", "qty"]
+                  }
+                },
+                "rush": { "type": "boolean", "description": "Rush shipping" }
+              },
+              "required": ["customer", "items"]
+            }
+          }
+        }
+      ],
+      "expect": {
+        "n_calls": 1,
+        "name": "create_order",
+        "args_match": {
+          "customer": "(?i)ada lovelace",
+          "items": ["(?i)AX-19", "(?i)BX-7"]
+        },
+        "max_prompt_tokens": 1000
+      }
+    },
+    "tc_union": {
+      "kind": "single",
+      "intent": "A union-typed argument (anyOf: a preset enum OR a structured object). The prompt pins an exact timestamp, which only the object branch can express, so a model that collapses the union to the enum fails. Discriminates schema-following depth.",
+      "prompt": "Schedule a reminder for exactly 2026-09-01 at 14:30 (not a vague time of day). Use the reminder tool.",
+      "tools": [
+        {
+          "type": "function",
+          "function": {
+            "name": "set_reminder",
+            "description": "Set a reminder at either a preset time of day or an exact datetime.",
+            "parameters": {
+              "type": "object",
+              "properties": {
+                "note": { "type": "string", "description": "What to remind about" },
+                "when": {
+                  "description": "Either a preset slot or an exact datetime object.",
+                  "anyOf": [
+                    { "type": "string", "enum": ["morning", "afternoon", "evening"] },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "date": { "type": "string", "description": "YYYY-MM-DD" },
+                        "time": { "type": "string", "description": "HH:MM 24h" }
+                      },
+                      "required": ["date", "time"]
+                    }
+                  ]
+                }
+              },
+              "required": ["when"]
+            }
+          }
+        }
+      ],
+      "expect": {
+        "n_calls": 1,
+        "name": "set_reminder",
+        "args_match": {
+          "when": ["2026-09-01", "14:30"]
+        },
+        "max_prompt_tokens": 900
+      }
+    },
+    "tc_distractor_p1": {
+      "kind": "single",
+      "intent": "tc_distractor with the correct tool (convert_currency) moved to POSITION 1 of 5. Paired with tc_distractor (pos 5) and tc_distractor_p3 (pos 3), it isolates positional bias in tool selection -- a model that pattern-matches the first offered tool passes here but should also pass tc_distractor.",
+      "prompt": "How much is 250 US dollars in euros right now? Use the available tools.",
+      "tools": [
+        {
+          "type": "function",
+          "function": {
+            "name": "convert_currency",
+            "description": "Convert an amount from one currency to another at the live rate.",
+            "parameters": {
+              "type": "object",
+              "properties": {
+                "amount": { "type": "number", "description": "Amount to convert" },
+                "from_currency": { "type": "string", "description": "ISO 4217 code, e.g. USD" },
+                "to_currency": { "type": "string", "description": "ISO 4217 code, e.g. EUR" }
+              },
+              "required": ["amount", "from_currency", "to_currency"]
+            }
+          }
+        },
+        {
+          "type": "function",
+          "function": {
+            "name": "get_weather",
+            "description": "Get the current weather for a city.",
+            "parameters": {
+              "type": "object",
+              "properties": { "city": { "type": "string" } },
+              "required": ["city"]
+            }
+          }
+        },
+        {
+          "type": "function",
+          "function": {
+            "name": "send_email",
+            "description": "Send an email to a recipient.",
+            "parameters": {
+              "type": "object",
+              "properties": {
+                "to": { "type": "string" },
+                "subject": { "type": "string" },
+                "body": { "type": "string" }
+              },
+              "required": ["to", "subject", "body"]
+            }
+          }
+        },
+        {
+          "type": "function",
+          "function": {
+            "name": "create_calendar_event",
+            "description": "Create a calendar event.",
+            "parameters": {
+              "type": "object",
+              "properties": {
+                "title": { "type": "string" },
+                "start_iso": { "type": "string" },
+                "duration_minutes": { "type": "integer" }
+              },
+              "required": ["title", "start_iso"]
+            }
+          }
+        },
+        {
+          "type": "function",
+          "function": {
+            "name": "search_flights",
+            "description": "Search for flights between two airports.",
+            "parameters": {
+              "type": "object",
+              "properties": {
+                "origin": { "type": "string" },
+                "destination": { "type": "string" },
+                "date": { "type": "string" }
+              },
+              "required": ["origin", "destination"]
+            }
+          }
+        }
+      ],
+      "expect": {
+        "n_calls": 1,
+        "name": "convert_currency",
+        "args_match": {
+          "amount": "^250(\\.0+)?$",
+          "from_currency": "(?i)usd",
+          "to_currency": "(?i)eur"
+        },
+        "max_prompt_tokens": 1400
+      }
+    },
+    "tc_distractor_p3": {
+      "kind": "single",
+      "intent": "tc_distractor with the correct tool (convert_currency) at POSITION 3 of 5 (the middle). Third leg of the positional-bias triple with tc_distractor (pos 5) and tc_distractor_p1 (pos 1).",
+      "prompt": "How much is 250 US dollars in euros right now? Use the available tools.",
+      "tools": [
+        {
+          "type": "function",
+          "function": {
+            "name": "get_weather",
+            "description": "Get the current weather for a city.",
+            "parameters": {
+              "type": "object",
+              "properties": { "city": { "type": "string" } },
+              "required": ["city"]
+            }
+          }
+        },
+        {
+          "type": "function",
+          "function": {
+            "name": "send_email",
+            "description": "Send an email to a recipient.",
+            "parameters": {
+              "type": "object",
+              "properties": {
+                "to": { "type": "string" },
+                "subject": { "type": "string" },
+                "body": { "type": "string" }
+              },
+              "required": ["to", "subject", "body"]
+            }
+          }
+        },
+        {
+          "type": "function",
+          "function": {
+            "name": "convert_currency",
+            "description": "Convert an amount from one currency to another at the live rate.",
+            "parameters": {
+              "type": "object",
+              "properties": {
+                "amount": { "type": "number", "description": "Amount to convert" },
+                "from_currency": { "type": "string", "description": "ISO 4217 code, e.g. USD" },
+                "to_currency": { "type": "string", "description": "ISO 4217 code, e.g. EUR" }
+              },
+              "required": ["amount", "from_currency", "to_currency"]
+            }
+          }
+        },
+        {
+          "type": "function",
+          "function": {
+            "name": "create_calendar_event",
+            "description": "Create a calendar event.",
+            "parameters": {
+              "type": "object",
+              "properties": {
+                "title": { "type": "string" },
+                "start_iso": { "type": "string" },
+                "duration_minutes": { "type": "integer" }
+              },
+              "required": ["title", "start_iso"]
+            }
+          }
+        },
+        {
+          "type": "function",
+          "function": {
+            "name": "search_flights",
+            "description": "Search for flights between two airports.",
+            "parameters": {
+              "type": "object",
+              "properties": {
+                "origin": { "type": "string" },
+                "destination": { "type": "string" },
+                "date": { "type": "string" }
+              },
+              "required": ["origin", "destination"]
+            }
+          }
+        }
+      ],
+      "expect": {
+        "n_calls": 1,
+        "name": "convert_currency",
+        "args_match": {
+          "amount": "^250(\\.0+)?$",
+          "from_currency": "(?i)usd",
+          "to_currency": "(?i)eur"
+        },
+        "max_prompt_tokens": 1400
+      }
+    },
+    "tc_ambiguous": {
+      "kind": "single",
+      "intent": "Two tools both plausibly about flights; a single prompt detail (a specific flight number, not a route) selects get_flight_status over search_flights. Catches surface pattern-matching on the word 'flight'.",
+      "prompt": "Is flight UA 448 on time today? Use the available tools.",
+      "tools": [
+        {
+          "type": "function",
+          "function": {
+            "name": "search_flights",
+            "description": "Search for available flights between two airports on a date.",
+            "parameters": {
+              "type": "object",
+              "properties": {
+                "origin": { "type": "string" },
+                "destination": { "type": "string" },
+                "date": { "type": "string" }
+              },
+              "required": ["origin", "destination"]
+            }
+          }
+        },
+        {
+          "type": "function",
+          "function": {
+            "name": "get_flight_status",
+            "description": "Get the current status (on time, delayed, cancelled) of a specific flight by its number.",
+            "parameters": {
+              "type": "object",
+              "properties": {
+                "flight_no": { "type": "string", "description": "Flight number, e.g. UA448" }
+              },
+              "required": ["flight_no"]
+            }
+          }
+        }
+      ],
+      "expect": {
+        "n_calls": 1,
+        "name": "get_flight_status",
+        "args_match": {
+          "flight_no": "(?i)UA\\s*448"
+        },
+        "max_prompt_tokens": 900
+      }
+    },
+    "tc_coercion": {
+      "kind": "single",
+      "intent": "The amount is given in words ('fifteen hundred'), but the schema types it as a number. The model must coerce words -> 1500 rather than pass a string or refuse. Catches literal argument copying.",
+      "prompt": "Convert fifteen hundred US dollars into euros using the available tool.",
+      "tools": [
+        {
+          "type": "function",
+          "function": {
+            "name": "convert_currency",
+            "description": "Convert an amount from one currency to another at the live rate.",
+            "parameters": {
+              "type": "object",
+              "properties": {
+                "amount": { "type": "number", "description": "Amount to convert, as a number" },
+                "from_currency": { "type": "string", "description": "ISO 4217 code, e.g. USD" },
+                "to_currency": { "type": "string", "description": "ISO 4217 code, e.g. EUR" }
+              },
+              "required": ["amount", "from_currency", "to_currency"]
+            }
+          }
+        }
+      ],
+      "expect": {
+        "n_calls": 1,
+        "name": "convert_currency",
+        "args_match": {
+          "amount": "^1500(\\.0+)?$",
+          "from_currency": "(?i)usd",
+          "to_currency": "(?i)eur"
+        },
+        "max_prompt_tokens": 900
+      }
+    }
+  }
+}

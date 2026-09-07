@@ -1,0 +1,33 @@
+=== REASONING ===
+*   Task: Summarize the technical passage.
+*   Format: Exactly 5 bullet points followed by a one-sentence TL;DR.
+*   Constraint 1: Be faithful to the source (no external claims).
+*   Constraint 2: Exactly 5 bullets.
+*   Constraint 3: One-sentence TL;DR.
+
+    *   *Paragraph 1:* Explains speculative decoding. Process: draft mechanism proposes tokens $\rightarrow$ target model verifies in one batch. Result: Target model quality, draft model cost. Rejection keeps output distributionally identical. Draft types: small model, n-gram lookup, or MTP head.
+    *   *Paragraph 2:* Workload economics. Code/structured text $\rightarrow$ n-grams are good. Prose $\rightarrow$ lower acceptance, bad drafts slow things down. MTP heads $\rightarrow$ stable across domains, slightly more memory/compute.
+    *   *Paragraph 3:* MoE (Mixture-of-experts) impact. MoE routes tokens to subsets of experts. Speculative verification (batching) might pull more expert weights into memory per step. On bandwidth-bound hardware, this increases the required break-even acceptance rate compared to dense models.
+    *   *Paragraph 4:* Server-side parallelism. KV-cache slots trade off aggregate throughput vs. per-stream speed. Speculation competes with slots for compute. Tuning requires joint configuration of speculative mode, slot count, and sampling, measured by end-to-end tokens per second.
+
+    *   *Point 1 (Mechanism):* Speculative decoding uses a cheap draft mechanism to propose tokens that a target model verifies in a single pass, maintaining target-model quality and output distribution.
+    *   *Point 2 (Draft Types):* Draft mechanisms can be separate small models, n-gram lookups (effective for structured text), or multi-token-prediction (MTP) heads (more stable across domains).
+    *   *Point 3 (Trade-offs):* In open-ended prose, poorly matched draft models can decrease generation speed because rejected batches waste verification passes.
+    *   *Point 4 (MoE):* Mixture-of-experts models may require higher acceptance rates to be profitable on bandwidth-bound hardware because batch verification can pull more expert weights into memory.
+    *   *Point 5 (Server/Tuning):* Server-side tuning requires jointly configuring speculative mode, slot count, and sampling settings to optimize end-to-end throughput and per-stream speed.
+
+    *   Speculative decoding accelerates inference by using draft mechanisms to propose tokens for target model verification, though its effectiveness depends on the workload, model architecture (like MoE), and server-side configurations.
+
+    *   Exactly 5 bullet points? Yes.
+    *   One-sentence TL;DR? Yes.
+    *   Faithful to source? Yes.
+    *   No added claims? Yes.
+
+=== CONTENT ===
+* Speculative decoding accelerates inference by using a cheap draft mechanism to propose tokens that a target model verifies in a single batch, maintaining the target model's output distribution.
+* Draft mechanisms can be small models, n-gram lookups (effective for structured text), or multi-token-prediction (MTP) heads, which offer more stable acceptance rates across domains.
+* Poorly matched draft models can slow down generation in open-ended prose because rejected batches waste target model verification passes.
+* For Mixture-of-experts (MoE) models on bandwidth-bound hardware, the break-even acceptance rate is higher than for dense models because batched verification pulls more expert weights into memory.
+* Server-side optimization requires jointly tuning speculative mode, slot count, and sampling settings to balance aggregate throughput and per-stream speed.
+
+TL;DR: Speculative decoding improves inference speed by verifying draft tokens in batches, but its efficiency depends on the draft method, the workload, the target model's architecture, and server-side configurations.

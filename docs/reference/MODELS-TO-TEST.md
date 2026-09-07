@@ -17,9 +17,26 @@ Complete list of models to evaluate on AMD Strix Halo for coding assistance.
 
 ### GPT Family (Open Source)
 - **GPT-OSS-20B-F16** (13GB) - ✅ Tested - Fastest small model
-- **GPT-OSS-120B** (size TBD) - ⏸️ Not tested yet
+- **GPT-OSS-120B** (F16, native MXFP4 MoE) - ✅ Tested - see PERFORMANCE-SUMMARY.md (33.1/33.8/30.3 t/s, 3/3, largest reasoning gain on the roster; stale "Not tested yet" line corrected 2026-09-06)
 
 **Verdict so far:** GLM-4.7-Flash-Q8 winning for overall coding, GPT-OSS-20B for speed
+
+---
+
+### 2026-09-06 Intake (#20) — New-Family Batch
+
+All four measured on Framework Desktop, `unsloth-studio 2026.8.22` (bundled llama-server build 10687), `--disable-tools`, `thinking` profile, `effort low`, seed 42. Full rows: PERFORMANCE-SUMMARY.md roster leaderboard.
+
+- **Qwen3.8-27B** (31.5GB, UD-Q8_K_XL) - ✅ Tested (2026-09-06, intake #20) — dense 27B baseline: ~17/16/15 t/s, 3/3 text + 7/7 tool on both rungs.
+- **gemma-4-31B-it-qat** (17.3GB, UD-Q4_K_XL) - ✅ Tested (2026-09-06, intake #20) — QAT int4 dense: ~27/27/23 t/s, 3/3 + 7/7; new memory-tight/fast dense pick.
+- **Qwen3.6-27B-MTP** (35.8GB, UD-Q8_K_XL) - ✅ Tested (2026-09-06, intake #20) — ~14/14/13 t/s, 3/3 + 7/7, but the MTP head is unused (build 10687 lacks `--spec-type draft-mtp`, see #14); baseline only until MTP runtime lands.
+- **gemma-4-31B-it** (35.0GB, UD-Q8_K_XL) - ✅ Tested (2026-09-06, intake #20), re-run on build 10687 — ~5.9/6.0/5.8 t/s confirmed, 3/3 + 7/7; earlier dense-Q8 slowness finding stands.
+
+**Deferred:**
+- **GLM-5.3-Flash** - ⏸️ Deferred (#22) — 320B-A18B, only fits this box at IQ1; llama.cpp PR #27754 (GLM-5.3 support) is still unmerged upstream.
+
+**Planned:**
+- **Qwen3-Coder-30B-A3B quant ladder** - 📋 Planned (#23) — Q4_K_M / UD-Q4_K_XL / Q6_K / UD-Q8_K_XL, each run through tool 7-call + 3 coding cells + tg/pp t/s, to answer "optimal quant" and make our numbers community-comparable.
 
 ---
 

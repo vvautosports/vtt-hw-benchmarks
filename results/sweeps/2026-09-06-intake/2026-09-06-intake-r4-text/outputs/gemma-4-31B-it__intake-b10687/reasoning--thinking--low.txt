@@ -1,0 +1,114 @@
+=== REASONING ===
+*   Three trucks (A, B, and C) arrive at a warehouse together at 6:00 AM.
+    *   Truck A returns every 12 minutes.
+    *   Truck B returns every 18 minutes.
+    *   Truck C returns every 30 minutes.
+    *   Time interval: 6:00 AM to 6:00 PM inclusive.
+    *   Goal: Find how many times all three trucks arrive at the same moment.
+
+    *   The trucks arrive together when the elapsed time is a multiple of each of their return intervals (12, 18, and 30 minutes).
+    *   The first time they arrive together after 6:00 AM is at the Least Common Multiple (LCM) of 12, 18, and 30.
+
+    *   Prime factorization:
+        *   12 = 2^2 * 3
+        *   18 = 2 * 3^2
+        *   30 = 2 * 3 * 5
+    *   LCM(12, 18, 30) = 2^(max(2, 1, 1)) * 3^(max(1, 2, 1)) * 5^(max(0, 0, 1))
+    *   LCM = 2^2 * 3^2 * 5
+    *   LCM = 4 * 9 * 5
+    *   LCM = 36 * 5
+    *   LCM = 180 minutes.
+
+    *   180 minutes / 60 minutes per hour = 3 hours.
+    *   The trucks arrive together every 3 hours.
+
+    *   Time period: 6:00 AM to 6:00 PM.
+    *   Total time duration: 12 hours.
+    *   Trucks arrive together every 3 hours.
+
+    *   Let T = 0 represent 6:00 AM.
+    *   The trucks arrive together at T = 0, 3, 6, 9, and 12 hours.
+    *   T = 0 is 6:00 AM.
+    *   T = 3 is 9:00 AM.
+    *   T = 6 is 12:00 PM.
+    *   T = 9 is 3:00 PM.
+    *   T = 12 is 6:00 PM.
+
+    *   T=0: 6:00 AM (1st time)
+    *   T=3: 9:00 AM (2nd time)
+    *   T=6: 12:00 PM (3rd time)
+    *   T=9: 3:00 PM (4th time)
+    *   T=12: 6:00 PM (5th time)
+
+    *   LCM of 12, 18, 30:
+        *   Multiples of 30: 30, 60, 90, 120, 150, 180.
+        *   180 is divisible by 12 (180 / 12 = 15).
+        *   180 is divisible by 18 (180 / 18 = 10).
+        *   180 is divisible by 30 (180 / 30 = 6).
+        *   Wait, is there a smaller one?
+        *   Multiples of 30:
+            *   30: Not div by 12 or 18.
+            *   60: Div by 12, not by 18.
+            *   90: Div by 18, not by 12.
+            *   120: Div by 12, not by 18.
+            *   150: Not div by 12 or 18.
+            *   180: Div by 12, 18, and 30.
+        *   LCM is correct: 180 minutes.
+    *   Time interval: 6:00 AM to 6:00 PM.
+        *   Duration = 12 hours.
+        *   Frequency = 3 hours.
+        *   Number of occurrences = (12 / 3) + 1 (since it's inclusive).
+        *   Number of occurrences = 4 + 1 = 5.
+
+    *   Truck A: 12, 24, 36, 48, 60, 72, 84, 96, 108, 120, 132, 144, 156, 168, 180
+    *   Truck B: 18, 36, 54, 72, 90, 108, 126, 144, 162, 180
+    *   Truck C: 30, 60, 90, 120, 150, 180
+    *   They first meet again at 180.
+    *   180 minutes = 3 hours.
+    *   Start: 6:00 AM
+    *   Intervals: 6:00, 9:00, 12:00, 15:00 (3 PM), 18:00 (6 PM).
+
+    *   Does "inclusive" mean both 6:00 AM and 6:00 PM are counted? Yes.
+    *   Total occurrences: 5.
+
+    *   LCM of 12, 18, 30.
+    *   12 = 2^2 * 3
+    *   18 = 2 * 3^2
+    *   30 = 2 * 3 * 5
+    *   LCM = 2^2 * 3^2 * 5 = 4 * 9 * 5 = 180 minutes.
+    *   180 minutes = 3 hours.
+    *   6:00 AM, 9:00 AM, 12:00 PM, 3:00 PM, 6:00 PM.
+    *   That's 5 times.
+
+=== CONTENT ===
+To find the number of times all three trucks arrive at the warehouse together, we need to determine the least common multiple (LCM) of their return intervals.
+
+1.  **Find the return intervals for each truck:**
+    *   Truck A: every 12 minutes
+    *   Truck B: every 18 minutes
+    *   Truck C: every 30 minutes
+
+2.  **Calculate the Least Common Multiple (LCM) of 12, 18, and 30:**
+    *   Prime factorization of 12: $2^2 \times 3$
+    *   Prime factorization of 18: $2 \times 3^2$
+    *   Prime factorization of 30: $2 \times 3 \times 5$
+    *   The LCM is found by taking the highest power of each prime factor present:
+        $\text{LCM} = 2^2 \times 3^2 \times 5 = 4 \times 9 \times 5 = 180$
+    *   The trucks arrive together every 180 minutes.
+
+3.  **Convert the LCM into hours:**
+    *   $180 \text{ minutes} \div 60 \text{ minutes/hour} = 3 \text{ hours}$
+
+4.  **Determine the times they arrive together between 6:00 AM and 6:00 PM:**
+    *   The time window is from 6:00 AM to 6:00 PM, which is a total duration of 12 hours.
+    *   Since the trucks arrive together every 3 hours, we list the times:
+        *   6:00 AM (Start)
+        *   9:00 AM
+        *   12:00 PM
+        *   3:00 PM
+        *   6:00 PM (End)
+
+5.  **Count the occurrences:**
+    *   There are 5 distinct moments when all three trucks arrive together.
+
+ANSWER: 5

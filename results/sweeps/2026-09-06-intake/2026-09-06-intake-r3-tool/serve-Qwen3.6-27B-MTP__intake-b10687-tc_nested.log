@@ -1,0 +1,102 @@
+{"timestamp": "2026-09-06T19:18:10.995460Z", "level": "info", "event": "run_server startup begin api_only=False host=0.0.0.0 port=8888"}
+{"timestamp": "2026-09-06T19:18:11.831679Z", "level": "info", "event": "Imported FastAPI app in 815.2ms"}
+{"timestamp": "2026-09-06T19:18:11.833161Z", "level": "info", "event": "Ensured Unsloth directories in 838.9ms"}
+{"timestamp": "2026-09-06T19:18:11.937852Z", "level": "info", "event": "run_server pre-uvicorn setup completed in 943.6ms"}
+INFO:     Started server process [110539]
+INFO:     Waiting for application startup.
+{"timestamp": "2026-09-06T19:18:12.032020Z", "level": "info", "event": "Removing unsloth compiled cache: /home/kalman9/.unsloth/studio/compiled_cache"}
+{"timestamp": "2026-09-06T19:18:12.032225Z", "level": "info", "event": "Cleaning generated modules from shared directory: /home/kalman9/unsloth_compiled_cache"}
+{"timestamp": "2026-09-06T19:18:12.073117Z", "level": "info", "event": "lifespan pre-auth setup completed in 47.7ms"}
+{"timestamp": "2026-09-06T19:18:12.074824Z", "level": "info", "event": "lifespan startup completed in 49.5ms"}
+INFO:     Application startup complete.
+INFO:     Unsloth Studio running on http://24.9.3.184:8888 (To stop: press Ctrl+C -- on macOS, Control+C not Command+C)
+{"timestamp": "2026-09-06T19:18:12.076072Z", "level": "info", "event": "Uvicorn startup hook completed in 1081.8ms"}
+{"timestamp": "2026-09-06T19:18:12.077272Z", "level": "info", "event": "run_server uvicorn ready after 1083.0ms"}
+{"timestamp": "2026-09-06T19:18:12.433924Z", "level": "warning", "event": "llama.cpp prebuilt is 6 days behind: installed b10687, latest b10798-mix-659e406. Run `unsloth studio update` to refresh."}
+WARNING: llama.cpp prebuilt is 6 days behind: installed b10687, latest b10798-mix-659e406. Run `unsloth studio update` to refresh.
+Starting Unsloth Studio...
+Hardware detected: ROCm (HIP 7.13.99004) -- Radeon 8060S Graphics
+{"timestamp": "2026-09-06T19:18:13.099897Z", "level": "info", "event": "InferenceOrchestrator initialized (subprocess mode)"}
+{"timestamp": "2026-09-06T19:18:13.122253Z", "level": "info", "event": "request_completed", "method": "GET", "path": "/api/health", "status_code": 200, "process_time_ms": 669.16}
+Loading model: /mnt/ai-models/unsloth/Qwen3.6-27B-MTP-GGUF/Qwen3.6-27B-UD-Q8_K_XL.gguf...
+{"timestamp": "2026-09-06T19:18:13.273005Z", "level": "info", "event": "Detected local GGUF model: /mnt/ai-models/unsloth/Qwen3.6-27B-MTP-GGUF/Qwen3.6-27B-UD-Q8_K_XL.gguf"}
+{"timestamp": "2026-09-06T19:18:13.411334Z", "level": "info", "event": "GGUF metadata: context_length=262144"}
+{"timestamp": "2026-09-06T19:18:13.411444Z", "level": "info", "event": "GGUF metadata: chat_template=8057 chars"}
+{"timestamp": "2026-09-06T19:18:13.411490Z", "level": "info", "event": "GGUF metadata: model supports reasoning (enable_thinking)"}
+{"timestamp": "2026-09-06T19:18:13.411525Z", "level": "info", "event": "GGUF metadata: model supports preserve_thinking"}
+{"timestamp": "2026-09-06T19:18:13.411586Z", "level": "info", "event": "GGUF metadata: model supports tool calling"}
+{"timestamp": "2026-09-06T19:18:13.414313Z", "level": "info", "event": "TrainingBackend initialized (subprocess mode)"}
+{"timestamp": "2026-09-06T19:18:13.483652Z", "level": "info", "event": "GGUF metadata: context_length=262144"}
+{"timestamp": "2026-09-06T19:18:13.483729Z", "level": "info", "event": "GGUF metadata: chat_template=8057 chars"}
+{"timestamp": "2026-09-06T19:18:13.483776Z", "level": "info", "event": "GGUF metadata: model supports reasoning (enable_thinking)"}
+{"timestamp": "2026-09-06T19:18:13.483817Z", "level": "info", "event": "GGUF metadata: model supports preserve_thinking"}
+{"timestamp": "2026-09-06T19:18:13.483881Z", "level": "info", "event": "GGUF metadata: model supports tool calling"}
+{"timestamp": "2026-09-06T19:18:13.498861Z", "level": "info", "event": "amd-smi not found on PATH; GPU utilization polling via amd-smi unavailable (VRAM falls back to torch mem_get_info)."}
+{"timestamp": "2026-09-06T19:18:13.502720Z", "level": "info", "event": "ROCm device 0 is a unified-memory APU sharing system RAM; reserving 1024MiB host headroom (117303->116279MiB usable)"}
+{"timestamp": "2026-09-06T19:18:13.583036Z", "level": "info", "event": "GGUF metadata: context_length=262144"}
+{"timestamp": "2026-09-06T19:18:13.583154Z", "level": "info", "event": "GGUF metadata: chat_template=8057 chars"}
+{"timestamp": "2026-09-06T19:18:13.583181Z", "level": "info", "event": "GGUF metadata: model supports reasoning (enable_thinking)"}
+{"timestamp": "2026-09-06T19:18:13.583199Z", "level": "info", "event": "GGUF metadata: model supports preserve_thinking"}
+{"timestamp": "2026-09-06T19:18:13.583241Z", "level": "info", "event": "GGUF metadata: model supports tool calling"}
+{"timestamp": "2026-09-06T19:18:13.639968Z", "level": "info", "event": "GGUF metadata: context_length=262144"}
+{"timestamp": "2026-09-06T19:18:13.640242Z", "level": "info", "event": "GGUF metadata: chat_template=8057 chars"}
+{"timestamp": "2026-09-06T19:18:13.640269Z", "level": "info", "event": "GGUF metadata: model supports reasoning (enable_thinking)"}
+{"timestamp": "2026-09-06T19:18:13.640289Z", "level": "info", "event": "GGUF metadata: model supports preserve_thinking"}
+{"timestamp": "2026-09-06T19:18:13.640334Z", "level": "info", "event": "GGUF metadata: model supports tool calling"}
+{"timestamp": "2026-09-06T19:18:13.644866Z", "level": "info", "event": "ROCm device 0 is a unified-memory APU sharing system RAM; reserving 1024MiB host headroom (117303->116279MiB usable)"}
+{"timestamp": "2026-09-06T19:18:13.645322Z", "level": "info", "event": "GGUF size: 33.3 GB, est. KV cache: 16.6 GB, MTP reserve: 2.17 GB (draft KV @ 262144 + verify n_max=2), context: 262144, GPUs free: [(0, 116279)], selected: [0], --fit: off"}
+{"timestamp": "2026-09-06T19:18:13.645650Z", "level": "info", "event": "Load mode: the whole load (54.7 GB) fits without paging, using --load-mode none."}
+{"timestamp": "2026-09-06T19:18:13.646463Z", "level": "info", "event": "Spec decoding: draft-mtp (MTP-only)"}
+{"timestamp": "2026-09-06T19:18:13.646619Z", "level": "info", "event": "Reasoning model: {'enable_thinking': True, 'preserve_thinking': False} by default"}
+{"timestamp": "2026-09-06T19:18:13.648313Z", "level": "info", "event": "Load mode: --load-mode none"}
+{"timestamp": "2026-09-06T19:18:13.648366Z", "level": "info", "event": "Starting llama-server: /home/kalman9/.unsloth/llama.cpp/llama-server -m /mnt/ai-models/unsloth/Qwen3.6-27B-MTP-GGUF/Qwen3.6-27B-UD-Q8_K_XL.gguf --port 36957 --parallel 4 --flash-attn on --no-context-shift -c 262144 --alias Qwen3.6-27B-UD-Q8_K_XL -ngl -1 --fit off --metrics --slot-save-path /home/kalman9/.unsloth/studio/cache/llama-slots --kv-unified --jinja --spec-type draft-mtp --spec-draft-n-max 2 --chat-template-kwargs {\"enable_thinking\": true, \"preserve_thinking\": false} --load-mode none"}
+{"timestamp": "2026-09-06T19:18:13.653669Z", "level": "info", "event": "llama-server stdout/stderr -> /home/kalman9/.unsloth/studio/logs/llama-server/llama-1788722293-port-36957-try0.log"}
+{"timestamp": "2026-09-06T19:18:15.366072Z", "level": "info", "event": "torch warm finished in 3291.5ms"}
+{"timestamp": "2026-09-06T19:18:20.973507Z", "level": "info", "event": "request_completed", "method": "GET", "path": "/v1/models", "status_code": 200, "process_time_ms": 148.63}
+{"timestamp": "2026-09-06T19:18:21.940754Z", "level": "info", "event": "llama-server ready on port 36957 for model '/mnt/ai-models/unsloth/Qwen3.6-27B-MTP-GGUF/Qwen3.6-27B-UD-Q8_K_XL.gguf'"}
+{"timestamp": "2026-09-06T19:18:21.960051Z", "level": "info", "event": "Loaded GGUF model via llama-server: /mnt/ai-models/unsloth/Qwen3.6-27B-MTP-GGUF/Qwen3.6-27B-UD-Q8_K_XL.gguf"}
+{"timestamp": "2026-09-06T19:18:21.963172Z", "level": "info", "event": "Loaded default model defaults from /home/kalman9/.unsloth/studio/unsloth_studio/lib/python3.13/site-packages/studio/backend/assets/configs/model_defaults/default.yaml"}
+{"timestamp": "2026-09-06T19:18:21.965807Z", "level": "info", "event": "request_completed", "method": "POST", "path": "/api/inference/load", "status_code": 200, "process_time_ms": 8768.33}
+
+========================================================
+  Unsloth Studio running at http://24.9.3.184:8888
+
+  Reachability check: http://24.9.3.184:8888/ is NOT reachable from the public internet (2/2 probe nodes failed).
+    Usually a cloud firewall (AWS security group, GCP firewall / Azure NSG rule) or home router isn't allowing inbound TCP 8888.
+    No firewall change needed -- SSH local-forward from your own computer:
+        ssh -L 8888:localhost:8888 <user>@24.9.3.184
+    then open http://localhost:8888/ in your browser.
+  You can access Unsloth Studio locally in the meantime: http://127.0.0.1:8888
+  Cloudflare tunnel: OFF (default). Unsloth is reachable on your local network only. Pass --cloudflare to expose a public Cloudflare HTTPS link.
+  Model loaded: /mnt/ai-models/unsloth/Qwen3.6-27B-MTP-GGUF/Qwen3.6-27B-UD-Q8_K_XL.gguf
+  Context length: 262144 tokens
+  API Key:      sk-unsloth-<redacted>
+
+  OpenAI / Anthropic SDK base URL:
+    http://24.9.3.184:8888/v1
+========================================================
+Server-side tools are ENABLED and this port is network-reachable. Anyone who can reach it with the API key can run code on this machine. Do not share the API key. Pass --disable-tools to turn off.
+
+OpenAI Chat Completions:
+  curl http://24.9.3.184:8888/v1/chat/completions \
+    -H "Authorization: Bearer sk-unsloth-<redacted>" \
+    -H "Content-Type: application/json" \
+    -d '{"messages": [{"role": "user", "content": "Hello"}], "stream": true}'
+
+Anthropic Messages:
+  curl http://24.9.3.184:8888/v1/messages \
+    -H "Authorization: Bearer sk-unsloth-<redacted>" \
+    -H "Content-Type: application/json" \
+    -d '{"max_tokens": 256, "messages": [{"role": "user", "content": "Hello"}], "stream": true}'
+
+OpenAI Responses:
+  curl http://24.9.3.184:8888/v1/responses \
+    -H "Authorization: Bearer sk-unsloth-<redacted>" \
+    -H "Content-Type: application/json" \
+    -d '{"input": "Hello", "stream": true}'
+
+{"timestamp": "2026-09-06T19:18:31.073670Z", "level": "info", "event": "request_completed", "method": "GET", "path": "/v1/models", "status_code": 200, "process_time_ms": 95.29}
+{"timestamp": "2026-09-06T19:18:31.943611Z", "level": "info", "event": "engine_stats", "gen_tok_s": 0.0, "prompt_tok_s": 0.0, "running": 1, "waiting": 0}
+{"timestamp": "2026-09-06T19:18:41.946392Z", "level": "info", "event": "engine_stats", "gen_tok_s": 0.0, "prompt_tok_s": 240.9, "running": 1, "waiting": 0}
+{"timestamp": "2026-09-06T19:18:51.949268Z", "level": "info", "event": "engine_stats", "gen_tok_s": 0.0, "prompt_tok_s": 0.0, "running": 1, "waiting": 0}
+{"timestamp": "2026-09-06T19:18:54.198375Z", "level": "info", "event": "request_completed", "method": "POST", "path": "/v1/chat/completions", "status_code": 200, "process_time_ms": 23044.76}

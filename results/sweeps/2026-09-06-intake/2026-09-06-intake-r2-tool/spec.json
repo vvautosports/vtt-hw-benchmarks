@@ -1,0 +1,9 @@
+[
+  {
+    "name": "gemma-4-31B-it-qat",
+    "tag": "intake-b10687",
+    "path": "/mnt/ai-models/unsloth/gemma-4-31B-it-qat-GGUF/gemma-4-31B-it-qat-UD-Q4_K_XL.gguf",
+    "flags": "",
+    "env": {"UNSLOTH_DISABLE_UNIFIED_MEMORY": "1"}
+  }
+]

@@ -1,0 +1,76 @@
+=== REASONING ===
+*   Three trucks (A, B, and C) arrive at a warehouse together at 6:00 AM.
+    *   Truck A returns every 12 minutes.
+    *   Truck B returns every 18 minutes.
+    *   Truck C returns every 30 minutes.
+    *   Time interval: 6:00 AM to 6:00 PM inclusive.
+    *   Goal: Find how many times all three trucks arrive at the same moment.
+
+    *   The trucks arrive together when the elapsed time is a common multiple of their return intervals (12, 18, and 30 minutes).
+    *   They arrive together *at the same moment* at intervals equal to the Least Common Multiple (LCM) of 12, 18, and 30.
+
+    *   Prime factorization:
+        *   12 = 2^2 * 3^1
+        *   18 = 2^1 * 3^2
+        *   30 = 2^1 * 3^1 * 5^1
+    *   The LCM is the highest power of each prime factor present:
+        *   LCM(12, 18, 30) = 2^2 * 3^2 * 5^1
+        *   LCM = 4 * 9 * 5
+        *   LCM = 36 * 5 = 180 minutes.
+
+    *   180 minutes = 180 / 60 = 3 hours.
+
+    *   Start time: 6:00 AM.
+    *   End time: 6:00 PM.
+    *   Total duration: 12 hours.
+
+    *   The trucks arrive together every 3 hours.
+    *   The moments they arrive together are:
+        1.  6:00 AM (t = 0)
+        2.  9:00 AM (t = 3 hours)
+        3.  12:00 PM (t = 6 hours)
+        4.  3:00 PM (t = 9 hours)
+        5.  6:00 PM (t = 12 hours)
+
+    *   The question asks for the number of times they arrive *between 6:00 AM and 6:00 PM inclusive*.
+    *   Counting the list above: 6:00 AM, 9:00 AM, 12:00 PM, 3:00 PM, 6:00 PM.
+    *   Total count = 5.
+
+    *   LCM calculation: 12=2*2*3, 18=2*3*3, 30=2*3*5. LCM=2*2*3*3*5 = 180. Correct.
+    *   180 min = 3 hours. Correct.
+    *   12 hours duration / 3 hours per interval = 4 intervals.
+    *   Number of times they arrive together = intervals + 1 (because it's inclusive of both ends).
+    *   4 + 1 = 5. Correct.
+
+=== CONTENT ===
+To find how many times the three delivery trucks arrive at the warehouse together, we need to determine the interval at which their arrivals coincide. This is done by finding the Least Common Multiple (LCM) of their individual return intervals.
+
+1.  **Find the LCM of the return intervals:**
+    *   Truck A returns every 12 minutes.
+    *   Truck B returns every 18 minutes.
+    *   Truck C returns every 30 minutes.
+    
+    Prime factorization:
+    *   $12 = 2^2 \times 3$
+    *   $18 = 2 \times 3^2$
+    *   $30 = 2 \times 3 \times 5$
+    
+    The LCM is calculated by taking the highest power of each prime factor present:
+    $\text{LCM}(12, 18, 30) = 2^2 \times 3^2 \times 5 = 4 \times 9 \times 5 = 180 \text{ minutes.}$
+
+2.  **Convert the LCM to hours:**
+    $180 \text{ minutes} \div 60 \text{ minutes/hour} = 3 \text{ hours.}$
+    The trucks arrive together every 3 hours.
+
+3.  **Calculate the number of arrivals between 6:00 AM and 6:00 PM inclusive:**
+    The total time elapsed from 6:00 AM to 6:00 PM is 12 hours.
+    We list the times they arrive together:
+    *   6:00 AM (Start)
+    *   9:00 AM (6:00 AM + 3 hours)
+    *   12:00 PM (9:00 AM + 3 hours)
+    *   3:00 PM (12:00 PM + 3 hours)
+    *   6:00 PM (3:00 PM + 3 hours)
+
+Counting these occurrences, we find there are 5 moments when all three trucks arrive at the warehouse together.
+
+ANSWER: 5

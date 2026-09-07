@@ -1,0 +1,9 @@
+[
+  {
+    "name": "Qwen3.8-27B",
+    "tag": "intake-b10687",
+    "path": "/mnt/ai-models/unsloth/Qwen3.8-27B-GGUF/Qwen3.8-27B-UD-Q8_K_XL.gguf",
+    "flags": "",
+    "env": {"UNSLOTH_DISABLE_UNIFIED_MEMORY": "1"}
+  }
+]
