@@ -4,6 +4,11 @@
 results/*
 !results/.gitkeep
 !results/sweeps/
+# Community lane (EvalScope etc.): track only the small adapter records per pilot,
+# not the raw eval/perf output trees.
+!results/community/
+results/community/*/*
+!results/community/*/records/
 
 # Python
 __pycache__/

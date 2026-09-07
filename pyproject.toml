@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "vtt-hw-benchmarks"
+version = "0.1.0"
+description = "VVC hardware benchmarking: sweep drivers, deterministic graders, and the MLflow intake shim for the evidence lakehouse."
+requires-python = ">=3.10,<3.14"
+
+# Deliberately EMPTY. The sweep drivers under scripts/sweeps/ run from $HOME on the
+# inference nodes with no virtualenv and no checkout -- they are stdlib-only by
+# contract. Everything with a dependency lives behind an extra and runs off-node.
+dependencies = []
+
+[project.optional-dependencies]
+mlflow = ["mlflow>=2.19", "pyyaml>=6"]
+community = ["evalscope"]
+
+[project.scripts]
+log-sweep-to-mlflow = "hwbench_intake.log_sweep_to_mlflow:main"
+
+# scripts/utils/ is exposed as the importable package `hwbench_intake` so the
+# console script resolves after `pip install -e .` without moving any file that
+# existing docs, manifests and runbooks reference by its current path.
+[tool.setuptools]
+packages = ["hwbench_intake"]
+
+[tool.setuptools.package-dir]
+hwbench_intake = "scripts/utils"

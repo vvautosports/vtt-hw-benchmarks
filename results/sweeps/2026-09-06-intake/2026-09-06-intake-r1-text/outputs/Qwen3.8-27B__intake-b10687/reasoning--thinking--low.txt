@@ -1,0 +1,67 @@
+=== REASONING ===
+We need to find how many times all three trucks arrive at the same moment between 6:00 AM and 6:00 PM inclusive.
+
+Truck A returns every 12 minutes
+Truck B returns every 18 minutes
+Truck C returns every 30 minutes
+
+They all start together at 6:00 AM. They will all be at the warehouse simultaneously at times that are multiples of the LCM of 12, 18, and 30.
+
+Let me find LCM(12, 18, 30):
+- 12 = 2² × 3
+- 18 = 2 × 3²
+- 30 = 2 × 3 × 5
+
+LCM = 2² × 3² × 5 = 4 × 9 × 5 = 180 minutes
+
+So they all arrive together every 180 minutes.
+
+Now, the time from 6:00 AM to 6:00 PM is 12 hours = 720 minutes.
+
+The times when all three arrive together (measured from 6:00 AM) are:
+0, 180, 360, 540, 720 minutes
+
+That's 5 times.
+
+Let me verify:
+- 0 min = 6:00 AM ✓
+- 180 min = 9:00 AM ✓
+- 360 min = 12:00 PM ✓
+- 540 min = 3:00 PM ✓
+- 720 min = 6:00 PM ✓
+
+So the answer is 5.
+
+
+=== CONTENT ===
+## Finding When All Three Trucks Arrive Together
+
+**Step 1: Find the LCM of the return intervals.**
+
+- Truck A: every 12 minutes → 12 = 2² × 3
+- Truck B: every 18 minutes → 18 = 2 × 3²
+- Truck C: every 30 minutes → 30 = 2 × 3 × 5
+
+$$\text{LCM} = 2^2 \times 3^2 \times 5 = 180 \text{ minutes}$$
+
+All three trucks arrive together every **180 minutes**.
+
+**Step 2: Determine the time window.**
+
+From 6:00 AM to 6:00 PM is 12 hours = **720 minutes**.
+
+**Step 3: Count the simultaneous arrivals.**
+
+The trucks meet at times (measured from 6:00 AM):
+
+| Minutes from 6 AM | Clock Time |
+|---|---|
+| 0 | 6:00 AM |
+| 180 | 9:00 AM |
+| 360 | 12:00 PM |
+| 540 | 3:00 PM |
+| 720 | 6:00 PM |
+
+That gives us $\frac{720}{180} + 1 = 5$ simultaneous arrivals (including both endpoints).
+
+ANSWER: 5

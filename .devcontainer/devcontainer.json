@@ -1,0 +1,13 @@
+{
+  "name": "vtt-hw-benchmarks",
+  "image": "mcr.microsoft.com/devcontainers/python:1-3.12-bookworm",
+  "postCreateCommand": "pip install -e \".[mlflow,community]\"",
+  "forwardPorts": [5000, 7861],
+  "portsAttributes": {
+    "5000": { "label": "MLflow tracking (192.168.7.241)" },
+    "7861": { "label": "EvalScope / community-lane UI" }
+  },
+  "remoteEnv": {
+    "MLFLOW_TRACKING_URI": "http://192.168.7.241:5000"
+  }
+}

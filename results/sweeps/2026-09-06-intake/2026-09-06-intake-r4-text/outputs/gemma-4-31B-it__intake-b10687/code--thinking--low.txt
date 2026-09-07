@@ -1,0 +1,117 @@
+=== REASONING ===
+*   Input: A string `s` (e.g., '1-3,5,7-9').
+    *   Output: A list of integers (e.g., [1, 2, 3, 5, 7, 8, 9]).
+    *   Requirements:
+        *   Handle ranges (start-end inclusive).
+        *   Handle single numbers.
+        *   Ignore whitespace around numbers and commas.
+        *   Raise `ValueError` for reversed ranges (e.g., '9-7').
+        *   Return `[]` for empty or whitespace-only input.
+        *   Include a doctest block with $\ge 5$ examples.
+
+    *   Step 1: Check for empty or whitespace-only input. Return `[]`.
+    *   Step 2: Split the input string by commas (`,`).
+    *   Step 3: For each part:
+        *   Strip whitespace.
+        *   Check if it's a range (contains `-`).
+        *   If it's a range:
+            *   Split by `-`.
+            *   Convert start and end to integers.
+            *   Check if `start > end`. If so, raise `ValueError`.
+            *   Generate range from `start` to `end` (inclusive).
+        *   If it's a single number:
+            *   Convert to integer.
+    *   Step 4: Collect all generated numbers into a final list.
+
+    *   *Empty/whitespace:* `if not s.strip(): return []`
+    *   *Splitting:* `parts = s.split(',')`
+    *   *Processing parts:*
+        ```python
+        result = []
+        for part in parts:
+            part = part.strip()
+            if not part: continue # Handle trailing commas like '1-3,'
+            if '-' in part:
+                # ... logic for range ...
+            else:
+                # ... logic for single int ...
+        ```
+    *   *Range logic:*
+        ```python
+        start_str, end_str = part.split('-')
+        start, end = int(start_str), int(end_str)
+        if start > end:
+            raise ValueError(f"Reversed range: {part}")
+        result.extend(range(start, end + 1))
+        ```
+
+    *   `'1-3,5,7-9'` $\rightarrow$ `[1, 2, 3, 5, 7, 8, 9]` (Standard case)
+    *   `' 1 , 2-4 '` $\rightarrow$ `[1, 2, 3, 4]` (Whitespace handling)
+    *   `''` or `'  '` $\rightarrow$ `[]` (Empty/whitespace)
+    *   `'10-8'` $\rightarrow$ `ValueError` (Reversed range)
+    *   `'5'` $\rightarrow$ `[5]` (Single number)
+    *   (Optional) `'1, 2, 3'` $\rightarrow$ `[1, 2, 3]` (No ranges)
+
+    *   Ensure type hints are correct.
+    *   Use a list comprehension or `.extend()` for efficiency.
+    *   Double-check the `ValueError` requirement.
+
+=== CONTENT ===
+```python
+def parse_ranges(s: str) -> list[int]:
+    """
+    Parses a string of comma-separated numbers and ranges into a list of integers.
+    
+    Examples:
+    >>> parse_ranges('1-3,5,7-9')
+    [1, 2, 3, 5, 7, 8, 9]
+    >>> parse_ranges(' 1 , 2-4 ')
+    [1, 2, 3, 4]
+    >>> parse_ranges('  ')
+    []
+    >>> parse_ranges('')
+    []
+    >>> parse_ranges('5')
+    [5]
+    >>> parse_ranges('10-8')
+    Traceback (most recent call last):
+        ...
+    ValueError: Reversed range: 10-8
+    """
+    # Return empty list for empty or whitespace-only input
+    if not s or not s.strip():
+        return []
+
+    result = []
+    # Split by comma to separate individual numbers or ranges
+    parts = s.split(',')
+
+    for part in parts:
+        part = part.strip()
+        if not part:
+            continue  # Skip empty segments if there are trailing/double commas
+            
+        if '-' in part:
+            # Split the range into start and end
+            try:
+                start_str, end_str = part.split('-')
+                start, end = int(start_str), int(end_str)
+            except ValueError:
+                raise ValueError(f"Invalid range format: {part}")
+
+            # Check for reversed range
+            if start > end:
+                raise ValueError(f"Reversed range: {part}")
+            
+            # Add all integers in the range (inclusive)
+            result.extend(range(start, end + 1))
+        else:
+            # Parse as a single integer
+            result.append(int(part))
+
+    return result
+
+if __name__ == "__main__":
+    import doctest
+    doctest.testmod()
+```

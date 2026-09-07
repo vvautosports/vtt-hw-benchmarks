@@ -1,0 +1,356 @@
+# Slot assignments for the MLflow model registry.
+#
+# HAND-DERIVED from docs/reference/PERFORMANCE-SUMMARY.md (dated 2026-08-28). Every
+# entry carries the summary line it was derived from in `evidence:` so a promotion
+# argument can be checked against the doc without re-reading the sweeps.
+#
+# This file is the INPUT to scripts/utils/register_models.py, which sets the
+# `champion-<slot>` / `challenger-<slot>` aliases on the MLflow registry. The registry
+# is the alias authority (EVIDENCE-LAKEHOUSE-REFERENCE-ARCH.md §6, "Two registries,
+# split roles"); this YAML is the reviewable source that produces it.
+#
+# To promote: edit the champion/challenger here, open a PR that cites the run ids in
+# `evidence:`, and re-run register_models.py after merge. Do not move an alias by hand
+# in the MLflow UI -- the alias would then disagree with this file.
+#
+# model_key format: "<hf_repo_id>#<quant>", where hf_repo_id is the `hf_repo` field in
+# models-inventory.yaml and quant is the token parsed out of the GGUF filename by the
+# same regex scripts/utils/log_sweep_to_mlflow.py uses (QUANT_RE). Quant case is taken
+# VERBATIM from the filename -- that is why Qwen3-8B-128K is `#q8_0` (lowercase) while
+# Ornith is `#Q8_0`. Matching the existing tool's casing is what makes the registry
+# join to sweep-run tags.
+
+version: "1.0"
+generated: "2026-09-06"
+source_doc: "docs/reference/PERFORMANCE-SUMMARY.md"
+source_doc_date: "2026-08-28"
+source_hardware: "Framework Desktop (AMD Strix Halo), b10639-mix-f6f92fe, UNSLOTH_DISABLE_UNIFIED_MEMORY=1"
+key_format: "<hf_repo_id>#<quant>"
+alias_format: "champion-<slot> / challenger-<slot>"
+
+slots:
+
+  coding:
+    description: >-
+      Code generation. Graded on the battery's doctest-compliant code task; picked on
+      quality, not throughput -- the summary is explicit that the old speed argument for
+      this slot was an artifact.
+    champion:
+      model_key: "unsloth/Qwen3-Coder-30B-A3B-Instruct-GGUF#UD-Q8_K_XL"
+      inventory_name: "Qwen3-Coder-30B-A3B-Instruct"
+      section: "Which model for which job"
+      evidence: >-
+        "Code generation: Qwen3-Coder-30B-A3B-Instruct, 3/3 clean - but pick it for
+        QUALITY, not speed. ... True clean code speed is ~43.6 t/s"
+      runs:
+        - "results/sweeps/2026-08-28-rebaseline-toolsoff"
+        - "results/sweeps/2026-08-28-coder30b-code-anomaly"
+    challenger:
+      model_key: "ornith-ai/Ornith-1.5-35B-A3B-GGUF#Q8_0"
+      inventory_name: "Ornith-1.5-35B-A3B"
+      section: "Which model for which job / Roster leaderboard"
+      evidence: >-
+        "the three ~62 t/s models above beat it on every task" -- Ornith is the 3/3 member
+        of that group with the highest code figure (63.9 t/s vs the champion's 43.6),
+        so it is the standing speed challenge to a quality-picked champion.
+      runs:
+        - "results/sweeps/2026-08-28-rebaseline-toolsoff"
+      caveat: >-
+        ornith-ai's own Q8_0 GGUF, not an unsloth UD quant -- not like-for-like on quant
+        quality against the rest of the roster (models-inventory.yaml note).
+
+  reasoning:
+    description: >-
+      Fast general workhorse / multi-step reasoning with a verifiable answer. The top of
+      the leaderboard is a three-way statistical tie, so this slot is decided on quality.
+    near_tie: true
+    near_tie_note: >-
+      Ornith-1.5-35B-A3B, Nemotron-3.5-Lightning-30B-A3B and Qwen3.6-35B-A3B-MTP are
+      within 5% of each other. Per the convention for this file the FIRST-LISTED model in
+      the summary is taken as champion -- which here also agrees with the quality tiebreak
+      the summary itself recommends (Ornith 3/3 vs Nemotron 2/3).
+    champion:
+      model_key: "ornith-ai/Ornith-1.5-35B-A3B-GGUF#Q8_0"
+      inventory_name: "Ornith-1.5-35B-A3B"
+      section: "Which model for which job"
+      evidence: >-
+        "Fast general workhorse: Ornith-1.5-35B-A3B (64.5/63.9/57.4, 3/3) ... the top three
+        are within 5% of each other, so pick on quality, not speed. ... Ornith is 3/3."
+      runs:
+        - "results/sweeps/2026-08-28-rebaseline-toolsoff"
+    challenger:
+      model_key: "unsloth/NVIDIA-Nemotron-3.5-Lightning-30B-A3B-GGUF#UD-Q8_K_XL"
+      inventory_name: "Nemotron-3.5-Lightning-30B-A3B"
+      section: "Which model for which job"
+      evidence: >-
+        "or Nemotron-3.5-Lightning-30B-A3B (63.1/62.0/62.9) ... Nemotron is the most
+        uniform across tasks but drops the literal 'TL;DR' label on the summarize contract"
+      runs:
+        - "results/sweeps/2026-08-28-rebaseline-toolsoff"
+        - "results/sweeps/2026-08-28-nemotron-tldr-seeds"
+      caveat: >-
+        2/3 only because of the missing "TL;DR" label -- a format habit, five correct
+        bullets present. Also carries the Tier-2 parallel-call defect (see tool-calling).
+
+  tool-calling:
+    description: >-
+      Client-tool passthrough, graded on server-parsed tool_calls at the raw healing rung
+      (--disable-tools --disable-tool-call-healing --disable-tool-call-nudging).
+      Tier 1 is a saturated 90/90 floor; Tier 2 is the ranking axis.
+    near_tie: true
+    near_tie_note: >-
+      Four models sit at 7/7 on Tier 2. First-listed (Qwen3-Coder-30B) is taken as
+      champion. Coder-Next is skipped for challenger because it appears in the
+      retired/demoted table; Qwen3.8-Flash-Next is skipped because it is the only UD-Q4
+      entry on an otherwise Q8 roster (models-inventory.yaml forbids ranking it against
+      Q8 entries) and it already holds long-context + thinker. GLM-4.7-Flash therefore
+      takes the challenger alias.
+    champion:
+      model_key: "unsloth/Qwen3-Coder-30B-A3B-Instruct-GGUF#UD-Q8_K_XL"
+      inventory_name: "Qwen3-Coder-30B-A3B-Instruct"
+      section: "Tool-calling (Track 1)"
+      evidence: >-
+        "Qwen3-Coder-30B / Coder-Next / Qwen3.8-Flash-Next / GLM-4.7-Flash | 7/7 | -"
+      runs:
+        - "results/sweeps/2026-08-28-toolcall-tier2"
+        - "results/sweeps/2026-08-28-toolcall-tier1"
+    challenger:
+      model_key: "unsloth/GLM-4.7-Flash-GGUF#UD-Q8_K_XL"
+      inventory_name: "GLM-4.7-Flash-Q8"
+      section: "Tool-calling (Track 1)"
+      evidence: >-
+        Same 7/7 row; GLM-4.7-Flash is additionally the leaderboard's "baseline control"
+        at 34.8/33.9/33.5, 3/3.
+      runs:
+        - "results/sweeps/2026-08-28-toolcall-tier2"
+    excluded:
+      - model: "Nemotron-3.5-Lightning-30B-A3B"
+        reason: >-
+          6/7 -- parallel-call serialisation: reasoning plans 3 calls, emits 1. Reproduced
+          on the HP G1a, so a model trait, not a box artifact.
+      - model: "gpt-oss-120b"
+        reason: >-
+          5/7 -- same 1-of-3 parallel gap plus union collapse; also abandons the deep
+          chain at 31 calls where every other model survives 60.
+
+  long-context:
+    description: >-
+      Long prompts and mid-document retrieval. Only two roster models have any
+      long-context evidence at all, and one of them is missing from models-inventory.yaml.
+    champion:
+      model_key: "unsloth/Qwen3.8-Flash-Next-GGUF#UD-Q4_K_XL"
+      inventory_name: "Qwen3.8-Flash-Next"
+      section: "Which model for which job"
+      evidence: >-
+        "Long-context thinker / interrupt-driven agent: Qwen3.8-Flash-Next, 125B-A6B MoE,
+        262K ctx claim."
+      runs:
+        - "results/sweeps/2026-08-27-b10639-umfix-batch"
+        - "results/sweeps/2026-08-27-qwen38-settings-matrix"
+      caveat: >-
+        UD-Q4_K_XL -- the only non-Q8 top-tier copy on the roster; the 262K figure is the
+        model's claim, not a measured ceiling on this box.
+    challenger:
+      model_key: null
+      candidate: "DeepSeek-V4-Flash-0731"
+      status: "unregisterable"
+      blocked_by: >-
+        Absent from models-inventory.yaml. It is on the leaderboard and has the strongest
+        measured long-context evidence on the fleet, but the registry is built from the
+        inventory and no hf_repo/hf_file row exists for it, so no model_key can be formed
+        without inventing one. Add an inventory row, re-run register_models.py, then set
+        this model_key.
+      section: "Roster leaderboard"
+      evidence: >-
+        "The 16384 context pin is RETIRED: the ctx ladder loads+serves every rung to 98304
+        (~21 GiB still free; MLA latent-KV ~0.03 GiB/1k ctx) and the needle probe grades
+        3/3 mid-document retrieval to ~35k tokens. 65536 is the new setting."
+      runs:
+        - "results/sweeps/2026-08-28-deepseek-ctx-ladder"
+        - "results/sweeps/2026-08-28-deepseek-needle"
+
+  memory-tight:
+    description: >-
+      Smallest footprint that still grades 3/3 -- the pick when the box is also running
+      something else (co-residency).
+    champion:
+      model_key: "unsloth/gemma-4-26B-A4B-it-GGUF#UD-Q8_K_XL"
+      inventory_name: "gemma-4-26B-A4B-it"
+      section: "Which model for which job"
+      evidence: >-
+        "Memory-tight / fastest small MoE: gemma-4-26B-A4B-it - 26GB footprint, ~36 t/s,
+        3/3, stable across both runtime versions and both GTT states tested. Best choice
+        when the box is also running something else."
+      runs:
+        - "results/sweeps/2026-08-27-b10639-rebaseline-batch"
+        - "results/sweeps/2026-08-27-receipt-battery-g1a"
+    challenger:
+      model_key: "unsloth/Qwen3.8-27B-GGUF#UD-Q8_K_XL"
+      inventory_name: "Qwen3.8-27B"
+      section: "Roster leaderboard"
+      evidence: >-
+        "Qwen3.8-27B | 27B | UD-Q8_K_XL | 13.5 / 13.5 / 13.2 | 3/3" -- the next-smallest
+        3/3 footprint on the leaderboard (30 GB) after the champion's 26 GB.
+      runs:
+        - "results/sweeps/2026-08-27-roster-validation"
+      caveat: >-
+        Measured on b10472, NOT yet re-baselined on b10639 -- provisional per the
+        summary's "Note on runtimes". Also ~2.6x slower than the champion.
+    untested_candidate:
+      model: "gpt-oss-20b (unsloth/gpt-oss-20b-GGUF#UD-Q8_K_XL)"
+      note: >-
+        13 GB on disk and the only roster entry that fits a 16 GB GPU
+        (models-inventory.yaml light mode), which would make it the natural memory-tight
+        pick -- but it has NO row in PERFORMANCE-SUMMARY, so there is no graded evidence
+        to promote it on. Run the battery against it before considering it for this slot.
+
+  thinker:
+    description: >-
+      Deliberate/extended reasoning with a cost dial -- the model a driver agent hands a
+      hard problem to when latency is not the constraint.
+    champion:
+      model_key: "unsloth/Qwen3.8-Flash-Next-GGUF#UD-Q4_K_XL"
+      inventory_name: "Qwen3.8-Flash-Next"
+      section: "Which model for which job"
+      evidence: >-
+        "Use the reasoning_effort dial: low as the idle/default (15.6/22.3/17.1 t/s, tight
+        token economy), xhigh when you need the most thorough answer ... instruct mode is
+        the fastest config (107s battery wall) and still passes everything"
+      runs:
+        - "results/sweeps/2026-08-27-b10639-umfix-batch"
+        - "results/sweeps/2026-08-27-qwen38-settings-matrix"
+      caveat: >-
+        Cite ONLY the umfix figures. The earlier 204-225 t/s numbers were the
+        unified-memory bug generating garbage at speed and never terminating (0/3).
+    challenger:
+      model_key: null
+      candidate: "gpt-oss-120b"
+      status: "unregisterable"
+      blocked_by: >-
+        Absent from models-inventory.yaml, and no hf_repo id for it appears anywhere in
+        the repo (the leaderboard, the baselines manifest and the sweep records all name
+        it only as "gpt-oss-120b"). A model_key cannot be formed without inventing a repo
+        id. Add an inventory row with the real hf_repo/hf_file, re-run, then set this key.
+      section: "Which model for which job"
+      evidence: >-
+        "Large-model anchor: gpt-oss-120b - 120B-class, 30-34 t/s clean, 3/3, tight token
+        economy" and, on the leaderboard, "largest reasoning gain on the roster (+21%)".
+      runs:
+        - "results/sweeps/2026-08-27-baselines-235b-oss120b"
+        - "results/sweeps/2026-08-28-rebaseline-toolsoff"
+      caveat: >-
+        Carries two Tier-2 tool-calling defects (5/7) and abandons the deep chain at 31
+        calls -- a thinker, not an agent driver.
+
+# ---------------------------------------------------------------------------
+# Models with graded evidence that the registry cannot cover, because
+# models-inventory.yaml has no row for them. This is inventory drift, not a
+# verdict -- both are on the 2026-08-28 leaderboard.
+# ---------------------------------------------------------------------------
+evidence_only_not_in_inventory:
+  - name: "gpt-oss-120b"
+    quant_per_summary: "F16 (native MXFP4 MoE weights), 61 GB single file"
+    would_hold: ["challenger-thinker"]
+    evidence: "Roster leaderboard 33.1/33.8/30.3, 3/3; Tool-calling Tier 2 5/7"
+    fix: "add hf_repo + hf_file to models-inventory.yaml all_models, then re-run"
+  - name: "DeepSeek-V4-Flash-0731"
+    quant_per_summary: "UD-IQ3_XXS (4 shards), 97.1 GiB on disk"
+    would_hold: ["challenger-long-context"]
+    evidence: "Roster leaderboard 14.4/14.9/13.1, 3/3; ctx ladder to 98304; needle 3/3 to ~35k"
+    fix: >-
+      add hf_repo + hf_file to models-inventory.yaml all_models (the 2026-08-28 session
+      prompt records it as pulled from an unsloth HF repo into /mnt/ai-models/unsloth/,
+      but the exact repo id is not recorded anywhere in this repo -- confirm on the
+      Framework before writing it down).
+
+# ---------------------------------------------------------------------------
+# Retired / demoted. These get NO alias. Entries still present in
+# models-inventory.yaml are still registered as pointer models (the registry records
+# what exists on disk); they are simply never a champion or challenger.
+# ---------------------------------------------------------------------------
+retired:
+  - name: "Qwen3-Coder-Next"
+    model_key: "unsloth/Qwen3-Coder-Next-GGUF#UD-Q8_K_XL"
+    in_inventory: true
+    reason: >-
+      Demoted, not deleted. Rehabilitated to 3/3 in isolation after the first run was
+      confounded by a concurrent download and the unified-memory bug, but its code task
+      still fails under cross-request state bleed at 2/3 and it never beats Coder-30B's
+      throughput. "No promotion pending a bleed fix."
+    evidence: "Retired / demoted models; runs 2026-08-27-b10472-batch, 2026-08-27-bleed-order-test"
+  - name: "MiniMax-M3"
+    model_key: "unsloth/MiniMax-M3-GGUF#UD-Q3_K_XL"
+    in_inventory: true
+    reason: >-
+      Cannot load: needs ~181 GB against ~122 GB usable. A capacity failure, not an
+      architecture failure. Kept on disk for the future dual-machine RPC-pool test.
+    evidence: "Roster leaderboard, 'cannot load' row"
+  - name: "Qwen3-235B-A22B-Instruct-2507"
+    model_key: "unsloth/Qwen3-235B-A22B-Instruct-GGUF#UD-Q3_K_XL"
+    in_inventory: true
+    reason: >-
+      Not retired -- kept deliberately as the prev-gen large-MoE / parameter-scaling
+      control (retention-policy baseline). Holds no slot: 15.1/15.2/13.3 at 2/3, beaten
+      on every axis by models a third its size.
+    evidence: "Roster leaderboard; results/sweeps/2026-08-27-toolsoff-rerun-ab"
+  - name: "Nemotron-3-Nano-30B-A3B"
+    model_key: null
+    in_inventory: false
+    reason: >-
+      Deleted from disk 2026-08-27. Its only selling point -- "runs correctly on default
+      flags" while 3.5-Lightning needed --speculative-type off -- was eliminated when the
+      unified-memory root cause was found. Successor: Nemotron-3.5-Lightning.
+    evidence: "Retired / demoted models; results/sweeps/2026-08-27-b10639-rebaseline-batch"
+  - name: "GLM-4.7-Flash-REAP-23B-A3B"
+    model_key: null
+    in_inventory: false
+    reason: >-
+      Deleted 2026-08-27. No niche on any axis: smaller on disk but slower AND worse
+      (1/3 quality) than the full GLM-4.7-Flash.
+    evidence: "Retired / demoted models; results/sweeps/2026-08-27-b10472-batch"
+  - name: "gemma-3-27b-it"
+    model_key: null
+    in_inventory: false
+    reason: >-
+      Deleted 2026-08-27 (benchmarks banked first). No speed or quality niche --
+      gemma-4-26B-A4B is 5.5x faster at identical 3/3 grades. Its mmproj vision niche
+      passed to Muse-Glimmer-30B, its dense-control role to gemma-4-31B.
+    evidence: "Retired / demoted models; results/sweeps/2026-08-27-b10472-batch"
+  - name: "MiniMax-M2.5 (UD-Q3_K_XL copy)"
+    model_key: null
+    in_inventory: false
+    reason: >-
+      Copy deleted 2026-08-27. Fragile independent of the runtime bugs: first-request code
+      runs to the 8192 cap with incoherent output, and its earlier pass was flattered by
+      cross-request context bleed. Indicts the Q3 copy, not necessarily the family.
+    evidence: "Retired / demoted models; results/sweeps/2026-08-27-bleed-order-test"
+  - name: "Qwen3.8-Flash-Next @ 204-225 t/s"
+    model_key: null
+    in_inventory: false
+    reason: >-
+      Retired CLAIM, not a retired model. Those figures were the unified-memory corruption
+      generating garbage tokens at high speed while never terminating (0/3, all capped).
+      Superseded by the umfix batch. Never cite them.
+    evidence: "Retired / demoted models; 2026-08-27-b10639-batch vs -umfix-batch"
+
+# Roster entries that hold no slot and are not retired -- deliberate controls.
+controls:
+  - model_key: "unsloth/gemma-4-31B-it-GGUF#UD-Q8_K_XL"
+    role: "dense control -- deliberately slow reference (~6.5x slower than the A4B MoE of similar footprint)"
+  - model_key: "unsloth/Muse-Glimmer-30B-GGUF#UD-Q8_K_XL"
+    role: >-
+      vision niche / quality anchor (mmproj BF16, 2/2 vision smoke). Slowest text model on
+      the roster. No `vision` slot is defined here because the vision evidence is split --
+      2/2 on the bars.png smoke but 3/13 fields on the G1a receipt battery, parked pending
+      a per-family config investigation.
+  - model_key: "unsloth/Qwen3.6-35B-A3B-MTP-GGUF#UD-Q8_K_XL"
+    role: >-
+      third member of the reasoning near-tie (61.3/62.3/61.9, 3/3). Not the challenger
+      because it needs a fresh server per task to stay reliable (cross-request bleed
+      sensitivity) where Ornith and Nemotron do not.
+  - model_key: "unsloth/gpt-oss-20b-GGUF#UD-Q8_K_XL"
+    role: "light-mode / 16 GB-GPU entry; no PERFORMANCE-SUMMARY row (see memory-tight.untested_candidate)"
+  - model_key: "unsloth/Qwen3-8B-128K-GGUF#q8_0"
+    role: >-
+      light-mode entry; models-inventory.yaml records it as DRIFT -- not present on the
+      Framework /mnt/ai-models, to be re-downloaded on first light-mode run.

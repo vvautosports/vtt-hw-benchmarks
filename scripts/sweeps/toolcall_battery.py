@@ -32,6 +32,7 @@ sys.path.insert(0, HOME)
 import sweep_phase1 as sp1  # noqa: E402,F401  (imported for its KEY, refreshed by sp2)
 import sweep_phase2 as sp2  # noqa: E402
 import sweep_toolcall as tc  # noqa: E402
+import run_manifest as rm  # noqa: E402
 
 BASELINE = "/mnt/ai-models/unsloth/GLM-4.7-Flash-GGUF/GLM-4.7-Flash-UD-Q8_K_XL.gguf"
 BASELINE_ENV = {"UNSLOTH_DISABLE_UNIFIED_MEMORY": "1"}
@@ -92,6 +93,14 @@ def main():
     os.makedirs(os.path.join(rundir, "outputs"), exist_ok=True)
     # Provenance: the grader reads expectations from the run dir, not the repo.
     shutil.copyfile(cases_file, os.path.join(rundir, "toolcall_cases.json"))
+    rm.write_start(rundir, spec, "scripts/sweeps/toolcall_battery.py", sys.argv, {
+        "isolation": "fresh-server-per-case",
+        "axis": "cfg",
+        "api": "/v1/chat/completions (client-tool passthrough)",
+        "request_constants": consts,
+        "cases": list(names),
+        "outputs": "outputs/<cfg>/<task>--<profile>--<effort>.txt",
+    })
 
     out_path = os.path.join(rundir, "results.jsonl")
     records = []
@@ -145,6 +154,7 @@ def main():
         ok = sp2.wait_loaded(os.path.join(HOME, "unsloth-serve.log"), timeout=900)
         log(f"baseline restored healthy={ok}")
         flush()
+        rm.finalize(rundir, records)
     log("TOOLCALL BATTERY COMPLETE")
     with open(os.path.join(rundir, "DONE"), "w", encoding="utf-8") as f:
         f.write("done\n")

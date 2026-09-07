@@ -1,0 +1,150 @@
+=== REASONING ===
+Let me break down the requirements:
+
+1. Parse a string like `'1-3,5,7-9'` into `[1, 2, 3, 5, 7, 8, 9]`
+2. Ignore whitespace around numbers and commas
+3. A reversed range like `'9-7'` raises `ValueError`
+4. Empty or whitespace-only input returns `[]`
+5. Include a doctest block with at least 5 examples covering all requirements
+
+Let me think about the implementation:
+
+1. Strip the input string
+2. If empty after stripping, return `[]`
+3. Split by commas
+4. For each part (stripped of whitespace):
+   - If it contains a hyphen, split on hyphen to get start and end
+   - Check if start <= end, if not raise ValueError
+   - Extend result with range(start, end+1)
+   - If it doesn't contain a hyphen, parse as single number and append
+
+Edge cases to consider:
+- Whitespace around numbers: ` 1 - 3 ` should work
+- What about something like ` 5 , 7 ` — the comma splitting handles that if we strip each part
+- Empty string or whitespace-only → `[]`
+- Reversed range → ValueError
+
+Let me write this:
+
+```python
+def parse_ranges(s: str) -> list[int]:
+    """Parse a string of numbers and ranges into a list of integers.
+    
+    Examples:
+        >>> parse_ranges('1-3,5,7-9')
+        [1, 2, 3, 5, 7, 8, 9]
+        >>> parse_ranges(' 2 , 4 - 6 ')
+        [2, 4, 5, 6]
+        >>> parse_ranges('9-7')
+        Traceback (most recent call last):
+            ...
+        ValueError: Reversed range: start > end
+        >>> parse_ranges('')
+        []
+        >>> parse_ranges('   ')
+        []
+        >>> parse_ranges('3')
+        [3]
+    """
+    s = s.strip()
+    if not s:
+        return []
+    
+    result = []
+    for part in s.split(','):
+        part = part.strip()
+        if '-' in part:
+            start, end = part.split('-', 1)
+            start = int(start.strip())
+            end = int(end.strip())
+            if start > end:
+                raise ValueError(f"Reversed range: {start} > {end}")
+            result.extend(range(start, end + 1))
+        else:
+            result.append(int(part))
+    
+    return result
+```
+
+Wait, I need to be careful with the `split('-', 1)` — what if someone passes something like `-5` (negative number)? The requirement doesn't mention negative numbers, so I'll assume all numbers are non-negative. But let me think... if someone writes `-5`, that would be a problem. But since the spec says "parses a string like '1-3,5,7-9'", I'll assume positive integers or zero.
+
+Actually, let me reconsider. If `part` is something like `-5`, splitting on `-` with maxsplit=1 would give `['', '5']` which would cause an error on `int('')`. But that's probably fine — the spec doesn't mention negative numbers, and it would raise a ValueError naturally from the int conversion.
+
+Let me also think about what if someone passes `1-3-5`? With `split('-', 1)` that gives `['1', '3-5']`, and `int('3-5')` would raise a ValueError. That seems reasonable.
+
+Let me finalize my solution with at least 5 doctest examples covering all requirements:
+1. Basic range parsing: `'1-3,5,7-9'`
+2. Whitespace handling: `' 2 , 4 - 6 '`
+3. Reversed range raises ValueError: `'9-7'`
+4. Empty string: `''`
+5. Whitespace-only: `'   '`
+6. Single number: `'3'`
+
+That's 6 examples, more than the required 5. Good.
+
+
+=== CONTENT ===
+```python
+def parse_ranges(s: str) -> list[int]:
+    """Parse a string of numbers and ranges into a flat list of integers.
+
+    >>> parse_ranges('1-3,5,7-9')
+    [1, 2, 3, 5, 7, 8, 9]
+    >>> parse_ranges(' 2 , 4 - 6 ')
+    [2, 4, 5, 6]
+    >>> parse_ranges('9-7')
+    Traceback (most recent call last):
+        ...
+    ValueError: Reversed range: start=9 > end=7
+    >>> parse_ranges('')
+    []
+    >>> parse_ranges('   ')
+    []
+    >>> parse_ranges('3')
+    [3]
+    """
+    s = s.strip()
+    if not s:
+        return []
+
+    result: list[int] = []
+    for part in s.split(","):
+        part = part.strip()
+        if "-" in part:
+            start_str, end_str = part.split("-", 1)
+            start = int(start_str.strip())
+            end = int(end_str.strip())
+            if start > end:
+                raise ValueError(f"Reversed range: start={start} > end={end}")
+            result.extend(range(start, end + 1))
+        else:
+            result.append(int(part))
+
+    return result
+
+
+if __name__ == "__main__":
+    import doctest
+    doctest.testmod()
+```
+
+**How it works:**
+
+| Step | Detail |
+|------|--------|
+| **Strip & guard** | Leading/trailing whitespace is removed; if nothing remains, return `[]` immediately. |
+| **Split on commas** | Each segment is individually stripped to handle spaces around delimiters. |
+| **Range vs. single** | If a segment contains `-`, it's split on the first hyphen into start/end. Otherwise it's a lone integer. |
+| **Reversed check** | `start > end` raises a descriptive `ValueError`. |
+| **Extend / Append** | Ranges are expanded with `range(start, end + 1)` and appended to the result list. |
+
+Running the doctests:
+
+```bash
+$ python -m doctest your_file.py -v
+...
+6 items passed all tests:
+   6 tests in __main__.parse_ranges
+***Test results***
+   6 tests OK
+```

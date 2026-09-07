@@ -1,0 +1,23 @@
+run_id: 2026-09-06-evalscope-pilot
+date: '2026-09-06'
+node: kalman9-framework-01
+backend: unsloth-studio (ROCm gfx1151)
+runtime_build: 'version: 0.3.0-dev (build 10687, commit 92b19177a)'
+studio_version: unsloth 2026.8.22
+api: http://192.168.4.214:8888/v1
+model: GLM-4.7-Flash-UD-Q8_K_XL
+lane: community
+harness: evalscope
+evalscope_version: 1.11.1
+eval_type: openai_api
+datasets:
+- arc
+- gsm8k
+limit: 20
+records: results.jsonl
+driver_script: evalscope eval
+forgejo_issue: 15
+source_work_dir: results/community/2026-09-06-evalscope-pilot/eval
+run_dirs:
+- '20260907_022007'
+- '20260907_022809'
