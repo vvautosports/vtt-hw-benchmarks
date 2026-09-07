@@ -1,0 +1,3 @@
+{"case": "gsm8k/main", "effort": "n/a", "model": "GLM-4.7-Flash-UD-Q8_K_XL", "n": 20, "profile": "evalscope", "quality": {"correct": null, "graded": true, "score": 1.0}, "score": 1.0, "tag": "evalscope-pilot", "task": "gsm8k", "wall_s": 477.3}
+{"case": "arc/ARC-Easy", "effort": "n/a", "model": "GLM-4.7-Flash-UD-Q8_K_XL", "n": 20, "profile": "evalscope", "quality": {"correct": null, "graded": true, "score": 1.0}, "score": 1.0, "tag": "evalscope-pilot", "task": "arc", "wall_s": 421.8}
+{"case": "arc/ARC-Challenge", "effort": "n/a", "model": "GLM-4.7-Flash-UD-Q8_K_XL", "n": 20, "profile": "evalscope", "quality": {"correct": null, "graded": true, "score": 0.95}, "score": 0.95, "tag": "evalscope-pilot", "task": "arc", "wall_s": 421.8}
