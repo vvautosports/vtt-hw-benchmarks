@@ -10,9 +10,47 @@ ROOT="/mnt/ai-models"
 LOG="$HOME/roster-fetch-2026-08-27.log"
 DONE="$HOME/roster-fetch-2026-08-27.DONE"
 
-rm -f "$DONE"
-
 log() { echo "[$(date '+%H:%M:%S')] $*" >> "$LOG"; }
+
+# --------------------------------------------------------------------------- #
+# Driver ship list -- `bash fetch_roster.sh --ship` copies the drivers to the
+# node and downloads NOTHING.
+#
+# The sweep drivers execute from $HOME on the node (they `sys.path.insert(0,
+# HOME)` and import each other as flat modules), so every module a driver imports
+# has to land in $HOME too. run_manifest.py is imported by roster_batch.py AND
+# toolcall_battery.py -- if it is missing on the node, both die at import. Keep
+# this list in sync when a driver grows an import. The drivers are stdlib-only,
+# so a plain copy is the entire install step.
+#
+#   bash fetch_roster.sh --ship                       # -> $HOME on this box
+#   SHIP_DEST=/tmp/stage bash fetch_roster.sh --ship  # -> somewhere else
+# --------------------------------------------------------------------------- #
+SHIP_FILES=(
+  run_manifest.py
+  roster_batch.py
+  toolcall_battery.py
+  sweep_phase1.py
+  sweep_phase2.py
+  sweep_toolcall.py
+)
+
+if [ "${1:-}" = "--ship" ]; then
+  src="${SHIP_ROOT:-$(cd "$(dirname "$0")" && pwd)}"
+  dest="${SHIP_DEST:-$HOME}"
+  rc=0
+  for f in "${SHIP_FILES[@]}"; do
+    if [ -f "$src/$f" ]; then
+      cp "$src/$f" "$dest/$f" && echo "shipped $f -> $dest"
+    else
+      echo "MISSING $src/$f (driver will fail to import on the node)" >&2
+      rc=1
+    fi
+  done
+  exit "$rc"
+fi
+
+rm -f "$DONE"
 
 # repo | include-pattern | dest-subpath
 FETCH=(

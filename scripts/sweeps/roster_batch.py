@@ -35,6 +35,7 @@ sys.path.insert(0, HOME)
 
 import sweep_phase1 as sp1  # noqa: E402
 import sweep_phase2 as sp2  # noqa: E402
+import run_manifest as rm  # noqa: E402
 
 BASELINE = "/mnt/ai-models/unsloth/GLM-4.7-Flash-GGUF/GLM-4.7-Flash-UD-Q8_K_XL.gguf"
 PROFILE = "thinking"
@@ -52,13 +53,10 @@ def serve_argv():
     return p.stdout.strip()
 
 
-def runtime_build():
-    exe = os.path.join(HOME, ".unsloth/llama.cpp/llama-server")
-    try:
-        p = subprocess.run([exe, "--version"], capture_output=True, text=True, timeout=60)
-        return ((p.stdout or "") + (p.stderr or "")).strip().splitlines()[0]
-    except Exception as e:  # noqa: BLE001
-        return f"unknown ({e!r})"
+# Hoisted into run_manifest so the manifest and the records can never disagree
+# about which llama.cpp build produced a run. Re-exported here: existing callers
+# and docs still say roster_batch.runtime_build().
+runtime_build = rm.runtime_build
 
 
 def launch(path, flags, logfile, env=None):
@@ -78,6 +76,13 @@ def main():
     os.makedirs(os.path.join(rundir, "outputs"), exist_ok=True)
     out_path = os.path.join(rundir, "results.jsonl")
     build = runtime_build()
+    rm.write_start(rundir, spec, "scripts/sweeps/roster_batch.py", sys.argv, {
+        "isolation": "fresh-server-per-model",
+        "axis": "cfg",
+        "request_constants": {"profile": PROFILE, "reasoning_effort": EFFORT,
+                              "seed": 42, "max_tokens": 8192},
+        "outputs": "outputs/<cfg>/<task>--<profile>--<effort>.txt",
+    })
     log(f"build={build}  entries={len(spec)}")
 
     records = []
@@ -139,6 +144,7 @@ def main():
         ok = sp2.wait_loaded(os.path.join(HOME, "unsloth-serve.log"), timeout=900)
         log(f"baseline restored healthy={ok}")
         flush()
+        rm.finalize(rundir, records)
     log("ROSTER BATCH COMPLETE")
     with open(os.path.join(rundir, "DONE"), "w") as f:
         f.write("done\n")
