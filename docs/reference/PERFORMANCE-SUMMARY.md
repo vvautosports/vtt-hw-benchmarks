@@ -40,6 +40,16 @@ Battery: 3 fixed tasks (multi-step reasoning with a verifiable answer, code with
 
 ---
 
+### Quant ladder — Qwen3-Coder-30B-A3B-Instruct (2026-09-07, build 10687, raw rung)
+
+| Quant | Size | t/s (reason/code/summ) | Text | Tier-2 raw | Run (source) |
+|---|---|---|---|---|---|
+| UD-Q4_K_XL | ~18G | 68.7 / 68.0 / 56.4 | 2/3 | 6/7 | [`2026-09-07-ladder`](../../results/sweeps/2026-09-07-ladder/) |
+| UD-Q6_K_XL | ~26G | 56.2 / 55.0 / 48.4 | 2/3 | 5/7 | same |
+| UD-Q8_K_XL | 34G | 43.6 / 43.4 / 40.2 | 3/3 | 7/7 | same |
+
+Q4 and Q6 both drop `summarize` (short output, TL;DR label) and one or two distractor tool cases (0 calls, token cap). **UD-Q8_K_XL stays the daily-driver quant for this model**; Q4 is a ~1.6x text / ~4x tool-turn speed option at a directional quality cost (n=3/7 cells). First rows logged with `manifest.auto.yaml` from the new drivers (hwbench #23).
+
 ## Which model for which job
 
 - **Fast general workhorse:** **Ornith-1.5-35B-A3B (64.5/63.9/57.4, 3/3)** or **Nemotron-3.5-Lightning-30B-A3B (63.1/62.0/62.9)** — on clean numbers the top three are within 5% of each other, so pick on quality, not speed. Nemotron is the most uniform across tasks but drops the literal "TL;DR" label on the summarize contract (a Nemotron-family habit); Ornith is 3/3. (Do not add `--speculative-type off` — that was a workaround for an env-corruption bug that is now fixed; default flags are the best config.)

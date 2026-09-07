@@ -1,0 +1,1 @@
+[{"name": "Qwen3-Coder-30B-A3B-Instruct", "tag": "ladder-b10687-UD-Q6_K_XL", "path": "/mnt/ai-models/unsloth/Qwen3-Coder-30B-A3B-Instruct-GGUF/Qwen3-Coder-30B-A3B-Instruct-UD-Q6_K_XL.gguf", "flags": "--disable-tools", "env": {"UNSLOTH_DISABLE_UNIFIED_MEMORY": "1"}}]

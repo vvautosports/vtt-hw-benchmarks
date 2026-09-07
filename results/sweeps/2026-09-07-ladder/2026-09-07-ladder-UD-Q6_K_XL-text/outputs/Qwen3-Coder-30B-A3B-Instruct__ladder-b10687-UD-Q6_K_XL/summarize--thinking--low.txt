@@ -1,0 +1,30 @@
+=== CONTENT ===
+**Function:** `parse_ranges(s: str) -> list`
+
+**Implementation:**
+```python
+import re
+
+def parse_ranges(s: str) -> list:
+    """Parse a string of number ranges and return a list of all numbers in those ranges."""
+    if not s:
+        return []
+    
+    # Split by comma to get individual range expressions
+    parts = s.split(',')
+    result = []
+    
+    for part in parts:
+        part = part.strip()
+        if '-' in part:
+            # Handle range like "1-3"
+            start, end = map(int, part.split('-'))
+            result.extend(range(start, end + 1))
+        else:
+            # Handle single number
+            result.append(int(part))
+    
+    return result
+```
+
+**TL;DR:** Parses a comma-separated string of numbers and ranges (like "1-3,5,7-9") into a flat list of integers.

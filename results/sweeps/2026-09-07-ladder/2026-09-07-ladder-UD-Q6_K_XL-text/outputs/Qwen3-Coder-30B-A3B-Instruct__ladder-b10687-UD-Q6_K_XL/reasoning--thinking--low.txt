@@ -1,0 +1,53 @@
+=== CONTENT ===
+I need to find how many times all three trucks arrive at the warehouse simultaneously between 6:00 AM and 6:00 PM.
+
+First, let me establish the time frame:
+- From 6:00 AM to 6:00 PM inclusive = 12 hours = 720 minutes
+
+Next, I need to find when all three trucks arrive at the same time.
+
+Since:
+- Truck A returns every 12 minutes
+- Truck B returns every 18 minutes  
+- Truck C returns every 30 minutes
+
+All three trucks will arrive together at the same time when the arrival times coincide. This happens at the Least Common Multiple (LCM) of their intervals.
+
+Finding LCM(12, 18, 30):
+- 12 = 2² × 3
+- 18 = 2 × 3²
+- 30 = 2 × 3 × 5
+
+LCM = 2² × 3² × 5 = 4 × 9 × 5 = 180 minutes
+
+So all three trucks arrive together every 180 minutes.
+
+Now I need to count how many times this happens between 6:00 AM and 6:00 PM:
+
+Starting time: 6:00 AM (0 minutes)
+Ending time: 6:00 PM = 12 hours = 720 minutes
+
+The arrival times when all three trucks are together are:
+- 6:00 AM (0 minutes)
+- 6:00 AM + 180 minutes = 9:00 AM
+- 9:00 AM + 180 minutes = 12:00 PM
+- 12:00 PM + 180 minutes = 3:00 PM
+- 3:00 PM + 180 minutes = 6:00 PM
+
+Let me verify these times are within the 720-minute window:
+- 0 minutes = 6:00 AM ✓
+- 180 minutes = 3 hours = 9:00 AM ✓
+- 360 minutes = 6 hours = 12:00 PM ✓
+- 540 minutes = 9 hours = 3:00 PM ✓
+- 720 minutes = 12 hours = 6:00 PM ✓
+
+All five times are within the given period.
+
+Let me double-check by seeing if there could be a sixth occurrence:
+- Next occurrence would be at 720 + 180 = 900 minutes
+- 900 minutes = 15 hours, which is after 6:00 PM
+- So this is outside our time frame
+
+Therefore, there are 5 times when all three trucks arrive simultaneously.
+
+ANSWER: 5

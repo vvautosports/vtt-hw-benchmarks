@@ -1,0 +1,53 @@
+=== CONTENT ===
+I need to find how many times all three trucks arrive at the warehouse at the same time between 6:00 AM and 6:00 PM.
+
+First, let me establish the arrival patterns:
+- Truck A returns every 12 minutes
+- Truck B returns every 18 minutes  
+- Truck C returns every 30 minutes
+
+All trucks start at 6:00 AM, so I need to find when their schedules align again.
+
+To find when all three trucks arrive simultaneously, I need to find the Least Common Multiple (LCM) of their return intervals.
+
+Finding LCM of 12, 18, and 30:
+
+Prime factorization:
+- 12 = 2² × 3
+- 18 = 2 × 3²
+- 30 = 2 × 3 × 5
+
+LCM = 2² × 3² × 5 = 4 × 9 × 5 = 180 minutes
+
+So all three trucks will arrive together every 180 minutes (3 hours).
+
+Now I need to count how many times this happens between 6:00 AM and 6:00 PM inclusive.
+
+Time period: 6:00 AM to 6:00 PM = 12 hours = 720 minutes
+
+Starting time: 6:00 AM (minute 0)
+First arrival together: 6:00 AM (minute 0)
+Second arrival together: 6:00 AM + 180 minutes = 9:00 AM
+Third arrival together: 9:00 AM + 180 minutes = 12:00 PM
+Fourth arrival together: 12:00 PM + 180 minutes = 3:00 PM
+Fifth arrival together: 3:00 PM + 180 minutes = 6:00 PM
+
+Let me verify this works:
+- At 6:00 AM: All trucks arrive (0 minutes)
+- At 9:00 AM: 180 minutes after start → 180 ÷ 12 = 15 (integer), 180 ÷ 18 = 10 (integer), 180 ÷ 30 = 6 (integer) ✓
+- At 12:00 PM: 360 minutes after start → 360 ÷ 12 = 30, 360 ÷ 18 = 20, 360 ÷ 30 = 12 ✓
+- At 3:00 PM: 540 minutes after start → 540 ÷ 12 = 45, 540 ÷ 18 = 30, 540 ÷ 30 = 18 ✓
+- At 6:00 PM: 720 minutes after start → 720 ÷ 12 = 60, 720 ÷ 18 = 40, 720 ÷ 30 = 24 ✓
+
+Since 720 minutes is exactly 4 periods of 180 minutes, the last arrival at 6:00 PM is included.
+
+The arrivals occur at:
+- 6:00 AM
+- 9:00 AM  
+- 12:00 PM
+- 3:00 PM
+- 6:00 PM
+
+This gives us 5 total times.
+
+ANSWER: 5

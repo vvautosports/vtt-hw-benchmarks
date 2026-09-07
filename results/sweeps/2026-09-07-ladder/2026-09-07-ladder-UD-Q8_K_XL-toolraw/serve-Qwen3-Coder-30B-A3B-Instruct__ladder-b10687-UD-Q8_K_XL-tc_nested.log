@@ -1,0 +1,55 @@
+{"timestamp": "2026-09-07T16:53:16.702138Z", "level": "info", "event": "run_server startup begin api_only=False host=0.0.0.0 port=8888"}
+{"timestamp": "2026-09-07T16:53:17.516918Z", "level": "info", "event": "Imported FastAPI app in 793.2ms"}
+{"timestamp": "2026-09-07T16:53:17.518094Z", "level": "info", "event": "Ensured Unsloth directories in 817.2ms"}
+{"timestamp": "2026-09-07T16:53:17.626174Z", "level": "info", "event": "run_server pre-uvicorn setup completed in 925.2ms"}
+INFO:     Started server process [168855]
+INFO:     Waiting for application startup.
+{"timestamp": "2026-09-07T16:53:17.745182Z", "level": "info", "event": "Removing unsloth compiled cache: /home/kalman9/.unsloth/studio/compiled_cache"}
+{"timestamp": "2026-09-07T16:53:17.745492Z", "level": "info", "event": "Cleaning generated modules from shared directory: /home/kalman9/unsloth_compiled_cache"}
+{"timestamp": "2026-09-07T16:53:17.766224Z", "level": "info", "event": "lifespan pre-auth setup completed in 32.7ms"}
+{"timestamp": "2026-09-07T16:53:17.767006Z", "level": "info", "event": "lifespan startup completed in 33.5ms"}
+INFO:     Application startup complete.
+INFO:     Unsloth Studio running on http://24.9.3.184:8888 (To stop: press Ctrl+C -- on macOS, Control+C not Command+C)
+{"timestamp": "2026-09-07T16:53:17.768035Z", "level": "info", "event": "Uvicorn startup hook completed in 1067.1ms"}
+{"timestamp": "2026-09-07T16:53:17.768197Z", "level": "info", "event": "run_server uvicorn ready after 1067.3ms"}
+{"timestamp": "2026-09-07T16:53:18.099526Z", "level": "warning", "event": "llama.cpp prebuilt is 7 days behind: installed b10687, latest b10798-mix-659e406. Run `unsloth studio update` to refresh."}
+WARNING: llama.cpp prebuilt is 7 days behind: installed b10687, latest b10798-mix-659e406. Run `unsloth studio update` to refresh.
+Starting Unsloth Studio...
+Hardware detected: ROCm (HIP 7.13.99004) -- Radeon 8060S Graphics
+{"timestamp": "2026-09-07T16:53:18.744939Z", "level": "info", "event": "InferenceOrchestrator initialized (subprocess mode)"}
+{"timestamp": "2026-09-07T16:53:18.766239Z", "level": "info", "event": "request_completed", "method": "GET", "path": "/api/health", "status_code": 200, "process_time_ms": 612.11}
+Loading model: /mnt/ai-models/unsloth/Qwen3-Coder-30B-A3B-Instruct-GGUF/Qwen3-Coder-30B-A3B-Instruct-UD-Q8_K_XL.gguf...
+{"timestamp": "2026-09-07T16:53:18.920309Z", "level": "info", "event": "Detected local GGUF model: /mnt/ai-models/unsloth/Qwen3-Coder-30B-A3B-Instruct-GGUF/Qwen3-Coder-30B-A3B-Instruct-UD-Q8_K_XL.gguf"}
+{"timestamp": "2026-09-07T16:53:19.077581Z", "level": "info", "event": "GGUF metadata: context_length=262144"}
+{"timestamp": "2026-09-07T16:53:19.077766Z", "level": "info", "event": "GGUF metadata: chat_template=6896 chars"}
+{"timestamp": "2026-09-07T16:53:19.077830Z", "level": "info", "event": "GGUF metadata: model supports tool calling"}
+{"timestamp": "2026-09-07T16:53:19.078887Z", "level": "info", "event": "TrainingBackend initialized (subprocess mode)"}
+{"timestamp": "2026-09-07T16:53:19.119614Z", "level": "info", "event": "GGUF metadata: context_length=262144"}
+{"timestamp": "2026-09-07T16:53:19.119675Z", "level": "info", "event": "GGUF metadata: chat_template=6896 chars"}
+{"timestamp": "2026-09-07T16:53:19.119741Z", "level": "info", "event": "GGUF metadata: model supports tool calling"}
+{"timestamp": "2026-09-07T16:53:19.131032Z", "level": "info", "event": "amd-smi not found on PATH; GPU utilization polling via amd-smi unavailable (VRAM falls back to torch mem_get_info)."}
+{"timestamp": "2026-09-07T16:53:19.132987Z", "level": "info", "event": "ROCm device 0 is a unified-memory APU sharing system RAM; reserving 1024MiB host headroom (119026->118002MiB usable)"}
+{"timestamp": "2026-09-07T16:53:19.170228Z", "level": "info", "event": "GGUF metadata: context_length=262144"}
+{"timestamp": "2026-09-07T16:53:19.170269Z", "level": "info", "event": "GGUF metadata: chat_template=6896 chars"}
+{"timestamp": "2026-09-07T16:53:19.170433Z", "level": "info", "event": "GGUF metadata: model supports tool calling"}
+{"timestamp": "2026-09-07T16:53:19.202019Z", "level": "info", "event": "GGUF metadata: context_length=262144"}
+{"timestamp": "2026-09-07T16:53:19.202065Z", "level": "info", "event": "GGUF metadata: chat_template=6896 chars"}
+{"timestamp": "2026-09-07T16:53:19.202267Z", "level": "info", "event": "GGUF metadata: model supports tool calling"}
+{"timestamp": "2026-09-07T16:53:19.204776Z", "level": "info", "event": "ROCm device 0 is a unified-memory APU sharing system RAM; reserving 1024MiB host headroom (119026->118002MiB usable)"}
+{"timestamp": "2026-09-07T16:53:19.205088Z", "level": "info", "event": "GGUF size: 33.5 GB, est. KV cache: 24.0 GB, context: 262144, GPUs free: [(0, 118002)], selected: [0], --fit: off"}
+{"timestamp": "2026-09-07T16:53:19.205372Z", "level": "info", "event": "Load mode: the whole load (59.2 GB) fits without paging, using --load-mode none."}
+{"timestamp": "2026-09-07T16:53:19.207049Z", "level": "info", "event": "Load mode: --load-mode none"}
+{"timestamp": "2026-09-07T16:53:19.207110Z", "level": "info", "event": "Starting llama-server: /home/kalman9/.unsloth/llama.cpp/llama-server -m /mnt/ai-models/unsloth/Qwen3-Coder-30B-A3B-Instruct-GGUF/Qwen3-Coder-30B-A3B-Instruct-UD-Q8_K_XL.gguf --port 32969 --parallel 4 --flash-attn on --no-context-shift -c 262144 --alias Qwen3-Coder-30B-A3B-Instruct-UD-Q8_K_XL -ngl -1 --fit off --metrics --slot-save-path /home/kalman9/.unsloth/studio/cache/llama-slots --kv-unified --jinja --spec-default --load-mode none"}
+{"timestamp": "2026-09-07T16:53:19.213349Z", "level": "info", "event": "llama-server stdout/stderr -> /home/kalman9/.unsloth/studio/logs/llama-server/llama-1788799999-port-32969-try0.log"}
+{"timestamp": "2026-09-07T16:53:20.835680Z", "level": "info", "event": "torch warm finished in 3068.8ms"}
+{"timestamp": "2026-09-07T16:53:26.672460Z", "level": "info", "event": "request_completed", "method": "GET", "path": "/v1/models", "status_code": 200, "process_time_ms": 138.73}
+{"timestamp": "2026-09-07T16:53:33.906561Z", "level": "info", "event": "Model load exceeded 15s; padding the response so a proxy cannot time it out"}
+{"timestamp": "2026-09-07T16:53:35.886102Z", "level": "info", "event": "llama-server ready on port 32969 for model '/mnt/ai-models/unsloth/Qwen3-Coder-30B-A3B-Instruct-GGUF/Qwen3-Coder-30B-A3B-Instruct-UD-Q8_K_XL.gguf'"}
+{"timestamp": "2026-09-07T16:53:35.911035Z", "level": "info", "event": "Loaded GGUF model via llama-server: /mnt/ai-models/unsloth/Qwen3-Coder-30B-A3B-Instruct-GGUF/Qwen3-Coder-30B-A3B-Instruct-UD-Q8_K_XL.gguf"}
+{"timestamp": "2026-09-07T16:53:35.913501Z", "level": "info", "event": "Loaded default model defaults from /home/kalman9/.unsloth/studio/unsloth_studio/lib/python3.13/site-packages/studio/backend/assets/configs/model_defaults/default.yaml"}
+{"timestamp": "2026-09-07T16:53:35.915915Z", "level": "info", "event": "request_completed", "method": "POST", "path": "/api/inference/load", "status_code": 200, "process_time_ms": 17076.23}
+
+========================================================
+  Unsloth Studio running at http://24.9.3.184:8888
+{"timestamp": "2026-09-07T16:53:36.770658Z", "level": "info", "event": "request_completed", "method": "GET", "path": "/v1/models", "status_code": 200, "process_time_ms": 83.8}
+{"timestamp": "2026-09-07T16:53:39.353205Z", "level": "info", "event": "request_completed", "method": "POST", "path": "/v1/chat/completions", "status_code": 200, "process_time_ms": 2504.65}

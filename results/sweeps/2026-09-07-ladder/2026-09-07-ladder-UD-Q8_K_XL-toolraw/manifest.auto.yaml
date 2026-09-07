@@ -1,0 +1,55 @@
+run_id: "2026-09-07-ladder-UD-Q8_K_XL-toolraw"
+date: "2026-09-07"
+started_utc: "2026-09-07T16:52:32Z"
+ended_utc: "2026-09-07T16:56:50Z"
+node: "fedora"
+os: "Linux-7.1.9-100.fc43.x86_64-x86_64-with-glibc2.42"
+arch: "gfx1151"
+runtime_build: "version: 0.3.0-dev (build 10687, commit 92b19177a)"
+studio_version: "unsloth 2026.8.22"
+python_version: "3.14.7"
+hardware: ""
+backend: "unsloth-studio"
+api: "/v1/chat/completions (client-tool passthrough)"
+isolation: "fresh-server-per-case"
+rung: ""
+launch_env:
+  UNSLOTH_DISABLE_UNIFIED_MEMORY: "1"
+flags: "--disable-tools --disable-tool-call-healing --disable-tool-call-nudging"
+driver_script: "scripts/sweeps/toolcall_battery.py"
+driver_argv:
+  - "/home/kalman9/toolcall_battery.py"
+  - "/home/kalman9/batch_2026_09_07_ladder_UD-Q8_K_XL_toolraw.json"
+  - "/home/kalman9/runs/2026-09-07-ladder-UD-Q8_K_XL-toolraw"
+  - "--cases"
+  - "/home/kalman9/toolcall_cases_tier2.json"
+repo_git_sha: ""
+spec:
+  - name: "Qwen3-Coder-30B-A3B-Instruct"
+    tag: "ladder-b10687-UD-Q8_K_XL"
+    path: "/mnt/ai-models/unsloth/Qwen3-Coder-30B-A3B-Instruct-GGUF/Qwen3-Coder-30B-A3B-Instruct-UD-Q8_K_XL.gguf"
+    flags: "--disable-tools --disable-tool-call-healing --disable-tool-call-nudging"
+    env:
+      UNSLOTH_DISABLE_UNIFIED_MEMORY: "1"
+request_constants:
+  max_tokens: 2048
+  seed: 42
+  temperature: 0.0
+  top_p: 1.0
+  reasoning_effort: "low"
+  enable_tools: false
+cases:
+  - "tc_parallel"
+  - "tc_nested"
+  - "tc_union"
+  - "tc_distractor_p1"
+  - "tc_distractor_p3"
+  - "tc_ambiguous"
+  - "tc_coercion"
+axis: "cfg"
+records: "results.jsonl"
+outputs: "outputs/<cfg>/<task>--<profile>--<effort>.txt"
+grading: "py scripts/utils/grade_sweep.py /home/kalman9/runs/2026-09-07-ladder-UD-Q8_K_XL-toolraw results --layout cfg"
+forgejo_issue: "23"
+cell_count: 7
+load_failures: 0

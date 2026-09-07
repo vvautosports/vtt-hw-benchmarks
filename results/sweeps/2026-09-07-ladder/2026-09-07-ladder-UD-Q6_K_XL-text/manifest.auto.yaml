@@ -1,0 +1,44 @@
+run_id: "2026-09-07-ladder-UD-Q6_K_XL-text"
+date: "2026-09-07"
+started_utc: "2026-09-07T16:46:11Z"
+ended_utc: "2026-09-07T16:47:33Z"
+node: "fedora"
+os: "Linux-7.1.9-100.fc43.x86_64-x86_64-with-glibc2.42"
+arch: "gfx1151"
+runtime_build: "version: 0.3.0-dev (build 10687, commit 92b19177a)"
+studio_version: "unsloth 2026.8.22"
+python_version: "3.14.7"
+hardware: ""
+backend: "unsloth-studio"
+api: "/v1/chat/completions"
+isolation: "fresh-server-per-model"
+rung: ""
+launch_env:
+  UNSLOTH_DISABLE_UNIFIED_MEMORY: "1"
+flags: "--disable-tools"
+driver_script: "scripts/sweeps/roster_batch.py"
+driver_argv:
+  - "/home/kalman9/roster_batch.py"
+  - "/home/kalman9/batch_2026_09_07_ladder_UD-Q6_K_XL_text.json"
+  - "/home/kalman9/runs/2026-09-07-ladder-UD-Q6_K_XL-text"
+repo_git_sha: ""
+spec:
+  - name: "Qwen3-Coder-30B-A3B-Instruct"
+    tag: "ladder-b10687-UD-Q6_K_XL"
+    path: "/mnt/ai-models/unsloth/Qwen3-Coder-30B-A3B-Instruct-GGUF/Qwen3-Coder-30B-A3B-Instruct-UD-Q6_K_XL.gguf"
+    flags: "--disable-tools"
+    env:
+      UNSLOTH_DISABLE_UNIFIED_MEMORY: "1"
+request_constants:
+  profile: "thinking"
+  reasoning_effort: "low"
+  seed: 42
+  max_tokens: 8192
+cases: []
+axis: "cfg"
+records: "results.jsonl"
+outputs: "outputs/<cfg>/<task>--<profile>--<effort>.txt"
+grading: "py scripts/utils/grade_sweep.py /home/kalman9/runs/2026-09-07-ladder-UD-Q6_K_XL-text results --layout cfg"
+forgejo_issue: "23"
+cell_count: 3
+load_failures: 0
