@@ -27,6 +27,13 @@ Design points that matter
 * **Two lanes, never mixed.** `--lane community` routes to its own
   `hwbench/community-<harness>` experiment so an EvalScope score can never land
   in a bespoke leaderboard.
+* **Metadata beyond tags (hwbench #27).** Every run carries a `mlflow.note.content`
+  description (one line per child, a sweep summary on the parent), the parent
+  carries a sortable per-cell `eval_results.json` table (`mlflow.log_table`) and a
+  dataset input for the prompt set / tool-case bundle it ran (`mlflow.log_input`),
+  and the experiment carries a methodology note. `mlflow.source.*` tags point at
+  the rundir and the git commit of the checkout it was logged from. `--refresh-tags`
+  back-fills all of these on runs logged before this existed.
 
 Options
 -------
@@ -64,12 +71,49 @@ MANIFEST_PARAMS = ("run_id", "date", "node", "hardware", "backend", "api",
 METRIC_FIELDS = ("wall_s", "load_s", "prompt_tokens", "prompt_tokens_total",
                  "completion_tokens", "tps_wall", "tps_server", "prefill_tps",
                  "reasoning_chars", "content_chars", "turns", "n_calls",
-                 "chain_depth_reached", "args_parse_failures")
+                 "chain_depth_reached", "args_parse_failures",
+                 # speculative decoding (MTP / draft) counters from llama-server timings
+                 "draft_n", "draft_n_accepted", "draft_accept_rate")
 
 # quality fields that stay flat; every other numeric/bool quality field gets q_
 QUALITY_FLAT = ("correct", "n_calls", "chain_depth_reached")
 
 SPEC_KNOWN = ("name", "path", "tag", "flags", "env")
+
+FORGEJO_ISSUES = "https://git.vvautosports.com/vvc/vtt-hw-benchmarks/issues/"
+NOTE_TAG = "mlflow.note.content"
+TABLE_FILE = "eval_results.json"
+# per-cell table: fixed columns first, then every q_* quality metric seen
+TABLE_COLUMNS = ("cfg", "task", "validity", "correct", "tps_wall", "tps_server",
+                 "completion_tokens", "prompt_tokens", "wall_s", "load_s",
+                 "finish_reason")
+EXPERIMENT_NOTES = {
+    "toolcall": (
+        "Track 1 tool-calling battery (deterministic, greedy, one graded cell per "
+        "fresh server). Cases live in scripts/sweeps/toolcall_cases*.json and are "
+        "attached to every parent run as a dataset input; grading is "
+        "scripts/utils/grade_sweep.py (static, no LLM judge). Children are cells, "
+        "parents are sweeps; see docs/reference/TRACK2-HARNESS-BENCHMARKS.md and "
+        "docs/reference/PERFORMANCE-SUMMARY.md."),
+    "text-sweeps": (
+        "Text battery (reasoning / code / summarize) from scripts/sweeps/"
+        "sweep_phase1.py at the roster-baseline config (thinking, low effort, "
+        "seed 42), one fresh server per model. Graded statically by "
+        "scripts/utils/grade_sweep.py; t/s is wall-clock over completion tokens. "
+        "Ranking tables: docs/reference/PERFORMANCE-SUMMARY.md."),
+    "agent-battery": (
+        "Track 2A agent-harness battery: real coding agents driven against a "
+        "pinned local server (scripts/agents/). Metrics are end-to-end task "
+        "wall time and pass/fail; see docs/reference/TRACK2-HARNESS-BENCHMARKS.md."),
+    "serving-config": (
+        "Serving-configuration A/B sweeps (cache-ram, slots, speculation). The "
+        "axis is the server flag set, the workload is held constant."),
+}
+EXPERIMENT_NOTE_FOOTER = (
+    "\n\nLogged by scripts/utils/log_sweep_to_mlflow.py from committed rundirs "
+    "under results/sweeps/ (vvc/vtt-hw-benchmarks). Architecture: "
+    "docs/reference/EVIDENCE-LAKEHOUSE-REFERENCE-ARCH.md. Tags follow its section 5; "
+    "descriptions, tables and dataset inputs are hwbench #27.")
 
 QUANT_RE = re.compile(
     r"(?i)-((?:UD-)?(?:I?Q\d+(?:_[A-Z0-9]+)*)|F16|BF16|F32|MXFP4)"
@@ -442,6 +486,147 @@ def grader_version():
     return v
 
 
+def source_git_commit(rundir):
+    """Full SHA of the checkout the rundir sits in; "" when there is none."""
+    try:
+        p = subprocess.run(["git", "-C", rundir, "rev-parse", "HEAD"],
+                           capture_output=True, text=True, timeout=30)
+        if p.returncode == 0 and p.stdout.strip():
+            return p.stdout.strip()
+    except Exception:  # noqa: BLE001
+        pass
+    # Container mounts of a worktree see only a .git pointer file: let the
+    # caller hoist the SHA, same as HWBENCH_GRADER_VERSION.
+    return os.environ.get("HWBENCH_GIT_COMMIT", "")
+
+
+def fmt_num(v, nd=1):
+    if v is None:
+        return "-"
+    try:
+        return ("%." + str(nd) + "f") % float(v)
+    except (TypeError, ValueError):
+        return str(v)
+
+
+def rel_repo(path):
+    return os.path.relpath(path, REPO_ROOT).replace("\\", "/")
+
+
+# --------------------------------------------------------------------------- #
+# descriptions, per-cell table, dataset inputs (hwbench #27)
+# --------------------------------------------------------------------------- #
+def child_note(ident, tags, metrics, task):
+    """One-line description shown in the run's Description panel."""
+    pieces = [str(ident["model_key"]), str(ident["quant"]), task or "-",
+              tags.get("validity", UNAVAILABLE)]
+    if "correct" in metrics:
+        pieces.append("pass" if metrics["correct"] else "FAIL")
+    if metrics.get("tps_wall") is not None:
+        pieces.append(fmt_num(metrics["tps_wall"]) + " t/s")
+    pieces.append(str(tags.get("runtime_build", UNAVAILABLE)) + " on "
+                  + str(tags.get("host", UNAVAILABLE)))
+    return " | ".join(pieces)
+
+
+def results_table(children):
+    """Dict-of-lists for mlflow.log_table: one row per child (cell)."""
+    qcols = sorted({k for c in children for k in c["metrics"] if k.startswith("q_")})
+    cols = list(TABLE_COLUMNS) + qcols
+    rows = {c: [] for c in cols}
+    for c in children:
+        m, t, p = c["metrics"], c["tags"], c["params"]
+        cfg, _, task = c["name"].partition("/")
+        vals = {"cfg": cfg, "task": task or p.get("task", ""),
+                "validity": t.get("validity", UNAVAILABLE),
+                "finish_reason": t.get("finish_reason", UNAVAILABLE)}
+        for col in cols:
+            rows[col].append(vals[col] if col in vals else m.get(col))
+    return rows
+
+
+def parent_note(ctx, children, family, experiment, issue):
+    models = sorted({c["tags"]["model_key"] for c in children})
+    quants = sorted({c["tags"]["quant"] for c in children})
+    graded = [c for c in children if "correct" in c["metrics"]]
+    passed = sum(1 for c in graded if c["metrics"]["correct"])
+    tps = sorted(c["metrics"]["tps_wall"] for c in children
+                 if c["metrics"].get("tps_wall") is not None)
+    bad = sorted({c["tags"]["validity"] for c in children
+                  if c["tags"]["validity"] != "ok"})
+    m = ctx["manifest"]
+    lines = ["**" + ctx["run_id"] + "** -- " + family + " sweep, " + str(len(children))
+             + " cells (" + experiment + ", lane " + ctx["lane"] + ")",
+             "Models: " + ", ".join(models) + "  |  quants: " + ", ".join(quants)]
+    if graded:
+        lines.append("Graded: %d/%d pass" % (passed, len(graded))
+                     + (" (validity: " + ", ".join(bad) + ")" if bad else ""))
+    if tps:
+        lines.append("tps_wall: min %s / median %s / max %s"
+                     % (fmt_num(tps[0]), fmt_num(tps[len(tps) // 2]), fmt_num(tps[-1])))
+    lines.append("Runtime " + str(first(m.get("runtime_build"), UNAVAILABLE))
+                 + " on " + str(first(m.get("node"), UNAVAILABLE))
+                 + " (" + str(first(m.get("os"), UNAVAILABLE)) + "); isolation "
+                 + str(first(m.get("isolation"), UNAVAILABLE)) + "; driver "
+                 + str(first(m.get("driver_script"), UNAVAILABLE)))
+    lines.append("Source: " + rel_repo(ctx["rundir"])
+                 + ("  @ " + ctx["git_commit"][:12] if ctx["git_commit"] else ""))
+    if issue is not None:
+        lines.append("Tracking: " + FORGEJO_ISSUES + str(issue))
+    return "\n".join(lines)
+
+
+def dataset_inputs(ctx, family, children):
+    """-> list of {name, source, rows} describing the prompt set the sweep ran.
+
+    Rows are plain dicts; log_live turns them into a pandas dataset. Nothing here
+    imports mlflow or pandas so --dry-run stays dependency-free.
+    """
+    out = []
+    rundir = ctx["rundir"]
+    if family == "toolcall":
+        for path in sorted(glob.glob(os.path.join(rundir, "toolcall_cases*.json"))):
+            bundle = load_json(path)
+            cases = bundle.get("cases") if isinstance(bundle, dict) else None
+            if not isinstance(cases, dict) or not cases:
+                continue
+            rows = []
+            for cid, case in cases.items():
+                if not isinstance(case, dict):
+                    continue
+                rows.append({"case": str(cid), "kind": str(case.get("kind", "")),
+                             "intent": str(case.get("intent", "")),
+                             "prompt": str(case.get("prompt", "")),
+                             "n_tools": len(case.get("tools") or []),
+                             "expect": json.dumps(case.get("expect", {}),
+                                                  sort_keys=True)})
+            stem = os.path.splitext(os.path.basename(path))[0].replace("_", "-")
+            name = stem + "-v" + str(bundle.get("version", 1))
+            if ctx["tier"] != UNAVAILABLE:
+                name += "-tier" + str(ctx["tier"])
+            out.append({"name": name, "rows": rows, "source": rel_repo(path)})
+    elif family == "text-sweeps":
+        sweeps_dir = os.path.join(REPO_ROOT, "scripts", "sweeps")
+        if sweeps_dir not in sys.path:
+            sys.path.insert(0, sweeps_dir)
+        try:
+            from sweep_phase1 import TASKS  # noqa: E402
+        except Exception as e:  # noqa: BLE001
+            warn("text battery prompts unavailable (" + repr(e) + "); no dataset input")
+            return out
+        used = {c["params"].get("task") for c in children}
+        rows = [{"task": str(k), "prompt": str(v)} for k, v in TASKS.items()
+                if not used or k in used]
+        out.append({"name": "text-battery-v1", "rows": rows,
+                    "source": "scripts/sweeps/sweep_phase1.py"})
+    return out
+
+
+def experiment_note(family):
+    body = EXPERIMENT_NOTES.get(family)
+    return body + EXPERIMENT_NOTE_FOOTER if body else None
+
+
 # --------------------------------------------------------------------------- #
 # building one child
 # --------------------------------------------------------------------------- #
@@ -551,6 +736,12 @@ def build_child(rec, ctx):
     else:
         name = task or cfg or key[:8]
 
+    tags[NOTE_TAG] = child_note(ident, tags, metrics, task)
+    tags["mlflow.source.name"] = rel_repo(ctx["rundir"])
+    tags["mlflow.source.type"] = "LOCAL"
+    if ctx["git_commit"]:
+        tags["mlflow.source.git.commit"] = ctx["git_commit"]
+
     return {"key": key, "name": name, "params": params, "metrics": metrics,
             "tags": tags, "artifacts": child_artifacts(rec, ctx, cfg, task)}
 
@@ -654,10 +845,14 @@ def main(argv=None):
            "manifest": manifest, "consts": consts, "spec_idx": index_spec(spec),
            "models_root": args.models_root, "inv": load_inventory(),
            "lane": args.lane, "track": track, "tier": tier,
-           "grader_version": grader_version(), "records_path": records_path}
+           "grader_version": grader_version(), "records_path": records_path,
+           "git_commit": source_git_commit(rundir)}
 
     children = [build_child(r, ctx) for r in records]
     p_artifacts = parent_artifacts(rundir, records_path, args.with_logs)
+    table = results_table(children)
+    datasets = dataset_inputs(ctx, family, children)
+    note = parent_note(ctx, children, family, experiment, args.forgejo_issue)
 
     if args.dry_run:
         print("experiment: " + experiment)
@@ -667,21 +862,46 @@ def main(argv=None):
             print("  child  %-72s params=%-3d metrics=%-3d tags=%-3d key=%s"
                   % (c["name"][:72], len(c["params"]), len(c["metrics"]),
                      len(c["tags"]), c["key"][:8]))
+            print("         note: " + c["tags"][NOTE_TAG])
+        print("parent note:\n  " + note.replace("\n", "\n  "))
+        print("table:      %d rows x %d cols (%s)"
+              % (len(table["cfg"]), len(table), TABLE_FILE))
+        for d in datasets:
+            print("dataset:    %s  (%d rows, source %s)"
+                  % (d["name"], len(d["rows"]), d["source"]))
         print("totals: 1 parent, %d children, %d parent artifacts, "
               "%d child artifacts  (DRY RUN -- nothing written)"
               % (len(children), len(p_artifacts),
                  sum(len(c["artifacts"]) for c in children)))
         return 0
 
-    return log_live(args, experiment, ctx, children, p_artifacts, family)
+    return log_live(args, experiment, ctx, children, p_artifacts, family,
+                    table, datasets, note)
 
 
-def log_live(args, experiment, ctx, children, p_artifacts, family):
+def log_live(args, experiment, ctx, children, p_artifacts, family,
+             table, datasets, note):
     try:
         import mlflow
         from mlflow.tracking import MlflowClient
     except ImportError:
         die("mlflow is not installed. Install the extra:  pip install -e '.[mlflow]'")
+
+    def log_inputs():
+        """Attach the prompt set / case bundle as dataset inputs. pandas is a
+        dependency of mlflow itself, so it is only imported here."""
+        if not datasets:
+            return 0
+        try:
+            import pandas as pd
+        except ImportError:
+            warn("pandas missing; dataset inputs skipped")
+            return 0
+        for d in datasets:
+            ds = mlflow.data.from_pandas(pd.DataFrame(d["rows"]), source=d["source"],
+                                         name=d["name"])
+            mlflow.log_input(ds, context="eval")
+        return len(datasets)
 
     uri = args.tracking_uri or os.environ.get("MLFLOW_TRACKING_URI") or DEFAULT_TRACKING_URI
     mlflow.set_tracking_uri(uri)
@@ -716,11 +936,22 @@ def log_live(args, experiment, ctx, children, p_artifacts, family):
               "runtime_build": agree("runtime_build"),
               "studio_version": agree("studio_version"),
               "isolation": agree("isolation"), "model_key": agree("model_key"),
-              "quant": agree("quant"), "family": family}
+              "quant": agree("quant"), "family": family,
+              NOTE_TAG: note,
+              "mlflow.source.name": children[0]["tags"]["mlflow.source.name"],
+              "mlflow.source.type": "LOCAL"}
+    if ctx["git_commit"]:
+        p_tags["mlflow.source.git.commit"] = ctx["git_commit"]
     if args.forgejo_issue is not None:
         p_tags["forgejo_issue"] = str(args.forgejo_issue)
 
+    # experiment-level methodology note: set once, never clobber a hand edit
+    exp_note = experiment_note(family)
+    if exp_note and not (exp.tags or {}).get(NOTE_TAG):
+        client.set_experiment_tag(exp.experiment_id, NOTE_TAG, exp_note)
+
     created = skipped = refreshed = 0
+    p_added = []
     if parent_id:
         parent_run = mlflow.start_run(run_id=parent_id)
     else:
@@ -730,8 +961,27 @@ def log_live(args, experiment, ctx, children, p_artifacts, family):
         if parent_id is None:
             for p in p_artifacts:
                 mlflow.log_artifact(p)
-        elif args.forgejo_issue is not None:
-            client.set_tag(pid, "forgejo_issue", str(args.forgejo_issue))
+            mlflow.log_table(data=table, artifact_file=TABLE_FILE)
+            p_added.append("table")
+            if log_inputs():
+                p_added.append("datasets")
+        else:
+            if args.forgejo_issue is not None:
+                client.set_tag(pid, "forgejo_issue", str(args.forgejo_issue))
+            if args.refresh_tags:
+                # back-fill the #27 metadata on a parent logged before it existed
+                cur = client.get_run(pid)
+                for k in (NOTE_TAG, "mlflow.source.name", "mlflow.source.type",
+                          "mlflow.source.git.commit"):
+                    if k in p_tags and not cur.data.tags.get(k):
+                        client.set_tag(pid, k, p_tags[k])
+                        p_added.append(k)
+                have = {a.path for a in client.list_artifacts(pid)}
+                if TABLE_FILE not in have:
+                    mlflow.log_table(data=table, artifact_file=TABLE_FILE)
+                    p_added.append("table")
+                if not (cur.inputs and cur.inputs.dataset_inputs) and log_inputs():
+                    p_added.append("datasets")
 
         for c in children:
             old = by_key.get(c["key"])
@@ -739,10 +989,13 @@ def log_live(args, experiment, ctx, children, p_artifacts, family):
                 skipped += 1
                 if args.refresh_tags:
                     for k, v in c["tags"].items():
-                        if (old.data.tags.get(k) == UNAVAILABLE
-                                and v != UNAVAILABLE):
-                            client.set_tag(old.info.run_id, k, v)
-                            refreshed += 1
+                        cur_v = old.data.tags.get(k)
+                        # fill what is missing or was "unavailable"; never overwrite
+                        if v == UNAVAILABLE or (cur_v is not None
+                                                and cur_v != UNAVAILABLE):
+                            continue
+                        client.set_tag(old.info.run_id, k, v)
+                        refreshed += 1
                 continue
             tags = dict(c["tags"])
             tags["mlflow.parentRunId"] = pid
@@ -760,6 +1013,8 @@ def log_live(args, experiment, ctx, children, p_artifacts, family):
     print("children: skipped %d, created %d%s"
           % (skipped, created,
              (", tags refreshed %d" % refreshed) if args.refresh_tags else ""))
+    print("parent metadata added: " + (", ".join(p_added) if p_added else "none")
+          + "  (table %d rows, %d dataset input(s))" % (len(table["cfg"]), len(datasets)))
     return 0
 
 

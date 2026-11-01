@@ -25,7 +25,7 @@ jobs:
         run: |
           apt-get update -qq
           DEBIAN_FRONTEND=noninteractive apt-get install -y -qq --no-install-recommends \
-            shellcheck yamllint python3 python3-pytest
+            shellcheck yamllint python3 python3-pytest python3-yaml
           npm install -g --silent markdownlint-cli
 
       - uses: https://github.com/actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0  # v7.0.0
@@ -55,3 +55,4 @@ jobs:
           python3 scripts/testing/test_fixtures.py
           python3 scripts/testing/test_grade_toolcall.py
           python3 scripts/testing/test_grade_receipt.py
+          python3 scripts/testing/test_log_sweep_table.py
