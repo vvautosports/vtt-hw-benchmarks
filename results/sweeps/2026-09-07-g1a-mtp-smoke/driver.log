@@ -1,0 +1,8 @@
+[14:07:37] build=b10830-mix-d5c17a0 port=8899 entries=4
+[14:07:37] === Qwen3.6-35B-A3B-MTP__g1a-b10830-spec-off  speculative=off n_max=None flags='--disable-tools --disable-tool-call-healing --disable-tool-call-nudging'
+[14:09:01] reasoning: loaded in 83.0s as unsloth/Qwen3.6-35B-A3B-MTP-GGUF
+[14:11:23]   reasoning: tps=None wall=142.0s draft=None/None err=None
+[14:11:23] === Qwen3.6-35B-A3B-MTP__g1a-b10830-mtp-n2  speculative=mtp n_max=2 flags='--disable-tools --disable-tool-call-healing --disable-tool-call-nudging'
+[14:13:00] reasoning: loaded in 93.6s as unsloth/Qwen3.6-35B-A3B-MTP-GGUF
+[14:13:58]   reasoning: tps=None wall=57.2s draft=None/None err=None
+[14:13:58] === gemma-4-31B-it__g1a-b10830-spec-off  speculative=off n_max=None flags='--disable-tools --disable-tool-call-healing --disable-tool-call-nudging'

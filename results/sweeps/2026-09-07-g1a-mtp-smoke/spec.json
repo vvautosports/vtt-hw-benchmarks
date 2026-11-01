@@ -1,0 +1,38 @@
+[
+  {
+    "name": "Qwen3.6-35B-A3B-MTP",
+    "tag": "g1a-b10830-spec-off",
+    "path": "C:/Users/kalman9/.cache/huggingface/hub/models--unsloth--Qwen3.6-35B-A3B-MTP-GGUF/snapshots/5bc3e238d916f48a861bac2f8a1990a0e9b7e98d/Qwen3.6-35B-A3B-UD-Q8_K_XL.gguf",
+    "flags": "--disable-tools --disable-tool-call-healing --disable-tool-call-nudging",
+    "env": {"UNSLOTH_DISABLE_UNIFIED_MEMORY": "1"},
+    "speculative_type": "off",
+    "spec_draft_n_max": null
+  },
+  {
+    "name": "Qwen3.6-35B-A3B-MTP",
+    "tag": "g1a-b10830-mtp-n2",
+    "path": "C:/Users/kalman9/.cache/huggingface/hub/models--unsloth--Qwen3.6-35B-A3B-MTP-GGUF/snapshots/5bc3e238d916f48a861bac2f8a1990a0e9b7e98d/Qwen3.6-35B-A3B-UD-Q8_K_XL.gguf",
+    "flags": "--disable-tools --disable-tool-call-healing --disable-tool-call-nudging",
+    "env": {"UNSLOTH_DISABLE_UNIFIED_MEMORY": "1"},
+    "speculative_type": "mtp",
+    "spec_draft_n_max": 2
+  },
+  {
+    "name": "gemma-4-31B-it",
+    "tag": "g1a-b10830-spec-off",
+    "path": "C:/Users/kalman9/.cache/huggingface/hub/models--unsloth--gemma-4-31B-it-GGUF/snapshots/c1ac76e99d5513b141e8adde7288b85c3f9c32ec/gemma-4-31B-it-UD-Q8_K_XL.gguf",
+    "flags": "--disable-tools --disable-tool-call-healing --disable-tool-call-nudging",
+    "env": {"UNSLOTH_DISABLE_UNIFIED_MEMORY": "1"},
+    "speculative_type": "off",
+    "spec_draft_n_max": null
+  },
+  {
+    "name": "gemma-4-31B-it",
+    "tag": "g1a-b10830-mtp-n4",
+    "path": "C:/Users/kalman9/.cache/huggingface/hub/models--unsloth--gemma-4-31B-it-GGUF/snapshots/c1ac76e99d5513b141e8adde7288b85c3f9c32ec/gemma-4-31B-it-UD-Q8_K_XL.gguf",
+    "flags": "--disable-tools --disable-tool-call-healing --disable-tool-call-nudging",
+    "env": {"UNSLOTH_DISABLE_UNIFIED_MEMORY": "1"},
+    "speculative_type": "mtp",
+    "spec_draft_n_max": 4
+  }
+]

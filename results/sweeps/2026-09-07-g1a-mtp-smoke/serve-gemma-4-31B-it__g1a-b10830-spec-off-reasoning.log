@@ -1,0 +1,40 @@
+{"timestamp": "2026-09-07T20:14:02.346656Z", "level": "info", "event": "run_server startup begin api_only=False host=127.0.0.1 port=8899"}
+{"timestamp": "2026-09-07T20:14:04.084997Z", "level": "info", "event": "Imported FastAPI app in 1687.0ms"}
+{"timestamp": "2026-09-07T20:14:04.090062Z", "level": "info", "event": "Ensured Unsloth directories in 1748.2ms"}
+{"timestamp": "2026-09-07T20:14:04.091790Z", "level": "info", "event": "run_server pre-uvicorn setup completed in 1750.0ms"}
+INFO:     Started server process [43352]
+INFO:     Waiting for application startup.
+{"timestamp": "2026-09-07T20:14:04.129447Z", "level": "info", "event": "Keeping the compiled cache: another backend of this install is live (PID 30784)"}
+{"timestamp": "2026-09-07T20:14:04.185924Z", "level": "info", "event": "lifespan pre-auth setup completed in 63.4ms"}
+{"timestamp": "2026-09-07T20:14:04.189552Z", "level": "info", "event": "lifespan startup completed in 67.0ms"}
+INFO:     Application startup complete.
+INFO:     Unsloth Studio running on http://127.0.0.1:8899 (To stop: press Ctrl+C -- on macOS, Control+C not Command+C)
+{"timestamp": "2026-09-07T20:14:04.192346Z", "level": "info", "event": "Uvicorn startup hook completed in 1850.5ms"}
+{"timestamp": "2026-09-07T20:14:04.192572Z", "level": "info", "event": "run_server uvicorn ready after 1850.7ms"}
+Starting Unsloth Studio...
+{"timestamp": "2026-09-07T20:14:05.508719Z", "level": "info", "event": "request_completed", "method": "GET", "path": "/api/health", "status_code": 200, "process_time_ms": 1273.8}
+Loading model: C:/Users/kalman9/.cache/huggingface/hub/models--unsloth--gemma-4-31B-it-GGUF/snapshots/c1ac76e99d5513b141e8adde7288b85c3f9c32ec/gemma-4-31B-it-UD-Q8_K_XL.gguf...
+Hardware detected: ROCm (HIP 7.13.99004) -- AMD Radeon(TM) 8060S Graphics
+{"timestamp": "2026-09-07T20:14:06.668040Z", "level": "info", "event": "InferenceOrchestrator initialized (subprocess mode)"}
+{"timestamp": "2026-09-07T20:14:06.673897Z", "level": "info", "event": "Detected local GGUF model: C:\\Users\\kalman9\\.cache\\huggingface\\hub\\models--unsloth--gemma-4-31B-it-GGUF\\snapshots\\c1ac76e99d5513b141e8adde7288b85c3f9c32ec\\gemma-4-31B-it-UD-Q8_K_XL.gguf"}
+{"timestamp": "2026-09-07T20:14:07.297225Z", "level": "info", "event": "Detected mmproj for vision: C:\\Users\\kalman9\\.cache\\huggingface\\hub\\models--unsloth--gemma-4-31B-it-GGUF\\snapshots\\c1ac76e99d5513b141e8adde7288b85c3f9c32ec\\mmproj-F16.gguf"}
+{"timestamp": "2026-09-07T20:14:07.644710Z", "level": "info", "event": "Detected MTP drafter: C:\\Users\\kalman9\\.cache\\huggingface\\hub\\models--unsloth--gemma-4-31B-it-GGUF\\snapshots\\c1ac76e99d5513b141e8adde7288b85c3f9c32ec\\mtp-gemma-4-31B-it.gguf"}
+{"timestamp": "2026-09-07T20:14:07.978826Z", "level": "info", "event": "GGUF metadata: context_length=262144"}
+{"timestamp": "2026-09-07T20:14:07.979415Z", "level": "info", "event": "GGUF metadata: chat_template=18922 chars"}
+{"timestamp": "2026-09-07T20:14:07.979528Z", "level": "info", "event": "GGUF metadata: model supports reasoning (enable_thinking)"}
+{"timestamp": "2026-09-07T20:14:07.979595Z", "level": "info", "event": "GGUF metadata: model supports preserve_thinking"}
+{"timestamp": "2026-09-07T20:14:07.979685Z", "level": "info", "event": "GGUF metadata: model supports tool calling"}
+{"timestamp": "2026-09-07T20:14:07.984995Z", "level": "info", "event": "TrainingBackend initialized (subprocess mode)"}
+{"timestamp": "2026-09-07T20:14:08.339710Z", "level": "info", "event": "amd-smi disabled on Windows (no HIP SDK detected) to avoid a UAC/DiskPart elevation prompt; GPU VRAM polling unavailable. Set UNSLOTH_ENABLE_AMD_SMI=1 to force amd-smi."}
+{"timestamp": "2026-09-07T20:14:08.771920Z", "level": "info", "event": "ROCm device 0 is a unified-memory APU sharing system RAM; reserving 1024MiB host headroom (69148->68124MiB usable)"}
+{"timestamp": "2026-09-07T20:14:09.433542Z", "level": "info", "event": "ROCm device 0 is a unified-memory APU sharing system RAM; reserving 1024MiB host headroom (69151->68127MiB usable)"}
+{"timestamp": "2026-09-07T20:14:09.437150Z", "level": "info", "event": "Context auto-reduced: 262144 -> 213504 (model: 33.7 GB, est. KV cache: 27.9 GB)"}
+{"timestamp": "2026-09-07T20:14:09.437618Z", "level": "info", "event": "GGUF size: 32.6 GB, mmproj: 1.1 GB, est. KV cache: 27.9 GB, context: 213504, GPUs free: [(0, 68127)], selected: [0], --fit: off"}
+{"timestamp": "2026-09-07T20:14:09.438744Z", "level": "info", "event": "Load mode: the whole load (64.5 GB) fits without paging, using --load-mode none."}
+{"timestamp": "2026-09-07T20:14:09.450182Z", "level": "info", "event": "Reasoning model: {'enable_thinking': True, 'preserve_thinking': False} by default"}
+{"timestamp": "2026-09-07T20:14:09.450433Z", "level": "info", "event": "Using mmproj for vision: C:\\Users\\kalman9\\.cache\\huggingface\\hub\\models--unsloth--gemma-4-31B-it-GGUF\\snapshots\\c1ac76e99d5513b141e8adde7288b85c3f9c32ec\\mmproj-F16.gguf"}
+{"timestamp": "2026-09-07T20:14:09.459214Z", "level": "info", "event": "Load mode: --load-mode none"}
+{"timestamp": "2026-09-07T20:14:09.459400Z", "level": "info", "event": "Starting llama-server: C:\\Users\\kalman9\\.unsloth\\llama.cpp\\build\\bin\\Release\\llama-server.exe -m C:\\Users\\kalman9\\.cache\\huggingface\\hub\\models--unsloth--gemma-4-31B-it-GGUF\\snapshots\\c1ac76e99d5513b141e8adde7288b85c3f9c32ec\\gemma-4-31B-it-UD-Q8_K_XL.gguf --port 63811 --parallel 4 --flash-attn on --no-context-shift -c 213504 --alias unsloth/gemma-4-31B-it-GGUF -ngl -1 --fit off --metrics --slot-save-path C:\\Users\\kalman9\\.unsloth\\studio\\cache\\llama-slots --kv-unified --threads 2 --jinja --chat-template-kwargs {\"enable_thinking\": true, \"preserve_thinking\": false} --mmproj C:\\Users\\kalman9\\.cache\\huggingface\\hub\\models--unsloth--gemma-4-31B-it-GGUF\\snapshots\\c1ac76e99d5513b141e8adde7288b85c3f9c32ec\\mmproj-F16.gguf --cache-ram 0 --ctx-checkpoints 0 --load-mode none"}
+{"timestamp": "2026-09-07T20:14:09.491905Z", "level": "info", "event": "llama-server stdout/stderr -> C:\\Users\\kalman9\\.unsloth\\studio\\logs\\llama-server\\llama-1788812049-port-63811-try0.log"}
+{"timestamp": "2026-09-07T20:14:14.955038Z", "level": "info", "event": "torch warm finished in 10765.5ms"}
+{"timestamp": "2026-09-07T20:14:20.686188Z", "level": "info", "event": "Model load exceeded 15s; padding the response so a proxy cannot time it out"}
