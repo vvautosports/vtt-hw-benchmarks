@@ -2,6 +2,8 @@
 
 Complete list of models to evaluate on AMD Strix Halo for coding assistance.
 
+Sections after the 2026-11 candidates are the January 2026 roadmap, kept as history.
+
 ---
 
 ## Currently Tested (Baseline Complete) ✅
@@ -37,6 +39,67 @@ All four measured on Framework Desktop, `unsloth-studio 2026.8.22` (bundled llam
 
 **Planned:**
 - **Qwen3-Coder-30B-A3B quant ladder** - 📋 Planned (#23) — Q4_K_M / UD-Q4_K_XL / Q6_K / UD-Q8_K_XL, each run through tool 7-call + 3 coding cells + tg/pp t/s, to answer "optimal quant" and make our numbers community-comparable.
+
+---
+
+## Next Intake Candidates - 2026-11
+
+Models released 2026-09-01 to 2026-11-01 that fit about 122 GB usable with at least 32K context. Sizes are Hugging Face file bytes / 1e9, checked 2026-11-01. Tracked in the intake issue: #34. Nothing here is tested yet, and all of it needs the runtime bump in #31 first.
+
+Disk check: `/mnt/ai-models` had 239 GB free on 2026-11-01. The first wave totals about 285 GB, so pull one model at a time and decide keep or delete after each.
+
+### First wave
+
+**1. Nemotron 3.5 Bolt 74B-A9B** (UD-Q4_K_XL, 50.2 GB, plus 1.0 GB DFlash drafter)
+
+- **Why test:** the only in-band model with an official drafter file. 9B active, vision and hybrid reasoning. Needs llama.cpp PR #30520 and #30506 (merged 2026-10-15).
+- **Priority:** ⭐⭐⭐⭐⭐
+- **Status:** 📋 Planned. The exact llama-server flag for its LiLiCorr drafter is undocumented, so let Studio select it first.
+- **Link:** <https://huggingface.co/unsloth/NVIDIA-Nemotron-3.5-Bolt-74B-A9B-GGUF>
+
+**2. Ornith-1.5-122B** (UD-Q4_K_XL, 79.7 GB)
+
+- **Why test:** larger sibling of our top-ranked Ornith-1.5-35B-A3B, on the existing `qwen3_5_moe` architecture. Community 122B-class MoEs land near 19-25 t/s.
+- **Priority:** ⭐⭐⭐⭐
+- **Status:** 📋 Planned. Active parameter count is disputed (about 10B or 12.7B), and the official repo ships no MTP file.
+- **Link:** <https://huggingface.co/unsloth/Ornith-1.5-122B-GGUF>
+
+**3. Flint 40B-A2.5B** (UD-Q6_K_XL, 36.3 GB)
+
+- **Why test:** coding-agent MoE with very high self-reported SWE-bench scores that nobody has reproduced. Needs PR #30928 (merged 2026-10-21).
+- **Priority:** ⭐⭐⭐⭐
+- **Status:** 📋 Planned. Vendor provenance is questioned, so treat its claims as unverified.
+- **Link:** <https://huggingface.co/unsloth/flint-GGUF>
+
+**4. Kolibri-1 78B-A3.5B** (Q4_K_M 49.8 GB first look, Q8_0 83.1 GB if it earns the space)
+
+- **Why test:** long-context stress test, with 1M context and mostly sliding-window attention. Needs PR #30673 (merged 2026-10-17).
+- **Priority:** ⭐⭐⭐
+- **Status:** 📋 Planned. GGUFs made before the merge need `--override-kv` fixes, and there is no Unsloth quant yet.
+- **Link:** <https://huggingface.co/bartowski/Kolibri-1-GGUF>
+
+**5. Nanbeige4.3-33B** (Q8_0, 35.2 GB)
+
+- **Why test:** the only credible new dense 27-35B entrant, using the plain `llama` architecture. Strong self-reported agentic-coding scores, but one report of a real-world debugging failure.
+- **Priority:** ⭐⭐⭐
+- **Status:** 📋 Planned. There is no Unsloth quant yet.
+- **Link:** <https://huggingface.co/bartowski/Nanbeige_Nanbeige4.3-33B-GGUF>
+
+### Stretch and optional
+
+- **Nemotron 3.5 Super VL 120B-A12B** (UD-Q3_K_XL, 65.8 GB) - 📋 Stretch. The only in-band native MTP head. Unsloth estimates 128 GB for UD-Q4_K_XL (86.9 GB), so start at Q3. <https://huggingface.co/unsloth/NVIDIA-Nemotron-3.5-Super-VL-120B-A12B-GGUF>
+- **GLM-5.3-Flash REAP50** (Q3_K_M, 78.8 GB) - 📋 Stretch. The #22 blocker is partly lifted: PR #27754 closed unmerged, but #27773 merged 2026-09-30 and MTP #29928 merged 2026-10-07. This is a community prune of unmeasured quality, so it gets a fit-and-speed check only. <https://huggingface.co/patrickbdevaney/GLM-5.3-Flash-REAP50-GGUF>
+- **LFM2.5-24B-A2B** (Q8_0, 25.5 GB) - 📋 Optional. Cheap, always-thinking MoE under the non-OSI LFM1.0 license. <https://huggingface.co/unsloth/LFM2.5-24B-A2B-GGUF>
+
+### Watch
+
+- **Clover-35B-A3B-Preview** - llama.cpp PR #31306 is still open.
+- **granite-switch-4.1-30b** - mainline support for the new architecture is unverified.
+- **DeepSeek-V4.1-Flash-1017** - PR #30817 closed unmerged, and the smallest Unsloth quant is 233 GB.
+- **MiniMax-M3.1-Flash** - about 252 GB, too large for this box.
+- **MiMo-V2.6-Flash-RL** - the smallest quant found is Q2_K at 126 GB, too large for this box.
+
+**Halogen:** no serving change. It is a closed, Linux-only engine for one model family that takes 80-99 GiB as sole tenant. At most, it earns one Framework comparison cell if Qwen3.8-Flash-Next joins the matrix. <https://github.com/peonist-ai/halogen-flash-server>
 
 ---
 
@@ -1350,6 +1413,6 @@ cd Qwen3-Coder-30B
 
 ---
 
-**Last Updated:** 2026-01-22
+**Last Updated:** 2026-11-01
 **Status:** Updated with Unsloth Dynamic GGUF priority
 **Next Action:** Download and test DeepSeek-V3.1-1bit IMMEDIATELY
